@@ -1,0 +1,7 @@
+Debug
+*.vcproj.*
+*.ncb
+*.suo
+*~
+*.swp
+*target*
