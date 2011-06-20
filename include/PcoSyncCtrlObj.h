@@ -45,7 +45,7 @@ namespace lima
 
     private:
       Camera*		m_cam;
-      tPvHandle&	m_handle;
+      //tPvHandle&	m_handle;
       TrigMode		m_trig_mode;
       BufferCtrlObj*	m_buffer;
       int		m_nb_frames;

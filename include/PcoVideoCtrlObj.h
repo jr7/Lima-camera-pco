@@ -35,7 +35,7 @@ namespace lima
 
     private:
       Camera*	 	m_cam;
-      tPvHandle& 	m_handle;
+      //tPvHandle& 	m_handle;
       bool	 	m_live;
       SyncCtrlObj* 	m_sync;
     };
