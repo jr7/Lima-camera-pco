@@ -4,8 +4,15 @@
 #include "PcoBufferCtrlObj.h"
 #include "PcoCamera.h"
 
+#define THROW_LIMA_HW_EXC(Error, x)  { \
+	printf("========*** LIMA_HW_EXC %s\n", x ); \
+			throw LIMA_HW_EXC(Error, x); \
+} 
+
+
 using namespace lima;
 using namespace lima::Pco;
+
 
 SyncCtrlObj::SyncCtrlObj(Camera *cam,BufferCtrlObj *buffer) :
   m_cam(cam),
@@ -132,8 +139,9 @@ void SyncCtrlObj::setExpTime(double exp_time)
   ValidRangesType valid_ranges;
   getValidRanges(valid_ranges);
 
- 	if ((exp_time <valid_ranges.min_exp_time)||(exp_time >valid_ranges.max_exp_time)) 
-     throw LIMA_HW_EXC(Error,"Exposure time out of range");
+  if ((exp_time <valid_ranges.min_exp_time)||(exp_time >valid_ranges.max_exp_time)){ 
+     THROW_LIMA_HW_EXC(Error,"Exposure time out of range");
+  }
 
   m_exp_time = exp_time;
   //ds->ccd.cocRunTime = 0;
@@ -145,9 +153,13 @@ void SyncCtrlObj::getExpTime(double &exp_time)
 {
   DEB_MEMBER_FUNCT();
 
+  ValidRangesType valid_ranges;
+  getValidRanges(valid_ranges);
   
-  exp_time = m_exp_time;
+  if (m_exp_time < valid_ranges.min_exp_time) m_exp_time = valid_ranges.min_exp_time;
+  if (m_exp_time > valid_ranges.max_exp_time) m_exp_time > valid_ranges.max_exp_time;
 
+  exp_time = m_exp_time;
   DEB_RETURN() << DEB_VAR1(exp_time);
 }
 
@@ -210,7 +222,7 @@ void SyncCtrlObj::getNbHwFrames(int& nb_frames)
 
 void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 {
-  valid_ranges.min_exp_time = 1e-6; // Don't know
+  valid_ranges.min_exp_time = m_cam->m_pcoInfo.dwMinExposureDESC * 1e-9 ; // Don't know
   valid_ranges.max_exp_time = m_cam->m_pcoInfo.dwMaxExposureDESC * 1e-3 ; // Don't know
   valid_ranges.min_lat_time = 0.; // Don't know
   valid_ranges.max_lat_time = 0.; // Don't know

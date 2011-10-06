@@ -442,7 +442,7 @@ Camera::Camera(const char *ip_addr) :
   if(error)
     throw LIMA_HW_EXC(Error,"Can't set image height");
   
-
+	m_sync = new SyncCtrlObj(this, NULL);
   
   // error = PvAttrEnumSet(m_handle, "AcquisitionMode", "Continuous");
   if(error)
@@ -554,32 +554,43 @@ void Camera::startAcq()
 
 
     //------------------------------------------------- set binning if needed
+    WORD wBinHorz, wBinVert;
     if (m_bin.changed == changed) {
-        error = PcoCheckError(PCO_SetBinning(m_handle, (WORD)m_bin.x, (WORD)m_bin.y));
+		wBinHorz = (WORD)m_bin.x;
+		wBinVert = (WORD)m_bin.y;
+        error = PcoCheckError(PCO_SetBinning(m_handle, wBinHorz, wBinVert));
         PCO_TRACE("PCO_SetBinning") ;
         m_bin.changed= valid;
     }
 
+    error = PcoCheckError(PCO_GetBinning(m_handle, &wBinHorz, &wBinVert));
+    PCO_TRACE("PCO_GetBinning") ;
+	DEB_TRACE() << DEB_VAR2(wBinHorz, wBinVert);
+
     //------------------------------------------------- set roi if needed
+    WORD wRoiX0; // Roi upper left x
+    WORD wRoiY0; // Roi upper left y
+    WORD wRoiX1; // Roi lower right x
+    WORD wRoiY1;// Roi lower right y
+
     if(m_roi.changed == valid) m_roi.changed = changed;    //+++++++++ TEST / FORCE WRITE ROI
     if (m_roi.changed == changed) {
-        WORD x0, y0, x1, y1;
-        x0 = (WORD)m_roi.x[0];
-        x1 = (WORD)m_roi.x[1];
-        y0 = (WORD)m_roi.y[0];
-        y1 = (WORD)m_roi.y[1];
+        wRoiX0 = (WORD)m_roi.x[0];
+        wRoiX1 = (WORD)m_roi.x[1];
+        wRoiY0 = (WORD)m_roi.y[0];
+        wRoiY1 = (WORD)m_roi.y[1];
 
-		DEB_TRACE() << DEB_VAR4(x0, y0, x1, y1);
+		DEB_TRACE() << DEB_VAR4(wRoiX0, wRoiY0, wRoiX1, wRoiY1);
 
-        error = PcoCheckError(PCO_SetROI(m_handle, x0, y0, x1, y1));
+        error = PcoCheckError(PCO_SetROI(m_handle, wRoiX0, wRoiY0, wRoiX1, wRoiY1));
         PCO_TRACE("PCO_SetROI") ;
 
-        error = PcoCheckError(PCO_GetROI(m_handle, &x0, &y0, &x1, &y1));
-        PCO_TRACE("PCO_GetROI") ;
-
-		DEB_TRACE() << DEB_VAR4(x0, y0, x1, y1);
         m_roi.changed= valid;
     }
+
+	error = PcoCheckError(PCO_GetROI(m_handle, &wRoiX0, &wRoiY0, &wRoiX1, &wRoiY1));
+    PCO_TRACE("PCO_GetROI") ;
+	DEB_TRACE() << DEB_VAR4(wRoiX0, wRoiY0, wRoiX1, wRoiY1);
 
     //------------------------------------------------- triggering mode 
 	
@@ -819,6 +830,8 @@ void Camera::startAcq()
 
     //------------------------------------------------- start acquisition
     //dprintf3("... PCO_SetRecordingState");
+
+	return;
 
     error = PcoCheckError(PCO_SetRecordingState(m_handle, 0x0001));
     PCO_TRACE("PCO_SetRecordingState") ;
