@@ -13,7 +13,7 @@ namespace lima
     class Camera;
     class BufferCtrlObj;
 
-    class SyncCtrlObj : public HwSyncCtrlObj
+    class  DLL_EXPORT  SyncCtrlObj : public HwSyncCtrlObj
     {
       DEB_CLASS_NAMESPC(DebModCamera,"SyncCtrlObj","Pco");
     public:
@@ -43,9 +43,14 @@ namespace lima
       
       void getStatus(HwInterface::StatusType&);
 
-    private:
+		WORD getPcoTrigMode();
+		WORD getPcoAcqMode();
+	private:
+     	double	m_exp_time;			/* exposure time in s */
+     	double	m_lat_time;			/* lattency - delay? */
+
       Camera*		m_cam;
-      //tPvHandle&	m_handle;
+      HANDLE&	m_handle;
       TrigMode		m_trig_mode;
       BufferCtrlObj*	m_buffer;
       int		m_nb_frames;

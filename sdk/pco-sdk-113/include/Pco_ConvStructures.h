@@ -42,6 +42,13 @@
 // local functions
 
 //--------------------
+
+#define _X86_
+//#include <Windows.h>
+#include <WinDef.h>
+//#include <ws2def.h>
+
+
 #ifndef PCO_CONVERT_STRUCT_H
 #define PCO_CONVERT_STRUCT_H
 

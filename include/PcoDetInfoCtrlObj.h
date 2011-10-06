@@ -10,7 +10,7 @@ namespace lima
   namespace Pco
   {
     class Camera;
-    class DetInfoCtrlObj : public HwDetInfoCtrlObj
+    class DLL_EXPORT  DetInfoCtrlObj : public HwDetInfoCtrlObj
     {
       DEB_CLASS_NAMESPC(DebModCamera, "DetInfoCtrlObj","Pco");
 
@@ -33,7 +33,7 @@ namespace lima
       virtual void unregisterMaxImageSizeCallback(HwMaxImageSizeCallback& cb);
     private:
       Camera* 			m_cam;
-      tPvHandle& 		m_handle;
+      HANDLE& 		m_handle;
     };
 
   } // namespace Pco

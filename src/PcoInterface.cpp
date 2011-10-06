@@ -1,12 +1,17 @@
+#include "Exceptions.h"
+
 #include "PcoInterface.h"
 #include "PcoCamera.h"
 #include "PcoDetInfoCtrlObj.h"
 #include "PcoBufferCtrlObj.h"
-#include "PcoVideoCtrlObj.h"
 #include "PcoSyncCtrlObj.h"
 
 using namespace lima;
 using namespace lima::Pco;
+
+
+
+
 
 
 Interface::Interface(Camera *cam) :
@@ -14,36 +19,18 @@ Interface::Interface(Camera *cam) :
 {
   DEB_CONSTRUCTOR();
   m_det_info = new DetInfoCtrlObj(cam);
-  if(m_cam->isMonochrome())
-    {
-      m_buffer = new BufferCtrlObj(cam);
-      m_video = NULL;
-    }
-  else
-    {
-      m_video = new VideoCtrlObj(cam);
-      cam->_allocBuffer();
-      cam->m_video = m_video;
-      m_buffer = NULL;
-    }
-  m_sync = new SyncCtrlObj(cam,m_video ? NULL : m_buffer);
+  m_buffer = new BufferCtrlObj(cam);
+  m_sync = new SyncCtrlObj(cam, m_buffer);
   cam->m_sync = m_sync;
 
   if(m_buffer)
     m_buffer->m_sync = m_sync;
-  if(m_video)
-    m_video->m_sync = m_sync;
 }
 
 Interface::~Interface()
 {
   DEB_DESTRUCTOR();
-  if(m_video)
-    {
-      delete m_video;
-    }
-  else
-    delete m_buffer;
+  delete m_buffer;
   delete m_det_info;
   delete m_sync;
 }
@@ -52,13 +39,7 @@ void Interface::getCapList(CapList &cap_list) const
 {
   cap_list.push_back(HwCap(m_sync));
   cap_list.push_back(HwCap(m_det_info));
-  if(m_video)
-    { 
-      cap_list.push_back(HwCap(m_video));
-      cap_list.push_back(HwCap(&(m_video->getHwBufferCtrlObj())));
-    }
-  else
-    cap_list.push_back(HwCap(m_buffer));
+  cap_list.push_back(HwCap(m_buffer));
 }
 
 void Interface::reset(ResetLevel reset_level)
@@ -83,8 +64,6 @@ void Interface::startAcq()
 
   if(m_buffer)
     m_buffer->getBuffer().setStartTimestamp(Timestamp::now());
-  else
-    m_video->getBuffer().setStartTimestamp(Timestamp::now());
   m_sync->startAcq();
 }
 

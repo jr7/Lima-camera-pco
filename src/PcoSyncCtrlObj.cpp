@@ -1,4 +1,5 @@
 #include <sstream>
+#include "Exceptions.h"
 #include "PcoSyncCtrlObj.h"
 #include "PcoBufferCtrlObj.h"
 #include "PcoCamera.h"
@@ -27,12 +28,12 @@ bool SyncCtrlObj::checkTrigMode(TrigMode trig_mode)
   DEB_MEMBER_FUNCT();
   DEB_PARAM() << DEB_VAR1(trig_mode);
 
-  switch(trig_mode)
-    {
+  switch(trig_mode){
     case IntTrig:
     case IntTrigMult:
-    case ExtTrigMult:
+    case ExtTrigSingle:
       return true;
+
     default:
       return false;
     }
@@ -43,33 +44,19 @@ void SyncCtrlObj::setTrigMode(TrigMode trig_mode)
   DEB_MEMBER_FUNCT();
   DEB_PARAM() << DEB_VAR1(trig_mode);
 
-  tPvErr error;
-  if(checkTrigMode(trig_mode))
-    {
-      switch(trig_mode)
-	{
-	case ExtTrigMult:
-	  error = PvAttrEnumSet(m_handle, "FrameStartTriggerMode", "SyncIn1");
-	  if(error)
-	    throw LIMA_HW_EXC(Error,"Can't set trigger input");
-	  error = PvAttrEnumSet(m_handle, "FrameStartTriggerEvent", "EdgeRising");
-	  if(error)
-	    throw LIMA_HW_EXC(Error,"Can't change Trigger start to a rising edge");
-	  break;
-	default:		// Software
-	  error = PvAttrEnumSet(m_handle, "FrameStartTriggerMode", "FixedRate");
-	  if(error)
-	    {
-	      std::stringstream message;
-	      message << "could not set trigger mode to FixedRate " << error;
-	      throw LIMA_HW_EXC(Error,message.str().c_str());
-	    }
-	  break;
+  if(checkTrigMode(trig_mode)){
+    switch(trig_mode)	{
+      case IntTrig: // 0 SOFT (spec)
+	  case IntTrigMult: // 1 START (spec)
+      case ExtTrigSingle:  // 2 GATE (spec)
+    	  break;
 	}
-      m_trig_mode = trig_mode;
-    }
-  else
+  }  else {
     throw LIMA_HW_EXC(NotSupported,"Trigger type not supported");
+  }
+
+	m_trig_mode = trig_mode;
+
 }
 
 void SyncCtrlObj::getTrigMode(TrigMode &trig_mode)
@@ -77,41 +64,122 @@ void SyncCtrlObj::getTrigMode(TrigMode &trig_mode)
   trig_mode = m_trig_mode;
 }
 
-void SyncCtrlObj::setExpTime(double exp_time)
+
+
+
+WORD SyncCtrlObj::getPcoAcqMode()
 {
   DEB_MEMBER_FUNCT();
-  DEB_PARAM() << DEB_VAR1(exp_time);
 
-  tPvErr error = PvAttrEnumSet(m_handle, "ExposureMode", "Manual");
-  if(error != ePvErrSuccess)
-    throw LIMA_HW_EXC(Error,"Can't set manual exposure");
+    switch( m_trig_mode)	{
+	  case IntTrig: // 0 SOFT (spec)
+    	  return 0x0000;
 
-  tPvUint32 exposure_value = tPvUint32(exp_time * 1e6);
-  error = PvAttrUint32Set(m_handle,"ExposureValue",exposure_value);
-  if(error != ePvErrSuccess)
-    throw LIMA_HW_EXC(Error,"Can't set exposure time failed"); 
+	  case IntTrigMult: // 1 START (spec)
+	  case ExtTrigSingle:  // 2 GATE (spec)
+    	  return 0x0001;
+
+	  default:
+		 throw LIMA_HW_EXC(NotSupported,"Invalid value");
+
+	}
+
+}
+
+
+WORD SyncCtrlObj::getPcoTrigMode(){
+  	//------------------------------------------------- triggering mode 
+	switch (m_trig_mode) {  // trig mode in spec
+			//  PCO = 0x0000
+			// A new image exposure is automatically started best possible compared to
+			// the readout of an image. If a CCD is used and the images are taken in a
+			// sequence, then exposures and sensor readout are started simultaneously.
+			// Signals at the trigger input (<exp trig>) are irrelevant.
+		case 0: return 0x0000;  // 0 = SOFT (spec)
+
+			// PCO = 0x0002
+			// A delay / exposure sequence is started at the RISING or FALLING edge
+			// (depending on the DIP switch setting) of the trigger input (<exp trig>).
+		case 1: return 0x0002;   // 1 = START (spec)
+			
+			// PCO = 0x0003
+			// The exposure time is defined by the pulse length at the trigger
+			// input(<exp trig>). The delay and exposure time values defined by the
+			// set/request delay and exposure command are ineffective. (Exposure
+			// time length control is also possible for double image mode; exposure
+			// time of the second image is given by the readout time of the first image.)
+		case 2: return 0x0003;  // 2 = GATE (spec)
+		
+    default: return 0x0000;			  // SOFT
+	}
+
+
+}
+
+#ifdef COMPILEIT
+enum TrigMode {
+	IntTrig 0,IntTrigMult 1,
+	ExtTrigSingle 2, ExtTrigMult 3,
+	ExtGate 4, ExtStartStop 5,
+	Live 6,
+};
+#endif
+
+
+
+void SyncCtrlObj::setExpTime(double exp_time)
+{
+  ValidRangesType valid_ranges;
+  getValidRanges(valid_ranges);
+
+ 	if ((exp_time <valid_ranges.min_exp_time)||(exp_time >valid_ranges.max_exp_time)) 
+     throw LIMA_HW_EXC(Error,"Exposure time out of range");
+
+  m_exp_time = exp_time;
+  //ds->ccd.cocRunTime = 0;
+
+
 }
 
 void SyncCtrlObj::getExpTime(double &exp_time)
 {
   DEB_MEMBER_FUNCT();
 
-  tPvUint32 exposure_value;
-  PvAttrUint32Get(m_handle, "ExposureValue", &exposure_value);
-  exp_time = exposure_value / 1e6;
+  
+  exp_time = m_exp_time;
 
   DEB_RETURN() << DEB_VAR1(exp_time);
 }
 
+
+
+
+
+
+
+#ifdef COMPILEIT
+
+#endif
+
+
+
 void SyncCtrlObj::setLatTime(double  lat_time)
 {
   //No latency managed
+  //delay ???
+
+  m_lat_time = lat_time;
 }
 
 void SyncCtrlObj::getLatTime(double& lat_time)
 {
-  lat_time = 0.;		// Don't know
+  m_lat_time = 0.;
+  lat_time = m_lat_time;		// Don't know - delay????
 }
+
+
+
+
 
 void SyncCtrlObj::setNbFrames(int  nb_frames)
 {
@@ -136,24 +204,29 @@ void SyncCtrlObj::getNbHwFrames(int& nb_frames)
   getNbFrames(nb_frames);
 }
 
+
+
+
+
 void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 {
   valid_ranges.min_exp_time = 1e-6; // Don't know
-  valid_ranges.max_exp_time = 60.; // Don't know
+  valid_ranges.max_exp_time = m_cam->m_pcoInfo.dwMaxExposureDESC * 1e-3 ; // Don't know
   valid_ranges.min_lat_time = 0.; // Don't know
   valid_ranges.max_lat_time = 0.; // Don't know
 }
 
 void SyncCtrlObj::startAcq()
 {
+  tPvErr error=0;
   DEB_MEMBER_FUNCT();
   if(!m_started)
     {
-      tPvErr error = PvCaptureStart(m_handle);
+      //tPvErr error = PvCaptureStart(m_handle);
       if(error)
 	throw LIMA_HW_EXC(Error,"Can't start acquisition capture");
 
-      error = PvCommandRun(m_handle, "AcquisitionStart");
+      //error = PvCommandRun(m_handle, "AcquisitionStart");
       if(error)
 	throw LIMA_HW_EXC(Error,"Can't start acquisition");
   
@@ -167,11 +240,13 @@ void SyncCtrlObj::startAcq()
 
 void SyncCtrlObj::stopAcq(bool clearQueue)
 {
+    tPvErr error=0;
+
   DEB_MEMBER_FUNCT();
   if(m_started)
     {
       DEB_TRACE() << "Try to stop Acq";
-      tPvErr error = PvCommandRun(m_handle,"AcquisitionStop");
+      //tPvErr error = PvCommandRun(m_handle,"AcquisitionStop");
       if(error)
 	{
 	  DEB_ERROR() << "Failed to stop acquisition";
@@ -179,7 +254,7 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 	}
 
       DEB_TRACE() << "Try to stop Capture";
-      error = PvCaptureEnd(m_handle);
+      //error = PvCaptureEnd(m_handle);
       if(error)
 	{
 	  DEB_ERROR() << "Failed to stop acquisition";
@@ -189,7 +264,7 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
       if(clearQueue)
 	{
 	  DEB_TRACE() << "Try to clear queue";
-	  error = PvCaptureQueueClear(m_handle);
+	  //error = PvCaptureQueueClear(m_handle);
 	  if(error)
 	    {
 	      DEB_ERROR() << "Failed to stop acquisition";
@@ -202,10 +277,12 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 
 void SyncCtrlObj::getStatus(HwInterface::StatusType& status)
 {
+    tPvErr error;
+
   DEB_MEMBER_FUNCT();
   if(m_started)
     {
-      tPvErr error = ePvErrSuccess;
+      //tPvErr error = ePvErrSuccess;
       if(m_buffer)
 	{
 	  bool exposing;

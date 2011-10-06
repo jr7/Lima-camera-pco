@@ -1,6 +1,10 @@
-#include <cstdlib>
-#include "PcoDetInfoCtrlObj.h"
+//#include <cstdlib>
+//#include <WinDef.h>
+//#include <WinNt.h>
+#include "Exceptions.h"
 #include "PcoCamera.h"
+#include "PcoDetInfoCtrlObj.h"
+
 
 using namespace lima;
 using namespace lima::Pco;
@@ -17,55 +21,45 @@ DetInfoCtrlObj::~DetInfoCtrlObj()
 
 void DetInfoCtrlObj::getMaxImageSize(Size& max_image_size)
 {
-  tPvUint32 width,height;
+  // ---- DONE
+  DWORD width,height;
   m_cam->getMaxWidthHeight(width,height);
   max_image_size = Size(int(width),int(height));
 }
 
 void DetInfoCtrlObj::getDetectorImageSize(Size& det_image_size)
 {
+  // ---- DONE
   getMaxImageSize(det_image_size);
 }
 
 void DetInfoCtrlObj::getDefImageType(ImageType& def_image_type)
 {
-  def_image_type = Bpp16;
+    // ---- DONE
+  unsigned int pixbytes;
+  m_cam->getBytesPerPixel(pixbytes);
+    def_image_type = (pixbytes == 2) ? Bpp16 : Bpp8;
 }
 
 void DetInfoCtrlObj::getCurrImageType(ImageType& curr_image_type)
 {
-  char modeStr[64];
-  tPvUint32 psize;
-  tPvErr error = PvAttrEnumGet(m_handle,"PixelFormat",modeStr,
-			       sizeof(modeStr),&psize);
-  int pixelSize = (modeStr[0] == 'B') ? 
-    atoi(&modeStr[5]) : atoi(&modeStr[4]);
-  curr_image_type = (pixelSize == 16) ? Bpp16 : Bpp8;
+    // ---- DONE
+  getDefImageType(curr_image_type);
 }
 
 void DetInfoCtrlObj::setCurrImageType(ImageType curr_image_type)
 {
-  VideoMode aMode = m_cam->getVideoMode();
-  VideoMode aNextMode;
+    // ---- DONE
   switch(curr_image_type)
     {
     case Bpp16:
-      if(aMode == Y8 || aMode == Y16)
-	aNextMode = Y16;
-      else
-	aNextMode = BAYER_RG16;
-      break;
     case Bpp8:
-      if(aMode == Y8 || aMode == Y16)
-	aNextMode = Y8;
-      else
-	aNextMode = BAYER_RG8;
       break;
+
     default:
       throw LIMA_HW_EXC(InvalidValue,"This image type is not Managed");
     }
 
-  m_cam->setVideoMode(aNextMode);
 }
 
 void DetInfoCtrlObj::getPixelSize(double& pixel_size)

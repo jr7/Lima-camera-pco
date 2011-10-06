@@ -1,3 +1,4 @@
+#include "Exceptions.h"
 #include "PcoBufferCtrlObj.h"
 #include "PcoSyncCtrlObj.h"
 #include "PcoCamera.h"
@@ -7,17 +8,18 @@ using namespace lima::Pco;
 
 BufferCtrlObj::BufferCtrlObj(Camera *cam) :
   m_handle(cam->getHandle()),
-  m_status(ePvErrSuccess),
+  //m_status(ePvErrSuccess),
   m_exposing(false)
 {
   DEB_CONSTRUCTOR();
 
-  m_frame[0].Context[0] = this;
-  m_frame[1].Context[0] = this;
+  //m_frame[0].Context[0] = this;
+  //m_frame[1].Context[0] = this;
 }
 void BufferCtrlObj::prepareAcq()
 {
   DEB_MEMBER_FUNCT();
+#ifdef COMPILEIT
   FrameDim dim;
   getFrameDim(dim);
   m_frame[0].ImageBufferSize = m_frame[1].ImageBufferSize = dim.getMemSize();
@@ -25,20 +27,22 @@ void BufferCtrlObj::prepareAcq()
   m_acq_frame_nb = -1;
   int buffer_nb,concat_frame_nb;
   m_buffer_cb_mgr.acqFrameNb2BufferNb(0,buffer_nb,concat_frame_nb);
-  tPvFrame& frame0 = m_frame[0];
-  frame0.ImageBuffer = (char*) m_buffer_cb_mgr.getBufferPtr(buffer_nb,
-							    concat_frame_nb);
+  //tPvFrame& frame0 = m_frame[0];
+  //frame0.ImageBuffer = (char*) m_buffer_cb_mgr.getBufferPtr(buffer_nb, concat_frame_nb);
 
   m_buffer_cb_mgr.acqFrameNb2BufferNb(1,buffer_nb,concat_frame_nb);
   tPvFrame& frame1 = m_frame[1];
   frame1.ImageBuffer = (char*) m_buffer_cb_mgr.getBufferPtr(buffer_nb,
-							    concat_frame_nb);
+    concat_frame_nb);
+#endif
 }
 
 void BufferCtrlObj::startAcq()
 {
   DEB_MEMBER_FUNCT();
 
+
+#ifdef COMPILEIT
   m_exposing = true;
   tPvFrame& frame = m_frame[0];
   m_status = PvCaptureQueueFrame(m_handle,&frame,_newFrame);
@@ -51,11 +55,16 @@ void BufferCtrlObj::startAcq()
       m_status = PvCaptureQueueFrame(m_handle,&frame,_newFrame);
     }
 */
+#endif
+
 }
 
 void BufferCtrlObj::_newFrame(tPvFrame* aFrame)
 {
   DEB_STATIC_FUNCT();
+
+#ifdef COMPILEIT
+
   BufferCtrlObj *bufferPt = (BufferCtrlObj*)aFrame->Context[0];
 
   int requested_nb_frames;
@@ -109,4 +118,7 @@ void BufferCtrlObj::_newFrame(tPvFrame* aFrame)
   
   if(stopAcq)
     bufferPt->m_sync->stopAcq(false);
+
+#endif
+
 }
