@@ -717,6 +717,7 @@ void Camera::startAcq()
         m_bufsize= m_bufsize_max;
 
 
+
         m_frames_per_buffer = (int) m_bufsize_max / m_imgsizeBuffer;
         //if(ds->ccd.frames_per_buffer > 2) ds->ccd.frames_per_buffer /= 2;
         m_frames_per_buffer = 1;
