@@ -157,7 +157,7 @@ void SyncCtrlObj::getExpTime(double &exp_time)
   getValidRanges(valid_ranges);
   
   if (m_exp_time < valid_ranges.min_exp_time) m_exp_time = valid_ranges.min_exp_time;
-  if (m_exp_time > valid_ranges.max_exp_time) m_exp_time > valid_ranges.max_exp_time;
+  if (m_exp_time > valid_ranges.max_exp_time) m_exp_time = valid_ranges.max_exp_time;
 
   exp_time = m_exp_time;
   DEB_RETURN() << DEB_VAR1(exp_time);

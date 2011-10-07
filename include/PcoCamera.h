@@ -42,7 +42,7 @@ struct stcSize {
 
 };
 enum enumChange {
-	invalid, valid, changed,
+	Invalid, Valid, Changed,
 };
 
 struct stcRoi {
@@ -93,7 +93,7 @@ namespace lima
 
         void 	startAcq();
         void	reset();
-
+		char *getInfo(char *output, int lg);
       private:
         unsigned long _getFramesMax(int segmentPco);
         int PcoCheckError(int err);
@@ -159,7 +159,7 @@ namespace lima
         bool		m_continue_acq;
 
         PCO_Description	m_pcoInfo;	/* camera description structure */
-        PCO_CameraType	strCamType;
+        PCO_CameraType	m_stcCamType;
         char m_model[MODEL_SIZE+1], m_iface[MODEL_SIZE+1];
         int	m_interface_type;
 

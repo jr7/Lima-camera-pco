@@ -36,6 +36,10 @@
 using namespace lima;
 using namespace lima::Pco;
 
+#define THROW_LIMA_HW_EXC(e, x)  { \
+	printf("========*** LIMA_HW_EXC %s\n", x ); \
+			throw LIMA_HW_EXC(e, x); \
+} 
 
 
 #define PCO_TRACE(x)  \
@@ -85,6 +89,23 @@ char *xlatI2A(int code, struct stcXlatI2A *stc) {
 
 }
 
+static char *getTimestamp(int fmtIdx) {
+   static char timeline[128];
+   errno_t err;
+	time_t ltime;
+	struct tm today;
+	char *fmt[] = {"%Y/%m/%d %H:%M:%S", "%Y-%m-%d-%H%M%S" , "%Y-%m-%d"};
+
+
+	time( &ltime );
+	//err = ctime_s(timebuf, 26, &ltime);
+	
+	err = localtime_s( &today, &ltime );
+
+	strftime(timeline, 128, fmt[fmtIdx], &today );
+      
+	return timeline;
+}
 Camera::Camera(const char *ip_addr) :
   m_cam_connected(false),
   m_sync(NULL)
@@ -107,13 +128,33 @@ Camera::Camera(const char *ip_addr) :
   m_acq_mode = 0;
   m_storage_mode = 0;
   m_recorder_submode = 0;
-  m_bin.changed = invalid;
-	m_roi.changed = invalid;
+  m_bin.changed = Invalid;
+	m_roi.changed = Invalid;
 
 
 
   m_cocRunTime = 0;		/* cam operation code - delay & exposure time & readout in s*/
 	m_frameRate = 0;
+
+
+	for(int i=0; i < 8; i++) {
+		m_bufferNrM[i] = -1;
+		m_bufferM[i]	= NULL;
+
+
+	 // Create two event objects
+        m_bufferM_events[i] = CreateEvent( 
+            NULL,   // default security attributes
+            FALSE,  // auto-reset event object
+            FALSE,  // initial state is nonsignaled
+            NULL);  // unnamed object
+
+        if (m_bufferM_events[i] == NULL) 
+        { 
+            THROW_LIMA_HW_EXC(Error, "CreateEvent error")
+        } 
+    } 
+
 
   DebParams::checkInit();
   
@@ -137,24 +178,24 @@ Camera::Camera(const char *ip_addr) :
   
 
 	// --- Get camera type
-	strCamType.wSize= sizeof(strCamType);
-	error = PcoCheckError(PCO_GetCameraType(m_handle, &strCamType));
+	m_stcCamType.wSize= sizeof(m_stcCamType);
+	error = PcoCheckError(PCO_GetCameraType(m_handle, &m_stcCamType));
 	PCO_TRACE("PCO_GetCameraType") ;
 
-	if((ptr = xlatI2A(strCamType.wCamType, modelType)) != NULL) {
+	if((ptr = xlatI2A(m_stcCamType.wCamType, modelType)) != NULL) {
 		strcpy_s(m_model, MODEL_SIZE, ptr);	error= 0;
 	} else {
-		sprintf_s(m_model, MODEL_SIZE, "UNKNOWN [0x%04x]", strCamType.wCamType); error= 1;
+		sprintf_s(m_model, MODEL_SIZE, "UNKNOWN [0x%04x]", m_stcCamType.wCamType); error= 1;
 	}
 
 	DEB_TRACE() <<   "m_model " << m_model;
 
 	if(error) throw LIMA_HW_EXC(Error, "Unknow model");
 	
-	if((ptr = xlatI2A((m_interface_type = strCamType.wInterfaceType), interfaceType)) != NULL) {
+	if((ptr = xlatI2A((m_interface_type = m_stcCamType.wInterfaceType), interfaceType)) != NULL) {
 		strcpy_s(m_iface, MODEL_SIZE, ptr);	error= 0;
 	} else {
-		sprintf_s(m_iface, MODEL_SIZE, "UNKNOWN [0x%04x]", strCamType.wInterfaceType); error= 1;
+		sprintf_s(m_iface, MODEL_SIZE, "UNKNOWN [0x%04x]", m_stcCamType.wInterfaceType); error= 1;
 	}
 
 	DEB_TRACE() <<   "m_iface " << m_iface;
@@ -200,6 +241,12 @@ Camera::Camera(const char *ip_addr) :
 
 	m_maxwidth_step= (unsigned int) m_pcoInfo.wRoiHorStepsDESC;   // ds->ccd.roi.xstep
 	m_maxheight_step= (unsigned int) m_pcoInfo.wRoiVertStepsDESC; // ds->ccd.roi.ystep,
+
+	m_roi.x[0] = m_roi.y[0] = 1;
+	m_roi.x[1] = m_size.maxwidth;
+	m_roi.y[1] = m_size.maxheight;
+	m_roi.changed = Changed;
+
 
 	sprintf_s(msg, MSG_SIZE, "* CCD Size = X[%d] x Y[%d] (%d bits)", m_size.maxwidth, m_size.maxheight, m_size.pixbits);
 	DEB_TRACE() <<   msg;
@@ -442,7 +489,7 @@ Camera::Camera(const char *ip_addr) :
   if(error)
     throw LIMA_HW_EXC(Error,"Can't set image height");
   
-	m_sync = new SyncCtrlObj(this, NULL);
+	// m_sync = new SyncCtrlObj(this, NULL); NO!
   
   // error = PvAttrEnumSet(m_handle, "AcquisitionMode", "Continuous");
   if(error)
@@ -555,12 +602,12 @@ void Camera::startAcq()
 
     //------------------------------------------------- set binning if needed
     WORD wBinHorz, wBinVert;
-    if (m_bin.changed == changed) {
+    if (m_bin.changed == Changed) {
 		wBinHorz = (WORD)m_bin.x;
 		wBinVert = (WORD)m_bin.y;
         error = PcoCheckError(PCO_SetBinning(m_handle, wBinHorz, wBinVert));
         PCO_TRACE("PCO_SetBinning") ;
-        m_bin.changed= valid;
+        m_bin.changed= Valid;
     }
 
     error = PcoCheckError(PCO_GetBinning(m_handle, &wBinHorz, &wBinVert));
@@ -573,8 +620,8 @@ void Camera::startAcq()
     WORD wRoiX1; // Roi lower right x
     WORD wRoiY1;// Roi lower right y
 
-    if(m_roi.changed == valid) m_roi.changed = changed;    //+++++++++ TEST / FORCE WRITE ROI
-    if (m_roi.changed == changed) {
+    if(m_roi.changed == Valid) m_roi.changed = Changed;    //+++++++++ TEST / FORCE WRITE ROI
+    if (m_roi.changed == Changed) {
         wRoiX0 = (WORD)m_roi.x[0];
         wRoiX1 = (WORD)m_roi.x[1];
         wRoiY0 = (WORD)m_roi.y[0];
@@ -585,7 +632,7 @@ void Camera::startAcq()
         error = PcoCheckError(PCO_SetROI(m_handle, wRoiX0, wRoiY0, wRoiX1, wRoiY1));
         PCO_TRACE("PCO_SetROI") ;
 
-        m_roi.changed= valid;
+        m_roi.changed= Valid;
     }
 
 	error = PcoCheckError(PCO_GetROI(m_handle, &wRoiX0, &wRoiY0, &wRoiX1, &wRoiY1));
@@ -959,3 +1006,58 @@ unsigned long Camera::_getFramesMax(int segmentPco){
 
 		return framesMax;
 	}
+
+
+
+char *Camera::getInfo(char *output, int lg){
+		char *ptr, *ptrMax;
+		int segmentPco = m_activeRamSegment;
+		int segmentArr = segmentPco -1;
+
+		ptr = output; *ptr = 0;
+		ptrMax = ptr + lg;
+
+		int width = +20;
+
+		ptr += sprintf_s(ptr, ptrMax - ptr,"**** PCO Info\n");
+		ptr += sprintf_s(ptr, ptrMax - ptr,"*%*s = %s\n", width, "timestamp", getTimestamp(0));
+
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = %g fps\n", width, "frameRate", m_frameRate);
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = X(%d,%d) Y(%d,%d) size(%d,%d)\n", width, "roi", 
+				m_roi.x[0], m_roi.x[1],
+				m_roi.y[0], m_roi.y[1],
+				m_roi.x[1] - m_roi.x[0] + 1, m_roi.y[1] - m_roi.y[0] + 1);
+
+		double _exposure;
+		m_sync->getExpTime(_exposure);
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = %g s\n", width, "expTime", _exposure);
+		
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = %d\n", width, "framesMax", m_dwMaxFramesInSegment[segmentArr]);
+
+		int iFrames;
+		m_sync->getNbFrames(iFrames);
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = %ld\n", width,"nrFrames", iFrames);
+
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = %d\n", width, "activeSegment", segmentPco);
+
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = %ld pages\n", width, "segmentSize", m_dwSegmentSize[segmentArr]);
+
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = %d pix\n", width, "pixPerPage", m_wPageSize);
+
+/***
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%s]\n", width,"fileDir", ds->ccd.file.image_dir);
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%s]\n", width, "filePrefix", ds->ccd.file.image_prefix);
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%s]\n", width, "fileSuffix", ds->ccd.file.image_suffix);
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%s]\n", width, "fileNoFmt", ds->ccd.file.image_no_fmt);
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%d]\n", width, "fileNo", ds->ccd.file.image_no);
+
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%s]\n", width, "sinogram fileDir", ds->ccd.sinogram.fileDir);
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%d][%d]\n", width, "sinogram cols", ds->ccd.sinogram.col_beg, ds->ccd.sinogram.col_end);
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%d][%d]\n", width, "sinogram rows", ds->ccd.sinogram.row_beg, ds->ccd.sinogram.row_end);
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%d]\n", width, "sinogram frames", ds->ccd.sinogram.nr_frames);
+		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%d]\n", width, "sinogram saving", ds->ccd.sinogram.saving);
+
+****/
+		ptr += sprintf_s(ptr, ptrMax - ptr,"****\n");
+		return output;
+}

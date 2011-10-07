@@ -50,6 +50,7 @@ void DetInfoCtrlObj::getCurrImageType(ImageType& curr_image_type)
 void DetInfoCtrlObj::setCurrImageType(ImageType curr_image_type)
 {
     // ---- DONE
+	// only check if it valid, BUT don't set it ????
   switch(curr_image_type)
     {
     case Bpp16:
@@ -64,16 +65,19 @@ void DetInfoCtrlObj::setCurrImageType(ImageType curr_image_type)
 
 void DetInfoCtrlObj::getPixelSize(double& pixel_size)
 {  
+	// pixel size in micrometer (???)
   pixel_size = -1.;		// @todo don't know
 }
 
 void DetInfoCtrlObj::getDetectorType(std::string& det_type)
 {
+    // ---- DONE
    det_type = "Pco";
 }
 
 void DetInfoCtrlObj::getDetectorModel(std::string& det_model)
 {
+    // ---- DONE
   m_cam->getCameraName(det_model);
 }
 
