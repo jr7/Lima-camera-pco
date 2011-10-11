@@ -28,6 +28,7 @@
 #define INTERFACE_TYPE_SIZE	32
 #define CAMERA_NAME_SIZE	128
 #define MSG_SIZE	512
+#define BUFF_XLAT_SIZE 128
 
 
 typedef DWORD tPvUint32;

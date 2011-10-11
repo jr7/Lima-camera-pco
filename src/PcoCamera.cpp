@@ -57,7 +57,7 @@ static char *timebaseUnits[] = {"ns", "us", "ms"};
 
 
 
-char *xlatI2A(int code, struct stcXlatI2A *stc) {
+char *xlatCode2Str(int code, struct stcXlatCode2Str *stc) {
 
 	char *type;
 
@@ -70,10 +70,13 @@ char *xlatI2A(int code, struct stcXlatI2A *stc) {
 
 }
 
-#define BUFF_ST_SIZE 128
+//=========================================================================================================
+//=========================================================================================================
 
-char *getPcoModelTypeStr(int code, int &err) {
-	struct stcXlatI2A modelType[] = {
+enum tblXlatCode2Str {ModelType, InterfaceType};
+
+char *xlatPcoCode2Str(int code, tblXlatCode2Str table, int &err) {
+	struct stcXlatCode2Str modelType[] = {
 		{CAMERATYPE_PCO1200HS, "PCO 1200 HS"},
 		{CAMERATYPE_PCO1300, "PCO 1300"},
 		{CAMERATYPE_PCO1600, "PCO 1600"},
@@ -85,21 +88,7 @@ char *getPcoModelTypeStr(int code, int &err) {
 		{0, NULL}
 	};
 
-	char *ptr;
-	static char buff[BUFF_ST_SIZE + 1];
-
-	if((ptr = xlatI2A(code, modelType)) != NULL) {
-		err = 0;
-		return ptr;
-	} else {
-		sprintf_s(buff, BUFF_ST_SIZE, "UNKNOWN MODEL [0x%04x]", code);
-		err = 1;
-		return buff;
-	}
-}
-
-char *getPcoInterfaceTypeStr(int code, int &err) {
-	struct stcXlatI2A interfaceType[] = {
+  struct stcXlatCode2Str interfaceType[] = {
 		{INTERFACE_FIREWIRE, "FIREWIRE"},
 		{INTERFACE_CAMERALINK, "CAMERALINK"},
 		{INTERFACE_USB, "USB"},
@@ -108,38 +97,60 @@ char *getPcoInterfaceTypeStr(int code, int &err) {
 		{0, NULL}
 	};
 
+  struct stcXlatCode2Str *stc;
 	char *ptr;
-	static char buff[BUFF_ST_SIZE+1];
+	static char buff[BUFF_XLAT_SIZE+1];
 
-	if((ptr = xlatI2A(code, interfaceType)) != NULL) {
+  switch(table) {
+    case ModelType: stc = modelType; break;
+    case InterfaceType: stc = interfaceType; break;
+    default:
+  		sprintf_s(buff, BUFF_XLAT_SIZE, "UNKNOWN XLAT TABLE [%d]", table);
+  		err = 1;
+	  	return buff;
+  }
+
+	if((ptr = xlatCode2Str(code, stc)) != NULL) {
 		err = 0;
 		return ptr;
 	} else {
-		sprintf_s(buff, BUFF_ST_SIZE, "UNKNOWN INTERFACE [0x%04x]", code);
+		sprintf_s(buff, BUFF_XLAT_SIZE, "UNKNOWN INTERFACE [0x%04x]", code);
 		err = 1;
 		return buff;
 	}
 }
 
+//=========================================================================================================
+//=========================================================================================================
+enum timestampFmt {Iso, FnFull, FnDate};
 
-
-static char *getTimestamp(int fmtIdx) {
+static char *getTimestamp(timestampFmt fmtIdx) {
    static char timeline[128];
    errno_t err;
 	time_t ltime;
 	struct tm today;
-	char *fmt[] = {"%Y/%m/%d %H:%M:%S", "%Y-%m-%d-%H%M%S" , "%Y-%m-%d"};
+	char *fmt;
 
+  switch(fmtIdx) {
+    case Iso: fmt = "%Y/%m/%d %H:%M:%S"; break;
+    case FnDate: fmt = "%Y-%m-%d"; break;
+
+    default:
+    case FnFull: fmt = "%Y-%m-%d-%H%M%S"; break;
+  }
 
 	time( &ltime );
 	//err = ctime_s(timebuf, 26, &ltime);
 	
 	err = localtime_s( &today, &ltime );
 
-	strftime(timeline, 128, fmt[fmtIdx], &today );
+	strftime(timeline, 128, fmt, &today );
       
 	return timeline;
 }
+
+//=========================================================================================================
+//=========================================================================================================
 Camera::Camera(const char *ip_addr) :
   m_cam_connected(false),
   m_sync(NULL)
@@ -217,17 +228,17 @@ Camera::Camera(const char *ip_addr) :
 		error = PcoCheckError(PCO_GetCameraType(m_handle, &m_stcCamType));
 		PCO_TRACE("PCO_GetCameraType") ;
 
-		ptr = getPcoModelTypeStr(m_stcCamType.wCamType, error);
+		ptr = xlatPcoCode2Str(m_stcCamType.wCamType, ModelType, error);
 		strcpy_s(m_model, MODEL_TYPE_SIZE, ptr);
 		DEB_TRACE() <<   "m_model " << m_model;
 		if(error) throw LIMA_HW_EXC(Error, "Unknow model");
 		
-		ptr = getPcoModelTypeStr((m_interface_type = m_stcCamType.wInterfaceType), error);
+		ptr = xlatPcoCode2Str(m_stcCamType.wCamType, InterfaceType, error);
 		strcpy_s(m_iface, INTERFACE_TYPE_SIZE, ptr);
 		DEB_TRACE() <<   "m_iface " << m_iface;
 		if(error) throw LIMA_HW_EXC(Error, "Unknow interface");
 
-		sprintf_s(m_camera_name, CAMERA_SIZE, "%s %s", m_model, m_iface);
+		sprintf_s(m_camera_name, CAMERA_NAME_SIZE, "%s %s", m_model, m_iface);
 
 		DEB_TRACE() <<   "m_camera_name " << m_camera_name ;	
 	}
@@ -800,11 +811,9 @@ void Camera::startAcq()
         //ds->ccd.bufsize= size;
         m_allocatedBufferSize= m_allocatedBufferSizeMax;
 
-
-
-        m_frames_per_buffer = (int) m_allocatedBufferSizeMax / m_imgsizeBuffer;
+        // m_frames_per_buffer = (int) m_allocatedBufferSizeMax / m_imgsizeBuffer;
         //if(ds->ccd.frames_per_buffer > 2) ds->ccd.frames_per_buffer /= 2;
-        m_frames_per_buffer = 1;
+        m_frames_per_buffer = 1;  // PCO DSK allows only one frame/buffer
 
         //dprintf2("<%s> allocating buffer ... imgsizeBytes[%ld] imgsizeBuffer[%ld] bufMax[%ld] framesPerBuf[%ld]", fnId, ds->ccd.imgsizeBytes, ds->ccd.imgsizeBuffer, ds->ccd.bufsize_max, ds->ccd.frames_per_buffer);
 
@@ -1082,7 +1091,7 @@ char *Camera::getInfo(char *output, int lg){
 		int width = +20;
 
 		ptr += sprintf_s(ptr, ptrMax - ptr,"**** PCO Info\n");
-		ptr += sprintf_s(ptr, ptrMax - ptr,"*%*s = %s\n", width, "timestamp", getTimestamp(0));
+		ptr += sprintf_s(ptr, ptrMax - ptr,"*%*s = %s\n", width, "timestamp", getTimestamp(Iso));
 
 		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = %g fps\n", width, "frameRate", m_frameRate);
 		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = X(%d,%d) Y(%d,%d) size(%d,%d)\n", width, "roi", 
@@ -1123,3 +1132,215 @@ char *Camera::getInfo(char *output, int lg){
 		ptr += sprintf_s(ptr, ptrMax - ptr,"****\n");
 		return output;
 }
+
+//===================================================================================================================
+//===================================================================================================================
+void Camera::assignImage2Buffer(DWORD frameFirst, DWORD frameLast, int bufIdx) {
+    DEB_MEMBER_FUNCT();
+
+    /********************************************************************************************************
+    Adds a buffer to the driver queue. This function returns immediately. If the desired image is
+    transferred to the buffer the buffer event will be fired. The user can start a thread, which can wait
+    for the event of the buffer (WaitFor(Single/Multiple)Objects). This function can be used to view
+    images while the recording is enabled (the user must set dw1stImage=dwLastImage=0).
+
+    SC2_SDK_FUNC int WINAPI PCO_AddBuffer(HANDLE ph, DWORD dw1stImage, DWORD dwLastImage,
+    SHORT sBufNr, WORD wXRes, WORD wYRes, WORD wBitPerPixel)
+    · HANDLE ph: Handle to a previously opened camera device.
+    · DWORD dw1stImage: Set dw1stImage=dwLastImage=0 during record for actual image
+    · DWORD dwLastImage: Set dw1stImage=dwLastImage=x after record for desired image
+    · SHORT sBufNr: SHORT to set the buffer number to fill with.
+    · WORD wXRes: x-Resolution.
+    · WORD wYRes: y-Resolution.
+    · WORD wBitPerPixel: BitResolution of one Pixel (e.g. 14bit).
+
+    The input data should be filled with the following parameter:
+    · dw1stImage = set to 0 for live view mode(?live view? transfers the most recent image to the
+    PC for viewing / monitoring)
+    - 0 = live view mode. x = set to the same value as dwLastImage. Has to be a valid image
+    number (see PCO_GetNumberOfImagesInSegment, 1?max available).
+    · dwLastImage = set to 0 in preview mode.
+    - 0 = live view mode. x = set to the same value as dw1stImage. Has to be a valid image
+    number (see PCO_GetNumberOfImagesInSegment, 1?max available).
+    · sBufNr: 0 ? 7:.number of desired buffer. A buffer can be reused after the event is fired.
+    · wXRes: Actual x-Resolution of the image which should be transferred.
+    · wYRes: Actual y-Resolution of the image which should be transferred.
+    · WBitPerPixel: BitResolution of the image which should be transferred.
+    ********************************************************************************************************/
+
+    int error;
+
+  //... PCO_AddBufferEx frames[%ld]-[%ld] bufIdx[%d] x[%d] y[%d] bits[%d]", frameFirst, frameLast, bufIdx, ds->ccd.size.xarm, ds->ccd.size.yarm, ds->ccd.size.bits
+        error = PcoCheckError(PCO_AddBufferEx(m_handle, frameFirst, frameLast, m_allocatedBufferNr[bufIdx], \
+						m_size.armwidth, m_size.armheight, m_size.pixbits));
+        PCO_TRACE("PCO_AddBufferEx") ;
+
+  
+
+	m_allocatedBufferAssignedFrameFirst[bufIdx] = frameFirst;
+	m_allocatedBufferAssignedFrameLast[bufIdx] = frameLast;
+	m_allocatedBufferReady[bufIdx] = 0;
+
+
+}
+
+
+/*---------------------------------------------------------------------------
+        Purpose:  Write file to disk in a separate thread
+		Arguments:	argin = ccd ds struct
+        Returns:    nothing
+*---------------------------------------------------------------------------*/
+void Camera::xferImag()
+{
+    DEB_MEMBER_FUNCT();
+
+	DWORD dwFramesPerBuffer, dwRequestedFrames, dwFrameIdx, dwFrameIdxLast;
+  DWORD dwFrameFirst2assign, dwFrameLast2assign;
+	DWORD dwEvent;
+	int requested_nb_frames;
+	long error;
+  long long nr =0;
+	long long bytesWritten = 0;
+	int bufIdx;
+	char *data;
+	unsigned int bufptr;
+	
+// --------------- writes in 1 file all the frames taken. 
+
+
+  m_sync->getNbFrames(requested_nb_frames);
+  dwRequestedFrames = (DWORD) requested_nb_frames;
+	dwFramesPerBuffer = m_frames_per_buffer;
+
+// --------------- prepare the first buffer 
+	dwFrameFirst2assign = 1;
+	dwFrameLast2assign = dwFrameFirst2assign + dwFramesPerBuffer - 1;
+	if(dwFrameLast2assign > dwRequestedFrames) dwFrameLast2assign = dwRequestedFrames;
+
+	bufIdx = 0;
+	 
+  error = PcoCheckError(PCO_AddBufferEx(m_handle, dwFrameFirst2assign, dwFrameLast2assign, m_allocatedBufferNr[bufIdx], \
+						m_size.armwidth, m_size.armheight, m_size.pixbits));
+  PCO_TRACE("PCO_AddBufferEx") ;
+
+  
+  
+  dwFrameFirst2assign = dwFrameLast2assign + 1;
+	dwFrameLast2assign = dwFrameFirst2assign + dwFramesPerBuffer - 1;
+	if(dwFrameLast2assign > dwRequestedFrames) dwFrameLast2assign = dwRequestedFrames;
+
+	bufIdx = 1;
+
+// --------------- if needed prepare the 2nd buffer 
+	if(dwFrameFirst2assign <= dwRequestedFrames) {
+    error = PcoCheckError(PCO_AddBufferEx(m_handle, dwFrameFirst2assign, dwFrameLast2assign, m_allocatedBufferNr[bufIdx], \
+						  m_size.armwidth, m_size.armheight, m_size.pixbits));
+    PCO_TRACE("PCO_AddBufferEx") ;
+
+	  dwFrameFirst2assign = dwFrameLast2assign + 1;
+	  dwFrameLast2assign = dwFrameFirst2assign + dwFramesPerBuffer - 1;
+	  if(dwFrameLast2assign > dwRequestedFrames) dwFrameLast2assign = dwRequestedFrames;
+	}
+
+// --------------- loop - process the N frames
+	dwFrameIdx = 1;
+	while(dwFrameIdx <= dwRequestedFrames) {
+
+		//dprintf3("... loop frame [%d] of [%d]", frameIdx, nrFrames);
+
+_RETRY:
+
+		//if(ds->ccd.filesave.saving == ACQ_SAVING_ABORTED){dprintf("<%s> Stop requested\n", fnId);	break;  // exit from while loop	}
+
+// --------------- look if one buffer has already the next frame & write it 
+		for(bufIdx = 0; bufIdx <2; bufIdx++) {
+			if((m_allocatedBufferAssignedFrameFirst[bufIdx] == dwFrameIdx) && m_allocatedBufferReady[bufIdx]) {
+				dwFrameIdxLast= m_allocatedBufferAssignedFrameLast[bufIdx];
+				goto _WRITE_FILE;
+			}
+		}
+
+// --------------- check if there is some buffer ready
+		dwEvent = WaitForMultipleObjects( 
+			2,           // number of objects in array
+			m_allocatedBufferEvent,     // array of objects
+			FALSE,       // wait for any object
+			500);       // ms wait
+
+    // The return value indicates which event is signaled
+
+    switch (dwEvent) { 
+        case WAIT_OBJECT_0 + 0: m_allocatedBufferReady[0] = 1; 	goto _RETRY;
+        case WAIT_OBJECT_0 + 1: m_allocatedBufferReady[1] = 1; goto _RETRY;
+
+        case WAIT_TIMEOUT: 
+			printf("Wait timed out.\n");
+			goto _RETRY;
+        
+        default: 
+          //dprintf("Wait error: %d\n", GetLastError()); 
+          goto _EXIT_ERROR ;
+    }
+
+
+// --------------- write the next file received in the multi-frames file
+
+_WRITE_FILE:
+		//dprintf3("... writting frames [%d]-[%d] to the file", frameIdx, frameIdxLast);
+
+	for( bufptr=0; dwFrameIdx <= dwFrameIdxLast; dwFrameIdx++, bufptr += m_imgsizeBytes){
+
+
+
+		data = ((char *) m_allocatedBufferPtr[bufIdx]) + bufptr;
+
+		//dprintf4("<%s>: Writing data size[%d] frame[%d] bufIdx[%d]\n", fnId, ds->ccd.filesave.datasize, frameIdx, bufIdx);
+		// if ((nr = _write(fp, data, ds->ccd.filesave.datasize)) != ds->ccd.filesave.datasize) {
+	
+	// --------------- if needed assign the next frame to this buffer  
+		if(dwFrameFirst2assign <= dwRequestedFrames) {
+
+      error = PcoCheckError(PCO_AddBufferEx(m_handle, dwFrameFirst2assign, dwFrameLast2assign, m_allocatedBufferNr[bufIdx], \
+						    m_size.armwidth, m_size.armheight, m_size.pixbits));
+      PCO_TRACE("PCO_AddBufferEx") ;
+
+
+		    dwFrameFirst2assign = dwFrameLast2assign + 1;
+		    dwFrameLast2assign = dwFrameFirst2assign + dwFramesPerBuffer - 1;
+		    if(dwFrameLast2assign > dwRequestedFrames) dwFrameLast2assign = dwRequestedFrames;
+
+		}
+
+	} // for frameIdx writting ONE buffer with N images
+
+	} // while(frameIdx ...
+
+
+	// if stop is requested the while loop is break to this point
+	
+	
+	
+	// --------------- close the multi-frames file  
+	// --------------- close the sinogram file  
+	// --------------- close the sinogram file [end]  
+
+	//_endthread();
+
+
+_EXIT_ERROR:
+//	dprintf("<%s> ERROR & EXIT[%s]", fnId, ds->ccd.filesave.filename);
+
+//	_endthread();
+;
+}
+
+
+
+
+
+
+
+
+
+
+

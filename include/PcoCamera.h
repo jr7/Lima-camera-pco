@@ -6,7 +6,7 @@
 #include "Constants.h"
 #include "HwMaxImageSizeCallback.h"
 
-struct stcXlatI2A {
+struct stcXlatCode2Str {
 		int code;
 		char *str;
 };
@@ -102,6 +102,9 @@ namespace lima
         //static void 	_newFrameCBK(tPvFrame*);
         //void		_newFrame(tPvFrame*);
 
+        void assignImage2Buffer(DWORD frameFirst, DWORD frameLast, int bufIdx) ;
+        void Camera::xferImag();
+
         char pcoErrorMsg[ERR_SIZE+1];
 
 
@@ -142,6 +145,12 @@ namespace lima
 	SHORT	m_allocatedBufferNr[8];				// bufnrM buffer number allocated by PCO_AllocateBuffer
 	WORD	*m_allocatedBufferPtr[8];			// buffer allocated by PCO_AllocateBuffer
 	HANDLE m_allocatedBufferEvent[8];
+
+  
+	DWORD m_allocatedBufferAssignedFrameFirst[8];
+	DWORD m_allocatedBufferAssignedFrameLast[8];
+	int m_allocatedBufferReady[8];
+
 
 
 	unsigned long	m_frames_per_buffer;
