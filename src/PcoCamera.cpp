@@ -55,26 +55,7 @@ using namespace lima::Pco;
 
 static char *timebaseUnits[] = {"ns", "us", "ms"};
 
-struct stcXlatI2A modelType[] = {
-	{CAMERATYPE_PCO1200HS, "PCO 1200 HS"},
-	{CAMERATYPE_PCO1300, "PCO 1300"},
-	{CAMERATYPE_PCO1600, "PCO 1600"},
-	{CAMERATYPE_PCO2000, "PCO 2000"},
-	{CAMERATYPE_PCO4000, "PCO 4000"},
-	{CAMERATYPE_PCO_DIMAX_STD, "PCO DIMAX STD"},
-	{CAMERATYPE_PCO_DIMAX_TV, "PCO DIMAX TV"},
-	{CAMERATYPE_PCO_DIMAX_AUTOMOTIVE, "PCO DIMAX AUTOMOTIVE"},
-	{0, NULL}
-};
 
-struct stcXlatI2A interfaceType[] = {
-	{INTERFACE_FIREWIRE, "FIREWIRE"},
-	{INTERFACE_CAMERALINK, "CAMERALINK"},
-	{INTERFACE_USB, "USB"},
-	{INTERFACE_ETHERNET, "ETHERNET"},
-	{INTERFACE_SERIAL, "SERIAL"},
-	{0, NULL}
-};
 
 char *xlatI2A(int code, struct stcXlatI2A *stc) {
 
@@ -88,6 +69,59 @@ char *xlatI2A(int code, struct stcXlatI2A *stc) {
 	return NULL;
 
 }
+
+#define BUFF_ST_SIZE 128
+
+char *getPcoModelTypeStr(int code, int &err) {
+	struct stcXlatI2A modelType[] = {
+		{CAMERATYPE_PCO1200HS, "PCO 1200 HS"},
+		{CAMERATYPE_PCO1300, "PCO 1300"},
+		{CAMERATYPE_PCO1600, "PCO 1600"},
+		{CAMERATYPE_PCO2000, "PCO 2000"},
+		{CAMERATYPE_PCO4000, "PCO 4000"},
+		{CAMERATYPE_PCO_DIMAX_STD, "PCO DIMAX STD"},
+		{CAMERATYPE_PCO_DIMAX_TV, "PCO DIMAX TV"},
+		{CAMERATYPE_PCO_DIMAX_AUTOMOTIVE, "PCO DIMAX AUTOMOTIVE"},
+		{0, NULL}
+	};
+
+	char *ptr;
+	static char buff[BUFF_ST_SIZE + 1];
+
+	if((ptr = xlatI2A(code, modelType)) != NULL) {
+		err = 0;
+		return ptr;
+	} else {
+		sprintf_s(buff, BUFF_ST_SIZE, "UNKNOWN MODEL [0x%04x]", code);
+		err = 1;
+		return buff;
+	}
+}
+
+char *getPcoInterfaceTypeStr(int code, int &err) {
+	struct stcXlatI2A interfaceType[] = {
+		{INTERFACE_FIREWIRE, "FIREWIRE"},
+		{INTERFACE_CAMERALINK, "CAMERALINK"},
+		{INTERFACE_USB, "USB"},
+		{INTERFACE_ETHERNET, "ETHERNET"},
+		{INTERFACE_SERIAL, "SERIAL"},
+		{0, NULL}
+	};
+
+	char *ptr;
+	static char buff[BUFF_ST_SIZE+1];
+
+	if((ptr = xlatI2A(code, interfaceType)) != NULL) {
+		err = 0;
+		return ptr;
+	} else {
+		sprintf_s(buff, BUFF_ST_SIZE, "UNKNOWN INTERFACE [0x%04x]", code);
+		err = 1;
+		return buff;
+	}
+}
+
+
 
 static char *getTimestamp(int fmtIdx) {
    static char timeline[128];
@@ -114,7 +148,6 @@ Camera::Camera(const char *ip_addr) :
   DEB_CONSTRUCTOR();
 	char msg[MSG_SIZE + 1];
   int error=0;
-  char *ptr;
   DWORD _dwValidImageCnt, _dwMaxImageCnt;
 
   // Init Frames
@@ -138,18 +171,18 @@ Camera::Camera(const char *ip_addr) :
 
 
 	for(int i=0; i < 8; i++) {
-		m_bufferNrM[i] = -1;
-		m_bufferM[i]	= NULL;
+		m_allocatedBufferNr[i] = -1;
+		m_allocatedBufferPtr[i]	= NULL;
 
 
 	 // Create two event objects
-        m_bufferM_events[i] = CreateEvent( 
+        m_allocatedBufferEvent[i] = CreateEvent( 
             NULL,   // default security attributes
             FALSE,  // auto-reset event object
             FALSE,  // initial state is nonsignaled
             NULL);  // unnamed object
 
-        if (m_bufferM_events[i] == NULL) 
+        if (m_allocatedBufferEvent[i] == NULL) 
         { 
             THROW_LIMA_HW_EXC(Error, "CreateEvent error")
         } 
@@ -178,40 +211,31 @@ Camera::Camera(const char *ip_addr) :
   
 
 	// --- Get camera type
-	m_stcCamType.wSize= sizeof(m_stcCamType);
-	error = PcoCheckError(PCO_GetCameraType(m_handle, &m_stcCamType));
-	PCO_TRACE("PCO_GetCameraType") ;
+	{
+		char *ptr;
+		m_stcCamType.wSize= sizeof(m_stcCamType);
+		error = PcoCheckError(PCO_GetCameraType(m_handle, &m_stcCamType));
+		PCO_TRACE("PCO_GetCameraType") ;
 
-	if((ptr = xlatI2A(m_stcCamType.wCamType, modelType)) != NULL) {
-		strcpy_s(m_model, MODEL_SIZE, ptr);	error= 0;
-	} else {
-		sprintf_s(m_model, MODEL_SIZE, "UNKNOWN [0x%04x]", m_stcCamType.wCamType); error= 1;
+		ptr = getPcoModelTypeStr(m_stcCamType.wCamType, error);
+		strcpy_s(m_model, MODEL_TYPE_SIZE, ptr);
+		DEB_TRACE() <<   "m_model " << m_model;
+		if(error) throw LIMA_HW_EXC(Error, "Unknow model");
+		
+		ptr = getPcoModelTypeStr((m_interface_type = m_stcCamType.wInterfaceType), error);
+		strcpy_s(m_iface, INTERFACE_TYPE_SIZE, ptr);
+		DEB_TRACE() <<   "m_iface " << m_iface;
+		if(error) throw LIMA_HW_EXC(Error, "Unknow interface");
+
+		sprintf_s(m_camera_name, CAMERA_SIZE, "%s %s", m_model, m_iface);
+
+		DEB_TRACE() <<   "m_camera_name " << m_camera_name ;	
 	}
-
-	DEB_TRACE() <<   "m_model " << m_model;
-
-	if(error) throw LIMA_HW_EXC(Error, "Unknow model");
-	
-	if((ptr = xlatI2A((m_interface_type = m_stcCamType.wInterfaceType), interfaceType)) != NULL) {
-		strcpy_s(m_iface, MODEL_SIZE, ptr);	error= 0;
-	} else {
-		sprintf_s(m_iface, MODEL_SIZE, "UNKNOWN [0x%04x]", m_stcCamType.wInterfaceType); error= 1;
-	}
-
-	DEB_TRACE() <<   "m_iface " << m_iface;
-
-	if(error) throw LIMA_HW_EXC(Error, "Unknow interface");
-
-	sprintf_s(m_camera_name, CAMERA_SIZE, "%s %s", m_model, m_iface);
-
-	DEB_TRACE() <<   "m_camera_name " << m_camera_name ;
-
 
 
 	// -- Reset to default settings
 	error = PcoCheckError(PCO_ResetSettingsToDefault(m_handle));
 	PCO_TRACE("PCO_ResetSettingsToDefault") ;
-
 
 
 	// -- Get camera description
@@ -237,7 +261,7 @@ Camera::Camera(const char *ip_addr) :
 	m_size.pixbits = (unsigned int) m_pcoInfo.wDynResDESC; // ds->ccd.size.bits
 	m_size.pixbytes = (m_size.pixbits <= 8)?1:2; // nr de bytes por pixel  12 bits -> 2 bytes
 
-	m_bufsize_max = m_size.maxwidth * m_size.maxheight * m_size.pixbytes;
+	m_allocatedBufferSizeMax = m_size.maxwidth * m_size.maxheight * m_size.pixbytes;
 
 	m_maxwidth_step= (unsigned int) m_pcoInfo.wRoiHorStepsDESC;   // ds->ccd.roi.xstep
 	m_maxheight_step= (unsigned int) m_pcoInfo.wRoiVertStepsDESC; // ds->ccd.roi.ystep,
@@ -585,6 +609,7 @@ void Camera::startAcq()
     error = PvCaptureQueueFrame(m_handle,&m_frame[1],_newFrameCBK);
 #endif
 
+#define DWORD_MAX 0xffffffff 
 //=====================================================================
 //static long StartAcq(Ccd ds, DevVoid *argin, DevVoid *argout, long *error){
     char *fnId = "StartAcq";
@@ -592,8 +617,6 @@ void Camera::startAcq()
     WORD state;
     HANDLE hEvent= NULL;
     int bufIdx;
-    DWORD exposure, delay;
-    WORD exposure_base, delay_base;
     float factor;
     int error;
 
@@ -615,17 +638,13 @@ void Camera::startAcq()
 	DEB_TRACE() << DEB_VAR2(wBinHorz, wBinVert);
 
     //------------------------------------------------- set roi if needed
-    WORD wRoiX0; // Roi upper left x
-    WORD wRoiY0; // Roi upper left y
-    WORD wRoiX1; // Roi lower right x
-    WORD wRoiY1;// Roi lower right y
+    WORD wRoiX0, wRoiY0; // Roi upper left x y
+    WORD wRoiX1, wRoiY1; // Roi lower right x y
 
     if(m_roi.changed == Valid) m_roi.changed = Changed;    //+++++++++ TEST / FORCE WRITE ROI
     if (m_roi.changed == Changed) {
-        wRoiX0 = (WORD)m_roi.x[0];
-        wRoiX1 = (WORD)m_roi.x[1];
-        wRoiY0 = (WORD)m_roi.y[0];
-        wRoiY1 = (WORD)m_roi.y[1];
+        wRoiX0 = (WORD)m_roi.x[0]; wRoiX1 = (WORD)m_roi.x[1];
+        wRoiY0 = (WORD)m_roi.y[0]; wRoiY1 = (WORD)m_roi.y[1];
 
 		DEB_TRACE() << DEB_VAR4(wRoiX0, wRoiY0, wRoiX1, wRoiY1);
 
@@ -646,14 +665,14 @@ void Camera::startAcq()
     PCO_TRACE("PCO_SetTriggerMode") ;
 	DEB_TRACE() << DEB_VAR1(trigmode);
 
-    // -- acquire mode : ignore or not ext. signal
+    //------------------------------------- acquire mode : ignore or not ext. signal
 
 	WORD acqmode = m_sync->getPcoAcqMode();
 	error = PcoCheckError(PCO_SetAcquireMode(m_handle, acqmode));
     PCO_TRACE("PCO_SetAcquireMode") ;
 	DEB_TRACE() << DEB_VAR1(acqmode);
 
-    // -- storage mode (recorder + sequence)
+    // ----------------------------------------- storage mode (recorder + sequence)
     m_storage_mode = 0;
     m_recorder_submode = 0;
 
@@ -663,34 +682,40 @@ void Camera::startAcq()
     error = PcoCheckError(PCO_SetRecorderSubmode(m_handle, m_recorder_submode));
     PCO_TRACE("PCO_SetRecorderSubmode") ;
 
+	//----------------------------------- set exposure time & delay time
     {
-        double _exposure, _delay;
+	    DWORD dwExposure, dwDelay;
+		WORD wExposure_base, wDelay_base;
+        double _exposure, _delay, val;
+		double maxDw = pow(2., 32) - 1.;
         m_sync->getExpTime(_exposure);
         m_sync->getLatTime(_delay);
 
-        //----------------------------------- set exposure time & delay time
-        for (exposure_base = 0; exposure_base < 3; exposure_base++) {
-            factor = pow((float)10, (int) (exposure_base * 3 - 9));			// factor 10E-9, 10E-6, 10E-3
-            if ((_exposure / factor) <= (pow(2., 32) - 1)) {		// multiply by 10E9, 10E6, 10E3
-                exposure = (DWORD) (_exposure / factor);			// exposure max precision in 32 bits, exposure base 0(ns)  1(us)  2(ms)
+		// exp/lat time is saved in s. PCO requires it expressed in ms(=2), us(=1), ns(=0)
+		// test time expressed in ns(=0), us(=1), ms(=2) up not overflow max precision in 32 bits
+        for (wExposure_base = 0; wExposure_base < 3; wExposure_base++) {  // base 0(ns), 1(us), 2(ms)
+            factor = pow((float)10, (int) (wExposure_base * 3 - 9));		// factor 10E-9, 10E-6, 10E-3
+            if ( (val = (_exposure / factor)) <= maxDw) {		// multiply by 10E9, 10E6, 10E3
+                dwExposure = (DWORD) val;			// exposure max precision in 32 bits, exposure base 0(ns)  1(us)  2(ms)
                 break;
             }
         }
-        //====================================== TODO set/get the valuo of ccd.delay now is 0 
-        for (delay_base = 0; delay_base < 3; delay_base++) {
-            factor = pow((float) 10, (int) (delay_base * 3 - 9));
-            if ((_delay / factor) <= (pow(2., 32) - 1)) {
-                delay = (DWORD) (_delay / factor);
+        //====================================== TODO set/get the value of ccd.delay now is 0 
+        for (wDelay_base = 0; wDelay_base < 3; wDelay_base++) {
+            factor = pow((float) 10, (int) (wDelay_base * 3 - 9));
+            if ( (val = (_delay / factor)) <= maxDw) {
+                dwDelay = (DWORD) val;
                 break;
             }
         }
-    } // block
+		DEB_TRACE() << DEB_VAR2(dwDelay, timebaseUnits[wDelay_base]);
+		DEB_TRACE() << DEB_VAR2(dwExposure, timebaseUnits[wExposure_base]);
 
-    DEB_TRACE() << DEB_VAR2(delay, timebaseUnits[delay_base]);
-	DEB_TRACE() << DEB_VAR2(exposure, timebaseUnits[exposure_base]);
+		error = PcoCheckError(PCO_SetDelayExposureTime(m_handle, dwDelay, dwExposure, wDelay_base, wExposure_base));
+		PCO_TRACE("PCO_SetDelayExposureTime") ;
 
-	error = PcoCheckError(PCO_SetDelayExposureTime(m_handle, delay, exposure, delay_base, exposure_base));
-    PCO_TRACE("PCO_SetDelayExposureTime") ;
+	} // block
+
 
     //------------------------------------------------- check recording state
 
@@ -703,7 +728,8 @@ void Camera::startAcq()
         error = PcoCheckError(PCO_SetRecordingState(m_handle, 0x0000));
         PCO_TRACE("PCO_SetRecordingState") ;
     }
-//-----------------------------------------------------------------------------------------------
+
+	//-----------------------------------------------------------------------------------------------
 //	5. Arm the camera.
 //	6. Get the sizes and allocate a buffer:
 //		PCO_GETSIZES(hCam, &actualsizex, &actualsizey, &ccdsizex, &ccdsizey)
@@ -738,13 +764,13 @@ void Camera::startAcq()
 
     {
         DWORD exposure, delay;
-        WORD exposure_base, delay_base;
+        WORD wExposure_base, wDelay_base;
 
-        error = PcoCheckError(PCO_GetDelayExposureTime(m_handle, &delay, &exposure, &delay_base, &exposure_base));
+        error = PcoCheckError(PCO_GetDelayExposureTime(m_handle, &delay, &exposure, &wDelay_base, &wExposure_base));
         PCO_TRACE("PCO_GetDelayExposureTime") ;
 
-	    DEB_TRACE() << DEB_VAR2(delay, timebaseUnits[delay_base]);
-		DEB_TRACE() << DEB_VAR2(exposure, timebaseUnits[exposure_base]);
+	    DEB_TRACE() << DEB_VAR2(delay, timebaseUnits[wDelay_base]);
+		DEB_TRACE() << DEB_VAR2(exposure, timebaseUnits[wExposure_base]);
     }
 
 
@@ -760,10 +786,10 @@ void Camera::startAcq()
     //m_size.armheight= yactualsize;
     size= m_size.armwidth * m_size.armheight * m_size.pixbytes;
 
-    m_bufsize= m_bufsize_max;
+    m_allocatedBufferSize= m_allocatedBufferSizeMax;
 
 	//------------------------------------------------- allocate buffer if not yet done, or size changed
-	if ((m_bufferNrM[0]==-1) || (size != m_imgsizeBytes)) {
+	if ((m_allocatedBufferNr[0]==-1) || (size != m_imgsizeBytes)) {
         m_imgsizeBytes= size;
         m_imgsizePixels= m_size.armwidth * m_size.armheight;
         m_imgsizePages= m_imgsizePixels / m_wPageSize;
@@ -772,11 +798,11 @@ void Camera::startAcq()
         m_imgsizeBuffer = m_imgsizePages * m_wPageSize * m_size.pixbytes;
 
         //ds->ccd.bufsize= size;
-        m_bufsize= m_bufsize_max;
+        m_allocatedBufferSize= m_allocatedBufferSizeMax;
 
 
 
-        m_frames_per_buffer = (int) m_bufsize_max / m_imgsizeBuffer;
+        m_frames_per_buffer = (int) m_allocatedBufferSizeMax / m_imgsizeBuffer;
         //if(ds->ccd.frames_per_buffer > 2) ds->ccd.frames_per_buffer /= 2;
         m_frames_per_buffer = 1;
 
@@ -784,23 +810,53 @@ void Camera::startAcq()
 
         //+++++++		//ds->ccd.bufsize=2016 * 2016 * ds->ccd.size.depth;
 
-        //dprintf2("<%s> PCO_FreeBuffers ...", fnId);
+        //-------------- free all the buffers allocated
         for(bufIdx=0; bufIdx < 8; bufIdx++) {
-            if(m_bufferNrM[bufIdx] != -1) {
-                //dprintf2("<%s> PCO_FreeBuffers ... bufnrM[%d] = %d", fnId, bufIdx,  m_bufferNrM[bufIdx]);
-
-                error = PcoCheckError(PCO_FreeBuffer(m_handle, m_bufferNrM[bufIdx]));
+            if(m_allocatedBufferNr[bufIdx] != -1) {
+				
+				// Frees a previously allocated buffer.
+                error = PcoCheckError(PCO_FreeBuffer(m_handle, m_allocatedBufferNr[bufIdx]));
                 PCO_TRACE("PCO_FreeBuffer") ;
-                m_bufferNrM[bufIdx] = -1;
-                m_bufferM[bufIdx] = NULL;
+
+				m_allocatedBufferNr[bufIdx] = -1;
+                m_allocatedBufferPtr[bufIdx] = NULL;
             }
         }
 
         //-------------- allocate 2 buffers (0,1) and received the handle, mem ptr, events
-        for(bufIdx = 0; bufIdx <2 ; bufIdx ++) {
-            //dprintf3("... PCO_AllocateBuffer[idx = %d]", bufIdx);
+		/************************************************************************************************
+		Allocates a buffer to receive the transferred images. There is a maximum of 8 buffers. This
+		function is needed to create, or to attach buffers for the image transfer. The buffers are attached to
+		the previously opened camera. Using two buffers in an alternating manner is sufficient for most
+		applications. If you use more than one camera, you will get the same buffer numbers 0 and 1 for
+		each camera while allocating e.g. two buffers.
 
-            error = PcoCheckError(PCO_AllocateBuffer(m_handle, &(m_bufferNrM[bufIdx]), (DWORD)m_bufsize, &(m_bufferM[bufIdx]), &(m_bufferM_events[bufIdx])));
+		SC2_SDK_FUNC int WINAPI PCO_AllocateBuffer(HANDLE ph, SHORT* sBufNr, DWORD dwSize,
+		WORD** wBuf, HANDLE* hEvent)
+		· HANDLE ph: Handle to a previously opened camera device.
+		· SHORT* sBufNr: Address of a SHORT pointer to get the current number of the buffer.
+		· DWORD dwSize: DWORD to set the buffer size.
+		· WORD** wBuf: Address of a WORD* to get the buffer pointer.
+		· HANDLE* hEvent: Address of a HANDLE to get the event which will be fired in case of 
+		a previously arrived image.
+
+		The input data should be filled with the following parameters:
+		· *sBufNr = -1 to allocate a new buffer, 0 … 7, to change a previously allocated buffer.
+		· dwSize = size of the buffer in byte (normally: Xres * Yres * 2).
+		· **wBuf = must be the address of a WORD*.
+		·*hEvent = 0 to create a ne
+
+		m_bufferNrM -> m_allocatedBufferNr
+		m_bufferM -> m_allocatedBufferPtr
+		m_bufferM_events -> m_allocatedBufferEvent
+		m_bufsize -> m_allocatedBufferSize
+		m_bufsize_max -> m_allocatedBufferSizeMax
+		***************************************************************************************************/
+
+        for(bufIdx = 0; bufIdx <2 ; bufIdx ++) {
+ 
+			error = PcoCheckError(PCO_AllocateBuffer(m_handle, &(m_allocatedBufferNr[bufIdx]), (DWORD)m_allocatedBufferSize, 
+										&(m_allocatedBufferPtr[bufIdx]), &(m_allocatedBufferEvent[bufIdx])));
             PCO_TRACE("PCO_AllocateBuffer") ;
 
             //dprintf2("<%s> Buffer #%d allocated (%d) (size=%d)", fnId, m_bufferNrM[bufIdx], bufIdx, ds->ccd.bufsize);
@@ -875,18 +931,24 @@ void Camera::startAcq()
         }
     } // block
 
-    //------------------------------------------------- start acquisition
-    //dprintf3("... PCO_SetRecordingState");
 
-	return;
-
-    error = PcoCheckError(PCO_SetRecordingState(m_handle, 0x0001));
-    PCO_TRACE("PCO_SetRecordingState") ;
+	//------------------------------------------------- start acquisition
+	/************************************************************************************************
+	SC2_SDK_FUNC int WINAPI PCO_SetRecordingState(HANDLE ph, WORD wRecState)
+		· WORD wRecState: WORD to set the active recording state.
+			- 0x0001 = camera is running, in recording status = [run]
+			- 0x0000 = camera is idle or [stop]’ped, not ready to take images
+	**************************************************************************************************/
+	{
+		WORD wRecState = 0x0000;   // 0x0001 => START acquisition  (0 for tests)     
+		error = PcoCheckError(PCO_SetRecordingState(m_handle, wRecState));
+		PCO_TRACE("PCO_SetRecordingState") ;
+	}
 
     m_frame.done= 0;
-    //dprintf("<%s> acquisition started.", fnId);
-    //return (DS_OK);
-	
+    
+	return;
+
 }
 
 

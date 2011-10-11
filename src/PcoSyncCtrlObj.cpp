@@ -22,11 +22,13 @@ SyncCtrlObj::SyncCtrlObj(Camera *cam,BufferCtrlObj *buffer) :
   m_nb_frames(1),
   m_started(false)
 {
+	// DONE
   DEB_CONSTRUCTOR();
 }
 
 SyncCtrlObj::~SyncCtrlObj()
 {
+	// DONE
   DEB_DESTRUCTOR();
 }
 
@@ -35,6 +37,7 @@ bool SyncCtrlObj::checkTrigMode(TrigMode trig_mode)
   DEB_MEMBER_FUNCT();
   DEB_PARAM() << DEB_VAR1(trig_mode);
 
+	// DONE
   switch(trig_mode){
     case IntTrig:
     case IntTrigMult:
@@ -51,6 +54,7 @@ void SyncCtrlObj::setTrigMode(TrigMode trig_mode)
   DEB_MEMBER_FUNCT();
   DEB_PARAM() << DEB_VAR1(trig_mode);
 
+	// DONE
   if(checkTrigMode(trig_mode)){
     switch(trig_mode)	{
       case IntTrig: // 0 SOFT (spec)
@@ -68,6 +72,7 @@ void SyncCtrlObj::setTrigMode(TrigMode trig_mode)
 
 void SyncCtrlObj::getTrigMode(TrigMode &trig_mode)
 {
+	// DONE
   trig_mode = m_trig_mode;
 }
 
@@ -76,6 +81,7 @@ void SyncCtrlObj::getTrigMode(TrigMode &trig_mode)
 
 WORD SyncCtrlObj::getPcoAcqMode()
 {
+	// DONE
   DEB_MEMBER_FUNCT();
 
     switch( m_trig_mode)	{
@@ -93,8 +99,15 @@ WORD SyncCtrlObj::getPcoAcqMode()
 
 }
 
+/*************
+enum TrigMode { IntTrig 0, IntTrigMult 1, ExtTrigSingle 2, ExtTrigMult 3,
+				ExtGate 4, ExtStartStop 5, Live 6, };
+*******************/
 
 WORD SyncCtrlObj::getPcoTrigMode(){
+	// DONE
+
+	// xlat from lima trig mode to PCO trig mode
   	//------------------------------------------------- triggering mode 
 	switch (m_trig_mode) {  // trig mode in spec
 			//  PCO = 0x0000
@@ -102,12 +115,12 @@ WORD SyncCtrlObj::getPcoTrigMode(){
 			// the readout of an image. If a CCD is used and the images are taken in a
 			// sequence, then exposures and sensor readout are started simultaneously.
 			// Signals at the trigger input (<exp trig>) are irrelevant.
-		case 0: return 0x0000;  // 0 = SOFT (spec)
+		case IntTrig: return 0x0000;  // 0 = SOFT (spec)
 
 			// PCO = 0x0002
 			// A delay / exposure sequence is started at the RISING or FALLING edge
 			// (depending on the DIP switch setting) of the trigger input (<exp trig>).
-		case 1: return 0x0002;   // 1 = START (spec)
+		case IntTrigMult: return 0x0002;   // 1 = START (spec)
 			
 			// PCO = 0x0003
 			// The exposure time is defined by the pulse length at the trigger
@@ -115,28 +128,18 @@ WORD SyncCtrlObj::getPcoTrigMode(){
 			// set/request delay and exposure command are ineffective. (Exposure
 			// time length control is also possible for double image mode; exposure
 			// time of the second image is given by the readout time of the first image.)
-		case 2: return 0x0003;  // 2 = GATE (spec)
+		case ExtTrigSingle: return 0x0003;  // 2 = GATE (spec)
 		
     default: return 0x0000;			  // SOFT
 	}
-
-
 }
-
-#ifdef COMPILEIT
-enum TrigMode {
-	IntTrig 0,IntTrigMult 1,
-	ExtTrigSingle 2, ExtTrigMult 3,
-	ExtGate 4, ExtStartStop 5,
-	Live 6,
-};
-#endif
-
 
 
 void SyncCtrlObj::setExpTime(double exp_time)
 {
-  ValidRangesType valid_ranges;
+	// DONE
+
+	ValidRangesType valid_ranges;
   getValidRanges(valid_ranges);
 
   if ((exp_time <valid_ranges.min_exp_time)||(exp_time >valid_ranges.max_exp_time)){ 
@@ -222,6 +225,7 @@ void SyncCtrlObj::getNbHwFrames(int& nb_frames)
 
 void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 {
+	// DONE
   valid_ranges.min_exp_time = m_cam->m_pcoInfo.dwMinExposureDESC * 1e-9 ; // Don't know
   valid_ranges.max_exp_time = m_cam->m_pcoInfo.dwMaxExposureDESC * 1e-3 ; // Don't know
   valid_ranges.min_lat_time = 0.; // Don't know

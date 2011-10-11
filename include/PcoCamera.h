@@ -107,7 +107,7 @@ namespace lima
 
         bool 		m_cam_connected;
         HANDLE	m_handle;				/* handle of opened camera */
-        char		m_camera_name[CAMERA_SIZE];
+        char		m_camera_name[CAMERA_NAME_SIZE];
         char		m_sensor_type[64];
         //tPvUint32		m_ufirmware_maj, m_ufirmware_min;
         //tPvUint32		m_uid;
@@ -136,12 +136,12 @@ namespace lima
 
           struct stcSize m_size;
 
-	unsigned long	m_bufsize;
-	unsigned long	m_bufsize_max;         // unsigned int    m_max_buffsize;
+	unsigned long	m_allocatedBufferSize;
+	unsigned long	m_allocatedBufferSizeMax;         // unsigned int    m_max_buffsize;
 
-	SHORT	m_bufferNrM[8];				// bufnrM buffer number allocated by PCO_AllocateBuffer
-	WORD	*m_bufferM[8];			// buffer allocated by PCO_AllocateBuffer
-	HANDLE m_bufferM_events[8];
+	SHORT	m_allocatedBufferNr[8];				// bufnrM buffer number allocated by PCO_AllocateBuffer
+	WORD	*m_allocatedBufferPtr[8];			// buffer allocated by PCO_AllocateBuffer
+	HANDLE m_allocatedBufferEvent[8];
 
 
 	unsigned long	m_frames_per_buffer;
@@ -160,7 +160,7 @@ namespace lima
 
         PCO_Description	m_pcoInfo;	/* camera description structure */
         PCO_CameraType	m_stcCamType;
-        char m_model[MODEL_SIZE+1], m_iface[MODEL_SIZE+1];
+        char m_model[MODEL_TYPE_SIZE+1], m_iface[INTERFACE_TYPE_SIZE+1];
         int	m_interface_type;
 
 	PCO_SC2_CL_TRANSFER_PARAM m_clTransferParam;

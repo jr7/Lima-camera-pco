@@ -24,8 +24,9 @@
 #include <math.h>
 
 #define ERR_SIZE	256
-#define MODEL_SIZE	32
-#define CAMERA_SIZE	128
+#define MODEL_TYPE_SIZE	32
+#define INTERFACE_TYPE_SIZE	32
+#define CAMERA_NAME_SIZE	128
 #define MSG_SIZE	512
 
 
