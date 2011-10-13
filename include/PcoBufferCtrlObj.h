@@ -64,9 +64,25 @@ namespace lima
       void getStatus(int &err,bool& exposing) {err = m_status,exposing = m_exposing;}
     private:
       static void _newFrame(tPvFrame*);
-      
+
+        //-------------------------------------------------------------  moved from taco
+        void assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, DWORD dwRequestedFrames, int bufIdx);
+        void xferImag();
+
+        SHORT	m_allocatedBufferNr[8];				// bufnrM buffer number allocated by PCO_AllocateBuffer
+        WORD	*m_allocatedBufferPtr[8];			// buffer allocated by PCO_AllocateBuffer
+        HANDLE m_allocatedBufferEvent[8];
+
+        DWORD m_allocatedBufferAssignedFrameFirst[8];
+        DWORD m_allocatedBufferAssignedFrameLast[8];
+        int m_allocatedBufferReady[8];
+
+       	unsigned long	m_frames_per_buffer;
+        //-------------------------------------------------------------
+
       HANDLE&      	m_handle;
       int        	m_frame[2];
+      Camera* m_cam;
       SyncCtrlObj* 	m_sync;
       int		m_status;
       bool		m_exposing;

@@ -36,20 +36,6 @@
 using namespace lima;
 using namespace lima::Pco;
 
-#define THROW_LIMA_HW_EXC(e, x)  { \
-	printf("========*** LIMA_HW_EXC %s\n", x ); \
-			throw LIMA_HW_EXC(e, x); \
-} 
-
-
-#define PCO_TRACE(x)  \
-{ \
-		if(error){ \
-			DEB_TRACE() << "*** " <<  x << " PCO ERROR " << pcoErrorMsg; \
-			throw LIMA_HW_EXC(Error, x); \
-		} \
-		DEB_TRACE() << "*** " <<  x << " OK" ; \
-}
 
 
 
@@ -813,7 +799,7 @@ void Camera::startAcq()
 
         // m_frames_per_buffer = (int) m_allocatedBufferSizeMax / m_imgsizeBuffer;
         //if(ds->ccd.frames_per_buffer > 2) ds->ccd.frames_per_buffer /= 2;
-        m_frames_per_buffer = 1;  // PCO DSK allows only one frame/buffer
+        //m_frames_per_buffer = 1;  // PCO DSK allows only one frame/buffer
 
         //dprintf2("<%s> allocating buffer ... imgsizeBytes[%ld] imgsizeBuffer[%ld] bufMax[%ld] framesPerBuf[%ld]", fnId, ds->ccd.imgsizeBytes, ds->ccd.imgsizeBuffer, ds->ccd.bufsize_max, ds->ccd.frames_per_buffer);
 
@@ -1053,6 +1039,21 @@ int Camera::PcoCheckError(int err) {
 	return (0);
 }
 
+
+static char* _PcoCheckError(int err) {
+	static char lastErrorMsg[ERR_SIZE];
+	if (err != 0) {
+		PCO_GetErrorText(err, lastErrorMsg, ERR_SIZE-14);
+		//sprintf(lastErrorMsg, "<PCO ERROR> %s", pcoErrorMsg);
+		//dprintf(lastErrorMsg);
+
+
+		return lastErrorMsg;
+	}
+	return NULL;
+}
+
+
 unsigned long Camera::_getFramesMax(int segmentPco){
 		char *fnId = "_getFramesMax";
 
@@ -1135,8 +1136,57 @@ char *Camera::getInfo(char *output, int lg){
 
 //===================================================================================================================
 //===================================================================================================================
-void Camera::assignImage2Buffer(DWORD frameFirst, DWORD frameLast, int bufIdx) {
+void Camera::assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, DWORD dwRequestedFrames, int bufIdx) {
     DEB_MEMBER_FUNCT();
+
+
+    int error;
+
+
+		StdBufferCbMgr& buffer_mgr = m_buffer_cb_mgr;
+		int buffer_nb, concat_frame_nb;		
+
+    buffer_mgr.setStartTimestamp(Timestamp::now());
+
+    buffer_mgr.acqFrameNb2BufferNb(dwFrameFirst, buffer_nb, concat_frame_nb);
+		void *ptr = buffer_mgr.getBufferPtr(buffer_nb,   concat_frame_nb);
+
+
+    m_allocatedBufferNr[bufIdx] = bufIdx;
+    m_allocatedBufferPtr[bufIdx] = (WORD *) ptr;
+    
+    /************************************************************************************************
+		Allocates a buffer to receive the transferred images. There is a maximum of 8 buffers. This
+		function is needed to create, or to attach buffers for the image transfer. The buffers are attached to
+		the previously opened camera. Using two buffers in an alternating manner is sufficient for most
+		applications. If you use more than one camera, you will get the same buffer numbers 0 and 1 for
+		each camera while allocating e.g. two buffers.
+
+		SC2_SDK_FUNC int WINAPI PCO_AllocateBuffer(HANDLE ph, SHORT* sBufNr, DWORD dwSize,
+		WORD** wBuf, HANDLE* hEvent)
+		· HANDLE ph: Handle to a previously opened camera device.
+		· SHORT* sBufNr: Address of a SHORT pointer to get the current number of the buffer.
+		· DWORD dwSize: DWORD to set the buffer size.
+		· WORD** wBuf: Address of a WORD* to get the buffer pointer.
+		· HANDLE* hEvent: Address of a HANDLE to get the event which will be fired in case of 
+		a previously arrived image.
+
+		The input data should be filled with the following parameters:
+		· *sBufNr = -1 to allocate a new buffer, 0 … 7, to change a previously allocated buffer.
+		· dwSize = size of the buffer in byte (normally: Xres * Yres * 2).
+		· **wBuf = must be the address of a WORD*.
+		·*hEvent = 0 to create a ne
+
+		m_bufferNrM -> m_allocatedBufferNr
+		m_bufferM -> m_allocatedBufferPtr
+		m_bufferM_events -> m_allocatedBufferEvent
+		m_bufsize -> m_allocatedBufferSize
+		m_bufsize_max -> m_allocatedBufferSizeMax
+		***************************************************************************************************/
+
+			error = PcoCheckError(PCO_AllocateBuffer(m_handle, &(m_allocatedBufferNr[bufIdx]), (DWORD)m_allocatedBufferSize, 
+										&(m_allocatedBufferPtr[bufIdx]), &(m_allocatedBufferEvent[bufIdx])));
+            PCO_TRACE("PCO_AllocateBuffer") ;
 
     /********************************************************************************************************
     Adds a buffer to the driver queue. This function returns immediately. If the desired image is
@@ -1168,19 +1218,19 @@ void Camera::assignImage2Buffer(DWORD frameFirst, DWORD frameLast, int bufIdx) {
     · WBitPerPixel: BitResolution of the image which should be transferred.
     ********************************************************************************************************/
 
-    int error;
-
-  //... PCO_AddBufferEx frames[%ld]-[%ld] bufIdx[%d] x[%d] y[%d] bits[%d]", frameFirst, frameLast, bufIdx, ds->ccd.size.xarm, ds->ccd.size.yarm, ds->ccd.size.bits
-        error = PcoCheckError(PCO_AddBufferEx(m_handle, frameFirst, frameLast, m_allocatedBufferNr[bufIdx], \
+  //... PCO_AddBufferEx frames[%ld]-[%ld] bufIdx[%d] x[%d] y[%d] bits[%d]", dwFrameFirst, frameLast, bufIdx, ds->ccd.size.xarm, ds->ccd.size.yarm, ds->ccd.size.bits
+        error = PcoCheckError(PCO_AddBufferEx(m_handle, dwFrameFirst, dwFrameLast, m_allocatedBufferNr[bufIdx], \
 						m_size.armwidth, m_size.armheight, m_size.pixbits));
         PCO_TRACE("PCO_AddBufferEx") ;
 
-  
-
-	m_allocatedBufferAssignedFrameFirst[bufIdx] = frameFirst;
-	m_allocatedBufferAssignedFrameLast[bufIdx] = frameLast;
+	m_allocatedBufferAssignedFrameFirst[bufIdx] = dwFrameFirst;
+	m_allocatedBufferAssignedFrameLast[bufIdx] = dwFrameLast;
 	m_allocatedBufferReady[bufIdx] = 0;
 
+     //----- prepartion of dwFrameFirst2assign & dwFrameLast2assign for the NEXT call to addBuffer
+  dwFrameFirst = dwFrameLast + 1;
+	dwFrameLast = dwFrameFirst + ((DWORD) m_frames_per_buffer) - 1;
+	if(dwFrameLast > dwRequestedFrames) dwFrameLast = dwRequestedFrames;
 
 }
 
@@ -1194,10 +1244,9 @@ void Camera::xferImag()
 {
     DEB_MEMBER_FUNCT();
 
-	DWORD dwFramesPerBuffer, dwRequestedFrames, dwFrameIdx, dwFrameIdxLast;
+	DWORD dwFrameIdx, dwFrameIdxLast;
   DWORD dwFrameFirst2assign, dwFrameLast2assign;
 	DWORD dwEvent;
-	int requested_nb_frames;
 	long error;
   long long nr =0;
 	long long bytesWritten = 0;
@@ -1205,41 +1254,45 @@ void Camera::xferImag()
 	char *data;
 	unsigned int bufptr;
 	
-// --------------- writes in 1 file all the frames taken. 
-
+// --------------- get the requested nr of images 
+	int requested_nb_frames;
+	DWORD dwFramesPerBuffer, dwRequestedFrames;
 
   m_sync->getNbFrames(requested_nb_frames);
   dwRequestedFrames = (DWORD) requested_nb_frames;
 	dwFramesPerBuffer = m_frames_per_buffer;
 
 // --------------- prepare the first buffer 
+  // ------- in PCO DIMAX only 1 image can be retreived
+  //         (dwFramesPerBuffer = 1) ====> (dwFrameLast2assign = dwFrameFirst2assign)
 	dwFrameFirst2assign = 1;
 	dwFrameLast2assign = dwFrameFirst2assign + dwFramesPerBuffer - 1;
 	if(dwFrameLast2assign > dwRequestedFrames) dwFrameLast2assign = dwRequestedFrames;
 
 	bufIdx = 0;
 	 
+  assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx);
+
+/******************
   error = PcoCheckError(PCO_AddBufferEx(m_handle, dwFrameFirst2assign, dwFrameLast2assign, m_allocatedBufferNr[bufIdx], \
 						m_size.armwidth, m_size.armheight, m_size.pixbits));
   PCO_TRACE("PCO_AddBufferEx") ;
 
-  
-  
+ 	m_allocatedBufferAssignedFrameFirst[bufIdx] = dwFrameFirst2assign;
+	m_allocatedBufferAssignedFrameLast[bufIdx] =dwFrameLast2assign;
+	m_allocatedBufferReady[bufIdx] = 0;
+ 
+      //----- prepartion of dwFrameFirst2assign & dwFrameLast2assign for the NEXT call to addBuffer
   dwFrameFirst2assign = dwFrameLast2assign + 1;
 	dwFrameLast2assign = dwFrameFirst2assign + dwFramesPerBuffer - 1;
 	if(dwFrameLast2assign > dwRequestedFrames) dwFrameLast2assign = dwRequestedFrames;
+************/
 
 	bufIdx = 1;
 
 // --------------- if needed prepare the 2nd buffer 
 	if(dwFrameFirst2assign <= dwRequestedFrames) {
-    error = PcoCheckError(PCO_AddBufferEx(m_handle, dwFrameFirst2assign, dwFrameLast2assign, m_allocatedBufferNr[bufIdx], \
-						  m_size.armwidth, m_size.armheight, m_size.pixbits));
-    PCO_TRACE("PCO_AddBufferEx") ;
-
-	  dwFrameFirst2assign = dwFrameLast2assign + 1;
-	  dwFrameLast2assign = dwFrameFirst2assign + dwFramesPerBuffer - 1;
-	  if(dwFrameLast2assign > dwRequestedFrames) dwFrameLast2assign = dwRequestedFrames;
+    assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx);
 	}
 
 // --------------- loop - process the N frames
@@ -1299,16 +1352,7 @@ _WRITE_FILE:
 	
 	// --------------- if needed assign the next frame to this buffer  
 		if(dwFrameFirst2assign <= dwRequestedFrames) {
-
-      error = PcoCheckError(PCO_AddBufferEx(m_handle, dwFrameFirst2assign, dwFrameLast2assign, m_allocatedBufferNr[bufIdx], \
-						    m_size.armwidth, m_size.armheight, m_size.pixbits));
-      PCO_TRACE("PCO_AddBufferEx") ;
-
-
-		    dwFrameFirst2assign = dwFrameLast2assign + 1;
-		    dwFrameLast2assign = dwFrameFirst2assign + dwFramesPerBuffer - 1;
-		    if(dwFrameLast2assign > dwRequestedFrames) dwFrameLast2assign = dwRequestedFrames;
-
+      assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx);
 		}
 
 	} // for frameIdx writting ONE buffer with N images

@@ -34,4 +34,30 @@
 typedef DWORD tPvUint32;
 typedef int tPvErr;
 
+#define THROW_LIMA_HW_EXC(e, x)  { \
+	printf("========*** LIMA_HW_EXC %s\n", x ); \
+			throw LIMA_HW_EXC(e, x); \
+} 
+
+
+#define PCO_TRACE(x)  \
+{ \
+		if(error){ \
+			DEB_TRACE() << "*** " <<  x << " PCO ERROR " << pcoErrorMsg; \
+			throw LIMA_HW_EXC(Error, x); \
+		} \
+		DEB_TRACE() << "*** " <<  x << " OK" ; \
+}
+
+#define _PCO_TRACE(x, s)  \
+{ \
+		if(error){ \
+			DEB_TRACE() << "*** " <<  x << " PCO ERROR " << s; \
+			throw LIMA_HW_EXC(Error, x); \
+		} \
+		DEB_TRACE() << "*** " <<  x << " OK" ; \
+}
+
+
+
 #endif

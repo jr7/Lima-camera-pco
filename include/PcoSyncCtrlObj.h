@@ -46,6 +46,8 @@ namespace lima
 		WORD getPcoTrigMode();
 		WORD getPcoAcqMode();
 	private:
+
+
      	double	m_exp_time;			/* exposure time in s */
      	double	m_lat_time;			/* lattency - delay? */
 

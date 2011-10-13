@@ -70,6 +70,10 @@ namespace lima
 {
   namespace Pco
   {
+
+    static char* _PcoCheckError(int err) ;
+
+
     class SyncCtrlObj;
     class VideoCtrlObj;
     class  DLL_EXPORT  Camera : public HwMaxImageSizeCallbackGen
@@ -93,8 +97,13 @@ namespace lima
 
         void 	startAcq();
         void	reset();
-		char *getInfo(char *output, int lg);
-      private:
+
+        char *getInfo(char *output, int lg);
+        void getArmWidthHeight(WORD& width,WORD& height){width = m_size.armwidth, height = m_size.armheight;}
+        void getBitsPerPixel(WORD& pixbits){pixbits = (WORD) m_size.pixbits;}
+
+    
+    private:
         unsigned long _getFramesMax(int segmentPco);
         int PcoCheckError(int err);
 
@@ -102,8 +111,8 @@ namespace lima
         //static void 	_newFrameCBK(tPvFrame*);
         //void		_newFrame(tPvFrame*);
 
-        void assignImage2Buffer(DWORD frameFirst, DWORD frameLast, int bufIdx) ;
-        void Camera::xferImag();
+        void assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, DWORD dwRequestedFrames, int bufIdx);
+        void xferImag();
 
         char pcoErrorMsg[ERR_SIZE+1];
 
@@ -142,7 +151,8 @@ namespace lima
 	unsigned long	m_allocatedBufferSize;
 	unsigned long	m_allocatedBufferSizeMax;         // unsigned int    m_max_buffsize;
 
-	SHORT	m_allocatedBufferNr[8];				// bufnrM buffer number allocated by PCO_AllocateBuffer
+  /**********
+  SHORT	m_allocatedBufferNr[8];				// bufnrM buffer number allocated by PCO_AllocateBuffer
 	WORD	*m_allocatedBufferPtr[8];			// buffer allocated by PCO_AllocateBuffer
 	HANDLE m_allocatedBufferEvent[8];
 
@@ -151,9 +161,11 @@ namespace lima
 	DWORD m_allocatedBufferAssignedFrameLast[8];
 	int m_allocatedBufferReady[8];
 
-
-
 	unsigned long	m_frames_per_buffer;
+  
+  ************/
+
+
 	unsigned long	m_imgsizeBytes;
 	unsigned long	m_imgsizePixels;
 	unsigned long	m_imgsizePages;
@@ -181,4 +193,6 @@ namespace lima
     };
   }
 }
+
+
 #endif
