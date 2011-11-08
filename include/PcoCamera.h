@@ -66,12 +66,13 @@ struct stcTemp {
 	short setpoint;
 };
 
+char* _PcoCheckError(int err) ;
+
 namespace lima
 {
   namespace Pco
   {
 
-    static char* _PcoCheckError(int err) ;
 
 
     class SyncCtrlObj;
@@ -111,8 +112,8 @@ namespace lima
         //static void 	_newFrameCBK(tPvFrame*);
         //void		_newFrame(tPvFrame*);
 
-        void assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, DWORD dwRequestedFrames, int bufIdx);
-        void xferImag();
+        //void assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, DWORD dwRequestedFrames, int bufIdx);
+        //void xferImag();
 
         char pcoErrorMsg[ERR_SIZE+1];
 

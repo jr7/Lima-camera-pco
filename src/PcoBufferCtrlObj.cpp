@@ -160,11 +160,60 @@ void BufferCtrlObj::_newFrame(tPvFrame* aFrame)
 
 
 
+
+//===================================================================================================================
+//===================================================================================================================
+    /********************************************************************************************************
+      4.7.22 PCO_AddBufferExtern (Only for experienced users!)
+
+      Adds a buffer to the driver queue. This function returns immediately. If the desired image is
+      transferred to the buffer the buffer event will be fired. The user can start a thread, which can wait
+      for the event of the buffer (WaitFor(Single/Multiple)Objects). This function can be used to view
+      images while the recording is enabled (the user must set dw1stImage=dwLastImage=0).
+      To read out previously recorded images with recording disabled, the user can call
+      PCO_GetImageEx. Nevertheless you can use this function to read out single images while the
+      camera is not in recording state, by setting dw1stImage=dwLastImage=x, where x is a valid image
+      number (1…max available).
+
+      a.) Prototype:
+      SC2_SDK_FUNC int WINAPI PCO_AddBufferExtern(HANDLE ph, HANDLE hEvent, DWORD dw1stImage,
+      DWORD dwLastImage, DWORD dwSynch, void* pBuf, DWORD dwLen, DWORD* dwStatus)
+
+      b.) Input parameter:
+      · HANDLE ph: Handle to a previously opened camera device.
+      · HANDLE hEvent: Handle to an externally allocated event.
+      · DWORD dw1stImage: Set dw1stImage=dwLastImage=0 during record for actual image
+      · DWORD dwLastImage: Set dw1stImage=dwLastImage=x after record for desired image
+      · DWORD dwSynch: Synchronization paremeter, usually 0.
+      · void *pBuf: Pointer to the buffer to receive the transferred image.
+      · DWORD dwLen: Length of the buffer.
+      · DWORD *dwStatus: Driver status.
+
+      The input data should be filled with the following parameter:
+      · hEvent = externally created event used to signal an occurred transfer.
+
+      · dw1stImage = set to 0 for live view mode(“live view” transfers the most recent image to the
+      PC for viewing / monitoring)
+      - 0 = live view mode. x = set to the same value as dwLastImage. Has to be a valid
+      image number (see PCO_GetNumberOfImagesInSegment, 1…max available).
+
+      · dwLastImage = set to 0 in preview mode.
+      - 0 = live view mode. x = set to the same value as dw1stImage. Has to be a valid image
+      number (see PCO_GetNumberOfImagesInSegment, 1…max available).
+
+      · dwSynch: set to 0.
+      · pBuf: Address of the first buffer element to which the image should be transferred.
+      · dwLen: Length of the buffer in bytes.
+      · dwStatus: Address of a DWORD to receive the buffer status.
+
+      c.) Return value:
+      · int: Error message, 0 in case of success else less than 0: see Error / Warning Codes
+    ********************************************************************************************************/
 //===================================================================================================================
 //===================================================================================================================
 void BufferCtrlObj::assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, DWORD dwRequestedFrames, int bufIdx) {
     DEB_MEMBER_FUNCT();
-    int error;
+    int error = 0;
     char *sErr;
 
 		StdBufferCbMgr& buffer_mgr = m_buffer_cb_mgr;
@@ -173,92 +222,51 @@ void BufferCtrlObj::assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
     buffer_mgr.setStartTimestamp(Timestamp::now());
 
     buffer_mgr.acqFrameNb2BufferNb(dwFrameFirst, buffer_nb, concat_frame_nb);
-		void *ptr = buffer_mgr.getBufferPtr(buffer_nb,   concat_frame_nb);
+		void *ptr = buffer_mgr.getBufferPtr(buffer_nb, concat_frame_nb);
+  // void *ptr = buffer_mgr.getFramePtr(buffer_nb, concat_frame_nb);
 
     m_allocatedBufferNr[bufIdx] = bufIdx;
     m_allocatedBufferPtr[bufIdx] = (WORD *) ptr;
     
-    /************************************************************************************************
-		Allocates a buffer to receive the transferred images. There is a maximum of 8 buffers. This
-		function is needed to create, or to attach buffers for the image transfer. The buffers are attached to
-		the previously opened camera. Using two buffers in an alternating manner is sufficient for most
-		applications. If you use more than one camera, you will get the same buffer numbers 0 and 1 for
-		each camera while allocating e.g. two buffers.
-
-		SC2_SDK_FUNC int WINAPI PCO_AllocateBuffer(HANDLE ph, SHORT* sBufNr, DWORD dwSize,
-		WORD** wBuf, HANDLE* hEvent)
-		· HANDLE ph: Handle to a previously opened camera device.
-		· SHORT* sBufNr: Address of a SHORT pointer to get the current number of the buffer.
-		· DWORD dwSize: DWORD to set the buffer size.
-		· WORD** wBuf: Address of a WORD* to get the buffer pointer.
-		· HANDLE* hEvent: Address of a HANDLE to get the event which will be fired in case of 
-		a previously arrived image.
-
-		The input data should be filled with the following parameters:
-		· *sBufNr = -1 to allocate a new buffer, 0 … 7, to change a previously allocated buffer.
-		· dwSize = size of the buffer in byte (normally: Xres * Yres * 2).
-		· **wBuf = must be the address of a WORD*.
-		·*hEvent = 0 to create a ne
-
-		m_bufferNrM -> m_allocatedBufferNr
-		m_bufferM -> m_allocatedBufferPtr
-		m_bufferM_events -> m_allocatedBufferEvent
-		m_bufsize -> m_allocatedBufferSize
-		m_bufsize_max -> m_allocatedBufferSizeMax
-		***************************************************************************************************/
-    DWORD dwMaxWidth;
-    DWORD dwMaxHeight;
-    WORD wArmWidth;
-    WORD wArmHeight;
+    DWORD dwMaxWidth, dwMaxHeight;
+    WORD wArmWidth, wArmHeight;
     WORD wBitPerPixel;
-    
-    unsigned int pixbytes;
+
+    unsigned int bytesPerPixel;
     
     m_cam->getArmWidthHeight(wArmWidth, wArmHeight);
     m_cam->getMaxWidthHeight(dwMaxWidth, dwMaxHeight);
-    m_cam->getBytesPerPixel(pixbytes);
+    m_cam->getBytesPerPixel(bytesPerPixel);
     m_cam->getBitsPerPixel(wBitPerPixel);
 
-    DWORD dwAllocatedBufferSize = dwMaxWidth * dwMaxHeight * (DWORD) pixbytes;
+    DWORD dwAllocatedBufferSize = dwMaxWidth * dwMaxHeight * (DWORD) bytesPerPixel;
 
-			sErr = _PcoCheckError(PCO_AllocateBuffer(m_handle, &(m_allocatedBufferNr[bufIdx]), dwAllocatedBufferSize, 
-										&(m_allocatedBufferPtr[bufIdx]), &(m_allocatedBufferEvent[bufIdx])));
-            _PCO_TRACE("PCO_AllocateBuffer", sErr) ;
 
-    /********************************************************************************************************
-    Adds a buffer to the driver queue. This function returns immediately. If the desired image is
-    transferred to the buffer the buffer event will be fired. The user can start a thread, which can wait
-    for the event of the buffer (WaitFor(Single/Multiple)Objects). This function can be used to view
-    images while the recording is enabled (the user must set dw1stImage=dwLastImage=0).
+/**** NOT USED 
+    _PcoCheckError(PCO_AllocateBuffer(m_handle, &(m_allocatedBufferNr[bufIdx]), dwAllocatedBufferSize, 
 
-    SC2_SDK_FUNC int WINAPI PCO_AddBuffer(HANDLE ph, DWORD dw1stImage, DWORD dwLastImage,
-    SHORT sBufNr, WORD wXRes, WORD wYRes, WORD wBitPerPixel)
-    · HANDLE ph: Handle to a previously opened camera device.
-    · DWORD dw1stImage: Set dw1stImage=dwLastImage=0 during record for actual image
-    · DWORD dwLastImage: Set dw1stImage=dwLastImage=x after record for desired image
-    · SHORT sBufNr: SHORT to set the buffer number to fill with.
-    · WORD wXRes: x-Resolution.
-    · WORD wYRes: y-Resolution.
-    · WORD wBitPerPixel: BitResolution of one Pixel (e.g. 14bit).
-
-    The input data should be filled with the following parameter:
-    · dw1stImage = set to 0 for live view mode(?live view? transfers the most recent image to the
-    PC for viewing / monitoring)
-    - 0 = live view mode. x = set to the same value as dwLastImage. Has to be a valid image
-    number (see PCO_GetNumberOfImagesInSegment, 1?max available).
-    · dwLastImage = set to 0 in preview mode.
-    - 0 = live view mode. x = set to the same value as dw1stImage. Has to be a valid image
-    number (see PCO_GetNumberOfImagesInSegment, 1?max available).
-    · sBufNr: 0 ? 7:.number of desired buffer. A buffer can be reused after the event is fired.
-    · wXRes: Actual x-Resolution of the image which should be transferred.
-    · wYRes: Actual y-Resolution of the image which should be transferred.
-    · WBitPerPixel: BitResolution of the image which should be transferred.
-    ********************************************************************************************************/
-
-  //... PCO_AddBufferEx frames[%ld]-[%ld] bufIdx[%d] x[%d] y[%d] bits[%d]", dwFrameFirst, frameLast, bufIdx, ds->ccd.size.xarm, ds->ccd.size.yarm, ds->ccd.size.bits
+    PCO_AddBufferEx frames[%ld]-[%ld] bufIdx[%d] x[%d] y[%d] bits[%d]", dwFrameFirst, frameLast, bufIdx, ds->ccd.size.xarm, ds->ccd.size.yarm, ds->ccd.size.bits
         sErr = _PcoCheckError(PCO_AddBufferEx(m_handle, dwFrameFirst, dwFrameLast, m_allocatedBufferNr[bufIdx], \
 						wArmWidth, wArmHeight, wBitPerPixel));
-        _PCO_TRACE("PCO_AddBufferEx", sErr) ;
+****/
+      // ---------- NEW function with our assigned buffers
+      //SC2_SDK_FUNC int WINAPI PCO_AddBufferExtern(HANDLE ph, HANDLE hEvent, DWORD dw1stImage,
+      //        DWORD dwLastImage, DWORD dwSynch, void* pBuf, DWORD dwLen, DWORD* dwStatus)
+
+      DWORD dwSynch = 0;  // must be 0
+      DWORD dwStatus = 0;
+      DWORD dwLen = 1;    // --------- TODO
+      void *myBuffer = 0;  //-------------------------- buffer received from lima TODO
+      HANDLE hEvent = m_allocatedBufferEvent[bufIdx];   // assigned in the constructor of  BufferCtrlObj
+
+      WORD wActSeg = 0;
+      sErr = _PcoCheckError(PCO_GetActiveRamSegment(m_handle, &wActSeg));
+        _PCO_TRACE("PCO_GetActiveRamSegment", sErr) ;
+
+    sErr = _PcoCheckError(PCO_AddBufferExtern(m_handle, hEvent,wActSeg,dwFrameFirst, dwFrameLast, dwSynch, myBuffer, \
+	            dwLen, &dwStatus));
+        _PCO_TRACE("PCO_AddBufferExtern", sErr) ;
+
 
 	m_allocatedBufferAssignedFrameFirst[bufIdx] = dwFrameFirst;
 	m_allocatedBufferAssignedFrameLast[bufIdx] = dwFrameLast;
@@ -271,25 +279,20 @@ void BufferCtrlObj::assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 
 }
 
+//===================================================================================================================
+//===================================================================================================================
+// cloned from   Write file to disk in a separate thread
 
-/*---------------------------------------------------------------------------
-        Purpose:  Write file to disk in a separate thread
-		Arguments:	argin = ccd ds struct
-        Returns:    nothing
-*---------------------------------------------------------------------------*/
 void BufferCtrlObj::xferImag()
 {
-    DEB_MEMBER_FUNCT();
+  DEB_MEMBER_FUNCT();
 
 	DWORD dwFrameIdx, dwFrameIdxLast;
   DWORD dwFrameFirst2assign, dwFrameLast2assign;
 	DWORD dwEvent;
-	long error;
   long long nr =0;
 	long long bytesWritten = 0;
 	int bufIdx;
-	char *data;
-	unsigned int bufptr;
 	
 // --------------- get the requested nr of images 
 	int requested_nb_frames;
@@ -297,7 +300,7 @@ void BufferCtrlObj::xferImag()
 
   m_sync->getNbFrames(requested_nb_frames);
   dwRequestedFrames = (DWORD) requested_nb_frames;
-	dwFramesPerBuffer = m_frames_per_buffer;
+	dwFramesPerBuffer = m_frames_per_buffer;   // in PCO = 1
 
 // --------------- prepare the first buffer 
   // ------- in PCO DIMAX only 1 image can be retreived
@@ -307,48 +310,36 @@ void BufferCtrlObj::xferImag()
 	if(dwFrameLast2assign > dwRequestedFrames) dwFrameLast2assign = dwRequestedFrames;
 
 	bufIdx = 0;
-	 
   assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx);
-
-/******************
-  error = PcoCheckError(PCO_AddBufferEx(m_handle, dwFrameFirst2assign, dwFrameLast2assign, m_allocatedBufferNr[bufIdx], \
-						m_size.armwidth, m_size.armheight, m_size.pixbits));
-  PCO_TRACE("PCO_AddBufferEx") ;
-
- 	m_allocatedBufferAssignedFrameFirst[bufIdx] = dwFrameFirst2assign;
-	m_allocatedBufferAssignedFrameLast[bufIdx] =dwFrameLast2assign;
-	m_allocatedBufferReady[bufIdx] = 0;
- 
-      //----- prepartion of dwFrameFirst2assign & dwFrameLast2assign for the NEXT call to addBuffer
-  dwFrameFirst2assign = dwFrameLast2assign + 1;
-	dwFrameLast2assign = dwFrameFirst2assign + dwFramesPerBuffer - 1;
-	if(dwFrameLast2assign > dwRequestedFrames) dwFrameLast2assign = dwRequestedFrames;
-************/
-
-	bufIdx = 1;
 
 // --------------- if needed prepare the 2nd buffer 
 	if(dwFrameFirst2assign <= dwRequestedFrames) {
+    bufIdx = 1;
     assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx);
 	}
-
 
   // --------------- loop - process the N frames
 	dwFrameIdx = 1;
 	while(dwFrameIdx <= dwRequestedFrames) {
-		//dprintf3("... loop frame [%d] of [%d]", frameIdx, nrFrames);
 
 _RETRY:
 
 		//if(ds->ccd.filesave.saving == ACQ_SAVING_ABORTED){dprintf("<%s> Stop requested\n", fnId);	break;  // exit from while loop	}
 
-// --------------- look if one buffer has already the next frame & write it 
-		for(bufIdx = 0; bufIdx < BUFFER_NR_EVENTS; bufIdx++) {
-			if((m_allocatedBufferAssignedFrameFirst[bufIdx] == dwFrameIdx) && m_allocatedBufferReady[bufIdx]) {
-				dwFrameIdxLast= m_allocatedBufferAssignedFrameLast[bufIdx];
-				goto _WRITE_FILE;
-			}
-		}
+// --------------- look if one of buffer is READY and has the NEXT frame => proccess it
+    // m_allocatedBufferAssignedFrameFirst[bufIdx] -> first frame in the buffer (we are using only 1 frame per buffer)
+    // m_allocatedBufferReady[bufIdx] -> is already filled by sdk (ready)
+
+    for(bufIdx = 0; bufIdx < BUFFER_NR_EVENTS; bufIdx++) {
+      if((m_allocatedBufferAssignedFrameFirst[bufIdx] == dwFrameIdx) && m_allocatedBufferReady[bufIdx]) {
+        dwFrameIdxLast= m_allocatedBufferAssignedFrameLast[bufIdx];
+        //----- the image dwFrameIdx is already in the buffer -> callback!
+        if(dwFrameFirst2assign <= dwRequestedFrames) {
+          assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx);
+        }
+        goto _WHILE_CONTINUE;
+      }
+    } // for
 
 // --------------- check if there is some buffer ready
 		dwEvent = WaitForMultipleObjects( 
@@ -379,28 +370,17 @@ _RETRY:
 
 
 // --------------- write the next file received in the multi-frames file
+//_WRITE_FILE:
 
-_WRITE_FILE:
-	  //dprintf3("... writting frames [%d]-[%d] to the file", frameIdx, frameIdxLast);
-	  for( bufptr=0; dwFrameIdx <= dwFrameIdxLast; dwFrameIdx++, bufptr += m_imgsizeBytes){
-      data = ((char *) m_allocatedBufferPtr[bufIdx]) + bufptr;
-      //dprintf4("<%s>: Writing data size[%d] frame[%d] bufIdx[%d]\n", fnId, ds->ccd.filesave.datasize, frameIdx, bufIdx);
-      // if ((nr = _write(fp, data, ds->ccd.filesave.datasize)) != ds->ccd.filesave.datasize) {
-      // --------------- if needed assign the next frame to this buffer  
-      if(dwFrameFirst2assign <= dwRequestedFrames) {
-        assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx);
-      }
-	  } // for frameIdx writting ONE buffer with N images
-	} // while(frameIdx ...
+_WHILE_CONTINUE:
+    ;
+  } // while(frameIdx ...
 
 
+  // TODO
 	// if stop is requested the while loop is break to this point
 	
 	
-	
-	// --------------- close the multi-frames file  
-	// --------------- close the sinogram file  
-	// --------------- close the sinogram file [end]  
 
 	//_endthread();
 
