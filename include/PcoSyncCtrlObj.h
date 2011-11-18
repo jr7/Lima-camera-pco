@@ -17,7 +17,7 @@ namespace lima
     {
       DEB_CLASS_NAMESPC(DebModCamera,"SyncCtrlObj","Pco");
     public:
-      SyncCtrlObj(Camera*,BufferCtrlObj*);
+      SyncCtrlObj(Camera*, BufferCtrlObj*);
       virtual ~SyncCtrlObj();
 
       virtual bool checkTrigMode(TrigMode trig_mode);
@@ -32,9 +32,12 @@ namespace lima
 
       virtual void setNbFrames(int  nb_frames);
       virtual void getNbFrames(int& nb_frames);
-
+			// these two functions calls the upper ones get/setNbFrames
       virtual void setNbHwFrames(int  nb_frames);
       virtual void getNbHwFrames(int& nb_frames);
+
+	  void setAcqFrames(int  nb_acq_frames) { m_nb_acq_frames = nb_acq_frames; }
+      void getAcqFrames(int& nb_acq_frames){ nb_acq_frames = m_nb_acq_frames; }
 
       virtual void getValidRanges(ValidRangesType& valid_ranges);
 
@@ -45,6 +48,8 @@ namespace lima
 
 		WORD getPcoTrigMode();
 		WORD getPcoAcqMode();
+	
+		BufferCtrlObj* _getBufferCtrlObj() {return m_buffer;}
 	private:
 
 
@@ -56,7 +61,8 @@ namespace lima
       TrigMode		m_trig_mode;
       BufferCtrlObj*	m_buffer;
       int		m_nb_frames;
-      bool		m_started;
+	  int m_nb_acq_frames;
+	  bool		m_started;
     };
 
   } // namespace Pco

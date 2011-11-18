@@ -39,8 +39,8 @@ namespace lima
       virtual int getNbAcquiredFrames();
       virtual int getNbHwAcquiredFrames();
 
-      void _getCocRunTime(double& coc_run_time){ coc_run_time = m_cam->m_cocRunTime ;};
-      void _getFrameRate(double& frame_rate){ frame_rate = m_cam->m_frameRate ;};
+      void _getCocRunTime(double& coc_run_time){ coc_run_time = m_cam->m_pcoData.cocRunTime ;};
+      void _getFrameRate(double& frame_rate){ frame_rate = m_cam->m_pcoData.frameRate ;};
 
 
     private:

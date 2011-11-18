@@ -3,7 +3,7 @@
 #include "PcoSyncCtrlObj.h"
 #include "PcoCamera.h"
 
-#define BUFFER_NR_EVENTS 2
+
 
 #define THROW_LIMA_HW_EXC(e, x)  { \
 	printf("========*** LIMA_HW_EXC %s\n", x ); \
@@ -17,39 +17,39 @@ using namespace lima::Pco;
 
 BufferCtrlObj::BufferCtrlObj(Camera *cam) :
   m_handle(cam->getHandle()),
-  //m_status(ePvErrSuccess),
+  m_cam(cam),
+  m_status(0),
   m_exposing(false)
 {
   DEB_CONSTRUCTOR();
 
-  //m_frame[0].Context[0] = this;
-  //m_frame[1].Context[0] = this;
-
-  m_frames_per_buffer = 1;  // PCO DSK allows only one frame/buffer
+  
 
   //----------------------------------------------- initialization buffers & creating events
-  for(int i=0; i < BUFFER_NR_EVENTS; i++) {
-		m_allocatedBufferNr[i] = -1;
-		m_allocatedBufferPtr[i]	= NULL;
+  for(int i=0; i < PCO_BUFFER_NREVENTS; i++) {
+		m_allocBuff.bufferNr[i] = -1;
+		m_allocBuff.bufferPtr[i]	= NULL;
 
 	 // Create two event objects
-        m_allocatedBufferEvent[i] = CreateEvent( 
+       m_allocBuff.bufferEvent[i] = CreateEvent( 
             NULL,   // default security attributes
             FALSE,  // auto-reset event object
             FALSE,  // initial state is nonsignaled
             NULL);  // unnamed object
 
-        if (m_allocatedBufferEvent[i] == NULL) 
+        if (m_allocBuff.bufferEvent[i] == NULL) 
         { 
             THROW_LIMA_HW_EXC(Error, "CreateEvent error")
         } 
     } 
-
-
 }
 void BufferCtrlObj::prepareAcq()
 {
   DEB_MEMBER_FUNCT();
+
+  m_acq_frame_nb = -1; // idx of the acquired frame
+
+
 #ifdef COMPILEIT
   FrameDim dim;
   getFrameDim(dim);
@@ -72,7 +72,7 @@ void BufferCtrlObj::startAcq()
 {
   DEB_MEMBER_FUNCT();
 
-		StdBufferCbMgr& buffer_mgr = m_buffer_cb_mgr;
+	StdBufferCbMgr& buffer_mgr = m_buffer_cb_mgr;
     buffer_mgr.setStartTimestamp(Timestamp::now());
 
 
@@ -94,11 +94,11 @@ void BufferCtrlObj::startAcq()
 
 }
 
+#ifdef COMPILEIT
 void BufferCtrlObj::_newFrame(tPvFrame* aFrame)
 {
   DEB_STATIC_FUNCT();
 
-#ifdef COMPILEIT
 
   BufferCtrlObj *bufferPt = (BufferCtrlObj*)aFrame->Context[0];
 
@@ -154,9 +154,13 @@ void BufferCtrlObj::_newFrame(tPvFrame* aFrame)
   if(stopAcq)
     bufferPt->m_sync->stopAcq(false);
 
-#endif
 
 }
+
+
+
+
+#endif
 
 
 
@@ -211,7 +215,7 @@ void BufferCtrlObj::_newFrame(tPvFrame* aFrame)
     ********************************************************************************************************/
 //===================================================================================================================
 //===================================================================================================================
-void BufferCtrlObj::assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, DWORD dwRequestedFrames, int bufIdx) {
+void BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, DWORD dwRequestedFrames, int bufIdx) {
     DEB_MEMBER_FUNCT();
     int error = 0;
     char *sErr;
@@ -225,8 +229,8 @@ void BufferCtrlObj::assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 		void *ptr = buffer_mgr.getBufferPtr(buffer_nb, concat_frame_nb);
   // void *ptr = buffer_mgr.getFramePtr(buffer_nb, concat_frame_nb);
 
-    m_allocatedBufferNr[bufIdx] = bufIdx;
-    m_allocatedBufferPtr[bufIdx] = (WORD *) ptr;
+    m_allocBuff.bufferNr[bufIdx] = bufIdx;
+    m_allocBuff.bufferPtr[bufIdx] = (WORD *) ptr;
     
     DWORD dwMaxWidth, dwMaxHeight;
     WORD wArmWidth, wArmHeight;
@@ -257,7 +261,7 @@ void BufferCtrlObj::assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
       DWORD dwStatus = 0;
       DWORD dwLen = 1;    // --------- TODO
       void *myBuffer = 0;  //-------------------------- buffer received from lima TODO
-      HANDLE hEvent = m_allocatedBufferEvent[bufIdx];   // assigned in the constructor of  BufferCtrlObj
+      HANDLE hEvent = m_allocBuff.bufferEvent[bufIdx];   // assigned in the constructor of  BufferCtrlObj
 
       WORD wActSeg = 0;
       sErr = _PcoCheckError(PCO_GetActiveRamSegment(m_handle, &wActSeg));
@@ -268,39 +272,41 @@ void BufferCtrlObj::assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
         _PCO_TRACE("PCO_AddBufferExtern", sErr) ;
 
 
-	m_allocatedBufferAssignedFrameFirst[bufIdx] = dwFrameFirst;
-	m_allocatedBufferAssignedFrameLast[bufIdx] = dwFrameLast;
-	m_allocatedBufferReady[bufIdx] = 0;
+	m_allocBuff.bufferAssignedFrameFirst[bufIdx] = dwFrameFirst;
+	m_allocBuff.bufferAssignedFrameLast[bufIdx] = dwFrameLast;
+	m_allocBuff.bufferReady[bufIdx] = 0;
 
      //----- prepartion of dwFrameFirst2assign & dwFrameLast2assign for the NEXT call to addBuffer
   dwFrameFirst = dwFrameLast + 1;
-	dwFrameLast = dwFrameFirst + ((DWORD) m_frames_per_buffer) - 1;
+	dwFrameLast = dwFrameFirst + m_cam->pcoGetFramesPerBuffer() - 1;
 	if(dwFrameLast > dwRequestedFrames) dwFrameLast = dwRequestedFrames;
-
 }
 
 //===================================================================================================================
 //===================================================================================================================
 // cloned from   Write file to disk in a separate thread
 
-void BufferCtrlObj::xferImag()
+int BufferCtrlObj::_xferImag()
 {
-  DEB_MEMBER_FUNCT();
+	DEB_MEMBER_FUNCT();
 
 	DWORD dwFrameIdx, dwFrameIdxLast;
-  DWORD dwFrameFirst2assign, dwFrameLast2assign;
+	DWORD dwFrameFirst2assign, dwFrameLast2assign;
 	DWORD dwEvent;
-  long long nr =0;
+	long long nr =0;
 	long long bytesWritten = 0;
 	int bufIdx;
+
+	int maxWaitTimeout = 10;
 	
 // --------------- get the requested nr of images 
 	int requested_nb_frames;
 	DWORD dwFramesPerBuffer, dwRequestedFrames;
 
-  m_sync->getNbFrames(requested_nb_frames);
-  dwRequestedFrames = (DWORD) requested_nb_frames;
-	dwFramesPerBuffer = m_frames_per_buffer;   // in PCO = 1
+	m_sync->getAcqFrames(requested_nb_frames);
+	dwRequestedFrames = (DWORD) requested_nb_frames;
+	dwFramesPerBuffer = m_cam->pcoGetFramesPerBuffer();
+
 
 // --------------- prepare the first buffer 
   // ------- in PCO DIMAX only 1 image can be retreived
@@ -310,12 +316,12 @@ void BufferCtrlObj::xferImag()
 	if(dwFrameLast2assign > dwRequestedFrames) dwFrameLast2assign = dwRequestedFrames;
 
 	bufIdx = 0;
-  assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx);
+	_assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx);
 
 // --------------- if needed prepare the 2nd buffer 
 	if(dwFrameFirst2assign <= dwRequestedFrames) {
-    bufIdx = 1;
-    assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx);
+		bufIdx = 1;
+		_assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx);
 	}
 
   // --------------- loop - process the N frames
@@ -324,18 +330,24 @@ void BufferCtrlObj::xferImag()
 
 _RETRY:
 
-		//if(ds->ccd.filesave.saving == ACQ_SAVING_ABORTED){dprintf("<%s> Stop requested\n", fnId);	break;  // exit from while loop	}
-
 // --------------- look if one of buffer is READY and has the NEXT frame => proccess it
     // m_allocatedBufferAssignedFrameFirst[bufIdx] -> first frame in the buffer (we are using only 1 frame per buffer)
     // m_allocatedBufferReady[bufIdx] -> is already filled by sdk (ready)
 
-    for(bufIdx = 0; bufIdx < BUFFER_NR_EVENTS; bufIdx++) {
-      if((m_allocatedBufferAssignedFrameFirst[bufIdx] == dwFrameIdx) && m_allocatedBufferReady[bufIdx]) {
-        dwFrameIdxLast= m_allocatedBufferAssignedFrameLast[bufIdx];
+    for(bufIdx = 0; bufIdx < PCO_BUFFER_NREVENTS; bufIdx++) {
+      if((m_allocBuff.bufferAssignedFrameFirst[bufIdx] == dwFrameIdx) && m_allocBuff.bufferReady[bufIdx]) {
+        m_acq_frame_nb = dwFrameIdx; // this frame was already readout to the buffer
+
+		  HwFrameInfoType frame_info;
+		  frame_info.acq_frame_nb = m_acq_frame_nb;
+		  m_buffer_cb_mgr.newFrameReady(frame_info);
+
+
+
+		dwFrameIdxLast= m_allocBuff.bufferAssignedFrameLast[bufIdx];
         //----- the image dwFrameIdx is already in the buffer -> callback!
         if(dwFrameFirst2assign <= dwRequestedFrames) {
-          assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx);
+          _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx);
         }
         goto _WHILE_CONTINUE;
       }
@@ -343,29 +355,31 @@ _RETRY:
 
 // --------------- check if there is some buffer ready
 		dwEvent = WaitForMultipleObjects( 
-			BUFFER_NR_EVENTS,           // number of objects in array
-			m_allocatedBufferEvent,     // array of objects
+			PCO_BUFFER_NREVENTS,           // number of objects in array
+			m_allocBuff.bufferEvent,     // array of objects
 			FALSE,       // wait for any object
 			5000);       // ms wait
 
     // The return value indicates which event is signaled
 
-#if BUFFER_NR_EVENTS != 2
+#if PCO_BUFFER_NREVENTS != 2
   #pragma message ("============================================== ABORT - wrong nr of WAIT_OBJECT ")
     DUMMY_FOR_ABORT = 5;
 #endif
 
     switch (dwEvent) { 
-        case WAIT_OBJECT_0 + 0: m_allocatedBufferReady[0] = 1; 	goto _RETRY;
-        case WAIT_OBJECT_0 + 1: m_allocatedBufferReady[1] = 1; goto _RETRY;
+        case WAIT_OBJECT_0 + 0: m_allocBuff.bufferReady[0] = 1; 	goto _RETRY;
+        case WAIT_OBJECT_0 + 1: m_allocBuff.bufferReady[1] = 1; goto _RETRY;
 
         case WAIT_TIMEOUT: 
+			maxWaitTimeout--;
 			printf("Wait timed out.\n");
-			goto _RETRY;
-        
+			if(maxWaitTimeout > 0 ) goto _RETRY;
+			return 1;
+
         default: 
           //dprintf("Wait error: %d\n", GetLastError()); 
-          goto _EXIT_ERROR ;
+			return 1;
     }
 
 
@@ -376,19 +390,7 @@ _WHILE_CONTINUE:
     ;
   } // while(frameIdx ...
 
+	return 0;
 
-  // TODO
-	// if stop is requested the while loop is break to this point
-	
-	
-
-	//_endthread();
-
-
-_EXIT_ERROR:
-//	dprintf("<%s> ERROR & EXIT[%s]", fnId, ds->ccd.filesave.filename);
-
-//	_endthread();
-;
 }
 

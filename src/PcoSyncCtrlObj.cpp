@@ -169,15 +169,6 @@ void SyncCtrlObj::getExpTime(double &exp_time)
 
 
 
-
-
-
-#ifdef COMPILEIT
-
-#endif
-
-
-
 void SyncCtrlObj::setLatTime(double  lat_time)
 {
   //No latency managed
@@ -195,7 +186,6 @@ void SyncCtrlObj::getLatTime(double& lat_time)
 
 
 
-
 void SyncCtrlObj::setNbFrames(int  nb_frames)
 {
   DEB_MEMBER_FUNCT();
@@ -209,6 +199,7 @@ void SyncCtrlObj::getNbFrames(int& nb_frames)
   nb_frames = m_nb_frames;
 }
 
+// these two functions calls the upper ones get/setNbFrames
 void SyncCtrlObj::setNbHwFrames(int  nb_frames)
 {
   setNbFrames(nb_frames);
@@ -226,8 +217,8 @@ void SyncCtrlObj::getNbHwFrames(int& nb_frames)
 void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 {
 	// DONE
-  valid_ranges.min_exp_time = m_cam->m_pcoInfo.dwMinExposureDESC * 1e-9 ; // Don't know
-  valid_ranges.max_exp_time = m_cam->m_pcoInfo.dwMaxExposureDESC * 1e-3 ; // Don't know
+  valid_ranges.min_exp_time = m_cam->m_pcoData.pcoInfo.dwMinExposureDESC * 1e-9 ; // Don't know
+  valid_ranges.max_exp_time = m_cam->m_pcoData.pcoInfo.dwMaxExposureDESC * 1e-3 ; // Don't know
   valid_ranges.min_lat_time = 0.; // Don't know
   valid_ranges.max_lat_time = 0.; // Don't know
 }
