@@ -20,6 +20,7 @@ SyncCtrlObj::SyncCtrlObj(Camera *cam,BufferCtrlObj *buffer) :
   m_trig_mode(IntTrig),
   m_buffer(buffer),
   m_nb_frames(1),
+  m_exposing(false),
   m_started(false)
 {
 	// DONE
@@ -291,20 +292,21 @@ void SyncCtrlObj::getStatus(HwInterface::StatusType& status)
     {
       //tPvErr error = ePvErrSuccess;
       if(m_buffer)
-	{
-	  bool exposing;
-	  m_buffer->getStatus(error,exposing);
-	  if(error)
-	    {
-	      status.acq = AcqFault;
-	      status.det = DetFault;
-	    }
-	  else
-	    {
-	      status.acq = AcqRunning;
-	      status.det = exposing ? DetExposure : DetIdle;
-	    }
-	}
+		{
+		  bool exposing = m_exposing;
+		  //m_buffer->getStatus(error,exposing);
+		  m_buffer->getStatus(error);
+		  if(error)
+			{
+			  status.acq = AcqFault;
+			  status.det = DetFault;
+			}
+		  else
+			{
+			  status.acq = AcqRunning;
+			  status.det = exposing ? DetExposure : DetIdle;
+			}
+		}
       else			// video mode, don't need to be precise
 	{
 	  status.acq = AcqRunning;

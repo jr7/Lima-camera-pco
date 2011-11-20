@@ -35,7 +35,9 @@ namespace lima
       BufferCtrlObj(Camera *cam);
       void prepareAcq();
       void startAcq();
-      void getStatus(int &err,bool& exposing) {err = m_status,exposing = m_exposing;}
+      //void getStatus(int &err,bool& exposing) {err = m_status,exposing = m_exposing;}
+      void getStatus(int &err) {err = m_status;}
+      void setStatus(int status) {m_status = status;}
 
         //-------------------------------------------------------------  moved from taco
         
@@ -56,7 +58,6 @@ namespace lima
       Camera* m_cam;
       SyncCtrlObj* 	m_sync;
       int		m_status;
-      bool		m_exposing;
     };
   }
 }

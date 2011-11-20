@@ -18,8 +18,7 @@ using namespace lima::Pco;
 BufferCtrlObj::BufferCtrlObj(Camera *cam) :
   m_handle(cam->getHandle()),
   m_cam(cam),
-  m_status(0),
-  m_exposing(false)
+  m_status(0)
 {
   DEB_CONSTRUCTOR();
 
@@ -75,10 +74,13 @@ void BufferCtrlObj::startAcq()
 	StdBufferCbMgr& buffer_mgr = m_buffer_cb_mgr;
     buffer_mgr.setStartTimestamp(Timestamp::now());
 
+	m_sync->setExposing(false);
+
+	m_cam->startAcq();
+	
 
 
 #ifdef COMPILEIT
-  m_exposing = true;
   tPvFrame& frame = m_frame[0];
   m_status = PvCaptureQueueFrame(m_handle,&frame,_newFrame);
   
@@ -298,6 +300,7 @@ int BufferCtrlObj::_xferImag()
 	int bufIdx;
 
 	int maxWaitTimeout = 10;
+
 	
 // --------------- get the requested nr of images 
 	int requested_nb_frames;

@@ -50,6 +50,10 @@ namespace lima
 		WORD getPcoAcqMode();
 	
 		BufferCtrlObj* _getBufferCtrlObj() {return m_buffer;}
+       void setExposing(bool exposing) {m_exposing = exposing;}
+		bool getExposing() {return m_exposing;}
+
+	
 	private:
 
 
@@ -63,7 +67,9 @@ namespace lima
       int		m_nb_frames;
 	  int m_nb_acq_frames;
 	  bool		m_started;
-    };
+	bool m_exposing;
+	
+	};
 
   } // namespace Pco
 } // namespace lima

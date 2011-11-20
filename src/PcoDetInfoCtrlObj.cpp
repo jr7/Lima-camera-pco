@@ -65,6 +65,7 @@ void DetInfoCtrlObj::setCurrImageType(ImageType curr_image_type)
 
 void DetInfoCtrlObj::getPixelSize(double& pixel_size)
 {  
+    // ---- DONE for the moment
 	// pixel size in micrometer (???)
   pixel_size = -1.;		// @todo don't know
 }
@@ -83,12 +84,14 @@ void DetInfoCtrlObj::getDetectorModel(std::string& det_model)
 
 void DetInfoCtrlObj::registerMaxImageSizeCallback(HwMaxImageSizeCallback& cb)
 {
-		// will not be used - from HwMaxImageSizeCallbackGen::registerMaxImageSizeCallback
+	// TOCHECK
+	// will not be used - from HwMaxImageSizeCallbackGen::registerMaxImageSizeCallback
   m_cam->registerMaxImageSizeCallback(cb);
 }
 
 void DetInfoCtrlObj::unregisterMaxImageSizeCallback(HwMaxImageSizeCallback& cb)
 {
+	// TOCHECK
   m_cam->unregisterMaxImageSizeCallback(cb);
 }
 
