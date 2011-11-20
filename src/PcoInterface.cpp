@@ -33,7 +33,8 @@ Interface::Interface(Camera *cam) :
 
 Interface::~Interface()
 {
-  DEB_DESTRUCTOR();
+	// DONE
+	DEB_DESTRUCTOR();
   delete m_buffer;
   delete m_det_info;
   delete m_sync;
@@ -41,6 +42,7 @@ Interface::~Interface()
 
 void Interface::getCapList(CapList &cap_list) const
 {
+	// DONE
   cap_list.push_back(HwCap(m_sync));
   cap_list.push_back(HwCap(m_det_info));
   cap_list.push_back(HwCap(m_buffer));
@@ -48,6 +50,7 @@ void Interface::getCapList(CapList &cap_list) const
 
 void Interface::reset(ResetLevel reset_level)
 {
+	// DONE
   DEB_MEMBER_FUNCT();
   DEB_PARAM() << DEB_VAR1(reset_level);
 
@@ -58,6 +61,7 @@ void Interface::reset(ResetLevel reset_level)
 void Interface::prepareAcq()
 {
   DEB_MEMBER_FUNCT();
+	// DONE
   if(m_buffer)
     m_buffer->prepareAcq();
 }
@@ -65,6 +69,7 @@ void Interface::prepareAcq()
 void Interface::startAcq()
 {
   DEB_MEMBER_FUNCT();
+	// DONE
 
   if(m_buffer)
     m_buffer->getBuffer().setStartTimestamp(Timestamp::now());
@@ -73,6 +78,7 @@ void Interface::startAcq()
 
 void Interface::stopAcq()
 {
+	// DONE
   DEB_MEMBER_FUNCT();
 
   m_sync->stopAcq();
@@ -80,12 +86,14 @@ void Interface::stopAcq()
 
 void Interface::getStatus(StatusType& status)
 {
+	// DONE
   m_sync->getStatus(status);
 }
 
 int Interface::getNbAcquiredFrames()
 {
   DEB_MEMBER_FUNCT();
+	// DONE
 
   int aNbAcquiredFrames;
   if(m_buffer)
@@ -99,6 +107,7 @@ int Interface::getNbAcquiredFrames()
 
 int Interface::getNbHwAcquiredFrames()
 {
+	// DONE
   return getNbAcquiredFrames();
 }
 

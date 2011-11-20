@@ -148,7 +148,6 @@ void SyncCtrlObj::setExpTime(double exp_time)
   }
 
   m_exp_time = exp_time;
-  //ds->ccd.cocRunTime = 0;
 
 
 }
@@ -159,9 +158,11 @@ void SyncCtrlObj::getExpTime(double &exp_time)
 
   ValidRangesType valid_ranges;
   getValidRanges(valid_ranges);
+	// DONE
   
   if (m_exp_time < valid_ranges.min_exp_time) m_exp_time = valid_ranges.min_exp_time;
-  if (m_exp_time > valid_ranges.max_exp_time) m_exp_time = valid_ranges.max_exp_time;
+  else if (m_exp_time > valid_ranges.max_exp_time) m_exp_time = valid_ranges.max_exp_time;
+  
 
   exp_time = m_exp_time;
   DEB_RETURN() << DEB_VAR1(exp_time);
@@ -172,6 +173,7 @@ void SyncCtrlObj::getExpTime(double &exp_time)
 
 void SyncCtrlObj::setLatTime(double  lat_time)
 {
+	// DONE
   //No latency managed
   //delay ???
 
@@ -180,6 +182,7 @@ void SyncCtrlObj::setLatTime(double  lat_time)
 
 void SyncCtrlObj::getLatTime(double& lat_time)
 {
+	// DONE
   m_lat_time = 0.;
   lat_time = m_lat_time;		// Don't know - delay????
 }
@@ -189,6 +192,7 @@ void SyncCtrlObj::getLatTime(double& lat_time)
 
 void SyncCtrlObj::setNbFrames(int  nb_frames)
 {
+	// DONE
   DEB_MEMBER_FUNCT();
   DEB_PARAM() << DEB_VAR1(nb_frames);
 
@@ -197,124 +201,101 @@ void SyncCtrlObj::setNbFrames(int  nb_frames)
 
 void SyncCtrlObj::getNbFrames(int& nb_frames)
 {
+	// DONE
   nb_frames = m_nb_frames;
 }
 
 // these two functions calls the upper ones get/setNbFrames
 void SyncCtrlObj::setNbHwFrames(int  nb_frames)
 {
+	// DONE
   setNbFrames(nb_frames);
 }
 
 void SyncCtrlObj::getNbHwFrames(int& nb_frames)
 {
+	// DONE
   getNbFrames(nb_frames);
 }
-
-
 
 
 
 void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 {
 	// DONE
-  valid_ranges.min_exp_time = m_cam->m_pcoData.pcoInfo.dwMinExposureDESC * 1e-9 ; // Don't know
-  valid_ranges.max_exp_time = m_cam->m_pcoData.pcoInfo.dwMaxExposureDESC * 1e-3 ; // Don't know
+  valid_ranges.min_exp_time = m_cam->m_pcoData.pcoInfo.dwMinExposureDESC * 1e-9 ;	//Minimum exposure time in ns
+  valid_ranges.max_exp_time = m_cam->m_pcoData.pcoInfo.dwMaxExposureDESC * 1e-3 ;   // Maximum exposure time in ms  
   valid_ranges.min_lat_time = 0.; // Don't know
   valid_ranges.max_lat_time = 0.; // Don't know
 }
 
 void SyncCtrlObj::startAcq()
 {
-  tPvErr error=0;
   DEB_MEMBER_FUNCT();
   if(!m_started)
     {
-      //tPvErr error = PvCaptureStart(m_handle);
-      if(error)
-	throw LIMA_HW_EXC(Error,"Can't start acquisition capture");
-
-      //error = PvCommandRun(m_handle, "AcquisitionStart");
-      if(error)
-	throw LIMA_HW_EXC(Error,"Can't start acquisition");
   
-      if(m_buffer)
-	m_buffer->startAcq();
-      else
-	m_cam->startAcq();
+		if(m_buffer) {
+			m_buffer->startAcq();
+			m_started = true;
+		}
+      //else m_cam->startAcq();
     }
-  m_started = true;
 }
 
 void SyncCtrlObj::stopAcq(bool clearQueue)
 {
-    tPvErr error=0;
+	int error;
 
   DEB_MEMBER_FUNCT();
   if(m_started)
     {
-      DEB_TRACE() << "Try to stop Acq";
-      //tPvErr error = PvCommandRun(m_handle,"AcquisitionStop");
+		m_cam->_pcoSet_RecordingState(0, error);
+		DEB_TRACE() << "Try to stop Acq";
       if(error)
-	{
-	  DEB_ERROR() << "Failed to stop acquisition";
-	  throw LIMA_HW_EXC(Error,"Failed to stop acquisition");
-	}
+		{
+		  DEB_ERROR() << "Failed to stop acquisition";
+		  throw LIMA_HW_EXC(Error,"Failed to stop acquisition");
+		}
 
-      DEB_TRACE() << "Try to stop Capture";
-      //error = PvCaptureEnd(m_handle);
-      if(error)
-	{
-	  DEB_ERROR() << "Failed to stop acquisition";
-	  throw LIMA_HW_EXC(Error,"Failed to stop acquisition");
-	}
-
-      if(clearQueue)
-	{
-	  DEB_TRACE() << "Try to clear queue";
-	  //error = PvCaptureQueueClear(m_handle);
-	  if(error)
-	    {
-	      DEB_ERROR() << "Failed to stop acquisition";
-	      throw LIMA_HW_EXC(Error,"Failed to stop acquisition");
-	    }
-	}
+    //  if(clearQueue) - ignored
     }
-  m_started = false;
+
+		
+	m_started = false;
 }
 
 void SyncCtrlObj::getStatus(HwInterface::StatusType& status)
 {
-    tPvErr error;
-
+	// DONE
+	int error;
   DEB_MEMBER_FUNCT();
   if(m_started)
     {
-      //tPvErr error = ePvErrSuccess;
       if(m_buffer)
 		{
-		  bool exposing = m_exposing;
-		  //m_buffer->getStatus(error,exposing);
-		  m_buffer->getStatus(error);
+		  bool exposing = m_exposing;  // pco recording
+		  m_buffer->getStatus(error); // pco error
+
 		  if(error)
-			{
+			{ // pco error
 			  status.acq = AcqFault;
 			  status.det = DetFault;
 			}
 		  else
-			{
+			{	// pco error -> OK
 			  status.acq = AcqRunning;
 			  status.det = exposing ? DetExposure : DetIdle;
 			}
 		}
-      else			// video mode, don't need to be precise
-	{
-	  status.acq = AcqRunning;
-	  status.det = DetExposure;
-	}
+      else			// m_buff = NULL / video mode, don't need to be precise
+		{
+		  status.acq = AcqRunning;
+		  status.det = DetExposure;
+		}
     }
   else
-    {
+    { // not started
       status.acq = AcqReady;
       status.det = DetIdle;
     }

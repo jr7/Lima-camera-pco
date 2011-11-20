@@ -1,11 +1,12 @@
 #ifndef PCOCAMERA_H
 #define PCOCAMERA_H
 #include "Pco.h"
+//#include "PcoCamera.h"
 #include "Pco_errt.h"
 #include "Debug.h"
 #include "Constants.h"
 #include "HwMaxImageSizeCallback.h"
-#include "PcoBufferCtrlObj.h"
+//#include "PcoBufferCtrlObj.h"
 
 #define PCO_BUFFER_NREVENTS 2
 struct stcXlatCode2Str {
@@ -45,7 +46,8 @@ struct stcPcoData {
 	//int	interface_type;
 
 	PCO_SC2_CL_TRANSFER_PARAM clTransferParam;
-
+	int pcoError;
+        char pcoErrorMsg[ERR_SIZE+1];
 
 	double	cocRunTime;		/* cam operation code - delay & exposure time & readout in s*/
 	double	frameRate;
@@ -114,7 +116,6 @@ struct stcBinning {
 	unsigned int y;			/* amount to bin/group y data.                 */
 };
 
-char* _PcoCheckError(int err) ;
 
 namespace lima
 {
@@ -157,17 +158,23 @@ namespace lima
 
 		SyncCtrlObj*	_getSyncCtrlObj() { return m_sync;}
 		struct stcPcoData * _getPcoData() {return & m_pcoData; }
+		char* _PcoCheckError(int err) ;
+		int pcoGetError() {return m_pcoData.pcoError;}
 
-    private:
+		char *_pcoSet_RecordingState(int state, int &error);
+
+	private:
 		SyncCtrlObj*	m_sync;
 
 		std::string m_log;
-        char pcoErrorMsg[ERR_SIZE+1];
+        //char pcoErrorMsg[ERR_SIZE+1];
 
 		struct stcPcoData m_pcoData;
 
         HANDLE	m_handle;				/* handle of opened camera */
         bool m_cam_connected;
+	
+		int m_pcoError;
 
         struct stcBinning m_bin;
         struct stcRoi m_roi;

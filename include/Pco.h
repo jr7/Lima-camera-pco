@@ -43,7 +43,7 @@ typedef int tPvErr;
 #define PCO_TRACE(x)  \
 { \
 		if(error){ \
-			DEB_TRACE() << "*** " <<  x << " PCO ERROR " << pcoErrorMsg; \
+			DEB_TRACE() << "*** " <<  x << " PCO ERROR " << m_pcoData.pcoErrorMsg; \
 			throw LIMA_HW_EXC(Error, x); \
 		} \
 		DEB_TRACE() << "*** " <<  x << " OK" ; \

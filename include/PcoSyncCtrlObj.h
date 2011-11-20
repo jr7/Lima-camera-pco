@@ -51,6 +51,7 @@ namespace lima
 	
 		BufferCtrlObj* _getBufferCtrlObj() {return m_buffer;}
        void setExposing(bool exposing) {m_exposing = exposing;}
+       void setStarted(bool started) {m_started = started;}
 		bool getExposing() {return m_exposing;}
 
 	
