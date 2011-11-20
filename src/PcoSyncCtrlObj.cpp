@@ -263,6 +263,7 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 
 		
 	m_started = false;
+
 }
 
 void SyncCtrlObj::getStatus(HwInterface::StatusType& status)
