@@ -6,6 +6,22 @@
 #include "HwSyncCtrlObj.h"
 #include "HwInterface.h"
 
+enum pcoAcqStatus {
+	pcoAcqIdle = 0, 
+	pcoAcqStart, 
+	pcoAcqRecordStart, 
+	pcoAcqRecordEnd,  
+	pcoAcqTransferStart, 
+	pcoAcqTransferEnd, 
+	pcoAcqStop, 
+	pcoAcqTransferStop, 
+	pcoAcqRecordTimeout,
+	pcoAcqWaitTimeout,
+	pcoAcqWaitError,
+	pcoAcqError,
+	pcoAcqPcoError,
+};
+
 namespace lima
 {
   namespace Pco
@@ -50,9 +66,9 @@ namespace lima
 		WORD getPcoAcqMode();
 	
 		BufferCtrlObj* _getBufferCtrlObj() {return m_buffer;}
-       void setExposing(bool exposing) {m_exposing = exposing;}
+       void setExposing(pcoAcqStatus exposing) {m_exposing = exposing;}
        void setStarted(bool started) {m_started = started;}
-		bool getExposing() {return m_exposing;}
+		pcoAcqStatus getExposing() {return m_exposing;}
 
 	
 	private:
@@ -68,7 +84,7 @@ namespace lima
       int		m_nb_frames;
 	  int m_nb_acq_frames;
 	  bool		m_started;
-	bool m_exposing;
+	pcoAcqStatus m_exposing;
 	
 	};
 

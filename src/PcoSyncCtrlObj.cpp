@@ -20,7 +20,7 @@ SyncCtrlObj::SyncCtrlObj(Camera *cam,BufferCtrlObj *buffer) :
   m_trig_mode(IntTrig),
   m_buffer(buffer),
   m_nb_frames(1),
-  m_exposing(false),
+  m_exposing(pcoAcqIdle),
   m_started(false)
 {
 	// DONE
@@ -139,12 +139,28 @@ WORD SyncCtrlObj::getPcoTrigMode(){
 void SyncCtrlObj::setExpTime(double exp_time)
 {
 	// DONE
+	DEB_MEMBER_FUNCT();
 
 	ValidRangesType valid_ranges;
   getValidRanges(valid_ranges);
 
+	
+
+  if (exp_time <valid_ranges.min_exp_time){ 
+	DEB_TRACE() << "Exposure time out of range"
+		<< DEB_VAR3(exp_time, valid_ranges.max_exp_time, valid_ranges.min_exp_time);
+	exp_time =valid_ranges.min_exp_time;
+  }
+
+  if (exp_time >valid_ranges.max_exp_time){ 
+	DEB_TRACE() << "Exposure time out of range"
+		<< DEB_VAR3(exp_time, valid_ranges.max_exp_time, valid_ranges.min_exp_time);
+	exp_time =valid_ranges.max_exp_time;
+  }
+
   if ((exp_time <valid_ranges.min_exp_time)||(exp_time >valid_ranges.max_exp_time)){ 
-     THROW_LIMA_HW_EXC(Error,"Exposure time out of range");
+	  THROW_HW_ERROR(NotSupported) << "Exposure time out of range"
+		 << DEB_VAR3(exp_time, valid_ranges.min_exp_time, valid_ranges.max_exp_time);
   }
 
   m_exp_time = exp_time;
@@ -196,7 +212,9 @@ void SyncCtrlObj::setNbFrames(int  nb_frames)
   DEB_MEMBER_FUNCT();
   DEB_PARAM() << DEB_VAR1(nb_frames);
 
+  printf("=== %s [%d] TRACE\n", __FUNCTION__, __LINE__);
   m_nb_frames = nb_frames;
+  printf("=== %s [%d] TRACE\n", __FUNCTION__, __LINE__);
 }
 
 void SyncCtrlObj::getNbFrames(int& nb_frames)
@@ -266,37 +284,78 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void SyncCtrlObj::getStatus(HwInterface::StatusType& status)
 {
 	// DONE
-	int error;
   DEB_MEMBER_FUNCT();
-  if(m_started)
-    {
-      if(m_buffer)
-		{
-		  bool exposing = m_exposing;  // pco recording
-		  m_buffer->getStatus(error); // pco error
+DEB_TRACE() << DEB_VAR3(m_started, m_buffer, m_exposing);
+printf("=============================================================================\n");
 
-		  if(error)
-			{ // pco error
+  if(m_started){
+      if(m_buffer){
+			//int error;
+		  //m_buffer->getStatus(error); // pco error - no sense throw ....
+
+		  switch(m_exposing) {
+
+			case pcoAcqStart: 
+			case pcoAcqRecordStart: 
+			  status.acq = AcqRunning;
+			  status.det = DetExposure;
+			  break;
+
+			case pcoAcqRecordEnd:  
+			case pcoAcqTransferStart: 
+			  status.acq = AcqRunning;
+			  status.det = DetIdle;
+			  break;
+
+			case pcoAcqRecordTimeout:
+			case pcoAcqWaitTimeout:
+			case pcoAcqWaitError:
+			case pcoAcqError:
+			case pcoAcqPcoError:
 			  status.acq = AcqFault;
 			  status.det = DetFault;
-			}
-		  else
-			{	// pco error -> OK
-			  status.acq = AcqRunning;
-			  status.det = exposing ? DetExposure : DetIdle;
-			}
-		}
-      else			// m_buff = NULL / video mode, don't need to be precise
-		{
-		  status.acq = AcqRunning;
-		  status.det = DetExposure;
-		}
-    }
-  else
-    { // not started
+			  break;
+
+
+			case pcoAcqStop: 
+			case pcoAcqTransferStop: 
+			case pcoAcqIdle: 
+			case pcoAcqTransferEnd: 
+		      status.acq = AcqReady;
+			  status.det = DetIdle;
+			  break;
+
+
+			default:
+					THROW_HW_ERROR(NotSupported) << "Undefined value";
+		  } // sw
+		} // m_buffer
+    } else { // not started
       status.acq = AcqReady;
       status.det = DetIdle;
     }

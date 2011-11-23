@@ -23,9 +23,11 @@ Interface::Interface(Camera *cam) :
   m_sync = new SyncCtrlObj(cam, m_buffer);
   cam->m_sync = m_sync;
 
+  	DEB_TRACE() << DEB_VAR2(cam, m_buffer);
+
   if(m_buffer){
     m_buffer->m_sync = m_sync;
-    m_buffer->m_cam = cam;  
+    //m_buffer->m_cam = cam;  
   }
 
   //m_buffer->m_buffer_cb_mgr;

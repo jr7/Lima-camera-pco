@@ -158,7 +158,7 @@ namespace lima
 
 		SyncCtrlObj*	_getSyncCtrlObj() { return m_sync;}
 		struct stcPcoData * _getPcoData() {return & m_pcoData; }
-		char* _PcoCheckError(int err) ;
+		char* _PcoCheckError(int err, int&error) ;
 		int pcoGetError() {return m_pcoData.pcoError;}
 
 		char *_pcoSet_RecordingState(int state, int &error);

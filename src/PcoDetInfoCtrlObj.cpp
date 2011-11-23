@@ -21,10 +21,13 @@ DetInfoCtrlObj::~DetInfoCtrlObj()
 
 void DetInfoCtrlObj::getMaxImageSize(Size& max_image_size)
 {
+	static char *fnId="DetInfoCtrlObj::getMaxImageSize";
+
   // ---- DONE
   DWORD width,height;
   m_cam->getMaxWidthHeight(width,height);
   max_image_size = Size(int(width),int(height));
+	printf("=== %s [%d]> width[%d] height[%d]\n", fnId, __LINE__, int(width),int(height));
 }
 
 void DetInfoCtrlObj::getDetectorImageSize(Size& det_image_size)

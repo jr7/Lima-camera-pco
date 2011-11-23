@@ -9,9 +9,18 @@
 
 
 struct stcAllocBuff {
-		SHORT	bufferNr[8];				// bufnrM buffer number allocated by PCO_AllocateBuffer
-        //WORD	*bufferPtr[8];			// buffer allocated by PCO_AllocateBuffer
-        HANDLE bufferEvent[8];
+		bool pcoAllocBufferDone;
+		bool createEventsDone;
+		
+		SHORT	pcoAllocBufferNr[8];				// bufnrM buffer number allocated by PCO_AllocateBuffer
+        WORD	*pcoAllocBufferPtr[8];			// buffer allocated by PCO_AllocateBuffer
+        DWORD	dwPcoAllocBufferSize[8];			// buffer allocated by PCO_AllocateBuffer
+
+		WORD	*limaAllocBufferPtr[8];			// buffer allocated by Lima
+        DWORD	dwLimaAllocBufferSize[8];			// buffer allocated by Lima
+
+		//HANDLE bufferEvent[8];
+        HANDLE bufferAllocEvent[8];
 
         DWORD bufferAssignedFrameFirst[8];
         DWORD bufferAssignedFrameLast[8];
@@ -49,11 +58,14 @@ namespace lima
         int _xferImag();
 		  
 		bool _getRequestStop() { return m_requestStop;}
+		void _pcoAllocBuffersFree();
 	
 	private:
+		Cond cond;
 		Camera* m_cam;
 		int _assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, DWORD dwRequestedFrames, int bufIdx);
-
+		
+		void _pcoAllocBuffers();
 		struct stcAllocBuff m_allocBuff;
 		unsigned long	m_frames_per_buffer;
 		//-------------------------------------------------------------
@@ -62,6 +74,7 @@ namespace lima
 		int        	m_frame[2];
 		SyncCtrlObj* 	m_sync;
 		bool m_requestStop;
+		int m_ImageBufferSize;
 
 	};
   }
