@@ -24,6 +24,8 @@
 #define PCO_ERRT_H_CREATE_OBJECT
 #define BYPASS
 
+#define BUFF_INFO_SIZE 5000
+
 #include <cstdlib>
 #include <process.h>
 
@@ -466,6 +468,20 @@ void Camera::startAcq()
 //		PCO_ArmCamera(hCam)
 //-----------------------------------------------------------------------------------------------
 
+
+// SC2_SDK_FUNC int WINAPI PCO_SetMetaDataMode(HANDLE ph, WORD wMetaDataMode, WORD* wMetaDataSize,
+//                                            WORD* wMetaDataVersion);
+// This option is only available with pco.dimax
+// In: HANDLE ph -> Handle to a previously opened camera.
+//     WORD  wMetaDataMode -> WORD variable to set the meta data mode.
+//     WORD* wMetaDataSize -> Pointer to a WORD variable receiving the meta data size.
+//     WORD* wMetaDataVersion -> Pointer to a WORD variable receiving the meta data version.
+// Out: int -> Error message.
+
+    error = PcoCheckError(PCO_SetMetaDataMode(m_handle, (WORD)0, &m_pcoData.wMetaDataSize, &m_pcoData.wMetaDataVersion));
+    PCO_TRACE("PCO_SetMetaDataMode") ;
+
+
     // ------------------------------------------------- arm camera
     error = PcoCheckError(PCO_ArmCamera(m_handle));
     PCO_TRACE("PCO_ArmCamera") ;
@@ -621,7 +637,7 @@ void pco_acq_thread(void *argin) {
 
 	m_sync->setExposing(pcoAcqRecordStart);
 
-	printf("=== %s [%d]> TRACE %s\n", fnId, __LINE__, "while cam recording");
+	//printf("=== %s [%d]> TRACE %s\n", fnId, __LINE__, "while cam recording");
 	while(_dwValidImageCnt <  (DWORD) nb_frames) {
 		Sleep(dwMsSleep);	
 		msg = m_cam->_PcoCheckError(PCO_GetNumberOfImagesInSegment(m_handle, wSegment, &_dwValidImageCnt, &_dwMaxImageCnt), error);
@@ -644,7 +660,7 @@ void pco_acq_thread(void *argin) {
 		}
 	}
 
-	printf("=== %s [%d]> TRACE %s\n", fnId, __LINE__, "end cam recording");
+	//printf("=== %s [%d]> TRACE %s\n", fnId, __LINE__, "end cam recording");
 	msg = m_cam->_pcoSet_RecordingState(0, error);
 	if(error) {
 		printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, msg);
@@ -665,7 +681,7 @@ void pco_acq_thread(void *argin) {
 	nb_acq_frames = (_dwValidImageCnt < (DWORD) nb_frames) ? _dwValidImageCnt : nb_frames;
 	m_sync->setAcqFrames(nb_acq_frames);
 
-	printf("=== %s [%d]> TRACE %s [[%ld]\n", fnId, __LINE__, "while cam recording", _dwValidImageCnt);
+	//printf("=== %s [%d]> TRACE %s [[%ld]\n", fnId, __LINE__, "while cam recording", _dwValidImageCnt);
 
 	if(m_sync->getExposing() != pcoAcqStop) {
 		pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImag();
@@ -782,7 +798,7 @@ unsigned long Camera::pcoGetFramesMax(int segmentPco){
 		unsigned long xroisize,yroisize;
 		unsigned long long pixPerFrame, pagesPerFrame;
 
-		printf("=== %s> segmentPco[%d]\n", fnId, segmentPco);
+		//printf("=== %s> segmentPco[%d]\n", fnId, segmentPco);
 		if((segmentPco <1) ||(segmentPco > PCO_MAXSEGMENTS)) {
 			printf("=== %s> ERROR segmentPco[%d]\n", fnId, segmentPco);
 			return -1;
@@ -793,13 +809,13 @@ unsigned long Camera::pcoGetFramesMax(int segmentPco){
 
 		pixPerFrame = (unsigned long long)xroisize * (unsigned long long)xroisize;
 
-		printf("=== %s> pixPerFrame[(%ld x %ld) = %lld]\n", fnId, xroisize, xroisize, pixPerFrame);
+		//printf("=== %s> pixPerFrame[(%ld x %ld) = %lld]\n", fnId, xroisize, xroisize, pixPerFrame);
 		if(pixPerFrame <0) {
 			printf("=== %s> ERROR pixPerFrame[%lld]\n", fnId, pixPerFrame);
 			return -1;
 		}
 
-		printf("=== %s> m_pcoData.wPixPerPage[%d]\n", fnId, m_pcoData.wPixPerPage);
+		//printf("=== %s> m_pcoData.wPixPerPage[%d]\n", fnId, m_pcoData.wPixPerPage);
 		if(m_pcoData.wPixPerPage < 1) {
 			printf("=== %s> ERROR m_pcoData.wPixPerPage[%d]\n", fnId, m_pcoData.wPixPerPage);
 			return -1;
@@ -809,11 +825,19 @@ unsigned long Camera::pcoGetFramesMax(int segmentPco){
 
 		framesMax = m_pcoData.dwMaxFramesInSegment[segmentArr] = (unsigned long)(((long long) m_pcoData.dwSegmentSize[segmentArr] ) / pagesPerFrame);
 
-		printf("=== %s> framesMax[%ld]\n", fnId, framesMax);
+		//printf("=== %s> framesMax[%ld]\n", fnId, framesMax);
 		return framesMax;
 	}
 //=========================================================================================================
 //=========================================================================================================
+
+//=========================================================================================================
+//=========================================================================================================
+
+char *Camera::getInfo(){
+	static char buff[BUFF_INFO_SIZE +1];
+	return getInfo(buff, BUFF_INFO_SIZE);
+}
 
 char *Camera::getInfo(char *output, int lg){
 	DEB_MEMBER_FUNCT();
@@ -852,6 +876,9 @@ char *Camera::getInfo(char *output, int lg){
 		ptr += sprintf_s(ptr, ptrMax - ptr, "* _exposure=[%g s]\n", _exposure);
 		ptr += sprintf_s(ptr, ptrMax - ptr, "* _delay=[%g s]\n", _delay);
 		
+
+		ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.armWidth=[%d] .armHeight=[%d] \n",  m_pcoData.armWidth,  m_pcoData.armHeight);
+		ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.wMetaDataSize=[%d] .wMetaDataVersion=[%d] \n",  m_pcoData.wMetaDataSize,  m_pcoData.wMetaDataVersion);
 
 		int iFrames;
 		m_sync->getNbFrames(iFrames);
@@ -1008,16 +1035,23 @@ char *Camera::_pcoSet_Cameralink_GigE_Parameters(int &error){
 
             // ---- no break
             
+// SC2_SDK_FUNC int WINAPI PCO_CamLinkSetImageParameters(HANDLE ph, WORD wxres, WORD wyres);
+// Neccessary while using a CamLink interface
+// If there is a change in buffer size (ROI, binning) this function has to be called 
+// with the new x and y resolution. Additionally this function has to be called, if you
+// switch to another camRAM segment and like to get images.
+// In: HANDLE ph -> Handle to a previously opened camera.
+//     WORD wxres -> X Resolution of the images to be transferred
+//     WORD wyres -> Y Resolution of the images to be transferred
+// Out: int -> Error message.
         case INTERFACE_ETHERNET:
-		    WORD xsent, ysent;
+		    WORD wXres, wYres;
 
-            xsent= m_pcoData.armWidth;
-            ysent= m_pcoData.armHeight;
-
-			error = PcoCheckError(PCO_CamLinkSetImageParameters(m_handle, xsent, ysent));
+            wXres= m_pcoData.armWidth;
+            wYres= m_pcoData.armHeight;
+			printf("=== %s> PCO_CamLinkSetImageParameters wXres[%d] wYres[%d]\n", fnId, wXres, wYres);
+			error = PcoCheckError(PCO_CamLinkSetImageParameters(m_handle, wXres, wYres));
 			if(error) return "PCO_CamLinkSetImageParameters";
-
-            break;
 
         default: break;
     } // case

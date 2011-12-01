@@ -211,10 +211,10 @@ void SyncCtrlObj::setNbFrames(int  nb_frames)
 	// DONE
   DEB_MEMBER_FUNCT();
   DEB_PARAM() << DEB_VAR1(nb_frames);
-
-  printf("=== %s [%d] TRACE\n", __FUNCTION__, __LINE__);
+//rh	
+  //printf("=== %s [%d] TRACE\n", __FUNCTION__, __LINE__);
   m_nb_frames = nb_frames;
-  printf("=== %s [%d] TRACE\n", __FUNCTION__, __LINE__);
+  //printf("=== %s [%d] TRACE\n", __FUNCTION__, __LINE__);
 }
 
 void SyncCtrlObj::getNbFrames(int& nb_frames)
@@ -240,11 +240,15 @@ void SyncCtrlObj::getNbHwFrames(int& nb_frames)
 
 void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 {
+	static char *fnId = "SyncCtrlObj::getValidRanges";
 	// DONE
+	//rh
+	//printf("=== %s> [enter]\n", fnId);
   valid_ranges.min_exp_time = m_cam->m_pcoData.pcoInfo.dwMinExposureDESC * 1e-9 ;	//Minimum exposure time in ns
   valid_ranges.max_exp_time = m_cam->m_pcoData.pcoInfo.dwMaxExposureDESC * 1e-3 ;   // Maximum exposure time in ms  
   valid_ranges.min_lat_time = 0.; // Don't know
   valid_ranges.max_lat_time = 0.; // Don't know
+	//printf("=== %s> [exit]\n", fnId);
 }
 
 void SyncCtrlObj::startAcq()
@@ -311,7 +315,6 @@ void SyncCtrlObj::getStatus(HwInterface::StatusType& status)
 	// DONE
   DEB_MEMBER_FUNCT();
 DEB_TRACE() << DEB_VAR3(m_started, m_buffer, m_exposing);
-printf("=============================================================================\n");
 
   if(m_started){
       if(m_buffer){

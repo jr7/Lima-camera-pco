@@ -80,7 +80,7 @@ struct stcPcoData {
 		unsigned int maxHeight;        //unsigned int ymax;
 		WORD armWidth;		//unsigned int xarm;		/* Last armed ccd size */
 		WORD armHeight;  //unsigned int yarm;
-
+		WORD wMetaDataSize, wMetaDataVersion;
 
 };
 
@@ -147,6 +147,7 @@ namespace lima
         void getCameraName(std::string& name);
 
         char *getInfo(char *output, int lg);
+        char *getInfo();
 
         unsigned long pcoGetFramesMax(int segmentPco);
 
