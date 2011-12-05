@@ -1,3 +1,8 @@
+#undef COMPILE_EMPTY
+//#define COMPILE_EMPTY
+
+//#define DEBUG_H
+
 #define PCO_ERRT_H_CREATE_OBJECT
 
 #define DATA_NR_FRAMES 50
@@ -8,31 +13,10 @@
 
 #undef __BYPASSINLINE__
 
-/***
-#include <stdio.h>
-
-#define DEBUG_H
-#define HWMAXIMAGESIZECALLBACK_H
-
-#include "Compatibility.h"
-#include "PCO_Structures.h"
-#include "PCO_ConvStructures.h"
-#include "Pco_ConvDlgExport.h"
-#include "sc2_SDKStructures.h"
-#include "SC2_CamExport.h"
-#include "sc2_defs.h"
-#include "SC2_SDKAddendum.h"
-#include <math.h>
-#include <time_compat.h>
-
 #include "Debug.h"
-#include "Pco.h"
-#include "..\..\camera\pco\sdk\pco-sdk-113\include\sc2_SDKStructures.h"
-#include "..\..\include\sc2_defs.h"
-#include "..\..\include\PCO_err.h"
-#include "..\..\include\PCO_errt.h"
-*/
 
+
+#ifndef COMPILE_EMPTY
 #include "Constants.h"
 #include "CtControl.h"
 #include "CtAcquisition.h"
@@ -43,14 +27,16 @@
 #include "PcoSyncCtrlObj.h"
 #include "PCO_errt.h"
 #include "PoolThreadMgr.h"
+#endif
 
 
+
+#ifndef COMPILE_EMPTY
 #include "load.h"
+#endif
 
 #pragma pack (4)
 #pragma pack ()
-
-
 
 
 int getlib(void);
@@ -77,37 +63,7 @@ enum DebFormat {
 };
 ***********/
 #define DEBUG_FORMAT 0x30
-
-/*********
-enum DebType {
-	DebTypeFatal		= 1 << 0,  1
-	DebTypeError		= 1 << 1,  2
-	DebTypeWarning		= 1 << 2,  4
-	DebTypeTrace		= 1 << 3,  8
-	DebTypeFunct		= 1 << 4,  10
-	DebTypeParam		= 1 << 5,  20
-	DebTypeReturn		= 1 << 6,  40
-	DebTypeAlways		= 1 << 7,  80
-};
-***********/
 #define DEBUG_TYPE 0xffffffff
-
-/*********
-enum DebModule {
-	DebModNone		= 1 << 0,
-	DebModCommon		= 1 << 1,
-	DebModHardware		= 1 << 2,
-	DebModHardwareSerial	= 1 << 3,
-	DebModControl		= 1 << 4,
-	DebModEspia		= 1 << 5,
-	DebModEspiaSerial	= 1 << 6,
-	DebModFocla		= 1 << 7,
-	DebModCamera		= 1 << 8,
-	DebModCameraCom		= 1 << 9,
-	DebModTest		= 1 << 10,
-	DebModApplication	= 1 << 11,
-};
-***********/
 #define DEBUG_MODULE 0xffffffff
 
 
@@ -134,11 +90,27 @@ enum DebModule {
 
 //===============================================================================================================
 //===============================================================================================================
-namespace lima {
+using namespace lima;
+
+#if 0
+	DebParams::Flags lima::DebParams::s_type_flags;
+DebParams::Flags lima::DebParams::s_fmt_flags;
+DebParams::Flags lima::DebParams::s_mod_flags;
+Mutex LIMACORE_API  *DebParams::s_mutex = NULL;
+LIMACORE_API DebStream *DebParams::s_deb_stream = NULL;
+#endif
+
+DEB_GLOBAL_NAMESPC(DebModNone,"main")	;
 
 int myMain(int argc, char* argv[])
 {
+#ifndef COMPILE_EMPTY
 	char *fnId; fnId = "main";
+
+
+	//DEB_GLOBAL_FUNCT();
+	DebObj deb(getDebParams(), false, __FUNCTION__,
+		   NULL, __FILE__, __LINE__);
 
 	//char info[INFO_SIZE+1];
 	char *msg;
@@ -150,7 +122,7 @@ int myMain(int argc, char* argv[])
 
 	static int err;
 
-
+	
 	printf("\n\n[%s %d] ======================= %s\r\n", __FILE__, __LINE__, "pco.camera demo program");
 	err = getlib();
 	if (err != 0)
@@ -170,7 +142,7 @@ int myMain(int argc, char* argv[])
 	//DebParams::setFormatFlags(DEBUG_FORMAT);
 
 	msg = "new cam" ; printf("\n\n%s> ======================= [%s %d]\r\n", msg, __FILE__, __LINE__);
-	Pco::Camera *myCam = new Pco::Camera("x") ;
+	Pco::Camera *myCam = new Pco::Camera() ;
 
 	msg = "new if" ; printf("\n\n%s> ======================= [%s %d]\r\n", msg, __FILE__, __LINE__);
 	Pco::Interface *myIf = new Pco::Interface(myCam) ;
@@ -182,7 +154,6 @@ int myMain(int argc, char* argv[])
 	CtAcquisition* 	myCtAcq = myCt->acquisition();
 
 
-#if 1
 	CtSaving::Parameters myPar;
 	CtSaving *mySav = myCt->saving();
 
@@ -193,7 +164,6 @@ int myMain(int argc, char* argv[])
 	myPar.savingMode= CtSaving::AutoFrame;
 	myPar.overwritePolicy= CtSaving::Overwrite;
 	mySav->setParameters(myPar);
-#endif
 
 	struct stcPcoData * m_pcoData = myCam->_getPcoData();
 
@@ -224,7 +194,7 @@ int myMain(int argc, char* argv[])
 	msg = "startAcq" ; printf("\n\n%s> ======================= [%s %d]\r\n", msg, __FILE__, __LINE__);
 	myCt->startAcq();
 
-	myCt->getStatus(status);
+	//myCt->getStatus(status);
 	printf("\n\n======================================================================================= %s> SLEEP begin\n", fnId );
 
 	while(1) {
@@ -255,15 +225,17 @@ int myMain(int argc, char* argv[])
 	PoolThreadMgr::get().quit();
 	msg = "after PoolThreadMgr::get().quit()" ; printf("\n\n%s> ======================= [%s %d]\r\n", msg, __FILE__, __LINE__);
 
+#endif
 	return 0;
 }
 
-} // lima
+//} // lima
 //===============================================================================================================
 //===============================================================================================================
 
 int getlib(void)
 {
+#ifndef COMPILE_EMPTY
 	HINSTANCE SC2Lib = NULL;
 	HINSTANCE LibLimaCore = NULL;
 	HINSTANCE libprocesslib = NULL;
@@ -281,8 +253,16 @@ int getlib(void)
 
 	liblimapco = LoadLibrary("liblimapco");
 	if (liblimapco == NULL) {liberror = GetLastError(); return liberror; }
-
-	return FALSE;
+#endif
+	return 0;
 }
 
-int main(int argc, char* argv[]) { return lima::myMain(argc, argv);}
+int main(int argc, char* argv[]) { 
+	
+#ifndef COMPILE_EMPTY
+  return myMain(argc, argv);
+#else
+	return 0 ;
+#endif
+
+}

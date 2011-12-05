@@ -139,11 +139,10 @@ static char *getTimestamp(timestampFmt fmtIdx) {
 
 //=========================================================================================================
 //=========================================================================================================
-Camera::Camera(const char *ip_addr) :
+Camera::Camera() :
 	m_cam_connected(false),
 	m_acq_frame_nb(1),
 	m_sync(NULL)
-	//m_video(NULL)
 {
 	DEB_CONSTRUCTOR();
 	char msg[MSG_SIZE + 1];

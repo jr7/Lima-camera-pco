@@ -1,7 +1,6 @@
 #ifndef PCOCAMERA_H
 #define PCOCAMERA_H
 #include "Pco.h"
-//#include "PcoCamera.h"
 #include "Pco_errt.h"
 #include "Debug.h"
 #include "Constants.h"
@@ -84,19 +83,6 @@ struct stcPcoData {
 
 };
 
-
-//struct stcSize {
-  //unsigned int    m_maxwidth, m_maxheight;
-  //unsigned int    m_pixbits, m_pixbytes;
-
-  //unsigned int maxwidth;		// unsigned int xmax;		/* Max size */
-	//unsigned int maxheight;        //unsigned int ymax;
-	//WORD armwidth;		//unsigned int xarm;		/* Last armed ccd size */
-	//WORD armheight;  //unsigned int yarm;
-	//unsigned int pixbytes;     //unsigned int depth;
-	//unsigned int pixbits;        //unsigned int bits;
-//};
-
 enum enumChange {
 	Invalid, Valid, Changed,
 };
@@ -129,7 +115,7 @@ namespace lima
       friend class SyncCtrlObj;
       DEB_CLASS_NAMESPC(DebModCamera,"Camera","Pco");
       public:
-        Camera(const char*);
+        Camera();
         ~Camera();
 
         void 	startAcq();
@@ -198,8 +184,6 @@ namespace lima
     };
   }
 }
-
-
 
 
 #endif
