@@ -216,7 +216,7 @@ int myMain(int argc, char* argv[])
 
 	msg = "getInfo" ; printf("\n\n%s> ======================= [%s %d]\r\n", msg, __FILE__, __LINE__);
 	//printf("%s\n", myCam->getInfo(info, INFO_SIZE));
-	printf("%s\n", myCam->getInfo());
+	printf("%s\n", myCam->getInfo(""));
 
 	msg = "delete cam" ; printf("\n\n%s> ======================= [%s %d]\r\n", msg, __FILE__, __LINE__);
 	delete myCam;

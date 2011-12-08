@@ -132,8 +132,8 @@ namespace lima
 
         void getCameraName(std::string& name);
 
-        char *getInfo(char *output, int lg);
-        char *getInfo();
+        char *getInfo(char *cmd, char *output, int lg);
+        char *getInfo(char *cmd);
 
         unsigned long pcoGetFramesMax(int segmentPco);
 

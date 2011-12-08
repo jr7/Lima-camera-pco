@@ -209,6 +209,12 @@ Camera::Camera() :
 
 	errMsg = _pcoGet_TemperatureInfo(error);
 	PCO_TRACE(errMsg) ;
+
+	{
+		WORD wRecState = 0x0000;   // 0x0001 => START acquisition  (0 for tests)     
+		error = PcoCheckError(PCO_SetRecordingState(m_handle, wRecState));
+		PCO_TRACE("PCO_SetRecordingState") ;
+	}
 	
 	
 // block #1 -- Get RAM size
@@ -687,6 +693,8 @@ void pco_acq_thread(void *argin) {
 		m_sync->setExposing(status);
 	}
 
+	m_sync->stopAcq();
+
 	printf("=== %s> EXIT\n", fnId);
 	_endthread();
 }
@@ -833,78 +841,100 @@ unsigned long Camera::pcoGetFramesMax(int segmentPco){
 //=========================================================================================================
 //=========================================================================================================
 
-char *Camera::getInfo(){
+char *Camera::getInfo(char *cmd){
 	static char buff[BUFF_INFO_SIZE +1];
-	return getInfo(buff, BUFF_INFO_SIZE);
+	return getInfo(cmd, buff, BUFF_INFO_SIZE);
 }
 
-char *Camera::getInfo(char *output, int lg){
+char *Camera::getInfo(char *cmd, char *output, int lg){
 	DEB_MEMBER_FUNCT();
 		char *ptr, *ptrMax;
 		int segmentPco = m_pcoData.activeRamSegment;
 		int segmentArr = segmentPco -1;
 
+		
 		ptr = output; *ptr = 0;
 		ptrMax = ptr + lg;
 
 		int width = +20;
 
-		ptr += sprintf_s(ptr, ptrMax - ptr,"**** %s [begin]\n", __FUNCTION__);
+		if( (cmd == NULL) || (*cmd == 0)) {
+			ptr += sprintf_s(ptr, ptrMax - ptr,"**** %s [begin]\n", __FUNCTION__);
 
-		ptr += sprintf_s(ptr, ptrMax - ptr,"**** PCO log\n");
-		ptr += sprintf_s(ptr, ptrMax - ptr,"%s\n", m_log.c_str());
+			ptr += sprintf_s(ptr, ptrMax - ptr,"**** PCO log\n");
+			ptr += sprintf_s(ptr, ptrMax - ptr,"%s\n", m_log.c_str());
 
-		ptr += sprintf_s(ptr, ptrMax - ptr,"**** PCO Info\n");
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* timestamp[%s]\n", getTimestamp(Iso));
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* cam_name[%s]\n", m_pcoData.camera_name);
+			ptr += sprintf_s(ptr, ptrMax - ptr,"**** PCO Info\n");
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* timestamp[%s]\n", getTimestamp(Iso));
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* cam_name[%s]\n", m_pcoData.camera_name);
 
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* roi X(%d,%d) Y(%d,%d) size(%d,%d)\n",  
-				m_roi.x[0], m_roi.x[1],
-				m_roi.y[0], m_roi.y[1],
-				m_roi.x[1] - m_roi.x[0] + 1, m_roi.y[1] - m_roi.y[0] + 1);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* roi X(%d,%d) Y(%d,%d) size(%d,%d)\n",  
+					m_roi.x[0], m_roi.x[1],
+					m_roi.y[0], m_roi.y[1],
+					m_roi.x[1] - m_roi.x[0] + 1, m_roi.y[1] - m_roi.y[0] + 1);
 
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* m_cocRunTime=[%g s]\n",  m_pcoData.cocRunTime);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* m_frameRate=[%g fps]\n", m_pcoData.frameRate);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_cocRunTime=[%g s]\n",  m_pcoData.cocRunTime);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_frameRate=[%g fps]\n", m_pcoData.frameRate);
 
-		double _exposure, _delay;
-        m_sync->getExpTime(_exposure);
-        m_sync->getLatTime(_delay);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.storage_mode=[%d]\n", m_pcoData.storage_mode);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.recorder_submode=[%d]\n", m_pcoData.recorder_submode);
-		
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* _exposure=[%g s]\n", _exposure);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* _delay=[%g s]\n", _delay);
-		
+			double _exposure, _delay;
+			m_sync->getExpTime(_exposure);
+			m_sync->getLatTime(_delay);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.storage_mode=[%d]\n", m_pcoData.storage_mode);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.recorder_submode=[%d]\n", m_pcoData.recorder_submode);
+			
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* _exposure=[%g s]\n", _exposure);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* _delay=[%g s]\n", _delay);
+			
 
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.armWidth=[%d] .armHeight=[%d] \n",  m_pcoData.armWidth,  m_pcoData.armHeight);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.wMetaDataSize=[%d] .wMetaDataVersion=[%d] \n",  m_pcoData.wMetaDataSize,  m_pcoData.wMetaDataVersion);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.armWidth=[%d] .armHeight=[%d] \n",  m_pcoData.armWidth,  m_pcoData.armHeight);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.wMetaDataSize=[%d] .wMetaDataVersion=[%d] \n",  m_pcoData.wMetaDataSize,  m_pcoData.wMetaDataVersion);
 
-		int iFrames;
-		m_sync->getNbFrames(iFrames);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* m_sync->getNbFrames=[%d frames]\n", iFrames);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* PcoActiveSegment=[%d]\n", segmentArr+1);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.dwMaxFramesInSegment[%d]=[%d frames]\n", segmentArr, m_pcoData.dwMaxFramesInSegment[segmentArr]);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.dwSegmentSize[%d]=[%d pages]\n", segmentArr, m_pcoData.dwSegmentSize[segmentArr]);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.wPixPerPage[%d pix]\n", m_pcoData.wPixPerPage);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.dwValidImageCnt[%d]=[%ld]\n", segmentArr, m_pcoData.dwValidImageCnt[segmentArr]);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.dwMaxImageCnt[%d]=[%ld]\n", segmentArr, m_pcoData.dwMaxImageCnt[segmentArr]);
+			int iFrames;
+			m_sync->getNbFrames(iFrames);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_sync->getNbFrames=[%d frames]\n", iFrames);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* PcoActiveSegment=[%d]\n", segmentArr+1);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.dwMaxFramesInSegment[%d]=[%d frames]\n", segmentArr, m_pcoData.dwMaxFramesInSegment[segmentArr]);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.dwSegmentSize[%d]=[%d pages]\n", segmentArr, m_pcoData.dwSegmentSize[segmentArr]);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.wPixPerPage[%d pix]\n", m_pcoData.wPixPerPage);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.dwValidImageCnt[%d]=[%ld]\n", segmentArr, m_pcoData.dwValidImageCnt[segmentArr]);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData.dwMaxImageCnt[%d]=[%ld]\n", segmentArr, m_pcoData.dwMaxImageCnt[segmentArr]);
 
 
-/***
-		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%s]\n", width,"fileDir", ds->ccd.file.image_dir);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%s]\n", width, "filePrefix", ds->ccd.file.image_prefix);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%s]\n", width, "fileSuffix", ds->ccd.file.image_suffix);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%s]\n", width, "fileNoFmt", ds->ccd.file.image_no_fmt);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%d]\n", width, "fileNo", ds->ccd.file.image_no);
+	/***
+			ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%s]\n", width,"fileDir", ds->ccd.file.image_dir);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%s]\n", width, "filePrefix", ds->ccd.file.image_prefix);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%s]\n", width, "fileSuffix", ds->ccd.file.image_suffix);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%s]\n", width, "fileNoFmt", ds->ccd.file.image_no_fmt);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%d]\n", width, "fileNo", ds->ccd.file.image_no);
 
-		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%s]\n", width, "sinogram fileDir", ds->ccd.sinogram.fileDir);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%d][%d]\n", width, "sinogram cols", ds->ccd.sinogram.col_beg, ds->ccd.sinogram.col_end);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%d][%d]\n", width, "sinogram rows", ds->ccd.sinogram.row_beg, ds->ccd.sinogram.row_end);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%d]\n", width, "sinogram frames", ds->ccd.sinogram.nr_frames);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%d]\n", width, "sinogram saving", ds->ccd.sinogram.saving);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%s]\n", width, "sinogram fileDir", ds->ccd.sinogram.fileDir);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%d][%d]\n", width, "sinogram cols", ds->ccd.sinogram.col_beg, ds->ccd.sinogram.col_end);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%d][%d]\n", width, "sinogram rows", ds->ccd.sinogram.row_beg, ds->ccd.sinogram.row_end);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%d]\n", width, "sinogram frames", ds->ccd.sinogram.nr_frames);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "*%*s = [%d]\n", width, "sinogram saving", ds->ccd.sinogram.saving);
 
-****/
-		ptr += sprintf_s(ptr, ptrMax - ptr,"**** %s [end]\n", __FUNCTION__);
+	****/
+			ptr += sprintf_s(ptr, ptrMax - ptr,"**** %s [end]\n", __FUNCTION__);
+			return output;
+		}
+
+		if(_stricmp(cmd, "cocRunTime") == 0){
+			ptr += sprintf_s(ptr, ptrMax - ptr, "%g",  m_pcoData.cocRunTime);
+			return output;
+		}
+
+
+		if(_stricmp(cmd, "frameRate") == 0){
+			ptr += sprintf_s(ptr, ptrMax - ptr, "%g", m_pcoData.frameRate);
+			return output;
+		}
+
+		if(_stricmp(cmd, "maxNbImages") == 0){
+			ptr += sprintf_s(ptr, ptrMax - ptr, "%ld", m_pcoData.dwMaxImageCnt[segmentArr]);
+			return output;
+		}
+
+		sprintf_s(ptr, ptrMax - ptr, "ERROR unknown cmd [%s]", cmd);
 		return output;
 }
 
