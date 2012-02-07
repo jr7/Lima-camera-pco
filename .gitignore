@@ -10,3 +10,7 @@ sdk-org
 *.bck
 *target*
 *.txt
+*.h.*
+*.cpp.*
+*.sip.*
+*.py.*
