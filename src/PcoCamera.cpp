@@ -426,8 +426,8 @@ void Camera::startAcq()
     char *fnId = "StartAcq";
     WORD state;
     HANDLE hEvent= NULL;
-    //float factor;
-    int error;
+
+	int error;
 	char *msg;
 
     //------------------------------------------------- set binning if needed
@@ -487,11 +487,8 @@ void Camera::startAcq()
     if (state>0) {
         DEB_TRACE() << "Force recording state to 0x0000" ;
 
-        //error = PcoCheckError(PCO_SetRecordingState(m_handle, 0x0000));
 		_pcoSet_RecordingState(0, error);
         PCO_TRACE("PCO_SetRecordingState") ;
-
-
 	}
 
 //-----------------------------------------------------------------------------------------------
@@ -502,104 +499,55 @@ void Camera::startAcq()
 //		In case of CamLink and GigE interface: PCO_CamLinkSetImageParameters(actualsizex, actualsizey)
 //		PCO_ArmCamera(hCam)
 //-----------------------------------------------------------------------------------------------
-// SC2_SDK_FUNC int WINAPI PCO_SetMetaDataMode(HANDLE ph, WORD wMetaDataMode, WORD* wMetaDataSize,
-//                                            WORD* wMetaDataVersion);
-// This option is only available with pco.dimax
-// In: HANDLE ph -> Handle to a previously opened camera.
-//     WORD  wMetaDataMode -> WORD variable to set the meta data mode.
-//     WORD* wMetaDataSize -> Pointer to a WORD variable receiving the meta data size.
-//     WORD* wMetaDataVersion -> Pointer to a WORD variable receiving the meta data version.
-// Out: int -> Error message.
+	
+	msg = _set_metadata_mode(0, error); PCO_TRACE(msg) ;
 
-    error = PcoCheckError(PCO_SetMetaDataMode(m_handle, (WORD)0, &m_pcoData->wMetaDataSize, &m_pcoData->wMetaDataVersion));
-    PCO_TRACE("PCO_SetMetaDataMode") ;
-
-    // ------------------------------------------------- arm camera
+	// ------------------------------------------------- arm camera
     error = PcoCheckError(PCO_ArmCamera(m_handle));
     PCO_TRACE("PCO_ArmCamera") ;
 
 
-        //====================================== get the coc runtime 
-        //---- only valid if it was used PCO_SetDelayExposureTime
-        //---- and AFTER armed the cam
-    {
-        DWORD dwTime_s, dwTime_ns;
-        double runTime;
-
-        error = PcoCheckError(PCO_GetCOCRuntime(m_handle, &dwTime_s, &dwTime_ns));
-        PCO_TRACE("PCO_GetCOCRuntime") ;
-
-        m_pcoData->cocRunTime = runTime = ((double) dwTime_ns * 1.0E-9) + (double) dwTime_s;
-        m_pcoData->frameRate = (dwTime_ns | dwTime_s) ? 1.0 / runTime : 0.0;
-
-        DEB_TRACE() << DEB_VAR2(m_pcoData->frameRate, m_pcoData->cocRunTime);
-    } // block
+    //====================================== get the coc runtime 
+    //---- only valid if it was used PCO_SetDelayExposureTime
+    //---- and AFTER armed the cam
+	msg = _get_coc_runtime(error); PCO_TRACE(msg) ;
+	
 
 
-    //====================================== get exp time
-    {
-        DWORD exposure, delay;
-        WORD wExposure_base, wDelay_base;
 
-        error = PcoCheckError(PCO_GetDelayExposureTime(m_handle, &delay, &exposure, &wDelay_base, &wExposure_base));
-        PCO_TRACE("PCO_GetDelayExposureTime") ;
-
-	    DEB_TRACE() << DEB_VAR2(delay, timebaseUnits[wDelay_base]);
-		DEB_TRACE() << DEB_VAR2(exposure, timebaseUnits[wExposure_base]);
-    }
-
-
-    //------------------------------------------------ get size
-	//   int err = PCO_GetSizes(hCamera, &wXResActual, &wYResActual, &wXResMax, &wYResMax);
-
-    
+#if 0
+	//------------------------------------------------ get size
 	error = PcoCheckError(PCO_GetSizes(m_handle, &m_pcoData->wXResActual, &m_pcoData->wYResActual, &m_pcoData->wXResMax, &m_pcoData->wYResMax));
     PCO_TRACE("PCO_GetSizes") ;
-
-	
 	error = PcoCheckError(PCO_GetPixelRate(m_handle, &m_pcoData->dwPixelRate));
     PCO_TRACE("PCO_GetPixelRate") ;
-
-
-    //------------------------------------------------- set image size for CamLink and GigE
 	msg = _pcoSet_Cameralink_GigE_Parameters(error);
 	PCO_TRACE(msg) ;
+#endif
+
+
+    //--------------------------- PREPARE / getSizes, pixelRate, clXferParam, LUT, setImgParam, Arm
+	msg = _prepare_cameralink_interface(error); PCO_TRACE(msg) ;
+
 
     //------------------------------------------------- checking nr of frames
     {
-        int segmentPco, segmentArr;
-        unsigned long frames, framesMax;
+        unsigned long framesMax;
         int iFrames;
 
-        segmentPco = m_pcoData->activeRamSegment;
-        segmentArr = segmentPco-1;
-
         m_sync->getNbFrames(iFrames);
+        framesMax = pcoGetFramesMax(m_pcoData->activeRamSegment);
 
-        //frames = m_frame.nb;
-        frames = iFrames;
-        framesMax = pcoGetFramesMax(segmentPco);
-
-        if ((frames > framesMax)) {
+        if ((((unsigned long) iFrames) > framesMax)) {
             throw LIMA_HW_EXC(Error, "frames OUT OF RANGE");
-
         }
-    } // block
-
+    } 
 
 	//------------------------------------------------- start acquisition
-	/************************************************************************************************
-	SC2_SDK_FUNC int WINAPI PCO_SetRecordingState(HANDLE ph, WORD wRecState)
-		· WORD wRecState: WORD to set the active recording state.
-			- 0x0001 = camera is running, in recording status = [run]
-			- 0x0000 = camera is idle or [stop]’ped, not ready to take images
-	**************************************************************************************************/
-
 	_pcoSet_RecordingState(1, error);
 
 	m_sync->setStarted(true);
 	m_sync->setExposing(pcoAcqRecordStart);
-    //m_frame.done= 0;
 
 	_beginthread( pco_acq_thread, 0, (void*) this);
 	return;
@@ -768,6 +716,16 @@ unsigned long Camera::pcoGetFramesMax(int segmentPco){
 		unsigned long xroisize,yroisize;
 		unsigned long long pixPerFrame, pagesPerFrame;
 
+		if(m_pcoData->stcCamType.wCamType == CAMERATYPE_PCO_EDGE) {
+			return LONG_MAX;
+		}
+
+
+		if(m_pcoData->stcCamType.wCamType != CAMERATYPE_PCO_DIMAX_STD) {
+			printf("=== %s> unknow camera type [%d]\n", fnId, m_pcoData->stcCamType.wCamType);
+			return -1;
+		}
+
 		if((segmentPco <1) ||(segmentPco > PCO_MAXSEGMENTS)) {
 			printf("=== %s> ERROR segmentPco[%d]\n", fnId, segmentPco);
 			return -1;
@@ -849,6 +807,7 @@ char *Camera::getInfo(char *cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->wXResMax=[%d] .wYResMax=[%d] \n",  m_pcoData->wXResMax,  m_pcoData->wYResMax);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->wMetaDataSize=[%d] .wMetaDataVersion=[%d] \n",  m_pcoData->wMetaDataSize,  m_pcoData->wMetaDataVersion);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->dwPixelRate=[l%d]\n",  m_pcoData->dwPixelRate);
+
 
 			int iFrames;
 			m_sync->getNbFrames(iFrames);
@@ -1083,7 +1042,6 @@ char *Camera::_prepare_cameralink_interface(int &error){
 	DEB_MEMBER_FUNCT();
 	static char *fnId = "_prepare_cameralink_interface";
 
-
 	error = PcoCheckError(PCO_GetSizes(m_handle, &m_pcoData->wXResActual, &m_pcoData->wYResActual, &m_pcoData->wXResMax, &m_pcoData->wYResMax));
     PCO_TRACE("PCO_GetSizes") ;
 
@@ -1094,14 +1052,34 @@ char *Camera::_prepare_cameralink_interface(int &error){
 	if(error) return "PCO_GetTransferParameter";
 
 
+    m_pcoData->clTransferParam.baudrate = PCO_CL_BAUDRATE_115K2;
+
 	switch(m_pcoData->stcCamType.wCamType) {
 		case CAMERATYPE_PCO_DIMAX_STD:
-            m_pcoData->clTransferParam.baudrate=115200;
-            m_pcoData->clTransferParam.DataFormat=2;
+		    m_pcoData->clTransferParam.baudrate = PCO_CL_BAUDRATE_115K2;
+			//m_pcoData->clTransferParam.Transmit = 1;
+
+			m_pcoData->clTransferParam.DataFormat=PCO_CL_DATAFORMAT_2x12; //=2
 			break;
 
 		case CAMERATYPE_PCO_EDGE:
+		    m_pcoData->clTransferParam.baudrate = PCO_CL_BAUDRATE_115K2;
+			m_pcoData->clTransferParam.Transmit = 1;
+
+			if(m_pcoData->dwPixelRate == PCO_CL_PIXELCLOCK_95MHZ) {
+				m_pcoData->clTransferParam.DataFormat=PCO_CL_DATAFORMAT_5x16 | SCCMOS_FORMAT_TOP_CENTER_BOTTOM_CENTER;
+			m_pcoData->wLUT_Identifier = 0; // Switch LUT->of
+				break;
+			}
 			
+			if(m_pcoData->dwPixelRate != PCO_CL_PIXELCLOCK_286MHZ) {
+
+				break;
+			}
+
+			m_pcoData->clTransferParam.DataFormat = PCO_CL_DATAFORMAT_5x12L | SCCMOS_FORMAT_TOP_CENTER_BOTTOM_CENTER;
+			m_pcoData->wLUT_Identifier = 0x1612; //Switch LUT->sqrt
+
 			break;
 
 		default:
@@ -1114,28 +1092,30 @@ char *Camera::_prepare_cameralink_interface(int &error){
     error = PcoCheckError(PCO_SetTransferParameter(m_handle, &m_pcoData->clTransferParam, sizeof(m_pcoData->clTransferParam)));
 	if(error) return "PCO_SetTransferParameter";
 
-
-//SC2_SDK_FUNC int WINAPI PCO_SetActiveLookupTable(HANDLE ph,
-//	WORD        *wIdentifier,            // define LUT to be activated, 0x0000 for no LUT
-//  WORD        *wParameter);            // optional parameter
+	//*****************************************************************************************
+	//SC2_SDK_FUNC int WINAPI PCO_SetActiveLookupTable(HANDLE ph,
+	//	WORD        *wIdentifier,            // define LUT to be activated, 0x0000 for no LUT
+	//  WORD        *wParameter);            // optional parameter
+	//*****************************************************************************************
 
 	if(m_pcoData->stcCamType.wCamType == CAMERATYPE_PCO_EDGE) {
-
+		m_pcoData->wLUT_Parameter = 0; 
 		error = PcoCheckError(PCO_SetActiveLookupTable(m_handle, &m_pcoData->wLUT_Identifier, &m_pcoData->wLUT_Parameter));
 		if(error) return "PCO_SetActiveLookupTabler";
-
 	}
 
 
-// SC2_SDK_FUNC int WINAPI PCO_CamLinkSetImageParameters(HANDLE ph, WORD wxres, WORD wyres);
-// Neccessary while using a CamLink interface
-// If there is a change in buffer size (ROI, binning) this function has to be called 
-// with the new x and y resolution. Additionally this function has to be called, if you
-// switch to another camRAM segment and like to get images.
-// In: HANDLE ph -> Handle to a previously opened camera.
-//     WORD wxres -> X Resolution of the images to be transferred
-//     WORD wyres -> Y Resolution of the images to be transferred
-// Out: int -> Error message.
+	//*****************************************************************************************
+	// SC2_SDK_FUNC int WINAPI PCO_CamLinkSetImageParameters(HANDLE ph, WORD wxres, WORD wyres);
+	// Neccessary while using a CamLink interface
+	// If there is a change in buffer size (ROI, binning) this function has to be called 
+	// with the new x and y resolution. Additionally this function has to be called, if you
+	// switch to another camRAM segment and like to get images.
+	// In: HANDLE ph -> Handle to a previously opened camera.
+	//     WORD wxres -> X Resolution of the images to be transferred
+	//     WORD wyres -> Y Resolution of the images to be transferred
+	// Out: int -> Error message.
+	//*****************************************************************************************
 
 	error = PcoCheckError(PCO_CamLinkSetImageParameters(m_handle, m_pcoData->wXResActual, m_pcoData->wYResActual));
 	if(error) return "PCO_CamLinkSetImageParameters";
@@ -1254,6 +1234,12 @@ char * Camera::_pcoSet_RecordingState(int state, int &error){
 
 	wRecState_new = state ? 0x0001 : 0x0000 ; // 0x0001 => START acquisition
 
+	/************************************************************************************************
+	SC2_SDK_FUNC int WINAPI PCO_SetRecordingState(HANDLE ph, WORD wRecState)
+		· WORD wRecState: WORD to set the active recording state.
+			- 0x0001 = camera is running, in recording status = [run]
+			- 0x0000 = camera is idle or [stop]’ped, not ready to take images
+	**************************************************************************************************/
 	error = PcoCheckError(PCO_GetRecordingState(m_handle, &wRecState_actual));
 	if(error) return "PCO_GetRecordingState";
 
@@ -1272,6 +1258,58 @@ char * Camera::_pcoSet_RecordingState(int state, int &error){
 	error = PcoCheckError(PCO_SetRecordingState(m_handle, wRecState_new));
 	if(error) return "PCO_SetRecordingState";
 
-	return fnId;
 }
 
+//=================================================================================================
+//=================================================================================================
+char *Camera::_get_coc_runtime(int &error){
+		
+	DEB_MEMBER_FUNCT();
+
+	static char *fnId = __FUNCTION__;
+
+	//====================================== get the coc runtime 
+    //---- only valid if it was used PCO_SetDelayExposureTime
+    //---- and AFTER armed the cam
+
+	DWORD dwTime_s, dwTime_ns;
+    double runTime;
+
+    error = PcoCheckError(PCO_GetCOCRuntime(m_handle, &dwTime_s, &dwTime_ns));
+	if(error) return "PCO_GetCOCRuntime";
+
+    m_pcoData->cocRunTime = runTime = ((double) dwTime_ns * 1.0E-9) + (double) dwTime_s;
+    m_pcoData->frameRate = (dwTime_ns | dwTime_s) ? 1.0 / runTime : 0.0;
+
+    DEB_TRACE() << DEB_VAR2(m_pcoData->frameRate, m_pcoData->cocRunTime);
+
+	return fnId;
+
+}
+
+//=================================================================================================
+//=================================================================================================
+char *Camera::_set_metadata_mode(WORD wMetaDataMode, int &error){
+		
+	DEB_MEMBER_FUNCT();
+
+	static char *fnId = __FUNCTION__;
+
+	//***************************************************************************************************
+	// SC2_SDK_FUNC int WINAPI PCO_SetMetaDataMode(HANDLE ph, WORD wMetaDataMode, WORD* wMetaDataSize,
+	//                                            WORD* wMetaDataVersion);
+	// This option is only available with pco.dimax
+	// In: HANDLE ph -> Handle to a previously opened camera.
+	//     WORD  wMetaDataMode -> WORD variable to set the meta data mode.
+	//     WORD* wMetaDataSize -> Pointer to a WORD variable receiving the meta data size.
+	//     WORD* wMetaDataVersion -> Pointer to a WORD variable receiving the meta data version.
+	// Out: int -> Error message.
+	//***************************************************************************************************
+	
+	m_pcoData->wMetaDataMode = wMetaDataMode;
+    error = PcoCheckError(PCO_SetMetaDataMode(m_handle, wMetaDataMode, &m_pcoData->wMetaDataSize, &m_pcoData->wMetaDataVersion));
+	if(error) return "PCO_SetMetaDataMode";
+
+	return fnId;
+
+}

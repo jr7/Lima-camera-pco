@@ -30,6 +30,10 @@
 #include "HwMaxImageSizeCallback.h"
 //#include "PcoBufferCtrlObj.h"
 
+#define PCO_CL_PIXELCLOCK_95MHZ 95000000
+#define PCO_CL_PIXELCLOCK_286MHZ 286000000
+#define PCO_CL_BAUDRATE_115K2	115200
+
 #define PCO_BUFFER_NREVENTS 2
 struct stcXlatCode2Str {
 		int code;
@@ -100,9 +104,8 @@ struct stcPcoData {
 		unsigned int bitsPerPix;     //unsigned int bits;
 		unsigned int maxWidth;		// unsigned int xmax;		/* Max size */
 		unsigned int maxHeight;        //unsigned int ymax;
-		//WORD wXResActual;		//unsigned int xarm;		/* Last armed ccd size */
-		//WORD wYResActual;  //unsigned int yarm;
-		WORD wMetaDataSize, wMetaDataVersion;
+
+		WORD wMetaDataMode, wMetaDataSize, wMetaDataVersion;
 		long msAcqRec, msAcqXfer, msAcqTout, msAcqTnow;
 		DWORD dwPixelRate;
 
@@ -210,6 +213,8 @@ namespace lima
 		int _init_edge();
 		int _init_dimax();
 		char *_prepare_cameralink_interface(int &error);
+		char *_get_coc_runtime(int &error);
+		char *_set_metadata_mode(WORD wMetaDataMode, int &error);
 
 
 
