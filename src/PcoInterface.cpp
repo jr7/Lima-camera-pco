@@ -1,3 +1,26 @@
+/**************************************************************************
+###########################################################################
+ This file is part of LImA, a Library for Image Acquisition
+
+ Copyright (C) : 2009-2011
+ European Synchrotron Radiation Facility
+ BP 220, Grenoble 38043
+ FRANCE
+
+ This is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+
+ This software is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, see <http://www.gnu.org/licenses/>.
+###########################################################################
+**************************************************************************/
 #include "Exceptions.h"
 
 #include "PcoInterface.h"
@@ -10,10 +33,13 @@ using namespace lima;
 using namespace lima::Pco;
 
 
+//=========================================================================================================
+char* _timestamp_pcointerface() {return __TIMESTAMP__ " (" __FILE__ ")";}
+//=========================================================================================================
 
 
-
-
+//=========================================================================================================
+//=========================================================================================================
 Interface::Interface(Camera *cam) :
   m_cam(cam)
 {
@@ -27,12 +53,12 @@ Interface::Interface(Camera *cam) :
 
   if(m_buffer){
     m_buffer->m_sync = m_sync;
-    //m_buffer->m_cam = cam;  
   }
 
-  //m_buffer->m_buffer_cb_mgr;
 }
 
+//=========================================================================================================
+//=========================================================================================================
 Interface::~Interface()
 {
 	// DONE
@@ -42,6 +68,8 @@ Interface::~Interface()
   delete m_sync;
 }
 
+//=========================================================================================================
+//=========================================================================================================
 void Interface::getCapList(CapList &cap_list) const
 {
 	// DONE
@@ -50,6 +78,8 @@ void Interface::getCapList(CapList &cap_list) const
   cap_list.push_back(HwCap(m_buffer));
 }
 
+//=========================================================================================================
+//=========================================================================================================
 void Interface::reset(ResetLevel reset_level)
 {
 	// DONE
@@ -60,6 +90,8 @@ void Interface::reset(ResetLevel reset_level)
   m_cam->reset();
 }
 
+//=========================================================================================================
+//=========================================================================================================
 void Interface::prepareAcq()
 {
   DEB_MEMBER_FUNCT();
@@ -68,6 +100,8 @@ void Interface::prepareAcq()
     m_buffer->prepareAcq();
 }
 
+//=========================================================================================================
+//=========================================================================================================
 void Interface::startAcq()
 {
   DEB_MEMBER_FUNCT();
@@ -78,6 +112,8 @@ void Interface::startAcq()
   m_sync->startAcq();
 }
 
+//=========================================================================================================
+//=========================================================================================================
 void Interface::stopAcq()
 {
 	// DONE
@@ -86,12 +122,16 @@ void Interface::stopAcq()
   m_sync->stopAcq();
 }
 
+//=========================================================================================================
+//=========================================================================================================
 void Interface::getStatus(StatusType& status)
 {
 	// DONE
   m_sync->getStatus(status);
 }
 
+//=========================================================================================================
+//=========================================================================================================
 int Interface::getNbAcquiredFrames()
 {
   DEB_MEMBER_FUNCT();
@@ -107,6 +147,8 @@ int Interface::getNbAcquiredFrames()
   return aNbAcquiredFrames;
 }
 
+//=========================================================================================================
+//=========================================================================================================
 int Interface::getNbHwAcquiredFrames()
 {
 	// DONE

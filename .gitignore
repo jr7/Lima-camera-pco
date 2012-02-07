@@ -6,3 +6,8 @@ Debug
 *.swp
 *.bck
 *target*
+build
+console
+include/PcoCamera0.h
+sdk/Digital_Camera_Toolbox
+*.txt

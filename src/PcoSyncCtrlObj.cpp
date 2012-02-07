@@ -1,3 +1,26 @@
+/**************************************************************************
+###########################################################################
+ This file is part of LImA, a Library for Image Acquisition
+
+ Copyright (C) : 2009-2011
+ European Synchrotron Radiation Facility
+ BP 220, Grenoble 38043
+ FRANCE
+
+ This is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+
+ This software is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, see <http://www.gnu.org/licenses/>.
+###########################################################################
+**************************************************************************/
 #include <sstream>
 #include "Exceptions.h"
 #include "PcoSyncCtrlObj.h"
@@ -13,7 +36,12 @@
 using namespace lima;
 using namespace lima::Pco;
 
+//=========================================================================================================
+char* _timestamp_pcosyncctrlobj() {return __TIMESTAMP__ " (" __FILE__ ")";}
+//=========================================================================================================
 
+//=========================================================================================================
+//=========================================================================================================
 SyncCtrlObj::SyncCtrlObj(Camera *cam,BufferCtrlObj *buffer) :
   m_cam(cam),
   m_handle(cam->getHandle()),
@@ -27,12 +55,16 @@ SyncCtrlObj::SyncCtrlObj(Camera *cam,BufferCtrlObj *buffer) :
   DEB_CONSTRUCTOR();
 }
 
+//=========================================================================================================
+//=========================================================================================================
 SyncCtrlObj::~SyncCtrlObj()
 {
 	// DONE
   DEB_DESTRUCTOR();
 }
 
+//=========================================================================================================
+//=========================================================================================================
 bool SyncCtrlObj::checkTrigMode(TrigMode trig_mode)
 {
   DEB_MEMBER_FUNCT();
@@ -50,6 +82,8 @@ bool SyncCtrlObj::checkTrigMode(TrigMode trig_mode)
     }
 }
 
+//=========================================================================================================
+//=========================================================================================================
 void SyncCtrlObj::setTrigMode(TrigMode trig_mode)
 {
   DEB_MEMBER_FUNCT();
@@ -71,15 +105,16 @@ void SyncCtrlObj::setTrigMode(TrigMode trig_mode)
 
 }
 
+//=========================================================================================================
+//=========================================================================================================
 void SyncCtrlObj::getTrigMode(TrigMode &trig_mode)
 {
 	// DONE
   trig_mode = m_trig_mode;
 }
 
-
-
-
+//=========================================================================================================
+//=========================================================================================================
 WORD SyncCtrlObj::getPcoAcqMode()
 {
 	// DONE
@@ -100,6 +135,8 @@ WORD SyncCtrlObj::getPcoAcqMode()
 
 }
 
+//=========================================================================================================
+//=========================================================================================================
 /*************
 enum TrigMode { IntTrig 0, IntTrigMult 1, ExtTrigSingle 2, ExtTrigMult 3,
 				ExtGate 4, ExtStartStop 5, Live 6, };
@@ -136,6 +173,8 @@ WORD SyncCtrlObj::getPcoTrigMode(){
 }
 
 
+//=========================================================================================================
+//=========================================================================================================
 void SyncCtrlObj::setExpTime(double exp_time)
 {
 	// DONE
@@ -168,6 +207,8 @@ void SyncCtrlObj::setExpTime(double exp_time)
 
 }
 
+//=========================================================================================================
+//=========================================================================================================
 void SyncCtrlObj::getExpTime(double &exp_time)
 {
   DEB_MEMBER_FUNCT();
@@ -184,9 +225,8 @@ void SyncCtrlObj::getExpTime(double &exp_time)
   DEB_RETURN() << DEB_VAR1(exp_time);
 }
 
-
-
-
+//=========================================================================================================
+//=========================================================================================================
 void SyncCtrlObj::setLatTime(double  lat_time)
 {
 	// DONE
@@ -196,6 +236,8 @@ void SyncCtrlObj::setLatTime(double  lat_time)
   m_lat_time = lat_time;
 }
 
+//=========================================================================================================
+//=========================================================================================================
 void SyncCtrlObj::getLatTime(double& lat_time)
 {
 	// DONE
@@ -203,26 +245,27 @@ void SyncCtrlObj::getLatTime(double& lat_time)
   lat_time = m_lat_time;		// Don't know - delay????
 }
 
-
-
-
+//=========================================================================================================
+//=========================================================================================================
 void SyncCtrlObj::setNbFrames(int  nb_frames)
 {
 	// DONE
   DEB_MEMBER_FUNCT();
   DEB_PARAM() << DEB_VAR1(nb_frames);
-//rh	
-  //printf("=== %s [%d] TRACE\n", __FUNCTION__, __LINE__);
+
   m_nb_frames = nb_frames;
-  //printf("=== %s [%d] TRACE\n", __FUNCTION__, __LINE__);
 }
 
+//=========================================================================================================
+//=========================================================================================================
 void SyncCtrlObj::getNbFrames(int& nb_frames)
 {
 	// DONE
   nb_frames = m_nb_frames;
 }
 
+//=========================================================================================================
+//=========================================================================================================
 // these two functions calls the upper ones get/setNbFrames
 void SyncCtrlObj::setNbHwFrames(int  nb_frames)
 {
@@ -230,27 +273,29 @@ void SyncCtrlObj::setNbHwFrames(int  nb_frames)
   setNbFrames(nb_frames);
 }
 
+//=========================================================================================================
+//=========================================================================================================
 void SyncCtrlObj::getNbHwFrames(int& nb_frames)
 {
 	// DONE
   getNbFrames(nb_frames);
 }
 
-
-
+//=========================================================================================================
+//=========================================================================================================
 void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 {
 	static char *fnId = "SyncCtrlObj::getValidRanges";
 	// DONE
-	//rh
-	//printf("=== %s> [enter]\n", fnId);
-  valid_ranges.min_exp_time = m_cam->m_pcoData.pcoInfo.dwMinExposureDESC * 1e-9 ;	//Minimum exposure time in ns
-  valid_ranges.max_exp_time = m_cam->m_pcoData.pcoInfo.dwMaxExposureDESC * 1e-3 ;   // Maximum exposure time in ms  
+
+	valid_ranges.min_exp_time = m_cam->m_pcoData->pcoInfo.dwMinExposureDESC * 1e-9 ;	//Minimum exposure time in ns
+  valid_ranges.max_exp_time = m_cam->m_pcoData->pcoInfo.dwMaxExposureDESC * 1e-3 ;   // Maximum exposure time in ms  
   valid_ranges.min_lat_time = 0.; // Don't know
   valid_ranges.max_lat_time = 0.; // Don't know
-	//printf("=== %s> [exit]\n", fnId);
 }
 
+//=========================================================================================================
+//=========================================================================================================
 void SyncCtrlObj::startAcq()
 {
   DEB_MEMBER_FUNCT();
@@ -265,6 +310,8 @@ void SyncCtrlObj::startAcq()
     }
 }
 
+//=========================================================================================================
+//=========================================================================================================
 void SyncCtrlObj::stopAcq(bool clearQueue)
 {
 	int error;
@@ -272,6 +319,9 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
   DEB_MEMBER_FUNCT();
   if(m_started)
     {
+		if(m_buffer->_getRequestStop()) return;
+		m_buffer->_setRequestStop(true);
+
 		m_cam->_pcoSet_RecordingState(0, error);
 		DEB_TRACE() << "Try to stop Acq";
       if(error)
@@ -289,27 +339,8 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//=========================================================================================================
+//=========================================================================================================
 void SyncCtrlObj::getStatus(HwInterface::StatusType& status)
 {
 	// DONE
@@ -318,8 +349,6 @@ DEB_TRACE() << DEB_VAR3(m_started, m_buffer, m_exposing);
 
   if(m_started){
       if(m_buffer){
-			//int error;
-		  //m_buffer->getStatus(error); // pco error - no sense throw ....
 
 		  switch(m_exposing) {
 

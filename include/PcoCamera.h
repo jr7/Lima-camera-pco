@@ -1,3 +1,26 @@
+/**************************************************************************
+###########################################################################
+ This file is part of LImA, a Library for Image Acquisition
+
+ Copyright (C) : 2009-2011
+ European Synchrotron Radiation Facility
+ BP 220, Grenoble 38043
+ FRANCE
+
+ This is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+
+ This software is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, see <http://www.gnu.org/licenses/>.
+###########################################################################
+**************************************************************************/
 #ifndef PCOCAMERA_H
 #define PCOCAMERA_H
 #include "Pco.h"
@@ -77,10 +100,14 @@ struct stcPcoData {
 		unsigned int bitsPerPix;     //unsigned int bits;
 		unsigned int maxWidth;		// unsigned int xmax;		/* Max size */
 		unsigned int maxHeight;        //unsigned int ymax;
-		WORD armWidth;		//unsigned int xarm;		/* Last armed ccd size */
-		WORD armHeight;  //unsigned int yarm;
+		//WORD wXResActual;		//unsigned int xarm;		/* Last armed ccd size */
+		//WORD wYResActual;  //unsigned int yarm;
 		WORD wMetaDataSize, wMetaDataVersion;
+		long msAcqRec, msAcqXfer, msAcqTout, msAcqTnow;
+		DWORD dwPixelRate;
 
+		WORD wXResActual, wYResActual, wXResMax, wYResMax;
+		WORD wLUT_Identifier, wLUT_Parameter;
 };
 
 enum enumChange {
@@ -115,7 +142,7 @@ namespace lima
       friend class SyncCtrlObj;
       DEB_CLASS_NAMESPC(DebModCamera,"Camera","Pco");
       public:
-        Camera();
+        Camera(const char *camPar);
         ~Camera();
 
         void 	startAcq();
@@ -123,10 +150,10 @@ namespace lima
 
 		HANDLE& getHandle() {return m_handle;}
 
-        void getMaxWidthHeight(DWORD& width,DWORD& height){width = m_pcoData.maxWidth, height = m_pcoData.maxHeight;}
-        void getArmWidthHeight(WORD& width,WORD& height){width = m_pcoData.armWidth, height = m_pcoData.armHeight;}
-        void getBytesPerPixel(unsigned int& pixbytes){pixbytes = m_pcoData.bytesPerPix;}
-		void getBitsPerPixel(WORD& pixbits){pixbits = (WORD) m_pcoData.bitsPerPix;}
+        void getMaxWidthHeight(DWORD& width,DWORD& height){width = m_pcoData->maxWidth, height = m_pcoData->maxHeight;}
+        void getArmWidthHeight(WORD& width,WORD& height){width = m_pcoData->wXResActual, height = m_pcoData->wYResActual;}
+        void getBytesPerPixel(unsigned int& pixbytes){pixbytes = m_pcoData->bytesPerPix;}
+		void getBitsPerPixel(WORD& pixbits){pixbits = (WORD) m_pcoData->bitsPerPix;}
 
 		int getNbAcquiredFrames() const {return m_acq_frame_nb;}
 
@@ -137,16 +164,16 @@ namespace lima
 
         unsigned long pcoGetFramesMax(int segmentPco);
 
-		unsigned long	pcoGetFramesPerBuffer() { return m_pcoData.frames_per_buffer; }
-		double pcoGetCocRunTime() { return m_pcoData.cocRunTime; }
-		double pcoGetFrameRate() { return m_pcoData.frameRate; }
+		unsigned long	pcoGetFramesPerBuffer() { return m_pcoData->frames_per_buffer; }
+		double pcoGetCocRunTime() { return m_pcoData->cocRunTime; }
+		double pcoGetFrameRate() { return m_pcoData->frameRate; }
 
-		WORD pcoGetActiveRamSegment() {return m_pcoData.activeRamSegment;}
+		WORD pcoGetActiveRamSegment() {return m_pcoData->activeRamSegment;}
 
 		SyncCtrlObj*	_getSyncCtrlObj() { return m_sync;}
-		struct stcPcoData * _getPcoData() {return & m_pcoData; }
+		struct stcPcoData * _getPcoData() {return  m_pcoData; }
 		char* _PcoCheckError(int err, int&error) ;
-		int pcoGetError() {return m_pcoData.pcoError;}
+		int pcoGetError() {return m_pcoData->pcoError;}
 
 		char *_pcoSet_RecordingState(int state, int &error);
 
@@ -156,7 +183,7 @@ namespace lima
 		std::string m_log;
         //char pcoErrorMsg[ERR_SIZE+1];
 
-		struct stcPcoData m_pcoData;
+		struct stcPcoData *m_pcoData;
 
         HANDLE	m_handle;				/* handle of opened camera */
         bool m_cam_connected;
@@ -179,6 +206,11 @@ namespace lima
 		char *_pcoSet_Cameralink_GigE_Parameters(int &error);
 		char *_pcoGet_Camera_Type(int &error);
 		char *_pcoGet_TemperatureInfo(int &error);
+
+		int _init_edge();
+		int _init_dimax();
+		char *_prepare_cameralink_interface(int &error);
+
 
 
     };

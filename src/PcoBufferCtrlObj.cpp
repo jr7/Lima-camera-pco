@@ -1,11 +1,35 @@
+/**************************************************************************
+###########################################################################
+ This file is part of LImA, a Library for Image Acquisition
+
+ Copyright (C) : 2009-2011
+ European Synchrotron Radiation Facility
+ BP 220, Grenoble 38043
+ FRANCE
+
+ This is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+
+ This software is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, see <http://www.gnu.org/licenses/>.
+###########################################################################
+**************************************************************************/
+
 #include "Exceptions.h"
 #include "PcoBufferCtrlObj.h"
 #include "PcoSyncCtrlObj.h"
 #include "PcoCamera.h"
 
-#undef COMPILE_WAIT_CONDITION
+#define COMPILE_WAIT_CONDITION
 #undef COMPILEIT
-#define COMPILE_PCO_ALLOC_BUFFER
+#define USING_PCO_ALLOCATED_BUFFERS
 
 
 #define THROW_LIMA_HW_EXC(e, x)  { \
@@ -16,8 +40,13 @@
 using namespace lima;
 using namespace lima::Pco;
 
+//=========================================================================================================
+char* _timestamp_pcobufferctrlobj() {return __TIMESTAMP__ " (" __FILE__ ")";}
+//=========================================================================================================
 
 
+//=========================================================================================================
+//=========================================================================================================
 BufferCtrlObj::BufferCtrlObj(Camera *cam) :
   m_handle(cam->getHandle()),
   m_cam(cam)
@@ -26,7 +55,8 @@ BufferCtrlObj::BufferCtrlObj(Camera *cam) :
   DEB_CONSTRUCTOR();
 
 
-	SoftBufferCtrlMgr::Sync &m_bufferSync = *getBufferSync(cond);
+	//SoftBufferCtrlMgr::Sync &m_bufferSync = *getBufferSync(cond);
+	m_bufferSync = getBufferSync(cond);
 
   m_requestStop = false;
 
@@ -43,6 +73,8 @@ BufferCtrlObj::BufferCtrlObj(Camera *cam) :
 	m_allocBuff.createEventsDone = false;
 
 }
+//=========================================================================================================
+//=========================================================================================================
 void BufferCtrlObj::prepareAcq()
 {
   DEB_MEMBER_FUNCT();
@@ -59,27 +91,13 @@ void BufferCtrlObj::prepareAcq()
   m_ImageBufferSize = dim.getMemSize();
 
 
-  //int buffer_nb,concat_frame_nb;
-  //m_buffer_cb_mgr.acqFrameNb2BufferNb(0,buffer_nb,concat_frame_nb);
-	//ptr = (char*) m_buffer_cb_mgr.getBufferPtr(buffer_nb, concat_frame_nb);
 
 	DEB_TRACE() << DEB_VAR1(m_ImageBufferSize);
 
-
-#ifdef COMPILEIT
-  
-  int buffer_nb,concat_frame_nb;
-  m_buffer_cb_mgr.acqFrameNb2BufferNb(0,buffer_nb,concat_frame_nb);
-  //tPvFrame& frame0 = m_frame[0];
-  //frame0.ImageBuffer = (char*) m_buffer_cb_mgr.getBufferPtr(buffer_nb, concat_frame_nb);
-
-  m_buffer_cb_mgr.acqFrameNb2BufferNb(1,buffer_nb,concat_frame_nb);
-  tPvFrame& frame1 = m_frame[1];
-  frame1.ImageBuffer = (char*) m_buffer_cb_mgr.getBufferPtr(buffer_nb,
-    concat_frame_nb);
-#endif
 }
 
+//=========================================================================================================
+//=========================================================================================================
 void BufferCtrlObj::startAcq()
 {
   DEB_MEMBER_FUNCT();
@@ -99,93 +117,7 @@ void BufferCtrlObj::startAcq()
 	m_cam->startAcq();
 	DEB_TRACE() << "=== TRACE";
 	
-
-
-#ifdef COMPILEIT
-  tPvFrame& frame = m_frame[0];
-  m_status = PvCaptureQueueFrame(m_handle,&frame,_newFrame);
-  
-/**  int requested_nb_frames;
-  m_sync->getNbFrames(requested_nb_frames);
-  if(!requested_nb_frames || requested_nb_frames > 1)
-    {
-      tPvFrame& frame = m_frame[1];
-      m_status = PvCaptureQueueFrame(m_handle,&frame,_newFrame);
-    }
-*/
-#endif
-
 }
-
-#ifdef COMPILEIT
-void BufferCtrlObj::_newFrame(tPvFrame* aFrame)
-{
-  DEB_STATIC_FUNCT();
-
-
-  BufferCtrlObj *bufferPt = (BufferCtrlObj*)aFrame->Context[0];
-
-  int requested_nb_frames;
-  bufferPt->m_sync->getNbFrames(requested_nb_frames);
-
-  bufferPt->m_exposing = false;
-  if(bufferPt->m_status || aFrame->Status != ePvErrSuccess) // error
-    {
-      // it's not really an error,continue
-      if(aFrame->Status == ePvErrDataMissing)
-	{
-	  DEB_WARNING() << DEB_VAR1(aFrame->Status);
-          PvCaptureQueueFrame(bufferPt->m_handle,aFrame,_newFrame);
-	  return;
-	}
-      else if(aFrame->Status == ePvErrCancelled) // we stopped the acqusition so not an error
-	return;
-      else 
-	{
-	  if(!bufferPt->m_status) // Keep error status
-	    bufferPt->m_status = aFrame->Status;
-
-	  if(aFrame->Status)
-	    DEB_ERROR() << DEB_VAR1(aFrame->Status);
-	    
-	  return;
-	}
-    }
-  
-  ++bufferPt->m_acq_frame_nb;
-  
-  bool stopAcq = false;
-  if(!requested_nb_frames || 
-     bufferPt->m_acq_frame_nb < (requested_nb_frames - 1))
-    {
-      int buffer_nb, concat_frame_nb;
-      bufferPt->m_buffer_cb_mgr.acqFrameNb2BufferNb(bufferPt->m_acq_frame_nb,
-						    buffer_nb,
-						    concat_frame_nb);
-      aFrame->ImageBuffer = (char*)bufferPt->m_buffer_cb_mgr.getBufferPtr(buffer_nb,
-									  concat_frame_nb);
-      bufferPt->m_exposing = true;
-      bufferPt->m_status = PvCaptureQueueFrame(bufferPt->m_handle,aFrame,_newFrame);
-    }
-  else
-    stopAcq = true;
-  
-  HwFrameInfoType frame_info;
-  frame_info.acq_frame_nb = bufferPt->m_acq_frame_nb;
-  bufferPt->m_buffer_cb_mgr.newFrameReady(frame_info);
-  
-  if(stopAcq)
-    bufferPt->m_sync->stopAcq(false);
-
-
-}
-
-
-
-
-#endif
-
-
 
 
 //===================================================================================================================
@@ -255,11 +187,6 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 	DEB_TRACE() << "entry -> " << DEB_VAR4(dwFrameFirst, dwFrameLast, dwRequestedFrames, bufIdx);;
 	StdBufferCbMgr& buffer_mgr = m_buffer_cb_mgr;
 
-
-		//int lima_buffer_nb, concat_frame_nb;		
- // buffer_mgr.acqFrameNb2BufferNb(dwFrameFirst, lima_buffer_nb, concat_frame_nb);
-  // void *ptr = buffer_mgr.getFramePtr(lima_buffer_nb, concat_frame_nb);
-
     buffer_mgr.setStartTimestamp(Timestamp::now());
 	lima_buffer_nb = dwFrameFirst-1;		
 
@@ -267,21 +194,29 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 #ifdef COMPILE_WAIT_CONDITION
 	Sync::Status status;
 	AutoMutex lock(cond.mutex()); 
-	status = m_bufferSync.wait(lima_buffer_nb, timeout);
-	if(status == Sync::AVAILABLE){
-		myBuffer = buffer_mgr.getFrameBufferPtr(lima_buffer_nb);
-	} else {
-		// (status == Sync::TIMEOUT)
-		// (status == Sync::INTERRUPTED)
-		return -1;
+	status = m_bufferSync->wait(lima_buffer_nb, timeout);
+
+	switch(status){
+		case Sync::AVAILABLE:
+			myBuffer = buffer_mgr.getFrameBufferPtr(lima_buffer_nb);
+			break;
+		case Sync::TIMEOUT:
+			DEB_TRACE() << "Sync wait TIMEOUT";
+			return -1;
+		case Sync::INTERRUPTED:
+			DEB_TRACE() << "Sync wait INTERRUPTED";
+			return -1;
+		default:
+			DEB_TRACE() << "Sync wait UNKNOWN STATUS";
+			return -1;
 	}
 #else
 #pragma message ("============================================== BYPASSED ----- COMPILE_WAIT_CONDITION -----")
 
 	myBuffer = buffer_mgr.getFrameBufferPtr(lima_buffer_nb);
- 	myBufferLen = m_ImageBufferSize;
 #endif
 
+ 	myBufferLen = m_ImageBufferSize;
     
     DWORD dwMaxWidth, dwMaxHeight;
     WORD wArmWidth, wArmHeight, wBitPerPixel;
@@ -325,8 +260,8 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 		sErr = m_cam->_PcoCheckError(PCO_GetActiveRamSegment(m_handle, &wActSeg), error);
         //_PCO_TRACE("PCO_GetActiveRamSegment", sErr) ;
 
-#ifndef COMPILE_PCO_ALLOC_BUFFER 
-		
+#ifndef USING_PCO_ALLOCATED_BUFFERS 
+	// the data transfer is made directly to the buffer allocated by LIMA		
 	sErr =  m_cam->_PcoCheckError(PCO_AddBufferExtern(m_handle, hEvent,wActSeg,dwFrameFirst, dwFrameLast, dwSynch, myBuffer, \
 	            dwLen, &dwStatus), error);
 	if(error) {
@@ -336,6 +271,8 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 		THROW_HW_ERROR(NotSupported) << sErr;
 	}
 #else
+	// the data transfer is made to the buffer allocated by PCO, after that we must to copy this buffer
+	// to the LIMA allocated one
 	sErr =  m_cam->_PcoCheckError(PCO_AddBufferEx(m_handle, \
 				dwFrameFirst, dwFrameLast, \
 				m_allocBuff.pcoAllocBufferNr[bufIdx], \
@@ -368,12 +305,9 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 
 //===================================================================================================================
 //===================================================================================================================
-// cloned from  Write file to disk in a separate thread
-
 int BufferCtrlObj::_xferImag()
 {
 	DEB_MEMBER_FUNCT();
-		
 
 	DWORD dwFrameIdx, dwFrameIdxLast;
 	DWORD dwFrameFirst2assign, dwFrameLast2assign;
@@ -425,9 +359,7 @@ int BufferCtrlObj::_xferImag()
 
 _RETRY:
 
-		if(	m_requestStop) {
-			return pcoAcqTransferStop;
-		}
+		//if(	m_requestStop) {return pcoAcqTransferStop;}
 
 
 // --------------- look if one of buffer is READY and has the NEXT frame => proccess it
@@ -441,11 +373,13 @@ _RETRY:
 
 		DEB_TRACE() << "========================================FOUND " << DEB_VAR3(lima_buffer_nb, dwFrameIdx, bufIdx);
 
-#ifdef COMPILE_PCO_ALLOC_BUFFER
+#ifdef USING_PCO_ALLOCATED_BUFFERS
+		// we are using the PCO allocated buffer, so this buffer must be copied to the lima buffer
 		void * ptrDest = (void *)m_allocBuff.limaAllocBufferPtr[bufIdx];
 		void *ptrSrc = (void *) m_allocBuff.pcoAllocBufferPtr[bufIdx];
 		size_t size = m_allocBuff.dwPcoAllocBufferSize[bufIdx];
 
+		if(	m_requestStop) {return pcoAcqTransferStop;}
 		memcpy(ptrDest, ptrSrc, size);
 		
 		DEB_TRACE() << "========================================FOUND " << DEB_VAR3(ptrDest, ptrSrc, size);
@@ -457,6 +391,7 @@ _RETRY:
 
 		dwFrameIdxLast= m_allocBuff.bufferAssignedFrameLast[bufIdx];
         //----- the image dwFrameIdx is already in the buffer -> callback!
+		//if(	m_requestStop) {return pcoAcqTransferStop;}
         if(dwFrameFirst2assign <= dwRequestedFrames) {
 			if(error = _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx)) {
 				return pcoAcqPcoError;
@@ -492,18 +427,14 @@ _RETRY:
 
         case WAIT_TIMEOUT: 
 			maxWaitTimeout--;
-			printf("Wait timed out.\n");
+			//printf("Wait timed out.\n");
 			if(maxWaitTimeout > 0 ) goto _RETRY;
 				return pcoAcqWaitTimeout;
 
         default: 
-          //dprintf("Wait error: %d\n", GetLastError()); 
 			return pcoAcqWaitError;
     }
 
-
-// --------------- write the next file received in the multi-frames file
-//_WRITE_FILE:
 
 _WHILE_CONTINUE:
     dwFrameIdx++;
@@ -524,9 +455,6 @@ void BufferCtrlObj::_pcoAllocBuffers() {
 	DEB_MEMBER_FUNCT();
 
 	int bufIdx;
-    
-    
-
 
 	if(!m_allocBuff.createEventsDone){
 		for(bufIdx=0; bufIdx < PCO_BUFFER_NREVENTS; bufIdx++) {
@@ -546,10 +474,8 @@ void BufferCtrlObj::_pcoAllocBuffers() {
 
 	}
 
-
-
-
-#ifdef COMPILE_PCO_ALLOC_BUFFER 
+#ifdef USING_PCO_ALLOCATED_BUFFERS 
+	// we are using pco allocated buffer, we must to allocate them
     int error = 0;
     char *sErr;
 	DWORD dwMaxWidth, dwMaxHeight;
@@ -588,18 +514,17 @@ void BufferCtrlObj::_pcoAllocBuffers() {
 }
 
 void BufferCtrlObj::_pcoAllocBuffersFree() {
-	
 
 	DEB_MEMBER_FUNCT();
 
-#ifdef COMPILE_PCO_ALLOC_BUFFER 
+#ifdef USING_PCO_ALLOCATED_BUFFERS 
+	// free the pco allocated buffers
     int error = 0;
     char *sErr;
 
 	if(m_allocBuff.pcoAllocBufferDone){
 	
 		//SC2_SDK_FUNC int WINAPI PCO_FreeBuffer(HANDLE ph, SHORT sBufNr)
-
 
 			//-------------- allocate 2 buffers (0,1) and received the handle, mem ptr, events
 			for(int bufIdx = 0; bufIdx <2 ; bufIdx ++) {
