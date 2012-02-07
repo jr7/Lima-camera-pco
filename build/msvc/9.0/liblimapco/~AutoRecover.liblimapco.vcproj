@@ -211,10 +211,6 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\..\..\notes\notes.txt"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\include\Pco.h"
 				>
 			</File>
@@ -228,10 +224,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\include\PcoDetInfoCtrlObj.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\notes\pcods_c.txt"
 				>
 			</File>
 			<File
