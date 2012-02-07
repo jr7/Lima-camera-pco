@@ -2,6 +2,7 @@ Debug
 build
 console
 notes
+sdk-org
 *.vcproj.*
 *.ncb
 *.suo
@@ -9,5 +10,4 @@ notes
 *.swp
 *.bck
 *target*
-sdk/Digital_Camera_Toolbox
 *.txt
