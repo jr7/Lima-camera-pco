@@ -115,12 +115,23 @@ void DetInfoCtrlObj::setCurrImageType(ImageType curr_image_type)
 
 //=========================================================================================================
 //=========================================================================================================
+#if 0
 void DetInfoCtrlObj::getPixelSize(double& pixel_size)
 {  
     // ---- DONE for the moment
 	// pixel size in micrometer (???)
   pixel_size = -1.;		// @todo don't know
 }
+#endif
+
+void DetInfoCtrlObj::getPixelSize(double& x_size,double &y_size)
+{  
+    // ---- TODO
+	// pixel size in micrometer (???)
+  x_size = y_size = -1.;		// @todo don't know
+
+}
+
 
 
 //=========================================================================================================

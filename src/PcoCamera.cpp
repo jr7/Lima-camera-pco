@@ -1258,6 +1258,8 @@ char * Camera::_pcoSet_RecordingState(int state, int &error){
 	error = PcoCheckError(PCO_SetRecordingState(m_handle, wRecState_new));
 	if(error) return "PCO_SetRecordingState";
 
+	return fnId;
+
 }
 
 //=================================================================================================
