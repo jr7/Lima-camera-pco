@@ -38,6 +38,7 @@
 #include "PCO_ConvStructures.h"
 #include "Pco_ConvDlgExport.h"
 #include "sc2_SDKStructures.h"
+#include "sc2_common.h"
 #include "SC2_CamExport.h"
 #include "sc2_defs.h"
 #include "SC2_SDKAddendum.h"
