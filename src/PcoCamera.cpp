@@ -27,6 +27,8 @@
 
 #define BUFF_INFO_SIZE 5000
 
+#define DWORD_MAX ULONG_MAX 
+
 #include <cstdlib>
 #include <process.h>
 
@@ -161,18 +163,11 @@ Camera::Camera(const char *camPar) :
 	char msg[MSG_SIZE + 1];
 	int error=0;
 	char *errMsg;
-	//DWORD _dwValidImageCnt, _dwMaxImageCnt;
 
 	m_pcoData =new(stcPcoData);
 	if(m_pcoData == NULL)
 		throw LIMA_HW_EXC(Error, "creation error");
-
-	m_pcoData->camera_name[0] = m_pcoData->sensor_type[0] = '\0';
-	m_pcoData->pcoError = 0;
-	m_pcoData->storage_mode = 0;
-	m_pcoData->recorder_submode = 0;
-	m_pcoData->cocRunTime = 0;		/* cam operation code - delay & exposure time & readout in s*/
-	m_pcoData->frameRate = 0;
+	memset((char *)m_pcoData, 0, sizeof(m_pcoData));
 
 	m_bin.changed = Invalid;
 	m_roi.changed = Invalid;
@@ -219,23 +214,13 @@ Camera::Camera(const char *camPar) :
 	errMsg = _pcoGet_TemperatureInfo(error);
 	PCO_TRACE(errMsg) ;
 
-
 	_pcoSet_RecordingState(0, error);
 
 	switch(m_pcoData->stcCamType.wCamType) {
-		case CAMERATYPE_PCO_DIMAX_STD:
-			_init_dimax();
+		case CAMERATYPE_PCO_DIMAX_STD: _init_dimax(); break;
+		case CAMERATYPE_PCO_EDGE: _init_edge(); break;
+		default: throw LIMA_HW_EXC(Error, "Camera type not supported!");
 			break;
-
-		case CAMERATYPE_PCO_EDGE:
-			_init_edge();
-			break;
-
-		default:
-
-			break;
-			
-
 	}
 
 
@@ -392,10 +377,8 @@ Camera::~Camera()
     	DEB_TRACE() << sErr;
 		THROW_HW_ERROR(NotSupported) << sErr;
 	}
-
 	m_cam_connected = false;
   }
-
 }
 
 
@@ -421,7 +404,6 @@ void Camera::startAcq()
 	m_pcoData->pcoError = 0;
 
 
-#define DWORD_MAX 0xffffffff 
 //=====================================================================
     char *fnId = "StartAcq";
     WORD state;
@@ -472,9 +454,10 @@ void Camera::startAcq()
     PCO_TRACE(msg) ;
 
     // ----------------------------------------- storage mode (recorder + sequence)
-    msg = _pcoSet_Storage_subRecord_Mode(error);
-    PCO_TRACE(msg) ;
-
+    if(m_pcoData->stcCamType.wCamType == CAMERATYPE_PCO_DIMAX_STD) {
+		msg = _pcoSet_Storage_subRecord_Mode(error);
+		PCO_TRACE(msg) ;
+	}
 	//----------------------------------- set exposure time & delay time
 	msg = _pcoSet_Exposure_Delay_Time(error);
 	PCO_TRACE(msg) ;
@@ -846,8 +829,8 @@ char *Camera::getInfo(char *cmd, char *output, int lg){
 
 
 		if(_stricmp(cmd, "clTransferParam") == 0){
-			ptr += sprintf_s(ptr, ptrMax - ptr, "      baudrate=[%u]\n", m_pcoData->clTransferParam.baudrate);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "ClockFrequency=[%u]\n", m_pcoData->clTransferParam.ClockFrequency);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "      baudrate=[%u] %g Kbps\n", m_pcoData->clTransferParam.baudrate, m_pcoData->clTransferParam.baudrate/1000.);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "ClockFrequency=[%u] %g MHz\n", m_pcoData->clTransferParam.ClockFrequency, m_pcoData->clTransferParam.ClockFrequency/1000000.);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "        CCline=[%u]\n", m_pcoData->clTransferParam.CCline);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "    DataFormat=[%u]\n", m_pcoData->clTransferParam.DataFormat);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "      Transmit=[%u]\n", m_pcoData->clTransferParam.Transmit);
@@ -866,6 +849,14 @@ char *Camera::getInfo(char *cmd, char *output, int lg){
 			return output;
 		}
 
+		if(_stricmp(cmd, "allocatedBuffer") == 0){
+			ptr += sprintf_s(ptr, ptrMax - ptr, "AllocatedBuffer: Done=[%d] Nr=[%d] Size=[%ld][%g MB]\n", 
+				m_pcoData->bAllocatedBufferDone, 
+				m_pcoData->iAllocatedBufferNumber, 
+				m_pcoData->dwAllocatedBufferSize, m_pcoData->dwAllocatedBufferSize/1000000.);
+			
+			return output;
+		}
 		if(_stricmp(cmd, "help") == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "<empty> - general info\n");
 			ptr += sprintf_s(ptr, ptrMax - ptr, "help\n");
@@ -875,6 +866,7 @@ char *Camera::getInfo(char *cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "acqTime - debug info\n");
 			ptr += sprintf_s(ptr, ptrMax - ptr, "timestamp - pco cam module compiled\n");
 			ptr += sprintf_s(ptr, ptrMax - ptr, "clTransferParam\n");
+			ptr += sprintf_s(ptr, ptrMax - ptr, "allocatedBuffer\n");
 			return output;
 		}
 

@@ -34,7 +34,7 @@
 #define PCO_CL_PIXELCLOCK_286MHZ 286000000
 #define PCO_CL_BAUDRATE_115K2	115200
 
-#define PCO_BUFFER_NREVENTS 2
+#define PCO_BUFFER_NREVENTS 4
 struct stcXlatCode2Str {
 		int code;
 		char *str;
@@ -111,6 +111,11 @@ struct stcPcoData {
 
 		WORD wXResActual, wYResActual, wXResMax, wYResMax;
 		WORD wLUT_Identifier, wLUT_Parameter;
+
+		DWORD dwAllocatedBufferSize;
+		int iAllocatedBufferNumber;
+		bool bAllocatedBufferDone;
+
 };
 
 enum enumChange {

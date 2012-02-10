@@ -410,7 +410,7 @@ _RETRY:
 
     // The return value indicates which event is signaled
 
-#if PCO_BUFFER_NREVENTS != 2
+#if PCO_BUFFER_NREVENTS != 4
   #pragma message ("============================================== ABORT - wrong nr of WAIT_OBJECT ")
     DUMMY_FOR_ABORT = 5;
 #endif
@@ -423,6 +423,14 @@ _RETRY:
         case WAIT_OBJECT_0 + 1: 
 			m_allocBuff.bufferReady[1] = 1; 
 			DEB_TRACE() << "========================================WAITOBJ 1  FOUND";
+			goto _RETRY;
+        case WAIT_OBJECT_0 + 2: 
+			m_allocBuff.bufferReady[2] = 1; 
+			DEB_TRACE() << "========================================WAITOBJ 2  FOUND";
+			goto _RETRY;
+        case WAIT_OBJECT_0 + 3: 
+			m_allocBuff.bufferReady[3] = 1; 
+			DEB_TRACE() << "========================================WAITOBJ 3  FOUND";
 			goto _RETRY;
 
         case WAIT_TIMEOUT: 
@@ -455,6 +463,7 @@ void BufferCtrlObj::_pcoAllocBuffers() {
 	DEB_MEMBER_FUNCT();
 
 	int bufIdx;
+	struct stcPcoData *m_pcoData = m_cam->_getPcoData();
 
 	if(!m_allocBuff.createEventsDone){
 		for(bufIdx=0; bufIdx < PCO_BUFFER_NREVENTS; bufIdx++) {
@@ -478,36 +487,38 @@ void BufferCtrlObj::_pcoAllocBuffers() {
 	// we are using pco allocated buffer, we must to allocate them
     int error = 0;
     char *sErr;
-	DWORD dwMaxWidth, dwMaxHeight;
-    WORD wBitPerPixel;
-    unsigned int bytesPerPixel;
+	DWORD _dwMaxWidth, _dwMaxHeight;
+    WORD _wBitPerPixel;
+    unsigned int _bytesPerPixel;
 
 	if(!m_allocBuff.pcoAllocBufferDone){
-		m_cam->getMaxWidthHeight(dwMaxWidth, dwMaxHeight);
-		m_cam->getBytesPerPixel(bytesPerPixel);
-		m_cam->getBitsPerPixel(wBitPerPixel);
+		m_cam->getMaxWidthHeight(_dwMaxWidth, _dwMaxHeight);
+		m_cam->getBytesPerPixel(_bytesPerPixel);
+		m_cam->getBitsPerPixel(_wBitPerPixel);
 
-		DWORD dwAllocatedBufferSize = dwMaxWidth * dwMaxHeight * (DWORD) bytesPerPixel;
+		DWORD _dwAllocatedBufferSize = _dwMaxWidth * _dwMaxHeight * (DWORD) _bytesPerPixel;
 
+		m_pcoData->iAllocatedBufferNumber =  PCO_BUFFER_NREVENTS;
+		m_pcoData->dwAllocatedBufferSize = _dwAllocatedBufferSize;
 
-			//-------------- allocate 2 buffers (0,1) and received the handle, mem ptr, events
-			for(bufIdx = 0; bufIdx <2 ; bufIdx ++) {
+		//-------------- allocate 2 buffers (0,1) and received the handle, mem ptr, events
+			for(bufIdx = 0; bufIdx < PCO_BUFFER_NREVENTS ; bufIdx ++) {
 				sErr = m_cam->_PcoCheckError(PCO_AllocateBuffer(m_handle, \
 					&m_allocBuff.pcoAllocBufferNr[bufIdx], \
-					dwAllocatedBufferSize, \
+					_dwAllocatedBufferSize, \
 					&m_allocBuff.pcoAllocBufferPtr[bufIdx], \
 					&m_allocBuff.bufferAllocEvent[bufIdx]\
 					), error);
 
 				if(error) {
     				DEB_TRACE() << sErr;
-    				DEB_TRACE() << DEB_VAR1(dwAllocatedBufferSize);
+    				DEB_TRACE() << DEB_VAR1(_dwAllocatedBufferSize);
 					THROW_HW_ERROR(NotSupported) << sErr;
 				}
-				m_allocBuff.dwPcoAllocBufferSize[bufIdx] = dwAllocatedBufferSize;
+				m_allocBuff.dwPcoAllocBufferSize[bufIdx] = _dwAllocatedBufferSize;
 
 			}
-		m_allocBuff.pcoAllocBufferDone = true;
+		m_pcoData->bAllocatedBufferDone = m_allocBuff.pcoAllocBufferDone = true;
 	}
 #endif
 
