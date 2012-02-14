@@ -184,6 +184,7 @@ namespace lima
 		int pcoGetError() {return m_pcoData->pcoError;}
 
 		char *_pcoSet_RecordingState(int state, int &error);
+		WORD _getCameraType() {return m_pcoData->stcCamType.wCamType ; }
 
 	private:
 		SyncCtrlObj*	m_sync;
@@ -214,6 +215,8 @@ namespace lima
 		char *_pcoSet_Cameralink_GigE_Parameters(int &error);
 		char *_pcoGet_Camera_Type(int &error);
 		char *_pcoGet_TemperatureInfo(int &error);
+
+		char *_pco_SetCameraSetup(DWORD dwSetup, int &error);
 
 		int _init_edge();
 		int _init_dimax();

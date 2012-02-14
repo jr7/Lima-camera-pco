@@ -308,10 +308,11 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 int BufferCtrlObj::_xferImag()
 {
 	DEB_MEMBER_FUNCT();
-	static char *fnId =  __FUNCTION__;
+	DEF_FNID;
+	
 
 
-	DWORD dwFrameIdx, dwFrameIdxLast;
+	DWORD dwFrameIdx;
 	DWORD dwFrameFirst2assign, dwFrameLast2assign;
 	DWORD dwEvent;
 	long long nr =0;
@@ -349,17 +350,22 @@ int BufferCtrlObj::_xferImag()
 			}
 	}
 
-  // --------------- loop - process the N frames
+
+	if(m_cam->_getCameraType() == CAMERATYPE_PCO_EDGE) {
+			m_cam->_pcoSet_RecordingState(1, error);
+	}
+  
+	// --------------- loop - process the N frames
 	dwFrameIdx = 1;
 
 	while(dwFrameIdx <= dwRequestedFrames) {
 
 _RETRY:
 
-		//if(	m_requestStop) {return pcoAcqTransferStop;}
+	if(	m_requestStop) {return pcoAcqTransferStop;}
 
 
-// --------------- look if one of buffer is READY and has the NEXT frame => proccess it
+	// --------------- look if one of buffer is READY and has the NEXT frame => proccess it
     // m_allocatedBufferAssignedFrameFirst[bufIdx] -> first frame in the buffer (we are using only 1 frame per buffer)
     // m_allocatedBufferReady[bufIdx] -> is already filled by sdk (ready)
 
@@ -386,9 +392,8 @@ _RETRY:
 		frame_info.acq_frame_nb = lima_buffer_nb;
 		m_buffer_cb_mgr.newFrameReady(frame_info);
 
-		dwFrameIdxLast= m_allocBuff.bufferAssignedFrameLast[bufIdx];
         //----- the image dwFrameIdx is already in the buffer -> callback!
-		//if(	m_requestStop) {return pcoAcqTransferStop;}
+		if(m_requestStop) {return pcoAcqTransferStop;}
         if(dwFrameFirst2assign <= dwRequestedFrames) {
 			if(error = _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx)) {
 				return pcoAcqPcoError;
@@ -434,7 +439,7 @@ _RETRY:
 			maxWaitTimeout--;
 			//printf("Wait timed out.\n");
 			if(maxWaitTimeout > 0 ) goto _RETRY;
-				return pcoAcqWaitTimeout;
+			return pcoAcqWaitTimeout;
 
         default: 
 			return pcoAcqWaitError;

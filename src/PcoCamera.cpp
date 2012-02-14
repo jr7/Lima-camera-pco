@@ -46,7 +46,8 @@ using namespace lima::Pco;
 
 static char *timebaseUnits[] = {"ns", "us", "ms"};
 
-void pco_acq_thread(void *argin);
+void _pco_acq_thread_dimax(void *argin);
+void _pco_acq_thread_edge(void *argin);
 
 
 
@@ -216,7 +217,7 @@ Camera::Camera(const char *camPar) :
 
 	_pcoSet_RecordingState(0, error);
 
-	switch(m_pcoData->stcCamType.wCamType) {
+	switch(_getCameraType()) {
 		case CAMERATYPE_PCO_DIMAX_STD: _init_dimax(); break;
 		case CAMERATYPE_PCO_EDGE: _init_edge(); break;
 		default: throw LIMA_HW_EXC(Error, "Camera type not supported!");
@@ -405,7 +406,7 @@ void Camera::startAcq()
 
 
 //=====================================================================
-    char *fnId = "StartAcq";
+	DEF_FNID;
     WORD state;
     HANDLE hEvent= NULL;
 
@@ -454,7 +455,7 @@ void Camera::startAcq()
     PCO_TRACE(msg) ;
 
     // ----------------------------------------- storage mode (recorder + sequence)
-    if(m_pcoData->stcCamType.wCamType == CAMERATYPE_PCO_DIMAX_STD) {
+    if(_getCameraType() == CAMERATYPE_PCO_DIMAX_STD) {
 		msg = _pcoSet_Storage_subRecord_Mode(error);
 		PCO_TRACE(msg) ;
 	}
@@ -527,12 +528,27 @@ void Camera::startAcq()
     } 
 
 	//------------------------------------------------- start acquisition
-	_pcoSet_RecordingState(1, error);
 
 	m_sync->setStarted(true);
 	m_sync->setExposing(pcoAcqRecordStart);
 
-	_beginthread( pco_acq_thread, 0, (void*) this);
+	switch(_getCameraType()) {
+		case CAMERATYPE_PCO_EDGE:
+			_beginthread( _pco_acq_thread_edge, 0, (void*) this);
+			break;
+
+		case CAMERATYPE_PCO_DIMAX_STD:
+			_pcoSet_RecordingState(1, error);
+			_beginthread( _pco_acq_thread_dimax, 0, (void*) this);
+			break;
+
+		default:
+			throw LIMA_HW_EXC(Error, "unkown camera type");
+
+	}
+
+
+
 	return;
 }
 
@@ -553,8 +569,8 @@ void msElapsedTimeSet(struct __timeb64 &t0) {
 //==========================================================================================================
 //==========================================================================================================
 
-void pco_acq_thread(void *argin) {
-	static char *fnId =  __FUNCTION__;
+void _pco_acq_thread_dimax(void *argin) {
+	DEF_FNID;
 	int error;
 
 	DWORD _dwValidImageCnt, _dwMaxImageCnt;
@@ -651,6 +667,40 @@ void pco_acq_thread(void *argin) {
 	_endthread();
 }
 
+//==========================================================================================================
+//==========================================================================================================
+
+void _pco_acq_thread_edge(void *argin) {
+	DEF_FNID;
+
+
+	printf("=== %s> ENTRY\n", fnId);
+
+	Camera* m_cam = (Camera *) argin;
+	SyncCtrlObj* m_sync = m_cam->_getSyncCtrlObj();
+	BufferCtrlObj* m_buffer = m_sync->_getBufferCtrlObj();
+
+	struct stcPcoData *m_pcoData = m_cam->_getPcoData();
+
+	struct __timeb64 tStart;
+	msElapsedTimeSet(tStart);
+
+	long msXfer;
+	bool requestStop = false;
+
+	HANDLE m_handle = m_cam->getHandle();
+
+	
+	pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImag();
+	m_sync->setExposing(status);
+
+	//m_sync->setExposing(status);
+
+	m_pcoData->msAcqXfer = msXfer = msElapsedTime(tStart);
+	printf("=== %s> EXIT xfer[%ld] (ms)\n", 
+			fnId, msXfer);
+	_endthread();
+}
 
 //=====================================================================
 //=====================================================================
@@ -692,20 +742,20 @@ char* Camera::_PcoCheckError(int err, int &error) {
 //=========================================================================================================
 //=========================================================================================================
 unsigned long Camera::pcoGetFramesMax(int segmentPco){
-		char *fnId = "pcoGetFramesMax";
+	DEF_FNID;
 
 		int segmentArr = segmentPco-1;
 		unsigned long framesMax;
 		unsigned long xroisize,yroisize;
 		unsigned long long pixPerFrame, pagesPerFrame;
 
-		if(m_pcoData->stcCamType.wCamType == CAMERATYPE_PCO_EDGE) {
+		if(_getCameraType() == CAMERATYPE_PCO_EDGE) {
 			return LONG_MAX;
 		}
 
 
-		if(m_pcoData->stcCamType.wCamType != CAMERATYPE_PCO_DIMAX_STD) {
-			printf("=== %s> unknow camera type [%d]\n", fnId, m_pcoData->stcCamType.wCamType);
+		if(_getCameraType() != CAMERATYPE_PCO_DIMAX_STD) {
+			printf("=== %s> unknow camera type [%d]\n", fnId, _getCameraType());
 			return -1;
 		}
 
@@ -882,7 +932,8 @@ char *Camera::getInfo(char *cmd, char *output, int lg){
 //=================================================================================================
 char * Camera::_pcoSet_Trig_Acq_Mode(int &error){
 	DEB_MEMBER_FUNCT();
-	static char *fnId = "_pcoSet_Trig_Acq_Mode";
+	
+	DEF_FNID;
 	//------------------------------------------------- triggering mode 
 	WORD trigmode = m_sync->getPcoTrigMode();
     error = PcoCheckError(PCO_SetTriggerMode(m_handle, trigmode));
@@ -906,7 +957,7 @@ char * Camera::_pcoSet_Trig_Acq_Mode(int &error){
 //=================================================================================================
 char * Camera::_pcoSet_Storage_subRecord_Mode(int &error){
 	DEB_MEMBER_FUNCT();
-	static char *fnId = "_pcoSet_Storage_subRecord_Mode";
+	DEF_FNID;
 
 	    // ----------------------------------------- storage mode (recorder + sequence)
 		// current storage mode
@@ -934,7 +985,7 @@ char * Camera::_pcoSet_Storage_subRecord_Mode(int &error){
 //=================================================================================================
 char* Camera::_pcoSet_Exposure_Delay_Time(int &error){
 	DEB_MEMBER_FUNCT();
-	static char *fnId = "_pcoSet_Exposure_Delay_Time";
+	DEF_FNID;
     float factor;
 
 	    DWORD dwExposure, dwDelay;
@@ -977,7 +1028,7 @@ char* Camera::_pcoSet_Exposure_Delay_Time(int &error){
 //=================================================================================================
 char *Camera::_pcoSet_Cameralink_GigE_Parameters(int &error){
 	DEB_MEMBER_FUNCT();
-	static char *fnId = "_pcoSet_Cameralink_GigE_Parameters";
+	DEF_FNID;
 
 	//------------------------------------------------- set image size for CamLink and GigE
 
@@ -1032,7 +1083,7 @@ char *Camera::_pcoSet_Cameralink_GigE_Parameters(int &error){
 //=================================================================================================
 char *Camera::_prepare_cameralink_interface(int &error){
 	DEB_MEMBER_FUNCT();
-	static char *fnId = "_prepare_cameralink_interface";
+	DEF_FNID;
 
 	error = PcoCheckError(PCO_GetSizes(m_handle, &m_pcoData->wXResActual, &m_pcoData->wYResActual, &m_pcoData->wXResMax, &m_pcoData->wYResMax));
     PCO_TRACE("PCO_GetSizes") ;
@@ -1046,7 +1097,7 @@ char *Camera::_prepare_cameralink_interface(int &error){
 
     m_pcoData->clTransferParam.baudrate = PCO_CL_BAUDRATE_115K2;
 
-	switch(m_pcoData->stcCamType.wCamType) {
+	switch(_getCameraType()) {
 		case CAMERATYPE_PCO_DIMAX_STD:
 		    m_pcoData->clTransferParam.baudrate = PCO_CL_BAUDRATE_115K2;
 			//m_pcoData->clTransferParam.Transmit = 1;
@@ -1090,7 +1141,7 @@ char *Camera::_prepare_cameralink_interface(int &error){
 	//  WORD        *wParameter);            // optional parameter
 	//*****************************************************************************************
 
-	if(m_pcoData->stcCamType.wCamType == CAMERATYPE_PCO_EDGE) {
+	if(_getCameraType() == CAMERATYPE_PCO_EDGE) {
 		m_pcoData->wLUT_Parameter = 0; 
 		error = PcoCheckError(PCO_SetActiveLookupTable(m_handle, &m_pcoData->wLUT_Identifier, &m_pcoData->wLUT_Parameter));
 		if(error) return "PCO_SetActiveLookupTabler";
@@ -1125,7 +1176,7 @@ char *Camera::_prepare_cameralink_interface(int &error){
 //=================================================================================================
 char *Camera::_pcoGet_Camera_Type(int &error){
 	DEB_MEMBER_FUNCT();
-	static char *fnId = "_pcoGet_Camera_Type";
+	DEF_FNID;
 	m_pcoData->frames_per_buffer = 1; // for PCO DIMAX
 
 	// --- Get camera type
@@ -1136,7 +1187,7 @@ char *Camera::_pcoGet_Camera_Type(int &error){
 		if(error) return "PCO_GetCameraType";
 		//PCO_TRACE("PCO_GetCameraType") ;
 
-		ptr = xlatPcoCode2Str(m_pcoData->stcCamType.wCamType, ModelType, error);
+		ptr = xlatPcoCode2Str(_getCameraType(), ModelType, error);
 		strcpy_s(m_pcoData->model, MODEL_TYPE_SIZE, ptr);
 		if(error) return m_pcoData->model;
 		//DEB_TRACE() <<   "m_pcoData->model " << m_pcoData->model;
@@ -1176,7 +1227,7 @@ char *Camera::_pcoGet_Camera_Type(int &error){
 //=================================================================================================
 char *Camera::_pcoGet_TemperatureInfo(int &error){
 	DEB_MEMBER_FUNCT();
-	static char *fnId = "_pcoGet_TemperatureInfo";
+	DEF_FNID;
 	char msg[MSG_SIZE + 1];
 
 
@@ -1220,7 +1271,7 @@ char *Camera::_pcoGet_TemperatureInfo(int &error){
 //=================================================================================================
 char * Camera::_pcoSet_RecordingState(int state, int &error){
 	DEB_MEMBER_FUNCT();
-	static char *fnId = "_pcoSet_RecordingState";
+	DEF_FNID;
 
 	WORD wRecState_new, wRecState_actual;
 
@@ -1259,8 +1310,7 @@ char * Camera::_pcoSet_RecordingState(int state, int &error){
 char *Camera::_get_coc_runtime(int &error){
 		
 	DEB_MEMBER_FUNCT();
-
-	static char *fnId = __FUNCTION__;
+	DEF_FNID;
 
 	//====================================== get the coc runtime 
     //---- only valid if it was used PCO_SetDelayExposureTime
@@ -1286,8 +1336,7 @@ char *Camera::_get_coc_runtime(int &error){
 char *Camera::_set_metadata_mode(WORD wMetaDataMode, int &error){
 		
 	DEB_MEMBER_FUNCT();
-
-	static char *fnId = __FUNCTION__;
+	DEF_FNID;
 
 	//***************************************************************************************************
 	// SC2_SDK_FUNC int WINAPI PCO_SetMetaDataMode(HANDLE ph, WORD wMetaDataMode, WORD* wMetaDataSize,
@@ -1303,6 +1352,83 @@ char *Camera::_set_metadata_mode(WORD wMetaDataMode, int &error){
 	m_pcoData->wMetaDataMode = wMetaDataMode;
     error = PcoCheckError(PCO_SetMetaDataMode(m_handle, wMetaDataMode, &m_pcoData->wMetaDataSize, &m_pcoData->wMetaDataVersion));
 	if(error) return "PCO_SetMetaDataMode";
+
+	return fnId;
+
+}
+
+
+		char *_pcoSet_CameraSetup(int &error);
+//=================================================================================================
+//=================================================================================================
+char *Camera::_pco_SetCameraSetup(DWORD dwSetup, int &error){
+		
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+
+	DWORD m_dwSetup[10];
+	WORD m_wLen = 10;
+	WORD m_wType;
+	int ts[3] = { 2000, 3000, 250}; // command, image, channel timeout
+
+	//***************************************************************************************************
+	// SC2_SDK_FUNC int WINAPI PCO_GetCameraSetup(HANDLE ph, WORD *wType, DWORD *dwSetup, WORD *wLen);
+	// Gets the camera setup structure (see camera specific structures)
+	// Not applicable to all cameras.
+	// See sc2_defs.h for valid flags: -- Defines for Get / Set Camera Setup
+	// In: HANDLE ph -> Handle to a previously opened camera.
+	//     WORD* wType -> Pointer to a word to get the actual type (Can be NULL to query wLen).
+	//     DWORD* dwSetup -> Pointer to a dword array (Can be NULL to query wLen)
+	//     WORD *wLen -> WORD Pointer to get the length of the array
+	// Out: int -> Error message.
+	//***************************************************************************************************
+
+	//***************************************************************************************************
+	// SC2_SDK_FUNC int WINAPI PCO_SetCameraSetup(HANDLE ph, WORD wType, DWORD *dwSetup, WORD wLen);
+	// Sets the camera setup structure (see camera specific structures)
+	// Camera must be switched off do activate new setup
+	// Not applicable to all cameras.
+	// See sc2_defs.h for valid flags: -- Defines for Get / Set Camera Setup
+	// In: HANDLE ph -> Handle to a previously opened camera.
+	//     WORD wType -> Word to set the actual type
+	//     DWORD* dwSetup -> Pointer to a dword array
+	//     WORD wLen -> WORD to set the length of the array
+	// Out: int -> Error message.
+	//***************************************************************************************************
+
+	// DWORD m_dwSetup[10];
+	// WORD m_wLen = 10;
+	// WORD m_wType;
+	// int ts[3] = { 2000, 3000, 250}; // command, image, channel timeout
+	// PCO_OpenCamera(&m_hCam,0);
+	// PCO_GetCameraSetup(m_hCam, &m_wType, &m_dwSetup[0], &m_wLen);
+
+	// m_dwSetup[0] = PCO_EDGE_SETUP_GLOBAL_SHUTTER;
+	// PCO_SetTimeouts(m_hCam, &ts[0], sizeof(ts));
+	// PCO_SetCameraSetup(m_hCam, m_wType, &m_dwSetup[0], m_wLen);
+	// PCO_RebootCamera(m_hCam);
+	// PCO_CloseCamera(m_hCam);
+
+
+    error = PcoCheckError(PCO_GetCameraSetup(m_handle, &m_wType, &m_dwSetup[0], &m_wLen));
+	if(error) return "PCO_GetCameraSetup";
+
+	if(m_dwSetup[0] == dwSetup) return fnId;
+
+	m_dwSetup[0] = dwSetup;
+
+    error = PcoCheckError(PCO_SetTimeouts(m_handle, &ts[0], sizeof(ts)));
+	if(error) return "PCO_SetTimeouts";
+
+    error = PcoCheckError(PCO_SetCameraSetup(m_handle, m_wType, &m_dwSetup[0], m_wLen));
+	if(error) return "PCO_SetCameraSetup";
+
+    error = PcoCheckError(PCO_RebootCamera(m_handle));
+	if(error) return "PCO_RebootCamera";
+
+    error = PcoCheckError(PCO_CloseCamera(m_handle));
+	if(error) return "PCO_CloseCamera";
+
 
 	return fnId;
 

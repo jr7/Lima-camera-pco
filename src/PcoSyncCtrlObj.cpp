@@ -285,7 +285,7 @@ void SyncCtrlObj::getNbHwFrames(int& nb_frames)
 //=========================================================================================================
 void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 {
-	static char *fnId = "SyncCtrlObj::getValidRanges";
+	DEF_FNID;
 	// DONE
 
 	valid_ranges.min_exp_time = m_cam->m_pcoData->pcoInfo.dwMinExposureDESC * 1e-9 ;	//Minimum exposure time in ns

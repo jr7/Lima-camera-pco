@@ -82,6 +82,6 @@ typedef int tPvErr;
 		DEB_TRACE() << "*** " <<  x << " OK" ; \
 }
 
-
+#define DEF_FNID 	static char *fnId =__FUNCTION__;
 
 #endif
