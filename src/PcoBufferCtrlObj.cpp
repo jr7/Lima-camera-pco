@@ -308,6 +308,8 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 int BufferCtrlObj::_xferImag()
 {
 	DEB_MEMBER_FUNCT();
+	static char *fnId =  __FUNCTION__;
+
 
 	DWORD dwFrameIdx, dwFrameIdxLast;
 	DWORD dwFrameFirst2assign, dwFrameLast2assign;
@@ -337,19 +339,14 @@ int BufferCtrlObj::_xferImag()
 	dwFrameLast2assign = dwFrameFirst2assign + dwFramesPerBuffer - 1;
 	if(dwFrameLast2assign > dwRequestedFrames) dwFrameLast2assign = dwRequestedFrames;
 
-	bufIdx = 0;
-	if(error = _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx)) {
-		DEB_TRACE() << "ERROR _assignImage2Buffer";
-		return pcoAcqPcoError;
-	}
-
-// --------------- if needed prepare the 2nd buffer 
-	if(dwFrameFirst2assign <= dwRequestedFrames) {
-		bufIdx = 1;
-		if(error = _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx)) {
-		DEB_TRACE() << "ERROR _assignImage2Buffer";
-			return pcoAcqPcoError;
-		}
+	for(int i = 0; i < PCO_BUFFER_NREVENTS; i++) {
+						// --------------- if needed prepare the next buffer 
+		if(dwFrameFirst2assign > dwRequestedFrames) break;
+			bufIdx = i;
+			if(error = _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx)) {
+				DEB_TRACE() << "ERROR _assignImage2Buffer";
+					return pcoAcqPcoError;
+			}
 	}
 
   // --------------- loop - process the N frames
