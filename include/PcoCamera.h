@@ -217,6 +217,7 @@ namespace lima
 		char *_pcoGet_TemperatureInfo(int &error);
 
 		char *_pco_SetCameraSetup(DWORD dwSetup, int &error);
+		char *_pco_GetCameraSetup(DWORD &dwSetup, int &error);
 
 		int _init_edge();
 		int _init_dimax();

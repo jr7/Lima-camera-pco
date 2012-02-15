@@ -60,6 +60,32 @@ char * _timestamp_pcodetinfoctrlobj();
 char* _timestamp_pcocamera() {return __TIMESTAMP__ " (" __FILE__ ")";}
 //=========================================================================================================
 
+//====================================================================
+//====================================================================
+
+char *str_trim_left(char *s) {
+	char c;
+	if(s == NULL) return NULL;
+	while((c = *s) != 0) {
+		if(!isspace(c)) break;
+		s++;		
+	}
+	return s;
+}
+
+char *str_trim_right(char *s) {
+	char *ptr;
+	if(s == NULL) return NULL;
+	ptr = s + strlen(s) - 1;
+	while(s <= ptr) {
+		if(!isspace(*ptr)) break;
+		*ptr-- = 0;
+	}
+	return s;
+}
+char *str_trim(char *s) {
+	return str_trim_left(str_trim_right(s));
+}
 //=========================================================================================================
 //=========================================================================================================
 char *xlatCode2Str(int code, struct stcXlatCode2Str *stc) {
@@ -794,8 +820,13 @@ char *Camera::getInfo(char *cmd){
 	return getInfo(cmd, buff, BUFF_INFO_SIZE);
 }
 
-char *Camera::getInfo(char *cmd, char *output, int lg){
+#define NRTOK 5
+char *Camera::getInfo(char *_cmd, char *output, int lg){
 	DEB_MEMBER_FUNCT();
+		char cmdBuff[BUFF_INFO_SIZE +1];
+		char *cmd;
+		char *tok[NRTOK];
+		int tokNr;
 		char *ptr, *ptrMax;
 		int segmentPco = m_pcoData->activeRamSegment;
 		int segmentArr = segmentPco -1;
@@ -804,8 +835,21 @@ char *Camera::getInfo(char *cmd, char *output, int lg){
 		ptrMax = ptr + lg;
 
 		int width = +20;
+		
+		strncpy_s(cmdBuff, BUFF_INFO_SIZE, _cmd, BUFF_INFO_SIZE);
+		cmd = str_trim(cmdBuff);
 
-		if( (cmd == NULL) || (*cmd == 0)) {
+		if(*cmd){
+			char *tokContext;
+			for(int i=0; i < NRTOK; i++) {
+				if( (tok[i] = strtok_s(cmd, " ", &tokContext)) == NULL) break;
+				cmd = NULL;
+				tokNr = i;
+			}
+			cmd = tok[0];
+		}
+
+		if(*cmd == 0) {
 			ptr += sprintf_s(ptr, ptrMax - ptr,"**** %s [begin]\n", __FUNCTION__);
 
 			ptr += sprintf_s(ptr, ptrMax - ptr,"**** PCO log\n");
@@ -855,6 +899,7 @@ char *Camera::getInfo(char *cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr,"**** %s [end]\n", __FUNCTION__);
 			return output;
 		}
+		
 
 		if(_stricmp(cmd, "cocRunTime") == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "%g",  m_pcoData->cocRunTime);
@@ -907,9 +952,49 @@ char *Camera::getInfo(char *cmd, char *output, int lg){
 			
 			return output;
 		}
-		if(_stricmp(cmd, "help") == 0){
+
+		if(_stricmp(cmd, "testCmd") == 0){
+			if(tokNr == 0) {
+				ptr += sprintf_s(ptr, ptrMax - ptr, "tokNr [%d] cmd [%s] No parameters", tokNr, cmd); 
+			} else {
+				ptr += sprintf_s(ptr, ptrMax - ptr, "tokNr [%d] cmd [%s]\n", tokNr, cmd); 
+				for(int i = 1; i<= tokNr; i++) {
+					ptr += sprintf_s(ptr, ptrMax - ptr, "tok [%d] [%s]\n", i, tok[i]); 
+				}
+			}
+			return output;
+		}
+
+
+		if(_stricmp(cmd, "rollingShutter") == 0){
+			DWORD dwSetup; int error;
+
+			if(_getCameraType() != CAMERATYPE_PCO_EDGE) {
+				ptr += sprintf_s(ptr, ptrMax - ptr, "invalid cmd / only for EDGE");
+				return output;
+			}
+			
+			if(tokNr == 0) {
+				_pco_GetCameraSetup(dwSetup, error);
+				ptr += sprintf_s(ptr, ptrMax - ptr, "%d", dwSetup);
+				return output;
+			}
+
+			if((tokNr != 1) || ((strcmp(tok[1],"0") != 0) && (strcmp(tok[1],"1") != 0))){
+				ptr += sprintf_s(ptr, ptrMax - ptr, "syntax ERROR - %s <0 | 1>", cmd);
+				return output;
+			}
+			
+			dwSetup = atoi(tok[1]);
+
+			_pco_SetCameraSetup(dwSetup, error);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "%d", dwSetup);
+			return output;
+		}
+
+		if((_stricmp(cmd, "help") == 0) || (_stricmp(cmd, "?") == 0)){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "<empty> - general info\n");
-			ptr += sprintf_s(ptr, ptrMax - ptr, "help\n");
+			ptr += sprintf_s(ptr, ptrMax - ptr, "help | ?\n");
 			ptr += sprintf_s(ptr, ptrMax - ptr, "cocRunTime\n");
 			ptr += sprintf_s(ptr, ptrMax - ptr, "frameRate\n");
 			ptr += sprintf_s(ptr, ptrMax - ptr, "maxNbImages - max nr img in the segment\n");
@@ -917,6 +1002,7 @@ char *Camera::getInfo(char *cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "timestamp - pco cam module compiled\n");
 			ptr += sprintf_s(ptr, ptrMax - ptr, "clTransferParam\n");
 			ptr += sprintf_s(ptr, ptrMax - ptr, "allocatedBuffer\n");
+			ptr += sprintf_s(ptr, ptrMax - ptr, "rollingShutter [0|1] - EDGE rolling shutter state\n");
 			return output;
 		}
 
@@ -1358,7 +1444,6 @@ char *Camera::_set_metadata_mode(WORD wMetaDataMode, int &error){
 }
 
 
-		char *_pcoSet_CameraSetup(int &error);
 //=================================================================================================
 //=================================================================================================
 char *Camera::_pco_SetCameraSetup(DWORD dwSetup, int &error){
@@ -1433,3 +1518,34 @@ char *Camera::_pco_SetCameraSetup(DWORD dwSetup, int &error){
 	return fnId;
 
 }
+
+char *Camera::_pco_GetCameraSetup(DWORD &dwSetup, int &error){
+		
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+
+	DWORD m_dwSetup[10];
+	WORD m_wLen = 10;
+	WORD m_wType;
+
+	//***************************************************************************************************
+	// SC2_SDK_FUNC int WINAPI PCO_GetCameraSetup(HANDLE ph, WORD *wType, DWORD *dwSetup, WORD *wLen);
+	// Gets the camera setup structure (see camera specific structures)
+	// Not applicable to all cameras.
+	// See sc2_defs.h for valid flags: -- Defines for Get / Set Camera Setup
+	// In: HANDLE ph -> Handle to a previously opened camera.
+	//     WORD* wType -> Pointer to a word to get the actual type (Can be NULL to query wLen).
+	//     DWORD* dwSetup -> Pointer to a dword array (Can be NULL to query wLen)
+	//     WORD *wLen -> WORD Pointer to get the length of the array
+	// Out: int -> Error message.
+	//***************************************************************************************************
+
+
+    error = PcoCheckError(PCO_GetCameraSetup(m_handle, &m_wType, &m_dwSetup[0], &m_wLen));
+	if(error) return "PCO_GetCameraSetup";
+
+	dwSetup = m_dwSetup[0];
+	return fnId;
+
+}
+
