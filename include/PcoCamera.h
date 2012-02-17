@@ -167,8 +167,7 @@ namespace lima
 
         void getCameraName(std::string& name);
 
-        char *getInfo(char *cmd, char *output, int lg);
-        char *getInfo(char *cmd);
+        char *talk(char *cmd);
 
         unsigned long pcoGetFramesMax(int segmentPco);
 
@@ -208,6 +207,8 @@ namespace lima
 
         int PcoCheckError(int err);
         void _allocBuffer();
+
+        char *_talk(char *cmd, char *output, int lg);
 
 		char *_pcoSet_Trig_Acq_Mode(int &error);
 		char *_pcoSet_Storage_subRecord_Mode(int &error);

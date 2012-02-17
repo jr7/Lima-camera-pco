@@ -815,16 +815,18 @@ unsigned long Camera::pcoGetFramesMax(int segmentPco){
 //=========================================================================================================
 //=========================================================================================================
 
-char *Camera::getInfo(char *cmd){
+char *Camera::talk(char *cmd){
 	static char buff[BUFF_INFO_SIZE +1];
-	return getInfo(cmd, buff, BUFF_INFO_SIZE);
+	return _talk(cmd, buff, BUFF_INFO_SIZE);
 }
 
 #define NRTOK 5
-char *Camera::getInfo(char *_cmd, char *output, int lg){
+#define NRCMDS 50
+char *Camera::_talk(char *_cmd, char *output, int lg){
 	DEB_MEMBER_FUNCT();
 		char cmdBuff[BUFF_INFO_SIZE +1];
-		char *cmd;
+		char *cmd, *key, *keys[NRCMDS];
+		int ikey = 0;
 		char *tok[NRTOK];
 		int tokNr;
 		char *ptr, *ptrMax;
@@ -900,19 +902,20 @@ char *Camera::getInfo(char *_cmd, char *output, int lg){
 			return output;
 		}
 		
-
-		if(_stricmp(cmd, "cocRunTime") == 0){
+		key = keys[ikey++] = "cocRunTime";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "%g",  m_pcoData->cocRunTime);
 			return output;
 		}
 
-
-		if(_stricmp(cmd, "frameRate") == 0){
+		key = keys[ikey++] = "frameRate";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "%g", m_pcoData->frameRate);
 			return output;
 		}
 
-		if(_stricmp(cmd, "timestamp") == 0){
+		key = keys[ikey++] = "timestamp";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcocamera());
 			ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcosyncctrlobj());
 			ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcointerface());
@@ -923,7 +926,8 @@ char *Camera::getInfo(char *_cmd, char *output, int lg){
 		}
 
 
-		if(_stricmp(cmd, "clTransferParam") == 0){
+		key = keys[ikey++] = "clTransferParam";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "      baudrate=[%u] %g Kbps\n", m_pcoData->clTransferParam.baudrate, m_pcoData->clTransferParam.baudrate/1000.);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "ClockFrequency=[%u] %g MHz\n", m_pcoData->clTransferParam.ClockFrequency, m_pcoData->clTransferParam.ClockFrequency/1000000.);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "        CCline=[%u]\n", m_pcoData->clTransferParam.CCline);
@@ -933,18 +937,21 @@ char *Camera::getInfo(char *_cmd, char *output, int lg){
 			return output;
 		}
 
-		if(_stricmp(cmd, "maxNbImages") == 0){
+		key = keys[ikey++] = "maxNbImages";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "%ld", m_pcoData->dwMaxImageCnt[segmentArr]);
 			return output;
 		}
 
-		if(_stricmp(cmd, "acqTime") == 0){
+		key = keys[ikey++] = "acqTime";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* Acq (ms) Tnow=[%ld] Tout=[%ld] Rec=[%ld] Xfer=[%ld]\n", 
 						m_pcoData->msAcqTnow, m_pcoData->msAcqTout, m_pcoData->msAcqRec, m_pcoData->msAcqXfer);
 			return output;
 		}
 
-		if(_stricmp(cmd, "allocatedBuffer") == 0){
+		key = keys[ikey++] = "allocatedBuffer";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "AllocatedBuffer: Done=[%d] Nr=[%d] Size=[%ld][%g MB]\n", 
 				m_pcoData->bAllocatedBufferDone, 
 				m_pcoData->iAllocatedBufferNumber, 
@@ -953,7 +960,15 @@ char *Camera::getInfo(char *_cmd, char *output, int lg){
 			return output;
 		}
 
-		if(_stricmp(cmd, "testCmd") == 0){
+		key = keys[ikey++] = "testCmd";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
+
+			if((tokNr == 2) &&  (_stricmp(tok[1], "time")==0)){
+				ptr += sprintf_s(ptr, ptrMax - ptr, "sleeping\n"); 
+				::Sleep(atoi(tok[2])*1000);
+				ptr += sprintf_s(ptr, ptrMax - ptr, "sleeping\n"); 
+			}
+
 			if(tokNr == 0) {
 				ptr += sprintf_s(ptr, ptrMax - ptr, "tokNr [%d] cmd [%s] No parameters", tokNr, cmd); 
 			} else {
@@ -966,7 +981,8 @@ char *Camera::getInfo(char *_cmd, char *output, int lg){
 		}
 
 
-		if(_stricmp(cmd, "rollingShutter") == 0){
+		key = keys[ikey++] = "rollingShutter";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
 			DWORD dwSetup; int error;
 
 			if(_getCameraType() != CAMERATYPE_PCO_EDGE) {
@@ -992,17 +1008,30 @@ char *Camera::getInfo(char *_cmd, char *output, int lg){
 			return output;
 		}
 
-		if((_stricmp(cmd, "help") == 0) || (_stricmp(cmd, "?") == 0)){
-			ptr += sprintf_s(ptr, ptrMax - ptr, "<empty> - general info\n");
-			ptr += sprintf_s(ptr, ptrMax - ptr, "help | ?\n");
-			ptr += sprintf_s(ptr, ptrMax - ptr, "cocRunTime\n");
-			ptr += sprintf_s(ptr, ptrMax - ptr, "frameRate\n");
-			ptr += sprintf_s(ptr, ptrMax - ptr, "maxNbImages - max nr img in the segment\n");
-			ptr += sprintf_s(ptr, ptrMax - ptr, "acqTime - debug info\n");
-			ptr += sprintf_s(ptr, ptrMax - ptr, "timestamp - pco cam module compiled\n");
-			ptr += sprintf_s(ptr, ptrMax - ptr, "clTransferParam\n");
-			ptr += sprintf_s(ptr, ptrMax - ptr, "allocatedBuffer\n");
-			ptr += sprintf_s(ptr, ptrMax - ptr, "rollingShutter [0|1] - EDGE rolling shutter state\n");
+
+		key = keys[ikey++] = "cameraType";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
+			ptr += sprintf_s(ptr, ptrMax - ptr, "sn[%ld] type: cam[%x][%x]if[%x] ver: hw[%lx]fw[%lx]\n", 
+				m_pcoData->stcCamType.dwSerialNumber, 
+				m_pcoData->stcCamType.wCamType, 
+				m_pcoData->stcCamType.wCamSubType, 
+				m_pcoData->stcCamType.wInterfaceType,
+				m_pcoData->stcCamType.dwHWVersion, 
+				m_pcoData->stcCamType.dwFWVersion
+
+				);
+			
+			return output;
+		}
+
+
+
+		key = keys[ikey++] = "?";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
+			for(int i = 0; i < ikey; i++) {
+				ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", keys[i]);
+			}
+			ptr += sprintf_s(ptr, ptrMax - ptr, "--- nrCmds[%d][%d]\n", ikey, NRCMDS);
 			return output;
 		}
 

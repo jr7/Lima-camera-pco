@@ -21,7 +21,7 @@ namespace Pco
         void getMaxWidthHeight(unsigned long& width,unsigned long& height /Out/);
         void getBytesPerPixel(unsigned int& pixbytes /Out/);
         int getNbAcquiredFrames();
-        char *getInfo(char *cmd);       
+        char *talk(char *cmd);       
 
   };
 };
