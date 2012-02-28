@@ -55,7 +55,7 @@ BufferCtrlObj::BufferCtrlObj(Camera *cam) :
   DEB_CONSTRUCTOR();
 
 
-	//SoftBufferCtrlMgr::Sync &m_bufferSync = *getBufferSync(cond);
+	//SoftBufferCtrlObj::Sync &m_bufferSync = *getBufferSync(cond);
 	m_bufferSync = getBufferSync(cond);
 
   m_requestStop = false;
