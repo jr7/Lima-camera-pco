@@ -55,9 +55,10 @@ char * _timestamp_pcosyncctrlobj();
 char * _timestamp_pcointerface();
 char * _timestamp_pcobufferctrlobj();
 char * _timestamp_pcodetinfoctrlobj();
+void print_hex_dump_buff(void *ptr_buff, size_t len);
 	
 //=========================================================================================================
-char* _timestamp_pcocamera() {return __TIMESTAMP__ " (" __FILE__ ")";}
+char* _timestamp_pcocamera() {return "$Id: " __TIMESTAMP__ " (" __FILE__ ") $";}
 //=========================================================================================================
 
 //====================================================================
@@ -191,10 +192,11 @@ Camera::Camera(const char *camPar) :
 	int error=0;
 	char *errMsg;
 
+
 	m_pcoData =new(stcPcoData);
 	if(m_pcoData == NULL)
 		throw LIMA_HW_EXC(Error, "creation error");
-	memset((char *)m_pcoData, 0, sizeof(m_pcoData));
+	memset((char *)m_pcoData, 0, sizeof(stcPcoData));
 
 	m_bin.changed = Invalid;
 	m_roi.changed = Invalid;
@@ -429,6 +431,7 @@ void Camera::startAcq()
 
 	m_acq_frame_nb = -1;
 	m_pcoData->pcoError = 0;
+	m_pcoData->pcoErrorMsg[0] = 0;
 
 
 //=====================================================================
@@ -696,6 +699,22 @@ void _pco_acq_thread_dimax(void *argin) {
 //==========================================================================================================
 //==========================================================================================================
 
+char *sPcoAcqStatus[] ={
+	"pcoAcqIdle", 
+	"pcoAcqStart", 
+	"pcoAcqRecordStart", 
+	"pcoAcqRecordEnd",  
+	"pcoAcqTransferStart", 
+	"pcoAcqTransferEnd", 
+	"pcoAcqStop", 
+	"pcoAcqTransferStop", 
+	"pcoAcqRecordTimeout",
+	"pcoAcqWaitTimeout",
+	"pcoAcqWaitError",
+	"pcoAcqError",
+	"pcoAcqPcoError",
+};
+
 void _pco_acq_thread_edge(void *argin) {
 	DEF_FNID;
 
@@ -716,15 +735,16 @@ void _pco_acq_thread_edge(void *argin) {
 
 	HANDLE m_handle = m_cam->getHandle();
 
-	
+	m_sync->setAcqFrames(0);
+
 	pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImag();
 	m_sync->setExposing(status);
 
 	//m_sync->setExposing(status);
 
 	m_pcoData->msAcqXfer = msXfer = msElapsedTime(tStart);
-	printf("=== %s> EXIT xfer[%ld] (ms)\n", 
-			fnId, msXfer);
+	printf("=== %s> EXIT xfer[%ld] (ms) status[%s]\n", 
+			fnId, msXfer, sPcoAcqStatus[status]);
 	_endthread();
 }
 
@@ -741,10 +761,9 @@ void Camera::reset()
 //=========================================================================================================
 int Camera::PcoCheckError(int err) {
 	static char lastErrorMsg[500];
-	m_pcoData->pcoError = err;
 	if (err != 0) {
+		m_pcoData->pcoError = err;
 		PCO_GetErrorText(err, m_pcoData->pcoErrorMsg, ERR_SIZE-14);
-
 		return (1);
 	}
 	return (0);
@@ -1025,6 +1044,34 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		}
 
 
+		key = keys[ikey++] = "lastError";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
+			m_pcoData->pcoErrorMsg[ERR_SIZE] = 0;
+			ptr += sprintf_s(ptr, ptrMax - ptr, "[%d] [%s]\n", 
+				m_pcoData->pcoError, m_pcoData->pcoErrorMsg
+				);
+			
+			return output;
+		}
+
+		key = keys[ikey++] = "lastError";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
+			m_pcoData->pcoErrorMsg[ERR_SIZE] = 0;
+			ptr += sprintf_s(ptr, ptrMax - ptr, "[%d] [%s]\n", 
+				m_pcoData->pcoError, m_pcoData->pcoErrorMsg
+				);
+			
+			return output;
+		}
+
+		key = keys[ikey++] = "dumpData";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
+
+			print_hex_dump_buff(m_pcoData, sizeof(stcPcoData));
+			ptr += sprintf_s(ptr, ptrMax - ptr, "dumped\n");
+			
+			return output;
+		}
 
 		key = keys[ikey++] = "?";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
@@ -1200,6 +1247,7 @@ char *Camera::_prepare_cameralink_interface(int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 
+
 	error = PcoCheckError(PCO_GetSizes(m_handle, &m_pcoData->wXResActual, &m_pcoData->wYResActual, &m_pcoData->wXResMax, &m_pcoData->wYResMax));
     PCO_TRACE("PCO_GetSizes") ;
 
@@ -1258,8 +1306,13 @@ char *Camera::_prepare_cameralink_interface(int &error){
 
 	if(_getCameraType() == CAMERATYPE_PCO_EDGE) {
 		m_pcoData->wLUT_Parameter = 0; 
-		error = PcoCheckError(PCO_SetActiveLookupTable(m_handle, &m_pcoData->wLUT_Identifier, &m_pcoData->wLUT_Parameter));
-		if(error) return "PCO_SetActiveLookupTabler";
+		error = PcoCheckError(
+			PCO_SetActiveLookupTable(m_handle, &m_pcoData->wLUT_Identifier, &m_pcoData->wLUT_Parameter));
+		if(error) {
+			printf("=== %s [%s]\n", fnId, m_pcoData->pcoErrorMsg);
+			printf("=== wLUT_Identifier[%04x] wLUT_Parameter[%04x]\n", m_pcoData->wLUT_Identifier, m_pcoData->wLUT_Parameter);
+			return "PCO_SetActiveLookupTable";
+		}
 	}
 
 
@@ -1463,13 +1516,14 @@ char *Camera::_set_metadata_mode(WORD wMetaDataMode, int &error){
 	//     WORD* wMetaDataVersion -> Pointer to a WORD variable receiving the meta data version.
 	// Out: int -> Error message.
 	//***************************************************************************************************
-	
-	m_pcoData->wMetaDataMode = wMetaDataMode;
-    error = PcoCheckError(PCO_SetMetaDataMode(m_handle, wMetaDataMode, &m_pcoData->wMetaDataSize, &m_pcoData->wMetaDataVersion));
-	if(error) return "PCO_SetMetaDataMode";
-
+	m_pcoData->wMetaDataSize = m_pcoData->wMetaDataVersion = 0;
+	if(_getCameraType() == CAMERATYPE_PCO_DIMAX_STD) {
+		m_pcoData->wMetaDataMode = wMetaDataMode;
+		error = PcoCheckError(
+			PCO_SetMetaDataMode(m_handle, wMetaDataMode, &m_pcoData->wMetaDataSize, &m_pcoData->wMetaDataVersion));
+		if(error) return "PCO_SetMetaDataMode";
+	}
 	return fnId;
-
 }
 
 
@@ -1577,4 +1631,148 @@ char *Camera::_pco_GetCameraSetup(DWORD &dwSetup, int &error){
 	return fnId;
 
 }
+
+//====================================================================
+// utils
+//====================================================================
+
+#define LEN_LINE_BUFF	128
+#define BYTES_PER_LINE		16
+#define OFFSET_COL_HEX1	(4 + 1 + 3)
+#define OFFSET_COL_HEX2	(OFFSET_COL_HEX1 + (8 * 3) + 2)
+#define OFFSET_COL_ASC1	(OFFSET_COL_HEX2 + (8 * 3) + 3)
+#define OFFSET_COL_ASC2	(OFFSET_COL_ASC1 + 8 + 1)
+
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
+char *nibble_to_hex(char *s, BYTE nibble)
+{
+  nibble &= 0x0f;
+  *s = (nibble <= 9) ?  '0' + nibble : 'a' + nibble - 10;
+  return s+1;
+}
+
+
+
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
+char *byte_to_hex(char *s, BYTE byte)
+{
+  s = nibble_to_hex(s, byte >> 4);
+  return nibble_to_hex(s, byte);;
+}
+
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
+char *word_to_hex(char *s, WORD word)
+{
+  s = byte_to_hex(s, word >> 8);
+  return byte_to_hex(s, (BYTE) word);
+  
+}
+
+
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
+char *dword_to_hex(char *s, DWORD dword)
+{
+  s = word_to_hex(s, dword >> 16);
+  return word_to_hex(s, (WORD) dword);
+  
+}
+
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
+const char *hex_dump_line(void *buff, size_t len, size_t *nr, WORD *offset) {
+
+	static char line_buff[LEN_LINE_BUFF];
+
+	char *s;
+	BYTE *ptr_buff;
+	BYTE *ptr_buff0;
+	int i, nr1, nr2;
+
+	ptr_buff = (BYTE *) buff;
+	ptr_buff0 = ptr_buff;
+
+	s = line_buff;
+
+
+	if(len <= 0) {
+		strcpy_s(s,LEN_LINE_BUFF,"<empty>");
+		return line_buff;
+	}
+
+	memset(line_buff, ' ', LEN_LINE_BUFF);
+
+	*nr = (len < BYTES_PER_LINE) ? len : BYTES_PER_LINE;
+
+	s = word_to_hex(s, *offset);
+	*offset += *nr;
+	*s = ':';
+	s = line_buff + OFFSET_COL_HEX1;
+
+	if(*nr <= BYTES_PER_LINE / 2) {
+		nr1 = *nr;
+		nr2 = -1;
+	} else {
+		nr1 = BYTES_PER_LINE / 2;
+		nr2 = *nr - nr1;
+	}
+
+	for(i = 0; i < nr1; i++) {
+		s = byte_to_hex(s, *ptr_buff++);
+		s++;
+	}
+
+	if(nr2 >0 ){
+		*s = '-';
+		s = line_buff + OFFSET_COL_HEX2;
+		for(i = 0; i < nr2; i++) {
+			s = byte_to_hex(s, *ptr_buff++);
+			s++;
+		}
+	}	
+
+	ptr_buff = ptr_buff0;
+	s = line_buff + OFFSET_COL_ASC1;
+	for(i = 0; i < nr1; i++) {
+		*s++ = (isprint(*ptr_buff)) ? *ptr_buff : '.';
+		ptr_buff++;
+	}
+
+	if(nr2 >0 ){
+		s = line_buff + OFFSET_COL_ASC2;
+		for(i = 0; i < nr2; i++) {
+			*s++ = (isprint(*ptr_buff)) ? *ptr_buff : '.';
+			ptr_buff++;
+		}
+	}	
+	
+	*s = 0;
+
+	return line_buff;
+
+}
+
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
+void print_hex_dump_buff(void *ptr_buff, size_t len) {
+	WORD offset = 0;
+	size_t nr = 0;
+	BYTE * ptr = (BYTE *) ptr_buff;
+	;
+	
+	printf("dump buff / len: %d\n", len);
+	
+	while(len > 0) {
+		printf("%s\n", hex_dump_line(ptr, len, &nr, &offset));
+		len -= nr;
+		ptr += nr;
+	}
+
+}
+
+
+
 
