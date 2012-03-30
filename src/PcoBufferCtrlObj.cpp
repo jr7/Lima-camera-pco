@@ -379,7 +379,7 @@ int BufferCtrlObj::_xferImag()
 	// --------------- loop - process the N frames
 	dwFrameIdx = 1;
 
-	while(dwFrameIdx <= dwRequestedFrames+1) {
+	while(dwFrameIdx <= dwRequestedFrames+17) {
 		//printf("=== %s> dwFrameIdx[%d] dwRequestedFrames[%ld]\n", fnId, dwFrameIdx,dwRequestedFrames );
 
 
