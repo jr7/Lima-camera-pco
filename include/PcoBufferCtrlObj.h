@@ -61,7 +61,7 @@ namespace lima
 
 	//int Camera::pcoGetError();
 
-    class DLL_EXPORT BufferCtrlObj : public SoftBufferCtrlMgr
+    class DLL_EXPORT BufferCtrlObj : public SoftBufferCtrlObj
     {
       friend class Interface;
       DEB_CLASS_NAMESPC(DebModCamera,"BufferCtrlObj","Pco");
@@ -85,7 +85,7 @@ namespace lima
 		void _pcoAllocBuffersFree();
 	
 	private:
-		SoftBufferCtrlMgr::Sync *m_bufferSync;
+		SoftBufferCtrlObj::Sync *m_bufferSync;
 		Cond cond;
 		Camera* m_cam;
 		int _assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, DWORD dwRequestedFrames, int bufIdx);

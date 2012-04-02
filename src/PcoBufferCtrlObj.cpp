@@ -55,7 +55,7 @@ BufferCtrlObj::BufferCtrlObj(Camera *cam) :
   DEB_CONSTRUCTOR();
 
 
-	//SoftBufferCtrlMgr::Sync &m_bufferSync = *getBufferSync(cond);
+	//SoftBufferCtrlObj::Sync &m_bufferSync = *getBufferSync(cond);
 	m_bufferSync = getBufferSync(cond);
 
   m_requestStop = false;
@@ -407,7 +407,8 @@ _RETRY:
 
 		if(	m_requestStop) {return pcoAcqTransferStop;}
 		memcpy(ptrDest, ptrSrc, size);
-		//printf("=== %s> got bufIdx[%d]\n", fnId, bufIdx);
+		printf("=== %s> got bufIdx[%d] size[%ld] dest[%08lx] src[%08lx]\n", fnId, bufIdx,
+			size, ((DWORD) ptrDest), ((DWORD) ptrSrc) );
 		
 		DEB_TRACE() << "========================================FOUND " << DEB_VAR3(ptrDest, ptrSrc, size);
 #endif
