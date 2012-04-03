@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\..\..\hardware\include;..\..\..\..\..\..\common\include;..\..\..\..\..\..\third-party\Processlib\core\include\WindowSpecific;..\..\..\..\..\..\third-party\Processlib\core\include;..\..\..\..\..\..\camera\pco\sdk\pco-sdk-113\include"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\..\..\hardware\include;..\..\..\..\..\..\common\include;..\..\..\..\..\..\third-party\Processlib\core\include\WindowSpecific;..\..\..\..\..\..\third-party\Processlib\core\include;..\..\..\..\..\..\camera\pco\sdk\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBLIMAPCO_EXPORTS;_WIN32_WINNT=0x0502"
 				GeneratePreprocessedFile="0"
 				MinimalRebuild="true"
@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(InputDir)..\..\..\..\sdk\pco-sdk-113\lib\SC2_Cam.lib $(InputDir)..\..\..\..\..\..\build\msvc\9.0\LimaCore\Debug\liblimacore.lib $(InputDir)..\..\..\..\..\..\third-party\Processlib\build\msvc\9.0\libprocesslib\Debug\libprocesslib.lib"
+				AdditionalDependencies="$(InputDir)..\..\..\..\sdk\lib\SC2_Cam.lib $(InputDir)..\..\..\..\..\..\build\msvc\9.0\LimaCore\Debug\liblimacore.lib $(InputDir)..\..\..\..\..\..\third-party\Processlib\build\msvc\9.0\libprocesslib\Debug\libprocesslib.lib"
 				OutputFile="$(InputDir)Debug\$(ProjectName).dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
@@ -118,7 +118,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\..\..\hardware\include;..\..\..\..\..\..\common\include;..\..\..\..\..\..\third-party\Processlib\core\include\WindowSpecific;..\..\..\..\..\..\third-party\Processlib\core\include;..\..\..\..\..\..\camera\pco\sdk\pco-sdk-113\include"
+				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\..\..\hardware\include;..\..\..\..\..\..\common\include;&quot;..\..\..\..\..\..\third-party\Processlib\core\include\WindowSpecific&quot;;&quot;..\..\..\..\..\..\third-party\Processlib\core\include&quot;;R:\bliss\projects\LIMA\package\WIN32\PCO\sdkPco\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBLIMAPCO_EXPORTS;_WIN32_WINNT=0x0502"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -138,7 +138,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(InputDir)..\..\..\..\sdk\pco-sdk-113\lib\SC2_Cam.lib $(InputDir)..\..\..\..\..\..\build\msvc\9.0\LimaCore\Release\liblimacore.lib $(InputDir)..\..\..\..\..\..\third-party\Processlib\build\msvc\9.0\libprocesslib\Release\libprocesslib.lib"
+				AdditionalDependencies="$(InputDir)..\..\..\..\sdk\lib\SC2_Cam.lib $(InputDir)..\..\..\..\..\..\build\msvc\9.0\LimaCore\Release\liblimacore.lib $(InputDir)..\..\..\..\..\..\third-party\Processlib\build\msvc\9.0\libprocesslib\Release\libprocesslib.lib"
 				OutputFile="$(InputDir)Release\$(ProjectName).dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
@@ -181,10 +181,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\..\..\src\notes.txt"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\src\PcoBufferCtrlObj.cpp"
 				>
 			</File>
@@ -211,10 +207,6 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\..\..\notes\notes.txt"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\include\Pco.h"
 				>
 			</File>
@@ -231,10 +223,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\notes\pcods_c.txt"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\include\PcoInterface.h"
 				>
 			</File>
@@ -248,6 +236,25 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+		</Filter>
+		<Filter
+			Name="notes"
+			>
+			<File
+				RelativePath="..\..\..\..\notes\notes.txt"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\..\notes\pcods_c.txt"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

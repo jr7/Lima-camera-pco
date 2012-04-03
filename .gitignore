@@ -3,4 +3,4 @@
 *.swp
 *.bck
 *target*
-*.vcproj.*.user
+*.vcproj.*user
