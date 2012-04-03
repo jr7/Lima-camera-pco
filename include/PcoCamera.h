@@ -111,6 +111,11 @@ struct stcPcoData {
 
 		WORD wXResActual, wYResActual, wXResMax, wYResMax;
 		WORD wLUT_Identifier, wLUT_Parameter;
+
+		DWORD dwAllocatedBufferSize;
+		int iAllocatedBufferNumber;
+		bool bAllocatedBufferDone;
+
 };
 
 enum enumChange {
@@ -162,8 +167,7 @@ namespace lima
 
         void getCameraName(std::string& name);
 
-        char *getInfo(char *cmd, char *output, int lg);
-        char *getInfo(char *cmd);
+        char *talk(char *cmd);
 
         unsigned long pcoGetFramesMax(int segmentPco);
 
@@ -179,6 +183,7 @@ namespace lima
 		int pcoGetError() {return m_pcoData->pcoError;}
 
 		char *_pcoSet_RecordingState(int state, int &error);
+		WORD _getCameraType() {return m_pcoData->stcCamType.wCamType ; }
 
 	private:
 		SyncCtrlObj*	m_sync;
@@ -203,12 +208,17 @@ namespace lima
         int PcoCheckError(int err);
         void _allocBuffer();
 
+        char *_talk(char *cmd, char *output, int lg);
+
 		char *_pcoSet_Trig_Acq_Mode(int &error);
 		char *_pcoSet_Storage_subRecord_Mode(int &error);
 		char *_pcoSet_Exposure_Delay_Time(int &error);
 		char *_pcoSet_Cameralink_GigE_Parameters(int &error);
 		char *_pcoGet_Camera_Type(int &error);
 		char *_pcoGet_TemperatureInfo(int &error);
+
+		char *_pco_SetCameraSetup(DWORD dwSetup, int &error);
+		char *_pco_GetCameraSetup(DWORD &dwSetup, int &error);
 
 		int _init_edge();
 		int _init_dimax();
