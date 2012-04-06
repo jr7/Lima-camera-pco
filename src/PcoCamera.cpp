@@ -516,7 +516,9 @@ void Camera::startAcq()
 	msg = _set_metadata_mode(0, error); PCO_TRACE(msg) ;
 
 	// ------------------------------------------------- arm camera
-    error = PcoCheckError(PCO_ArmCamera(m_handle));
+    
+	
+	error = PcoCheckError(PCO_ArmCamera(m_handle));
     PCO_TRACE("PCO_ArmCamera") ;
 
 
@@ -904,8 +906,11 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->wXResActual=[%d] .wYResActual=[%d] \n",  m_pcoData->wXResActual,  m_pcoData->wYResActual);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->wXResMax=[%d] .wYResMax=[%d] \n",  m_pcoData->wXResMax,  m_pcoData->wYResMax);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->wMetaDataSize=[%d] .wMetaDataVersion=[%d] \n",  m_pcoData->wMetaDataSize,  m_pcoData->wMetaDataVersion);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->dwPixelRate=[l%d]\n",  m_pcoData->dwPixelRate);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->dwPixelRate=[%ld] (%g) \n",  
+				m_pcoData->dwPixelRate, m_pcoData->dwPixelRate/1000000.);
 
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* wLUT_Identifier[x%04x] wLUT_Parameter [x%04x]\n",
+				m_pcoData->wLUT_Identifier, m_pcoData->wLUT_Parameter);
 
 			int iFrames;
 			m_sync->getNbFrames(iFrames);
@@ -1249,13 +1254,25 @@ char *Camera::_prepare_cameralink_interface(int &error){
 
 
 	error = PcoCheckError(PCO_GetSizes(m_handle, &m_pcoData->wXResActual, &m_pcoData->wYResActual, &m_pcoData->wXResMax, &m_pcoData->wYResMax));
-    PCO_TRACE("PCO_GetSizes") ;
+	if(error) {
+		char *fnPco = "PCO_GetSizes";
+		printf("=== %s> %s [%s]\n", fnId, fnPco, m_pcoData->pcoErrorMsg);
+		return fnPco;
+	}
 
 	error = PcoCheckError(PCO_GetPixelRate(m_handle, &m_pcoData->dwPixelRate));
-    PCO_TRACE("PCO_GetPixelRate") ;
+	if(error) {
+		char *fnPco = "PCO_GetPixelRate";
+		printf("=== %s> %s [%s]\n", fnId, fnPco, m_pcoData->pcoErrorMsg);
+		return fnPco;
+	}
 
     error = PcoCheckError(PCO_GetTransferParameter(m_handle, &m_pcoData->clTransferParam, sizeof(m_pcoData->clTransferParam)));
-	if(error) return "PCO_GetTransferParameter";
+	if(error) {
+		char *fnPco = "PCO_GetTransferParameter";
+		printf("=== %s> %s [%s]\n", fnId, fnPco, m_pcoData->pcoErrorMsg);
+		return fnPco;
+	}
 
 
     m_pcoData->clTransferParam.baudrate = PCO_CL_BAUDRATE_115K2;
@@ -1272,13 +1289,14 @@ char *Camera::_prepare_cameralink_interface(int &error){
 		    m_pcoData->clTransferParam.baudrate = PCO_CL_BAUDRATE_115K2;
 			m_pcoData->clTransferParam.Transmit = 1;
 
-			if(m_pcoData->dwPixelRate == PCO_CL_PIXELCLOCK_95MHZ) {
+			if((m_pcoData->dwPixelRate == PCO_CL_PIXELCLOCK_95MHZ)||
+				(m_pcoData->dwPixelRate == 95333333)){
 				m_pcoData->clTransferParam.DataFormat=PCO_CL_DATAFORMAT_5x16 | SCCMOS_FORMAT_TOP_CENTER_BOTTOM_CENTER;
-			m_pcoData->wLUT_Identifier = 0; // Switch LUT->of
+				m_pcoData->wLUT_Identifier = 0; // Switch LUT->of
 				break;
 			}
 			
-			if(m_pcoData->dwPixelRate != PCO_CL_PIXELCLOCK_286MHZ) {
+			if(m_pcoData->dwPixelRate == PCO_CL_PIXELCLOCK_286MHZ) {
 
 				break;
 			}
@@ -1296,7 +1314,11 @@ char *Camera::_prepare_cameralink_interface(int &error){
 	}
 
     error = PcoCheckError(PCO_SetTransferParameter(m_handle, &m_pcoData->clTransferParam, sizeof(m_pcoData->clTransferParam)));
-	if(error) return "PCO_SetTransferParameter";
+	if(error) {
+		char *fnPco = "PCO_SetTransferParameter";
+		printf("=== %s> %s [%s]\n", fnId, fnPco, m_pcoData->pcoErrorMsg);
+		return fnPco;
+	}
 
 	//*****************************************************************************************
 	//SC2_SDK_FUNC int WINAPI PCO_SetActiveLookupTable(HANDLE ph,
@@ -1315,6 +1337,8 @@ char *Camera::_prepare_cameralink_interface(int &error){
 		}
 	}
 
+	error = PcoCheckError(PCO_ArmCamera(m_handle));
+    PCO_TRACE("PCO_ArmCamera") ;
 
 	//*****************************************************************************************
 	// SC2_SDK_FUNC int WINAPI PCO_CamLinkSetImageParameters(HANDLE ph, WORD wxres, WORD wyres);
@@ -1329,8 +1353,11 @@ char *Camera::_prepare_cameralink_interface(int &error){
 	//*****************************************************************************************
 
 	error = PcoCheckError(PCO_CamLinkSetImageParameters(m_handle, m_pcoData->wXResActual, m_pcoData->wYResActual));
-	if(error) return "PCO_CamLinkSetImageParameters";
-
+	if(error) {
+		char *fnPco = "PCO_CamLinkSetImageParameters";
+		printf("=== %s> %s [%s]\n", fnId, fnPco, m_pcoData->pcoErrorMsg);
+		return fnPco;
+	}
 
 
 

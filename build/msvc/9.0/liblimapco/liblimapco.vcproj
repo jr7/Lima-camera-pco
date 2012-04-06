@@ -21,6 +21,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
+			InheritedPropertySheets=".\prop.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -96,6 +97,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
+			InheritedPropertySheets=".\prop.vsprops"
 			CharacterSet="0"
 			WholeProgramOptimization="1"
 			>
@@ -118,7 +120,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\..\..\..\include;..\..\..\..\..\..\hardware\include;..\..\..\..\..\..\common\include;..\..\..\..\..\..\third-party\Processlib\core\include\WindowSpecific;..\..\..\..\..\..\third-party\Processlib\core\include;R:\bliss\projects\LIMA\package\WIN32\PCO\sdkPco\include"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)include&quot;;&quot;$(LimaDir)hardware\include&quot;;&quot;$(LimaDir)common\include&quot;;&quot;$(LimaDir)third-party\Processlib\core\include\WindowSpecific&quot;;&quot;$(LimaDir)third-party\Processlib\core\include&quot;;&quot;$(LimaDir)..\sdkPco\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBLIMAPCO_EXPORTS;_WIN32_WINNT=0x0502"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -138,7 +140,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="R:\bliss\projects\LIMA\package\WIN32\PCO\sdkPco\lib\SC2_Cam.lib $(InputDir)..\..\..\..\..\..\build\msvc\9.0\LimaCore\Release\liblimacore.lib $(InputDir)..\..\..\..\..\..\third-party\Processlib\build\msvc\9.0\libprocesslib\Release\libprocesslib.lib"
+				AdditionalDependencies="$(LimaDir)..\sdkPco\lib\SC2_Cam.lib $(LimaDir)build\msvc\9.0\LimaCore\Release\liblimacore.lib $(LimaDir)third-party\Processlib\build\msvc\9.0\libprocesslib\Release\libprocesslib.lib"
 				OutputFile="$(InputDir)Release\$(ProjectName).dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"

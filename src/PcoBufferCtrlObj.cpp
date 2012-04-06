@@ -236,7 +236,7 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
     m_cam->getBitsPerPixel(wBitPerPixel);
 
     DWORD dwLen = wArmWidth * wArmHeight * bytesPerPixel;
-    DWORD dwAllocatedBufferSize = dwMaxWidth * dwMaxHeight * (DWORD) bytesPerPixel;
+    //DWORD dwAllocatedBufferSize = dwMaxWidth * dwMaxHeight * (DWORD) bytesPerPixel;
 
 	if(myBuffer == NULL) {
 		msg = "ERROR myBuffer = NULL";
@@ -260,7 +260,9 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 
 	m_allocBuff.limaAllocBufferPtr[bufIdx] = (WORD *) myBuffer; 
 	m_allocBuff.dwLimaAllocBufferSize[bufIdx] = myBufferLen; 
-	
+
+
+
 // ---------- NEW function with our assigned buffers
 //SC2_SDK_FUNC int WINAPI PCO_AddBufferExtern(HANDLE ph, HANDLE hEvent, DWORD dw1stImage,
 //        DWORD dwLastImage, DWORD dwSynch, void* pBuf, DWORD dwLen, DWORD* dwStatus)
@@ -287,10 +289,21 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 #else
 	// the data transfer is made to the buffer allocated by PCO, after that we must to copy this buffer
 	// to the LIMA allocated one
-	sErr =  m_cam->_PcoCheckError(PCO_AddBufferEx(m_handle, \
+
+	  
+#if 0
+	  sErr =  m_cam->_PcoCheckError(PCO_AddBufferEx(m_handle, \
 				dwFrameFirst, dwFrameLast, \
 				m_allocBuff.pcoAllocBufferNr[bufIdx], \
 				wArmWidth, wArmHeight, wBitPerPixel), error) ;
+
+#else
+
+	  sErr =  m_cam->_PcoCheckError(PCO_AddBufferEx(m_handle, \
+				0, 0, \
+				m_allocBuff.pcoAllocBufferNr[bufIdx], \
+				wArmWidth, wArmHeight, wBitPerPixel), error) ;
+#endif
 
 	if(error) {
 		printf("==== %s error [%s]\n", fnId, sErr);
@@ -379,7 +392,7 @@ int BufferCtrlObj::_xferImag()
 	// --------------- loop - process the N frames
 	dwFrameIdx = 1;
 
-	while(dwFrameIdx <= dwRequestedFrames+17) {
+	while(dwFrameIdx <= dwRequestedFrames) {
 		//printf("=== %s> dwFrameIdx[%d] dwRequestedFrames[%ld]\n", fnId, dwFrameIdx,dwRequestedFrames );
 
 
@@ -404,12 +417,22 @@ _RETRY:
 		void * ptrDest = (void *)m_allocBuff.limaAllocBufferPtr[bufIdx];
 		void *ptrSrc = (void *) m_allocBuff.pcoAllocBufferPtr[bufIdx];
 		size_t size = m_allocBuff.dwPcoAllocBufferSize[bufIdx];
-
+		SHORT sBufNr = 	m_allocBuff.pcoAllocBufferNr[bufIdx];
+		DWORD dwStatusDll, dwStatusDrv;
 		if(	m_requestStop) {return pcoAcqTransferStop;}
+
+		int errPco = PCO_GetBufferStatus(m_handle, sBufNr, &dwStatusDll, &dwStatusDrv);		
+		if((dwStatusDll != 0x80000000) || dwStatusDrv || errPco) {
+			printf("=== %s> got frame[%d / %d] bufIdx[%d] size[%ld] dest[%08lx] src[%08lx] \n"
+				"dwStatusDll[%08lx] dwStatusDrv[%08lx] errPco[%08lx] err[%s]\n", fnId, 
+				dwFrameIdx, dwRequestedFrames, bufIdx,
+				size, ((DWORD) ptrDest), ((DWORD) ptrSrc),
+				dwStatusDll, dwStatusDrv, errPco,
+				m_cam->_PcoCheckError(dwStatusDrv, error));
+		}
+
 		memcpy(ptrDest, ptrSrc, size);
-		printf("=== %s> got bufIdx[%d] size[%ld] dest[%08lx] src[%08lx]\n", fnId, bufIdx,
-			size, ((DWORD) ptrDest), ((DWORD) ptrSrc) );
-		
+
 		DEB_TRACE() << "========================================FOUND " << DEB_VAR3(ptrDest, ptrSrc, size);
 #endif
 
