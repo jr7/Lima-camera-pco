@@ -24,7 +24,6 @@
 #define PCO_ERRT_H_CREATE_OBJECT
 #define BYPASS
 
-
 #define BUFF_INFO_SIZE 5000
 
 #define DWORD_MAX ULONG_MAX 
