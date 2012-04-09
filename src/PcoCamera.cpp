@@ -527,19 +527,6 @@ void Camera::startAcq()
 	msg = _get_coc_runtime(error); PCO_TRACE(msg) ;
 	
 
-
-
-#if 0
-	//------------------------------------------------ get size
-	error = PcoCheckError(PCO_GetSizes(m_handle, &m_pcoData->wXResActual, &m_pcoData->wYResActual, &m_pcoData->wXResMax, &m_pcoData->wYResMax));
-    PCO_TRACE("PCO_GetSizes") ;
-	error = PcoCheckError(PCO_GetPixelRate(m_handle, &m_pcoData->dwPixelRate));
-    PCO_TRACE("PCO_GetPixelRate") ;
-	msg = _pcoSet_Cameralink_GigE_Parameters(error);
-	PCO_TRACE(msg) ;
-#endif
-
-
     //--------------------------- PREPARE / getSizes, pixelRate, clXferParam, LUT, setImgParam, Arm
 	msg = _prepare_cameralink_interface(error); PCO_TRACE(msg) ;
 

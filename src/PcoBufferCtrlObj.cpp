@@ -44,7 +44,6 @@ using namespace lima::Pco;
 char* _timestamp_pcobufferctrlobj() {return "$Id: " __TIMESTAMP__ " (" __FILE__ ") $";}
 //=========================================================================================================
 
-
 //=========================================================================================================
 //=========================================================================================================
 BufferCtrlObj::BufferCtrlObj(Camera *cam) :
@@ -77,20 +76,14 @@ BufferCtrlObj::BufferCtrlObj(Camera *cam) :
 //=========================================================================================================
 void BufferCtrlObj::prepareAcq()
 {
-  DEB_MEMBER_FUNCT();
+	DEB_MEMBER_FUNCT();
 
-  //char *ptr;
+	_pcoAllocBuffers();
 
+	FrameDim dim;
 
- 
-  _pcoAllocBuffers();
-
-  FrameDim dim;
-
-  getFrameDim(dim);
-  m_ImageBufferSize = dim.getMemSize();
-
-
+	getFrameDim(dim);
+	m_ImageBufferSize = dim.getMemSize();
 
 	DEB_TRACE() << DEB_VAR1(m_ImageBufferSize);
 
@@ -100,11 +93,11 @@ void BufferCtrlObj::prepareAcq()
 //=========================================================================================================
 void BufferCtrlObj::startAcq()
 {
-  DEB_MEMBER_FUNCT();
-  std::string name;
+	DEB_MEMBER_FUNCT();
+	std::string name;
 
 	StdBufferCbMgr& buffer_mgr = m_buffer_cb_mgr;
-    buffer_mgr.setStartTimestamp(Timestamp::now());
+	buffer_mgr.setStartTimestamp(Timestamp::now());
 
 	DEB_TRACE() << "=== TRACE";
 	m_requestStop = false;
@@ -116,7 +109,7 @@ void BufferCtrlObj::startAcq()
 	DEB_TRACE() << "=== TRACE" << name;
 	m_cam->startAcq();
 	DEB_TRACE() << "=== TRACE";
-	
+
 }
 
 
@@ -290,26 +283,17 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 	// the data transfer is made to the buffer allocated by PCO, after that we must to copy this buffer
 	// to the LIMA allocated one
 
-	  
-#if 0
+
+	  DWORD dwFrame =  (m_cam->_getCameraType() == CAMERATYPE_PCO_EDGE) ? 0 :  dwFrameFirst;
 	  sErr =  m_cam->_PcoCheckError(PCO_AddBufferEx(m_handle, \
-				dwFrameFirst, dwFrameLast, \
+				dwFrame, dwFrame, \
 				m_allocBuff.pcoAllocBufferNr[bufIdx], \
 				wArmWidth, wArmHeight, wBitPerPixel), error) ;
-
-#else
-
-	  sErr =  m_cam->_PcoCheckError(PCO_AddBufferEx(m_handle, \
-				0, 0, \
-				m_allocBuff.pcoAllocBufferNr[bufIdx], \
-				wArmWidth, wArmHeight, wBitPerPixel), error) ;
-#endif
 
 	if(error) {
 		printf("==== %s error [%s]\n", fnId, sErr);
-		printf("==== dwFrameFirst[%d] dwFrameLast[%d]\n", dwFrameFirst, dwFrameLast);
+		printf("==== dwFrame[%d] dwFrameFirst[%d] dwFrameLast[%d]\n", dwFrame, dwFrameFirst, dwFrameLast);
 		printf("==== wArmWidth[%d] wArmHeight[%d] wBitPerPixel[%d]\n", wArmWidth, wArmHeight, wBitPerPixel);
-		for(int i=1; i<80;i++) printf("=========================================================\n");
 
     	DEB_TRACE() << sErr;
     	DEB_TRACE() << DEB_VAR2(dwFrameFirst, dwFrameLast);
@@ -320,7 +304,6 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
     	DEB_TRACE() << DEB_VAR2(dwFrameFirst, dwFrameLast);
     	DEB_TRACE() << DEB_VAR3(wArmWidth, wArmHeight, wBitPerPixel);
 #endif
-	//printf("=== %s> assigned bufIdx[%d] dwFrameFirst[%d] dwFrameLast[%d]\n", fnId, bufIdx, dwFrameFirst, dwFrameLast);
 
 	m_allocBuff.bufferAssignedFrameFirst[bufIdx] = dwFrameFirst;
 	m_allocBuff.bufferAssignedFrameLast[bufIdx] = dwFrameLast;
@@ -393,8 +376,6 @@ int BufferCtrlObj::_xferImag()
 	dwFrameIdx = 1;
 
 	while(dwFrameIdx <= dwRequestedFrames) {
-		//printf("=== %s> dwFrameIdx[%d] dwRequestedFrames[%ld]\n", fnId, dwFrameIdx,dwRequestedFrames );
-
 
 _RETRY:
 
@@ -472,22 +453,18 @@ _RETRY:
     switch (dwEvent) { 
         case WAIT_OBJECT_0 + 0: 
 			m_allocBuff.bufferReady[0] = 1; 
-			//printf("=== %s> WAITOBJ 0  FOUND\n", fnId);
 			DEB_TRACE() << "========================================WAITOBJ 0  FOUND";
 			goto _RETRY;
         case WAIT_OBJECT_0 + 1: 
 			m_allocBuff.bufferReady[1] = 1; 
-			//printf("=== %s> WAITOBJ 1  FOUND\n", fnId);
 			DEB_TRACE() << "========================================WAITOBJ 1  FOUND";
 			goto _RETRY;
         case WAIT_OBJECT_0 + 2: 
 			m_allocBuff.bufferReady[2] = 1;
-			//printf("=== %s> WAITOBJ 2  FOUND\n", fnId);
 			DEB_TRACE() << "========================================WAITOBJ 2  FOUND";
 			goto _RETRY;
         case WAIT_OBJECT_0 + 3: 
 			m_allocBuff.bufferReady[3] = 1; 
-			//printf("=== %s> WAITOBJ 3  FOUND\n", fnId);
 			DEB_TRACE() << "========================================WAITOBJ 3  FOUND";
 			goto _RETRY;
 
@@ -511,7 +488,6 @@ _WHILE_CONTINUE:
 			m_sync->setAcqFrames(dwFrameIdx-1);
 		}
 
-    printf("=== %s> return\n", fnId);
 	return pcoAcqTransferEnd;
 
 }
