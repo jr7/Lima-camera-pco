@@ -30,8 +30,12 @@
 #include "HwMaxImageSizeCallback.h"
 //#include "PcoBufferCtrlObj.h"
 
-#define PCO_CL_PIXELCLOCK_95MHZ 95000000
-#define PCO_CL_PIXELCLOCK_286MHZ 286000000
+#define PCO_EDGE_PIXEL_RATE_MIN 95000000
+#define PCO_EDGE_PIXEL_RATE_MAX 286000000
+#define PCO_EDGE_PIXEL_RATE_LOW 100000000
+#define PCO_EDGE_PIXEL_RATE_HIGH 286000000
+#define PCO_EDGE_WIDTH_HIGH 1920
+
 #define PCO_CL_BAUDRATE_115K2	115200
 
 #define PCO_BUFFER_NREVENTS 2
@@ -107,7 +111,7 @@ struct stcPcoData {
 
 		WORD wMetaDataMode, wMetaDataSize, wMetaDataVersion;
 		long msAcqRec, msAcqXfer, msAcqTout, msAcqTnow;
-		DWORD dwPixelRate;
+		DWORD dwPixelRate, dwPixelRateRequested;
 
 		WORD wXResActual, wYResActual, wXResMax, wYResMax;
 		WORD wLUT_Identifier, wLUT_Parameter;

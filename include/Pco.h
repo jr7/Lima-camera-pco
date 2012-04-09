@@ -48,6 +48,7 @@
 #include <math.h>
 
 #define ERR_SIZE	256
+#define ERRMSG_SIZE	(256+128)
 #define MODEL_TYPE_SIZE	32
 #define INTERFACE_TYPE_SIZE	32
 #define CAMERA_NAME_SIZE	128
@@ -64,15 +65,17 @@ typedef int tPvErr;
 } 
 
 
+#if 0
 #define PCO_TRACE(x)  \
 { \
 		if(error){ \
-			DEB_TRACE() << "*** " <<  x << " PCO ERROR " << m_pcoData->pcoErrorMsg; \
-			throw LIMA_HW_EXC(Error, x); \
+			char msg[ERRMSG_SIZE+1]; \
+			sprintf_s(msg, "=== %s PcoError[x%08x][%s]", x, m_pcoData->pcoError,  m_pcoData->pcoErrorMsg); \
+			DEB_TRACE() << msg; \
+			throw LIMA_HW_EXC(Error, msg); \
 		} \
 		DEB_TRACE() << "*** " <<  x << " OK" ; \
 }
-
 #define _PCO_TRACE(x, s)  \
 { \
 		if(error){ \
@@ -81,6 +84,20 @@ typedef int tPvErr;
 		} \
 		DEB_TRACE() << "*** " <<  x << " OK" ; \
 }
+
+#endif
+
+#define PCO_THROW_OR_TRACE(__err__, __msg__)  \
+{ \
+		if(__err__){ \
+			char msg[ERRMSG_SIZE+1]; \
+			sprintf_s(msg, "=== %s PcoError[x%08x][%s]", __msg__, m_pcoData->pcoError,  m_pcoData->pcoErrorMsg); \
+			DEB_TRACE() << msg; \
+			throw LIMA_HW_EXC(Error, msg); \
+		} \
+		DEB_TRACE() << "*** " <<  __msg__ << " OK" ; \
+}
+
 
 #define DEF_FNID 	static char *fnId =__FUNCTION__;
 

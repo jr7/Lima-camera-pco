@@ -23,9 +23,10 @@
 **************************************************************************/
 #include <sstream>
 #include "Exceptions.h"
+#include "Pco.h"
+#include "PcoCamera.h"
 #include "PcoSyncCtrlObj.h"
 #include "PcoBufferCtrlObj.h"
-#include "PcoCamera.h"
 
 #define THROW_LIMA_HW_EXC(Error, x)  { \
 	printf("========*** LIMA_HW_EXC %s\n", x ); \
@@ -45,6 +46,7 @@ char* _timestamp_pcosyncctrlobj() {return "$Id: " __TIMESTAMP__ " (" __FILE__ ")
 SyncCtrlObj::SyncCtrlObj(Camera *cam,BufferCtrlObj *buffer) :
   m_cam(cam),
   m_handle(cam->getHandle()),
+  m_pcoData(cam->_getPcoData()),
   m_trig_mode(IntTrig),
   m_buffer(buffer),
   m_nb_frames(1),
@@ -317,18 +319,14 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 	int error;
 
   DEB_MEMBER_FUNCT();
+  DEF_FNID;
   if(m_started)
     {
 		if(m_buffer->_getRequestStop()) return;
 		m_buffer->_setRequestStop(true);
 
 		m_cam->_pcoSet_RecordingState(0, error);
-		DEB_TRACE() << "Try to stop Acq";
-      if(error)
-		{
-		  DEB_ERROR() << "Failed to stop acquisition";
-		  throw LIMA_HW_EXC(Error,"Failed to stop acquisition");
-		}
+		PCO_THROW_OR_TRACE(error, "Try to stop Acq") ;
 
     //  if(clearQueue) - ignored
     }

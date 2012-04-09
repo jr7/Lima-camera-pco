@@ -108,6 +108,7 @@ namespace lima
 	  int m_nb_acq_frames;
 	  bool		m_started;
 	pcoAcqStatus m_exposing;
+	struct stcPcoData *m_pcoData;
 	
 	};
 
