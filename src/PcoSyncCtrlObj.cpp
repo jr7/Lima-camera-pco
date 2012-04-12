@@ -290,8 +290,8 @@ void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 	DEF_FNID;
 	// DONE
 
-	valid_ranges.min_exp_time = m_cam->m_pcoData->pcoInfo.dwMinExposureDESC * 1e-9 ;	//Minimum exposure time in ns
-  valid_ranges.max_exp_time = m_cam->m_pcoData->pcoInfo.dwMaxExposureDESC * 1e-3 ;   // Maximum exposure time in ms  
+	valid_ranges.min_exp_time = m_pcoData->pcoInfo.dwMinExposureDESC * 1e-9 ;	//Minimum exposure time in ns
+  valid_ranges.max_exp_time = m_pcoData->pcoInfo.dwMaxExposureDESC * 1e-3 ;   // Maximum exposure time in ms  
   valid_ranges.min_lat_time = 0.; // Don't know
   valid_ranges.max_lat_time = 0.; // Don't know
 }

@@ -35,6 +35,9 @@
 #define PCO_EDGE_PIXEL_RATE_LOW 100000000
 #define PCO_EDGE_PIXEL_RATE_HIGH 286000000
 #define PCO_EDGE_WIDTH_HIGH 1920
+#define PCO_EDGE_LUT_SQRT 0x1612
+#define PCO_EDGE_LUT_NONE 0
+
 
 #define PCO_CL_BAUDRATE_115K2	115200
 
@@ -112,6 +115,7 @@ struct stcPcoData {
 		WORD wMetaDataMode, wMetaDataSize, wMetaDataVersion;
 		long msAcqRec, msAcqXfer, msAcqTout, msAcqTnow;
 		DWORD dwPixelRate, dwPixelRateRequested;
+		double fTransferRateMHzMax;
 
 		WORD wXResActual, wYResActual, wXResMax, wYResMax;
 		WORD wLUT_Identifier, wLUT_Parameter;
@@ -216,7 +220,7 @@ namespace lima
 
 		char *_pcoSet_Trig_Acq_Mode(int &error);
 		char *_pcoSet_Storage_subRecord_Mode(int &error);
-		char *_pcoSet_Exposure_Delay_Time(int &error);
+		char *_pcoSet_Exposure_Delay_Time(int &error, int ph);
 		char *_pcoSet_Cameralink_GigE_Parameters(int &error);
 		char *_pcoGet_Camera_Type(int &error);
 		char *_pcoGet_TemperatureInfo(int &error);
@@ -230,6 +234,8 @@ namespace lima
 		char *_get_coc_runtime(int &error);
 		char *_set_metadata_mode(WORD wMetaDataMode, int &error);
 
+		bool _isValid_pixelRate(DWORD dwPixelRate);
+		bool _isValid_Roi(struct stcRoi *new_roi);
 
 
     };
