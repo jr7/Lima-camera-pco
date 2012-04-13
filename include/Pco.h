@@ -90,14 +90,23 @@ typedef int tPvErr;
 #define PCO_THROW_OR_TRACE(__err__, __msg__)  \
 { \
 		if(__err__){ \
-			char msg[ERRMSG_SIZE+1]; \
-			sprintf_s(msg, "=== %s PcoError[x%08x][%s]", __msg__, m_pcoData->pcoError,  m_pcoData->pcoErrorMsg); \
-			DEB_TRACE() << msg; \
-			throw LIMA_HW_EXC(Error, msg); \
+			char ___buff___[ERRMSG_SIZE+1]; \
+			sprintf_s(___buff___, ERRMSG_SIZE, "=== %s PcoError[x%08x][%s]", __msg__, m_pcoData->pcoError,  m_pcoData->pcoErrorMsg); \
+			DEB_TRACE() << ___buff___; \
+			throw LIMA_HW_EXC(Error, ___buff___); \
 		} \
 		DEB_TRACE() << "*** " <<  __msg__ << " OK" ; \
 }
 
+#define PCO_PRINT_ERR(__err__, __msg__)  \
+{ \
+		if(__err__){ \
+			char ___buff___[ERRMSG_SIZE+1]; \
+			sprintf_s(___buff___,  ERRMSG_SIZE, "=== %s PcoError[x%08x][%s]", __msg__, m_pcoData->pcoError,  m_pcoData->pcoErrorMsg); \
+			printf("%s [%s][%d]\n", ___buff___, __FILE__, __LINE__); \
+			DEB_TRACE() << ___buff___; \
+		} \
+}
 
 #define DEF_FNID 	static char *fnId =__FUNCTION__;
 

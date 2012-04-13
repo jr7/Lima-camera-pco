@@ -192,6 +192,7 @@ namespace lima
 
 		char *_pcoSet_RecordingState(int state, int &error);
 		WORD _getCameraType() {return m_pcoData->stcCamType.wCamType ; }
+		bool _isCameraType(char *camType);
 
 	private:
 		SyncCtrlObj*	m_sync;

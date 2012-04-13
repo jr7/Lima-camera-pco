@@ -193,7 +193,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			m_sync->getNbFrames(iFrames);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_sync->getNbFrames=[%d frames]\n", iFrames);
 
-			if(_getCameraType()==CAMERATYPE_PCO_DIMAX_STD){
+			if(_isCameraType("dimax")){
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* DIMAX info\n");
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* PcoActiveSegment=[%d]\n", segmentArr+1);
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->dwMaxFramesInSegment[%d]=[%d frames]\n", segmentArr, m_pcoData->dwMaxFramesInSegment[segmentArr]);
@@ -291,8 +291,8 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		if(_stricmp(cmd, key) == 0){
 			DWORD dwSetup; int error;
 
-			if(_getCameraType() != CAMERATYPE_PCO_EDGE) {
-				ptr += sprintf_s(ptr, ptrMax - ptr, "invalid cmd / only for EDGE");
+			if(!_isCameraType("edge")) {
+				ptr += sprintf_s(ptr, ptrMax - ptr, "%d", 0);
 				return output;
 			}
 			
@@ -309,7 +309,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			
 			dwSetup = atoi(tok[1]);
 
-			_pco_SetCameraSetup(dwSetup, error);
+			char *msg = _pco_SetCameraSetup(dwSetup, error);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "%d", dwSetup);
 			return output;
 		}
@@ -319,7 +319,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		if(_stricmp(cmd, key) == 0){
 			DWORD _dwPixelRateRequested;
 
-			if(_getCameraType() != CAMERATYPE_PCO_EDGE) {
+			if(!_isCameraType("edge")) {
 				ptr += sprintf_s(ptr, ptrMax - ptr, "invalid cmd / only for EDGE");
 				return output;
 			}

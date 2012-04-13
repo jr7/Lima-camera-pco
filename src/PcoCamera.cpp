@@ -193,11 +193,12 @@ Camera::Camera(const char *camPar) :
 
 	_pcoSet_RecordingState(0, error);
 
-	switch(_getCameraType()) {
-		case CAMERATYPE_PCO_DIMAX_STD: _init_dimax(); break;
-		case CAMERATYPE_PCO_EDGE: _init_edge(); break;
-		default: throw LIMA_HW_EXC(Error, "Camera type not supported!");
-			break;
+	if(_isCameraType("dimax")) _init_dimax();
+	else if(_isCameraType("edge")) _init_edge();
+	else {
+		char msg[MSG_SIZE+1];
+		sprintf_s(msg, MSG_SIZE, "Camera type not supported! [x%04x]", _getCameraType());
+		throw LIMA_HW_EXC(Error, msg);
 	}
 
 
@@ -428,7 +429,7 @@ void Camera::startAcq()
     PCO_THROW_OR_TRACE(error, msg) ;
 
     // ----------------------------------------- storage mode (recorder + sequence)
-    if(_getCameraType() == CAMERATYPE_PCO_DIMAX_STD) {
+    if(_isCameraType("dimax")) {
 		msg = _pcoSet_Storage_subRecord_Mode(error);
 		PCO_THROW_OR_TRACE(error, msg) ;
 	}
@@ -468,7 +469,7 @@ void Camera::startAcq()
 
 
 
-		if(_getCameraType() == CAMERATYPE_PCO_EDGE) {
+		if(_isCameraType("edge")) {
 			error = PcoCheckError(PCO_GetPixelRate(m_handle, &m_pcoData->dwPixelRate));
 		    PCO_THROW_OR_TRACE(error, "PCO_GetPixelRate") ;
 
@@ -520,23 +521,18 @@ void Camera::startAcq()
 	m_sync->setStarted(true);
 	m_sync->setExposing(pcoAcqRecordStart);
 
-	switch(_getCameraType()) {
-		case CAMERATYPE_PCO_EDGE:
-			_beginthread( _pco_acq_thread_edge, 0, (void*) this);
-			break;
-
-		case CAMERATYPE_PCO_DIMAX_STD:
-			_pcoSet_RecordingState(1, error);
-			_beginthread( _pco_acq_thread_dimax, 0, (void*) this);
-			break;
-
-		default:
-			throw LIMA_HW_EXC(Error, "unkown camera type");
-
+	if(_isCameraType("edge")){
+		_beginthread( _pco_acq_thread_edge, 0, (void*) this);
+		return;
 	}
 
+	if(_isCameraType("dimax")){
+		_pcoSet_RecordingState(1, error);
+		_beginthread( _pco_acq_thread_dimax, 0, (void*) this);
+		return;
+	}
 
-
+	throw LIMA_HW_EXC(Error, "unkown camera type");
 	return;
 }
 
@@ -760,12 +756,12 @@ unsigned long Camera::pcoGetFramesMax(int segmentPco){
 		unsigned long xroisize,yroisize;
 		unsigned long long pixPerFrame, pagesPerFrame;
 
-		if(_getCameraType() == CAMERATYPE_PCO_EDGE) {
+		if(_isCameraType("edge")) {
 			return LONG_MAX;
 		}
 
 
-		if(_getCameraType() != CAMERATYPE_PCO_DIMAX_STD) {
+		if(!_isCameraType("dimax")) {
 			printf("=== %s> unknow camera type [%d]\n", fnId, _getCameraType());
 			return -1;
 		}
@@ -876,7 +872,7 @@ char* Camera::_pcoSet_Exposure_Delay_Time(int &error, int ph){
 		doIt = FALSE;
 
 
-		if((_getCameraType() == CAMERATYPE_PCO_EDGE) && (m_pcoData->dwPixelRate >= PCO_EDGE_PIXEL_RATE_HIGH) ) {
+		if((_isCameraType("edge")) && (m_pcoData->dwPixelRate >= PCO_EDGE_PIXEL_RATE_HIGH) ) {
 			double pixels = ((double) m_pcoData->wXResActual)* ((double) m_pcoData->wYResActual);
 			double bytes = (m_pcoData->wLUT_Identifier == PCO_EDGE_LUT_SQRT) ? 1.5 : 2.0;
 			double period = bytes * pixels / (m_pcoData->fTransferRateMHzMax * 1000000.);
@@ -984,44 +980,35 @@ char *Camera::_prepare_cameralink_interface(int &error){
 
 	_pcoData.clTransferParam.baudrate = PCO_CL_BAUDRATE_115K2;
 
-	switch(_getCameraType()) {
-		case CAMERATYPE_PCO_DIMAX_STD:
+	if(_isCameraType("dimax")){
 			//m_pcoData->clTransferParam.Transmit = 1;
 			_pcoData.clTransferParam.Transmit = m_pcoData->clTransferParam.Transmit;
 
 			_pcoData.clTransferParam.DataFormat=PCO_CL_DATAFORMAT_2x12; //=2
-			break;
-
-		case CAMERATYPE_PCO_EDGE:
+	} else
+	if(_isCameraType("edge")){
 			_pcoData.clTransferParam.Transmit = 1;
 
 			if(m_pcoData->dwPixelRate <= PCO_EDGE_PIXEL_RATE_LOW){
 				_pcoData.clTransferParam.DataFormat=PCO_CL_DATAFORMAT_5x16 | 
 					SCCMOS_FORMAT_TOP_CENTER_BOTTOM_CENTER;
 				m_pcoData->wLUT_Identifier = PCO_EDGE_LUT_NONE; // Switch LUT->off
-				break;
-			}
-			
+			} else 
 			if((m_pcoData->dwPixelRate >= PCO_EDGE_PIXEL_RATE_HIGH) & 
 					(m_pcoData->wXResActual > PCO_EDGE_WIDTH_HIGH)) {
 				_pcoData.clTransferParam.DataFormat=PCO_CL_DATAFORMAT_5x12L | 
 					SCCMOS_FORMAT_TOP_CENTER_BOTTOM_CENTER;
 				m_pcoData->wLUT_Identifier = PCO_EDGE_LUT_SQRT; //Switch LUT->sqrt
-				break;
-			}
-
-			_pcoData.clTransferParam.DataFormat = PCO_CL_DATAFORMAT_5x16 | 
+			} else {
+				_pcoData.clTransferParam.DataFormat = PCO_CL_DATAFORMAT_5x16 | 
 					SCCMOS_FORMAT_TOP_CENTER_BOTTOM_CENTER;
 				m_pcoData->wLUT_Identifier = PCO_EDGE_LUT_NONE; // Switch LUT->off
-
-			break;
-
-		default:
+			}
+	} else {
 			char msg[ERRMSG_SIZE + 1];
 			sprintf_s(msg, "ERROR DEFAULT - pixelRate[%d] / width[%d]",
 				m_pcoData->dwPixelRate, m_pcoData->wXResActual);
 			throw LIMA_HW_EXC(Error, msg);
-			break;
 	}
 
 
@@ -1038,7 +1025,7 @@ char *Camera::_prepare_cameralink_interface(int &error){
 		bDoArm = TRUE;
 	}
 
-	if(_getCameraType() == CAMERATYPE_PCO_EDGE) {
+	if(_isCameraType("edge")) {
 		WORD _wLUT_Identifier, _wLUT_Parameter;
 
 		error = PcoCheckError(
@@ -1075,6 +1062,7 @@ char *Camera::_prepare_cameralink_interface(int &error){
 char *Camera::_pcoGet_Camera_Type(int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
+	char *msg;
 	m_pcoData->frames_per_buffer = 1; // for PCO DIMAX
 
 	// --- Get camera type
@@ -1082,8 +1070,8 @@ char *Camera::_pcoGet_Camera_Type(int &error){
 		char *ptr;
 		m_pcoData->stcCamType.wSize= sizeof(m_pcoData->stcCamType);
 		error = PcoCheckError(PCO_GetCameraType(m_handle, &m_pcoData->stcCamType));
-		if(error) return "PCO_GetCameraType";
-		//PCO_THROW_OR_TRACE(error, "PCO_GetCameraType") ;
+		msg = "PCO_GetCameraType";
+		PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 
 		ptr = xlatPcoCode2Str(_getCameraType(), ModelType, error);
 		strcpy_s(m_pcoData->model, MODEL_TYPE_SIZE, ptr);
@@ -1104,16 +1092,16 @@ char *Camera::_pcoGet_Camera_Type(int &error){
 	// -- Reset to default settings
 
 	error = PcoCheckError(PCO_ResetSettingsToDefault(m_handle));
-	if(error) return "PCO_ResetSettingsToDefault";
-	//PCO_THROW_OR_TRACE(error, "PCO_ResetSettingsToDefault") ;
+	msg = "PCO_ResetSettingsToDefault";
+	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 	
 
 	// -- Get camera description
 	m_pcoData->pcoInfo.wSize= sizeof(m_pcoData->pcoInfo);
 
 	error = PcoCheckError(PCO_GetCameraDescription(m_handle, &m_pcoData->pcoInfo));
-	if(error) return "PCO_GetCameraDescription";
-	//PCO_THROW_OR_TRACE(error, "PCO_GetCameraDescription") ;
+	msg = "PCO_GetCameraDescription";
+	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 
 	return fnId;
 }
@@ -1169,24 +1157,26 @@ char *Camera::_pcoGet_TemperatureInfo(int &error){
 char * Camera::_pcoSet_RecordingState(int state, int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
+	char *msg;
 
 	WORD wRecState_new, wRecState_actual;
 
 	wRecState_new = state ? 0x0001 : 0x0000 ; // 0x0001 => START acquisition
 
 	error = PcoCheckError(PCO_GetRecordingState(m_handle, &wRecState_actual));
-	if(error) return "PCO_GetRecordingState";
+	msg = "PCO_GetRecordingState";
+	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 
-	if(wRecState_new == wRecState_actual) {
-		error = 0;
-		return fnId;
-	}
+	//if(wRecState_new == wRecState_actual) {error = 0; return fnId; }
 
 	error = PcoCheckError(PCO_SetRecordingState(m_handle, wRecState_new));
-	if(error) return "PCO_SetRecordingState";
+	msg = "PCO_SetRecordingState";
+	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 
 	if(wRecState_new == 0) {
 		error = PcoCheckError(PCO_CancelImages(m_handle));
+		msg = "PCO_CancelImages";
+		PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 	}
 
 	return fnId;
@@ -1227,7 +1217,7 @@ char *Camera::_set_metadata_mode(WORD wMetaDataMode, int &error){
 	DEF_FNID;
 
 	m_pcoData->wMetaDataSize = m_pcoData->wMetaDataVersion = 0;
-	if(_getCameraType() == CAMERATYPE_PCO_DIMAX_STD) {
+	if(_isCameraType("dimax")) {
 		m_pcoData->wMetaDataMode = wMetaDataMode;
 		error = PcoCheckError(
 			PCO_SetMetaDataMode(m_handle, wMetaDataMode, &m_pcoData->wMetaDataSize, &m_pcoData->wMetaDataVersion));
@@ -1243,11 +1233,20 @@ char *Camera::_pco_SetCameraSetup(DWORD dwSetup, int &error){
 		
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
+	char *msg;
 
+	DWORD _dwSetup;
 	DWORD m_dwSetup[10];
 	WORD m_wLen = 10;
 	WORD m_wType;
 	int ts[3] = { 2000, 3000, 250}; // command, image, channel timeout
+
+
+	if(!_isCameraType("edge")) {
+		return "only for PCO EDGE";
+	}
+
+
 
 	// DWORD m_dwSetup[10];
 	// WORD m_wLen = 10;
@@ -1261,26 +1260,35 @@ char *Camera::_pco_SetCameraSetup(DWORD dwSetup, int &error){
 	// PCO_SetCameraSetup(m_hCam, m_wType, &m_dwSetup[0], m_wLen);
 	// PCO_RebootCamera(m_hCam);
 	// PCO_CloseCamera(m_hCam);
+	// Camera setup parameter for pco.edge:
+	// #define PCO_EDGE_SETUP_ROLLING_SHUTTER 0x00000001         // rolling shutter
+	// #define PCO_EDGE_SETUP_GLOBAL_SHUTTER  0x00000002         // global shutter
 
+	_dwSetup = dwSetup ? PCO_EDGE_SETUP_ROLLING_SHUTTER : PCO_EDGE_SETUP_GLOBAL_SHUTTER;
 
     error = PcoCheckError(PCO_GetCameraSetup(m_handle, &m_wType, &m_dwSetup[0], &m_wLen));
-	if(error) return "PCO_GetCameraSetup";
+	msg = "PCO_GetCameraSetup";
+	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 
-	if(m_dwSetup[0] == dwSetup) return fnId;
+	if(m_dwSetup[0] == _dwSetup) return fnId;
 
-	m_dwSetup[0] = dwSetup;
+	m_dwSetup[0] = _dwSetup;
 
     error = PcoCheckError(PCO_SetTimeouts(m_handle, &ts[0], sizeof(ts)));
-	if(error) return "PCO_SetTimeouts";
+	msg = "PCO_SetTimeouts";
+	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 
     error = PcoCheckError(PCO_SetCameraSetup(m_handle, m_wType, &m_dwSetup[0], m_wLen));
-	if(error) return "PCO_SetCameraSetup";
+	msg = "PCO_SetCameraSetup";
+	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 
     error = PcoCheckError(PCO_RebootCamera(m_handle));
-	if(error) return "PCO_RebootCamera";
+	msg = "PCO_RebootCamera";
+	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 
     error = PcoCheckError(PCO_CloseCamera(m_handle));
-	if(error) return "PCO_CloseCamera";
+	msg = "PCO_CloseCamera";
+	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 
 
 	return fnId;
@@ -1297,11 +1305,13 @@ char *Camera::_pco_GetCameraSetup(DWORD &dwSetup, int &error){
 	DWORD m_dwSetup[10];
 	WORD m_wLen = 10;
 	WORD m_wType;
+	char *msg;
 
     error = PcoCheckError(PCO_GetCameraSetup(m_handle, &m_wType, &m_dwSetup[0], &m_wLen));
-	if(error) return "PCO_GetCameraSetup";
+	msg = "PCO_GetCameraSetup";
+	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 
-	dwSetup = m_dwSetup[0];
+	dwSetup = (m_dwSetup[0] == PCO_EDGE_SETUP_ROLLING_SHUTTER) ? 1 : 0;
 	return fnId;
 
 }
@@ -1346,6 +1356,29 @@ bool Camera::_isValid_Roi(struct stcRoi *new_roi){
 		(((y0 - 1) % ySteps) != 0) ||((y1 % ySteps) != 0) ) return FALSE;
 		
 	return TRUE;
+}
+
+
+//=================================================================================================
+//=================================================================================================
+bool Camera::_isCameraType(char *camType){
+		
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+
+	switch(_getCameraType()) {
+		case CAMERATYPE_PCO_DIMAX_STD: 
+			if(_stricmp("dimax", camType) == 0) return TRUE; 
+			break;
+		
+		case CAMERATYPE_PCO_EDGE: 
+		case CAMERATYPE_PCO_EDGE_GL:
+			if(_stricmp("edge", camType) == 0) return TRUE; 
+			break;
+
+	}
+		
+	return FALSE;
 }
 
 

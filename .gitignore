@@ -2,5 +2,6 @@
 *.suo
 *.swp
 *.bck
+*.bak
 *target*
 *.vcproj.*user
