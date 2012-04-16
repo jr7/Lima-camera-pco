@@ -37,7 +37,7 @@
 #define PCO_EDGE_WIDTH_HIGH 1920
 #define PCO_EDGE_LUT_SQRT 0x1612
 #define PCO_EDGE_LUT_NONE 0
-
+#define PCO_EDGE_SLEEP_SHUTTER_MS 10000
 
 #define PCO_CL_BAUDRATE_115K2	115200
 
@@ -123,11 +123,15 @@ struct stcPcoData {
 		DWORD dwAllocatedBufferSize;
 		int iAllocatedBufferNumber;
 		bool bAllocatedBufferDone;
-
+		bool bRollingShutter;
 };
 
 enum enumChange {
 	Invalid, Valid, Changed,
+};
+
+enum enumPcoFamily {
+	Dimax = 1, Edge,
 };
 
 struct stcRoi {
@@ -192,7 +196,9 @@ namespace lima
 
 		char *_pcoSet_RecordingState(int state, int &error);
 		WORD _getCameraType() {return m_pcoData->stcCamType.wCamType ; }
-		bool _isCameraType(char *camType);
+		bool _isCameraType(enum enumPcoFamily tp);
+		bool _isConfig(){return m_config; };
+		void _pco_set_shutter_rolling_edge(int &error);
 
 	private:
 		SyncCtrlObj*	m_sync;
@@ -213,6 +219,7 @@ namespace lima
 
 
 		int		m_acq_frame_nb;
+		bool m_config;
 
         int PcoCheckError(int err);
         void _allocBuffer();
@@ -226,18 +233,20 @@ namespace lima
 		char *_pcoGet_Camera_Type(int &error);
 		char *_pcoGet_TemperatureInfo(int &error);
 
-		char *_pco_SetCameraSetup(DWORD dwSetup, int &error);
-		char *_pco_GetCameraSetup(DWORD &dwSetup, int &error);
 
-		int _init_edge();
-		int _init_dimax();
+		//char *_pco_SetCameraSetup(DWORD dwSetup, int &error);
+		bool _get_shutter_rolling_edge(int &error);
+		void _set_shutter_rolling_edge(bool roling, int &error);
+
+		void _init();
+		void _init_edge();
+		void _init_dimax();
 		char *_prepare_cameralink_interface(int &error);
 		char *_get_coc_runtime(int &error);
 		char *_set_metadata_mode(WORD wMetaDataMode, int &error);
 
 		bool _isValid_pixelRate(DWORD dwPixelRate);
 		bool _isValid_Roi(struct stcRoi *new_roi);
-
 
     };
   }

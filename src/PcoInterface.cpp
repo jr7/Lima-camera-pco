@@ -126,8 +126,15 @@ void Interface::stopAcq()
 //=========================================================================================================
 void Interface::getStatus(StatusType& status)
 {
+  DEB_MEMBER_FUNCT();
 	// DONE
-  m_sync->getStatus(status);
+	if(m_cam->_isConfig()){
+		status.acq = AcqConfig;
+		status.det = DetIdle;
+	} else {
+		m_sync->getStatus(status);
+	}
+	DEB_RETURN() << DEB_VAR1(status);
 }
 
 //=========================================================================================================

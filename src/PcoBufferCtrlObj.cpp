@@ -284,7 +284,7 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 	// to the LIMA allocated one
 
 
-	  DWORD dwFrame =  (m_cam->_isCameraType("edge")) ? 0 :  dwFrameFirst;
+	  DWORD dwFrame =  (m_cam->_isCameraType(Edge)) ? 0 :  dwFrameFirst;
 	  sErr =  m_cam->_PcoCheckError(PCO_AddBufferEx(m_handle, \
 				dwFrame, dwFrame, \
 				m_allocBuff.pcoAllocBufferNr[bufIdx], \
@@ -368,7 +368,7 @@ int BufferCtrlObj::_xferImag()
 	}
 
 
-	if(m_cam->_isCameraType("edge")) {
+	if(m_cam->_isCameraType(Edge)) {
 			m_cam->_pcoSet_RecordingState(1, error);
 	}
   
@@ -417,7 +417,7 @@ _RETRY:
 		DEB_TRACE() << "========================================FOUND " << DEB_VAR3(ptrDest, ptrSrc, size);
 #endif
 
-		if(m_cam->_isCameraType("edge")) {
+		if(m_cam->_isCameraType(Edge)) {
 			//m_sync->setAcqFrames(dwFrameIdx);
 		}
 
@@ -484,7 +484,7 @@ _WHILE_CONTINUE:
     dwFrameIdx++;
   } // while(frameIdx ...
 
-		if(m_cam->_isCameraType("edge")) {
+		if(m_cam->_isCameraType(Edge)) {
 			m_sync->setAcqFrames(dwFrameIdx-1);
 		}
 

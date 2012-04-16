@@ -33,6 +33,7 @@
 #include "PcoSyncCtrlObj.h"
 #include "PcoBufferCtrlObj.h"
 
+
 using namespace lima;
 using namespace lima::Pco;
 
@@ -193,7 +194,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			m_sync->getNbFrames(iFrames);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_sync->getNbFrames=[%d frames]\n", iFrames);
 
-			if(_isCameraType("dimax")){
+			if(_isCameraType(Dimax)){
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* DIMAX info\n");
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* PcoActiveSegment=[%d]\n", segmentArr+1);
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->dwMaxFramesInSegment[%d]=[%d frames]\n", segmentArr, m_pcoData->dwMaxFramesInSegment[segmentArr]);
@@ -289,16 +290,17 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 
 		key = keys[ikey++] = "rollingShutter";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
-			DWORD dwSetup; int error;
+			DWORD dwSetup, dwSetupNew; int error;
+			bool rolling, rollingNew;
 
-			if(!_isCameraType("edge")) {
+			if(!_isCameraType(Edge)) {
 				ptr += sprintf_s(ptr, ptrMax - ptr, "%d", 0);
 				return output;
 			}
 			
+			rolling = _get_shutter_rolling_edge(error);
 			if(tokNr == 0) {
-				_pco_GetCameraSetup(dwSetup, error);
-				ptr += sprintf_s(ptr, ptrMax - ptr, "%d", dwSetup);
+				ptr += sprintf_s(ptr, ptrMax - ptr, "%d", rolling);
 				return output;
 			}
 
@@ -307,10 +309,12 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				return output;
 			}
 			
-			dwSetup = atoi(tok[1]);
+			rollingNew = atoi(tok[1]) != 0;
 
-			char *msg = _pco_SetCameraSetup(dwSetup, error);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "%d", dwSetup);
+			if(rollingNew != rolling){
+				_set_shutter_rolling_edge(rollingNew, error);
+			}
+			ptr += sprintf_s(ptr, ptrMax - ptr, "%d", rollingNew);
 			return output;
 		}
 
@@ -319,7 +323,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		if(_stricmp(cmd, key) == 0){
 			DWORD _dwPixelRateRequested;
 
-			if(!_isCameraType("edge")) {
+			if(!_isCameraType(Edge)) {
 				ptr += sprintf_s(ptr, ptrMax - ptr, "invalid cmd / only for EDGE");
 				return output;
 			}
