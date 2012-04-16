@@ -543,6 +543,7 @@ void BufferCtrlObj::_pcoAllocBuffers() {
 
 		//-------------- allocate 2 buffers (0,1) and received the handle, mem ptr, events
 			for(bufIdx = 0; bufIdx < PCO_BUFFER_NREVENTS ; bufIdx ++) {
+				m_allocBuff.pcoAllocBufferNr[bufIdx] = -1;
 				sErr = m_cam->_PcoCheckError(PCO_AllocateBuffer(m_handle, \
 					&m_allocBuff.pcoAllocBufferNr[bufIdx], \
 					_dwAllocatedBufferSize, \
@@ -585,6 +586,7 @@ void BufferCtrlObj::_pcoAllocBuffersFree() {
     				DEB_TRACE() << sErr;
 					THROW_HW_ERROR(NotSupported) << sErr;
 				}
+				m_allocBuff.pcoAllocBufferNr[bufIdx]= -1;
 				m_allocBuff.dwPcoAllocBufferSize[bufIdx] = 0;
 				m_allocBuff.pcoAllocBufferPtr[bufIdx] = NULL;
 

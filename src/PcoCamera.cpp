@@ -366,6 +366,9 @@ Camera::~Camera()
 
 	m_sync->_getBufferCtrlObj()->_pcoAllocBuffersFree();
 	error = PcoCheckError(PCO_CloseCamera(m_handle));
+	char *msg ="PCO_CloseCamera";
+	PCO_PRINT_ERR(error, msg); 
+
 }
 
 
@@ -695,6 +698,8 @@ void _pco_shutter_thread_edge(void *argin) {
 	Camera* m_cam = (Camera *) argin;
 	m_cam->_pco_set_shutter_rolling_edge(error);
 
+	printf("=== %s> EXIT\n", fnId);
+
 	_endthread();
 }
 
@@ -1006,6 +1011,7 @@ char *Camera::_prepare_cameralink_interface(int &error){
 	DEF_FNID;
 	bool bDoArm = FALSE;
 	struct stcPcoData _pcoData;
+	char msg[ERRMSG_SIZE + 1];
 
 	
 	error = PcoCheckError(PCO_GetTransferParameter(m_handle, &m_pcoData->clTransferParam, sizeof(m_pcoData->clTransferParam)));
@@ -1038,8 +1044,7 @@ char *Camera::_prepare_cameralink_interface(int &error){
 				m_pcoData->wLUT_Identifier = PCO_EDGE_LUT_NONE; // Switch LUT->off
 			}
 	} else {
-			char msg[ERRMSG_SIZE + 1];
-			sprintf_s(msg, "ERROR DEFAULT - pixelRate[%d] / width[%d]",
+			sprintf_s(msg,ERRMSG_SIZE, "ERROR DEFAULT - pixelRate[%d] / width[%d]",
 				m_pcoData->dwPixelRate, m_pcoData->wXResActual);
 			throw LIMA_HW_EXC(Error, msg);
 	}
@@ -1053,8 +1058,13 @@ char *Camera::_prepare_cameralink_interface(int &error){
 		m_pcoData->clTransferParam.DataFormat = _pcoData.clTransferParam.DataFormat;
 		m_pcoData->clTransferParam.Transmit =_pcoData.clTransferParam.Transmit;
 
+		sprintf_s(msg,ERRMSG_SIZE, "PCO_SetTransferParameter - baudrate[%d] dataFormat[x%08x] trasmit[%d]",
+				m_pcoData->clTransferParam.baudrate, 
+				m_pcoData->clTransferParam.DataFormat,
+				m_pcoData->clTransferParam.Transmit);
+
 		error = PcoCheckError(PCO_SetTransferParameter(m_handle, &m_pcoData->clTransferParam, sizeof(m_pcoData->clTransferParam)));
-		PCO_THROW_OR_TRACE(error, "PCO_SetTransferParameter") ;
+		PCO_THROW_OR_TRACE(error, msg) ;
 		bDoArm = TRUE;
 	}
 
@@ -1231,7 +1241,8 @@ char *Camera::_get_coc_runtime(int &error){
     double runTime;
 
     error = PcoCheckError(PCO_GetCOCRuntime(m_handle, &dwTime_s, &dwTime_ns));
-	if(error) return "PCO_GetCOCRuntime";
+	char *msg = "PCO_GetCOCRuntime";
+	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 
     m_pcoData->cocRunTime = runTime = ((double) dwTime_ns * 1.0E-9) + (double) dwTime_s;
     m_pcoData->frameRate = (dwTime_ns | dwTime_s) ? 1.0 / runTime : 0.0;
@@ -1254,7 +1265,8 @@ char *Camera::_set_metadata_mode(WORD wMetaDataMode, int &error){
 		m_pcoData->wMetaDataMode = wMetaDataMode;
 		error = PcoCheckError(
 			PCO_SetMetaDataMode(m_handle, wMetaDataMode, &m_pcoData->wMetaDataSize, &m_pcoData->wMetaDataVersion));
-		if(error) return "PCO_SetMetaDataMode";
+		char *msg ="PCO_SetMetaDataMode";
+		PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 	}
 	return fnId;
 }
@@ -1344,6 +1356,8 @@ void Camera::_pco_set_shutter_rolling_edge(int &error){
     error = PcoCheckError(PCO_RebootCamera(m_handle));
 	msg = "PCO_RebootCamera";
 	PCO_PRINT_ERR(error, msg); 	if(error) return;
+
+	m_sync->_getBufferCtrlObj()->_pcoAllocBuffersFree();
 
     error = PcoCheckError(PCO_CloseCamera(m_handle));
 	msg = "PCO_CloseCamera";
