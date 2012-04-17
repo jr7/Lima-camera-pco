@@ -39,6 +39,7 @@
 #include "PcoCamera.h"
 #include "PcoSyncCtrlObj.h"
 #include "PcoBufferCtrlObj.h"
+#include "PcoCameraUtils.h"
 
 using namespace lima;
 using namespace lima::Pco;
@@ -167,7 +168,8 @@ void Camera::_init(){
 	m_config = FALSE;
 
 	m_log.clear();
-	m_log.append("\n");
+	sprintf_s(msg, MSG_SIZE, "*** Pco log %s\n", getTimestamp(Iso));
+	m_log.append(msg);
 
 
 	// --- Open Camera
@@ -690,11 +692,9 @@ char *sPcoAcqStatus[] ={
 //=====================================================================
 void _pco_shutter_thread_edge(void *argin) {
 	DEF_FNID;
-
 	int error;
 
 	printf("=== %s> ENTRY\n", fnId);
-
 	Camera* m_cam = (Camera *) argin;
 	m_cam->_pco_set_shutter_rolling_edge(error);
 
@@ -997,8 +997,6 @@ char *Camera::_pcoSet_Cameralink_GigE_Parameters(int &error){
         default: break;
     } // case
 
-
-
 	return fnId;
 }
 
@@ -1014,32 +1012,40 @@ char *Camera::_prepare_cameralink_interface(int &error){
 	char msg[ERRMSG_SIZE + 1];
 
 	
-	error = PcoCheckError(PCO_GetTransferParameter(m_handle, &m_pcoData->clTransferParam, sizeof(m_pcoData->clTransferParam)));
+	//error = PcoCheckError(PCO_GetTransferParameter(m_handle, &m_pcoData->clTransferParam, sizeof(m_pcoData->clTransferParam)));
+	error = PcoCheckError(PCO_GetTransferParameter(m_handle, &m_pcoData->clTransferParam, sizeof(PCO_SC2_CL_TRANSFER_PARAM)));
     PCO_THROW_OR_TRACE(error, "PCO_GetTransferParameter") ;
-
-	_pcoData.clTransferParam.baudrate = PCO_CL_BAUDRATE_115K2;
+	memcpy(&_pcoData.clTransferParam, &m_pcoData->clTransferParam,sizeof(PCO_SC2_CL_TRANSFER_PARAM));
+	
+	m_pcoData->clTransferParam.baudrate = PCO_CL_BAUDRATE_115K2;
 
 	if(_isCameraType(Dimax)){
 			//m_pcoData->clTransferParam.Transmit = 1;
-			_pcoData.clTransferParam.Transmit = m_pcoData->clTransferParam.Transmit;
-
-			_pcoData.clTransferParam.DataFormat=PCO_CL_DATAFORMAT_2x12; //=2
+			//_pcoData.clTransferParam.Transmit = m_pcoData->clTransferParam.Transmit;
+			m_pcoData->clTransferParam.DataFormat=PCO_CL_DATAFORMAT_2x12; //=2
 	} else
-	if(_isCameraType(Edge)){
-			_pcoData.clTransferParam.Transmit = 1;
+	if(_isCameraType(EdgeGL)) {
+		m_pcoData->clTransferParam.Transmit = 1;
+		m_pcoData->clTransferParam.DataFormat=PCO_CL_DATAFORMAT_5x12 | 
+			SCCMOS_FORMAT_TOP_CENTER_BOTTOM_CENTER;
+			//SCCMOS_FORMAT_TOP_BOTTOM;
+		m_pcoData->wLUT_Identifier = 0; //Switch LUT->off
+	} else 
+	if(_isCameraType(EdgeRolling)){
+			m_pcoData->clTransferParam.Transmit = 1;
 
 			if(m_pcoData->dwPixelRate <= PCO_EDGE_PIXEL_RATE_LOW){
-				_pcoData.clTransferParam.DataFormat=PCO_CL_DATAFORMAT_5x16 | 
+				m_pcoData->clTransferParam.DataFormat=PCO_CL_DATAFORMAT_5x16 | 
 					SCCMOS_FORMAT_TOP_CENTER_BOTTOM_CENTER;
 				m_pcoData->wLUT_Identifier = PCO_EDGE_LUT_NONE; // Switch LUT->off
 			} else 
-			if((m_pcoData->dwPixelRate >= PCO_EDGE_PIXEL_RATE_HIGH) & 
-					(m_pcoData->wXResActual > PCO_EDGE_WIDTH_HIGH)) {
-				_pcoData.clTransferParam.DataFormat=PCO_CL_DATAFORMAT_5x12L | 
+			if( ((m_pcoData->dwPixelRate >= PCO_EDGE_PIXEL_RATE_HIGH) & 
+					(m_pcoData->wXResActual > PCO_EDGE_WIDTH_HIGH))) {
+				m_pcoData->clTransferParam.DataFormat=PCO_CL_DATAFORMAT_5x12L | 
 					SCCMOS_FORMAT_TOP_CENTER_BOTTOM_CENTER;
 				m_pcoData->wLUT_Identifier = PCO_EDGE_LUT_SQRT; //Switch LUT->sqrt
 			} else {
-				_pcoData.clTransferParam.DataFormat = PCO_CL_DATAFORMAT_5x16 | 
+				m_pcoData->clTransferParam.DataFormat = PCO_CL_DATAFORMAT_5x16 | 
 					SCCMOS_FORMAT_TOP_CENTER_BOTTOM_CENTER;
 				m_pcoData->wLUT_Identifier = PCO_EDGE_LUT_NONE; // Switch LUT->off
 			}
@@ -1054,23 +1060,19 @@ char *Camera::_prepare_cameralink_interface(int &error){
 		(_pcoData.clTransferParam.DataFormat != m_pcoData->clTransferParam.DataFormat) ||
 		(_pcoData.clTransferParam.Transmit != m_pcoData->clTransferParam.Transmit)	)
 	{
-		m_pcoData->clTransferParam.baudrate = _pcoData.clTransferParam.baudrate;
-		m_pcoData->clTransferParam.DataFormat = _pcoData.clTransferParam.DataFormat;
-		m_pcoData->clTransferParam.Transmit =_pcoData.clTransferParam.Transmit;
-
-		sprintf_s(msg,ERRMSG_SIZE, "PCO_SetTransferParameter - baudrate[%d] dataFormat[x%08x] trasmit[%d]",
-				m_pcoData->clTransferParam.baudrate, 
-				m_pcoData->clTransferParam.DataFormat,
-				m_pcoData->clTransferParam.Transmit);
-
 		error = PcoCheckError(PCO_SetTransferParameter(m_handle, &m_pcoData->clTransferParam, sizeof(m_pcoData->clTransferParam)));
+		if(error){
+			sprintf_s(msg,ERRMSG_SIZE, "PCO_SetTransferParameter - baudrate[%d][%d] dataFormat[x%08x][x%08x] trasmit[%d][%d]",
+				_pcoData.clTransferParam.baudrate, m_pcoData->clTransferParam.baudrate,
+				_pcoData.clTransferParam.DataFormat, m_pcoData->clTransferParam.DataFormat,
+				_pcoData.clTransferParam.Transmit, m_pcoData->clTransferParam.Transmit);
+		} else msg[0]=0;
 		PCO_THROW_OR_TRACE(error, msg) ;
 		bDoArm = TRUE;
 	}
 
 	if(_isCameraType(Edge)) {
 		WORD _wLUT_Identifier, _wLUT_Parameter;
-
 		error = PcoCheckError(
 			PCO_GetActiveLookupTable(m_handle, &_wLUT_Identifier, &_wLUT_Parameter));
 	    PCO_THROW_OR_TRACE(error, "PCO_GetActiveLookupTable") ;
@@ -1438,7 +1440,6 @@ bool Camera::_isValid_Roi(struct stcRoi *new_roi){
 
 //=================================================================================================
 //=================================================================================================
-
 bool Camera::_isCameraType(enum enumPcoFamily tp){
 		
 	DEB_MEMBER_FUNCT();
@@ -1448,12 +1449,47 @@ bool Camera::_isCameraType(enum enumPcoFamily tp){
 		case CAMERATYPE_PCO_DIMAX_STD: 
 			return tp == Dimax ;
 		
-		case CAMERATYPE_PCO_EDGE: 
 		case CAMERATYPE_PCO_EDGE_GL:
-			return tp == Edge ;
+			return((tp == EdgeGL) || (tp == Edge));
+
+		case CAMERATYPE_PCO_EDGE:
+			return((tp == EdgeRolling) || (tp == Edge));
+
+		default:
+			return FALSE;
 
 	}
 		
-	return FALSE;
 }
 
+//=================================================================================================
+//=================================================================================================
+void Camera::_pco_GetPixelRate(DWORD &pixRate, int &error){
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+		if(!_isCameraType(Edge)) {
+			pixRate = 0;
+			error = -1;
+			return;
+		}
+
+		error = PcoCheckError(PCO_GetPixelRate(m_handle, &m_pcoData->dwPixelRate));
+	    PCO_THROW_OR_TRACE(error, "PCO_GetPixelRate") ;
+
+		pixRate = m_pcoData->dwPixelRate;
+}
+
+//=================================================================================================
+//=================================================================================================
+void Camera::_presetPixelRate(DWORD &pixRate, int &error){
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+		if(!_isCameraType(Edge) || !_isValid_pixelRate(pixRate)) {
+			pixRate = 0;
+			error = -1;
+			return;
+		}
+
+		m_pcoData->dwPixelRateRequested = pixRate;
+		error = 0;
+}

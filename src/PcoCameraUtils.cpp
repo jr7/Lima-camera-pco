@@ -29,6 +29,7 @@
 
 #include "Exceptions.h"
 
+#include "PcoCameraUtils.h"
 #include "PcoCamera.h"
 #include "PcoSyncCtrlObj.h"
 #include "PcoBufferCtrlObj.h"
@@ -55,7 +56,6 @@ char* _timestamp_pcocamerautils() {return "$Id: " __TIMESTAMP__ " (" __FILE__ ")
 //=========================================================================================================
 //=========================================================================================================
 //=========================================================================================================
-enum timestampFmt {Iso, FnFull, FnDate};
 
 static char *getTimestamp(timestampFmt fmtIdx) {
    static char timeline[128];
@@ -148,8 +148,6 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		if(*cmd == 0) {
 			ptr += sprintf_s(ptr, ptrMax - ptr,"**** %s [begin]\n", __FUNCTION__);
 
-			ptr += sprintf_s(ptr, ptrMax - ptr,"**** PCO log\n");
-			ptr += sprintf_s(ptr, ptrMax - ptr,"%s\n", m_log.c_str());
 
 			ptr += sprintf_s(ptr, ptrMax - ptr,"**** PCO Info\n");
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* timestamp[%s]\n", getTimestamp(Iso));
@@ -179,10 +177,11 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* wXResActual=[%d] wYResActual=[%d] \n",  m_pcoData->wXResActual,  m_pcoData->wYResActual);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* wXResMax=[%d] wYResMax=[%d] \n",  m_pcoData->wXResMax,  m_pcoData->wYResMax);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* wMetaDataSize=[%d] wMetaDataVersion=[%d] \n",  m_pcoData->wMetaDataSize,  m_pcoData->wMetaDataVersion);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* dwPixelRate=[%ld](%g MHz) dwPixelRateRequested=[%ld](%g MHz) \n",  
-				m_pcoData->dwPixelRate, m_pcoData->dwPixelRate/1000000.,
-				m_pcoData->dwPixelRateRequested, m_pcoData->dwPixelRateRequested/1000000.);
 
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* dwPixelRate=[%ld](%g MHz)\n",  
+				m_pcoData->dwPixelRate, m_pcoData->dwPixelRate/1000000.);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* dwPixelRateRequested=[%ld](%g MHz) \n",  
+				m_pcoData->dwPixelRateRequested, m_pcoData->dwPixelRateRequested/1000000.);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* Valid dwPixelRate=[%ld][%ld][%ld][%ld] \n",  
 				m_pcoData->pcoInfo.dwPixelRateDESC[0],m_pcoData->pcoInfo.dwPixelRateDESC[1],
 				m_pcoData->pcoInfo.dwPixelRateDESC[2],m_pcoData->pcoInfo.dwPixelRateDESC[3]);
@@ -238,22 +237,24 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "      baudrate=[%u] %g Kbps\n", m_pcoData->clTransferParam.baudrate, m_pcoData->clTransferParam.baudrate/1000.);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "ClockFrequency=[%u] %g MHz\n", m_pcoData->clTransferParam.ClockFrequency, m_pcoData->clTransferParam.ClockFrequency/1000000.);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "        CCline=[%u]\n", m_pcoData->clTransferParam.CCline);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "    DataFormat=[%u]\n", m_pcoData->clTransferParam.DataFormat);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "    DataFormat=[x%x]\n", m_pcoData->clTransferParam.DataFormat);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "      Transmit=[%u]\n", m_pcoData->clTransferParam.Transmit);
-			
 			return output;
 		}
 
 		key = keys[ikey++] = "maxNbImages";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
-			ptr += sprintf_s(ptr, ptrMax - ptr, "%ld", m_pcoData->dwMaxImageCnt[segmentArr]);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "%ld", pcoGetFramesMax(m_pcoData->activeRamSegment));
 			return output;
 		}
 
 		key = keys[ikey++] = "acqTime";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* Acq (ms) Tnow=[%ld] Tout=[%ld] Rec=[%ld] Xfer=[%ld]\n", 
-						m_pcoData->msAcqTnow, m_pcoData->msAcqTout, m_pcoData->msAcqRec, m_pcoData->msAcqXfer);
+						m_pcoData->msAcqTnow, 
+						m_pcoData->msAcqTout, 
+						m_pcoData->msAcqRec, 
+						m_pcoData->msAcqXfer);
 			return output;
 		}
 
@@ -290,7 +291,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 
 		key = keys[ikey++] = "rollingShutter";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
-			DWORD dwSetup, dwSetupNew; int error;
+			int error;
 			bool rolling, rollingNew;
 
 			if(!_isCameraType(Edge)) {
@@ -321,31 +322,27 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 
 		key = keys[ikey++] = "pixelRate";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
-			DWORD _dwPixelRateRequested;
+			DWORD pixRate; int error;
 
-			if(!_isCameraType(Edge)) {
-				ptr += sprintf_s(ptr, ptrMax - ptr, "invalid cmd / only for EDGE");
+			if(!_isCameraType(Edge) || (tokNr < 0) || (tokNr > 1)) {
+				ptr += sprintf_s(ptr, ptrMax - ptr, "-1.0");
 				return output;
 			}
 			
 			if(tokNr == 0) {
+				_pco_GetPixelRate(pixRate, error);
 				ptr += sprintf_s(ptr, ptrMax - ptr, "%ld", m_pcoData->dwPixelRate);
 				return output;
 			}
 
-			if((tokNr != 1)){
-				ptr += sprintf_s(ptr, ptrMax - ptr, "syntax ERROR - %s <value Hz>", cmd);
-				return output;
-			}
+			pixRate = atoi(tok[1]);
+			_presetPixelRate(pixRate, error);
 			
-			_dwPixelRateRequested = atoi(tok[1]);
-
-			if((_dwPixelRateRequested != 0) && (!_isValid_pixelRate(_dwPixelRateRequested))){
-				ptr += sprintf_s(ptr, ptrMax - ptr, "value out of range");
+			if(error){
+				ptr += sprintf_s(ptr, ptrMax - ptr, "-1.0");
 				return output;
 			}
 
-			m_pcoData->dwPixelRateRequested = _dwPixelRateRequested;		
 			ptr += sprintf_s(ptr, ptrMax - ptr, "%ld", m_pcoData->dwPixelRateRequested);
 			return output;
 		}
@@ -389,38 +386,30 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		}
 
 
-
-
 		key = keys[ikey++] = "cameraType";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
-			ptr += sprintf_s(ptr, ptrMax - ptr, "sn[%ld] type: cam[%x][%x]if[%x] ver: hw[%lx]fw[%lx]\n", 
-				m_pcoData->stcCamType.dwSerialNumber, 
+			ptr += sprintf_s(ptr, ptrMax - ptr, "\n");
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* serial number[%d]\n", 
+				m_pcoData->stcCamType.dwSerialNumber);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* camera type[%x] subtype[%x] [%s]\n", 
 				m_pcoData->stcCamType.wCamType, 
-				m_pcoData->stcCamType.wCamSubType, 
+				m_pcoData->stcCamType.wCamSubType,
+				m_pcoData->model); 
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* interfase[%x]  [%s]\n", 
 				m_pcoData->stcCamType.wInterfaceType,
+				m_pcoData->iface);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* version hw[%lx]  fw[%lx]\n", 
 				m_pcoData->stcCamType.dwHWVersion, 
-				m_pcoData->stcCamType.dwFWVersion
+				m_pcoData->stcCamType.dwFWVersion);
 
-				);
-			
-			return output;
-		}
-
-
-		key = keys[ikey++] = "lastError";     //----------------------------------------------------------------
-		if(_stricmp(cmd, key) == 0){
-			m_pcoData->pcoErrorMsg[ERR_SIZE] = 0;
-			ptr += sprintf_s(ptr, ptrMax - ptr, "[%d] [%s]\n", 
-				m_pcoData->pcoError, m_pcoData->pcoErrorMsg
-				);
-			
+			ptr += sprintf_s(ptr, ptrMax - ptr,"%s\n", m_log.c_str());
 			return output;
 		}
 
 		key = keys[ikey++] = "lastError";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 			m_pcoData->pcoErrorMsg[ERR_SIZE] = 0;
-			ptr += sprintf_s(ptr, ptrMax - ptr, "[%d] [%s]\n", 
+			ptr += sprintf_s(ptr, ptrMax - ptr, "[x%08x] [%s]\n", 
 				m_pcoData->pcoError, m_pcoData->pcoErrorMsg
 				);
 			

@@ -49,6 +49,7 @@ SyncCtrlObj::SyncCtrlObj(Camera *cam,BufferCtrlObj *buffer) :
   m_pcoData(cam->_getPcoData()),
   m_trig_mode(IntTrig),
   m_buffer(buffer),
+  m_lat_time(0.), m_exp_time(0.),
   m_nb_frames(1),
   m_exposing(pcoAcqIdle),
   m_started(false)
@@ -243,7 +244,7 @@ void SyncCtrlObj::setLatTime(double  lat_time)
 void SyncCtrlObj::getLatTime(double& lat_time)
 {
 	// DONE
-  m_lat_time = 0.;
+  //m_lat_time = 0.;
   lat_time = m_lat_time;		// Don't know - delay????
 }
 
