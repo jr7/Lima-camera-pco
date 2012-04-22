@@ -386,7 +386,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		}
 
 
-		key = keys[ikey++] = "cameraType";     //----------------------------------------------------------------
+		key = keys[ikey++] = "camInfo";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "\n");
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* serial number[%d]\n", 
@@ -403,6 +403,18 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				m_pcoData->stcCamType.dwFWVersion);
 
 			ptr += sprintf_s(ptr, ptrMax - ptr,"%s\n", m_log.c_str());
+			return output;
+		}
+
+		key = keys[ikey++] = "camType";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
+			ptr += sprintf_s(ptr, ptrMax - ptr, "ty[%s] if[%s] sn[%d] hw[%lx] fw[%lx]", 
+				m_pcoData->model, 
+				m_pcoData->iface,
+				m_pcoData->stcCamType.dwSerialNumber,
+				m_pcoData->stcCamType.dwHWVersion, 
+				m_pcoData->stcCamType.dwFWVersion
+				);
 			return output;
 		}
 
