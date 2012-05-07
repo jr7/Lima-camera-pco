@@ -731,7 +731,7 @@ void _pco_acq_thread_edge(void *argin) {
 
 	pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImag();
 	m_sync->setExposing(status);
-
+	m_sync->stopAcq();
 	char *msg = m_cam->_pcoSet_RecordingState(0, error);
 	if(error) {
 		printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, msg);
