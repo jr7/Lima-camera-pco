@@ -19,47 +19,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 ############################################################################
-import os, sys, imp, glob, DLFCN
+from Lima import module_helper
 
-root_name = __path__[0]
-mod_name = os.path.basename(root_name)
+mod_path = __path__
+depends_on = 'Core'
+has_dependent = False
 
-def version_code(s):
-        return map(int, s.strip('v').split('.'))
+cleanup_data = module_helper.load_prepare(mod_path, depends_on, has_dependent)
 
-def version_cmp(x, y):
-        return cmp(version_code(x), version_code(y))
+from Lima import Core
 
-env_var_name = 'LIMA_%s_VERSION' % mod_name.upper()
-try:
-        version = os.environ[env_var_name]
-except KeyError:
-        version = 'LAST'
+cleanup_data = module_helper.load_dep_cleanup(cleanup_data)
 
-req_version = version
+module_helper.load_cleanup(cleanup_data)
 
-if version.upper() == 'LAST':
-        version_dirs = [x for x in os.listdir(root_name) if x.startswith('v')]
-        version_dirs.sort(version_cmp)
-        version = version_dirs[-1]
-else:
-        if version[0] != 'v':
-                version = 'v' + version
-
-mod_path = os.path.join(root_name, version)
-if not (os.path.isdir(mod_path) or os.path.islink(mod_path)):
-        raise ImportError('Invalid %s: %s' % (env_var_name, req_version))
-
-__path__.append(mod_path)
-
-ld_open_flags = sys.getdlopenflags()
-sys.setdlopenflags(ld_open_flags | DLFCN.RTLD_GLOBAL)
-
-from Lima.Basler.limabasler import Basler as _B
-globals().update(_B.__dict__)
-
-sys.setdlopenflags(ld_open_flags)
-
-del root_name, mod_name, mod_path, x, env_var_name
-del version, req_version, version_dirs, version_code, version_cmp
-del os, sys, imp, glob, DLFCN
+del mod_path, depends_on, has_dependent, cleanup_data
+del module_helper
