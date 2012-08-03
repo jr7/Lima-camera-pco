@@ -25,6 +25,12 @@ Configuration file **Lima/config.inc** (values set to 1):
 See :ref:`Compilation`
 
 
+OS
+``
+- **Win7 Professional (english) 32 bits SP1**
+
+
+
 Software packages required
 ```````````````````````````
 
@@ -120,6 +126,75 @@ Configuration
 ``````````````
 
 - **TODO**
+
+
+
+PC characteristics (used for PCO EDGE)
+``````````````````````````````````````
+
+- **RAM**
+
+.. code-block:: sh
+
+    24 GB (6 x DDR3-1333 Reg. ECC 4 GB module)
+
+- **PROC**
+
+.. code-block:: sh
+
+        2 x Intel Xeon E5645 Six-Core CPU, 2,40GHz, 80W, Socket LGA1366, 12MB 5,86GT/sec
+
+        CPU's :*2 x Xeon SixCore E5645 2,40Ghz 12MB 5,86GT/sec*
+        Intel Xeon E5645 Six-Core CPU, 2,40GHz, 80W, Socket LGA1366, 12MB
+        external cache. 5,86GT/sec QPI speed. 1333MHz memory speed (DDR3 only).
+        Intel Technologies: Intel Turbo Boost , Intel Hyper-Threading
+        Technology, Intel Virtualization (VT-x), Intel Trusted Execution,
+        Enhanced Intel SpeedStep, Intel Demand Based Switching, Execute
+        Disable Bit.
+
+- **HD**
+
+.. code-block:: sh
+
+    C:
+    WDC WD5003ABYX-01WERA1
+    Western Digital 500 GB, 7200 RPM, SATA 2, 300 Mbps
+
+    D:
+    Adaptec RAID 5405/5405Q with 2 HD of 450 Gb -> RAID0 837 GB
+    HUS156045VLS600
+    Hitachi 450GB, 15,000RPM SAS / Serial Attached SCSI, 6Gbps
+
+- **graphic card**
+
+.. code-block:: sh
+
+    Matrox G200eW
+
+- **PCI slots**
+
+.. code-block:: sh
+
+    1* PCIe x4 (in x8 slot)
+    3* PCIe x8
+    1* PCIe x8 (in x16 slot)
+    2* PCIe x16
+
+
+- **motherboard**
+
+.. code-block:: sh
+
+        Motherboard Extended ATX format 13,68" x 13", (34,7cm x 33cm) (W x H);
+        2 socket LGA 1366-pin. It supports processors Quad-Core Intel Xeon
+        series 5500; QPI bus system (up to 6.4GT/s); *chipset Intel 5520*;
+
+        18 socket DIMM 240 pin, support for up to 288GB memory DDR3
+        1333/1066/800MHz Registered or 48GB memory DDR3 unbuffered ECC, the real
+        operating ram speed depends on the processor?s model and number of
+        installed ram, best performances are achieved through a triple channel
+        configuration;
+
 
 
 
