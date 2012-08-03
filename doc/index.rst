@@ -91,7 +91,7 @@ Software packages required
 
 Post installation actions
 `````````````````````````
-- **enable/disble PCO logs** (C:\ProgramData\pco)
+- **enable/disable PCO logs** (C:\ProgramData\pco)
 
 .. code-block:: sh
 
