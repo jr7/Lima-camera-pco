@@ -36,7 +36,7 @@ Software packages required
 
 - **download links**
 
- - `PCO and Silicon Software download <ftp://pcoag.biz/>`_
+ - `PCO and Silicon Software download (login/pw required) <ftp://pcoag.biz/>`_
  - `VC++ download <http://www.microsoft.com/visualstudio/en-us/products/2008-editions/express>`_
  - `GSL download <http://sourceforge.net/projects/gnuwin32/files/gsl/1.8/gsl-1.8.exe/download>`_
  - `python download <http://www.python.org/download/releases/2.6.6/>`_
@@ -91,15 +91,15 @@ Software packages required
 
 Post installation actions
 `````````````````````````
-- **enable/disable PCO logs** (C:\ProgramData\pco)
+- **enable/disable PCO logs** (C:\\ProgramData\\pco)
 
 .. code-block:: sh
 
-                            rename .txt (disabled) files to .log (enabled) 
-          0 camware.log     <---- created by hand
-        385 PCO_CDlg.log
-        385 PCO_Conv.log
-        382 SC2_Cam.log
+                  +---- rename .txt (disabled) files to .log (enabled) 
+         camware.log     <---- created by hand
+        PCO_CDlg.log
+        PCO_Conv.log
+         SC2_Cam.log
 
 
 - **system variables** 
@@ -185,7 +185,7 @@ PC characteristics (used for PCO EDGE)
 
 .. code-block:: sh
 
-        Motherboard Extended ATX format 13,68" x 13", (34,7cm x 33cm) (W x H);
+        Motherboard Extended ATX format 13,68in x 13in, (34,7cm x 33cm) (W x H);
         2 socket LGA 1366-pin. It supports processors Quad-Core Intel Xeon
         series 5500; QPI bus system (up to 6.4GT/s); *chipset Intel 5520*;
 
