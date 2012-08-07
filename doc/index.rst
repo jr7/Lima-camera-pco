@@ -1,5 +1,3 @@
-.. _pco:
-
 PCO
 ---
 
@@ -272,10 +270,9 @@ The boards tested by PCO are:
  Intel DX58SO2
  Supermicro X8DTH-iF
 
-With the PC described in :ref:`pco-esrf-pc`
+With the PC described in :ref:`pco-esrf-pc` 
 the speed of the CameraLink is about
 **570 MB/s** (66% of the theoretic max of 860 MB/s). 
-
 
 
 
