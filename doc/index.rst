@@ -1,5 +1,7 @@
+.. _pco:
+
 PCO
--------
+---
 
 .. image:: Under_cons.jpg
 .. image:: pco.dimax-255x255.jpg
@@ -179,6 +181,7 @@ Configuration
 - **TODO**
 
 
+.. _pco-esrf-pc:
 
 PC characteristics (used for PCO EDGE at ESRF)
 ``````````````````````````````````````````````
@@ -251,6 +254,27 @@ PC characteristics (used for PCO EDGE at ESRF)
     2x PCIe x16
 
 
+PCO EDGE - install instructions for Silicon Software Me4 Board
+``````````````````````````````````````````````````````````````
+
+Check the document **camera/pco/doc/Me4_Installation_Test_e1.pdf** with the
+requirements and procedure to install the CameraLink grabber card. It is 
+important in order to get the maximum transfer speed required by the PCO EDGE
+camera.
+
+The boards tested by PCO are:
+
+.. code-block:: sh
+
+ Supermicro X8ST3
+ GigaByte GA-X58A-UD3R
+ Intel S5520
+ Intel DX58SO2
+ Supermicro X8DTH-iF
+
+With the PC described in :ref:`pco-esrf-pc`
+the speed of the CameraLink is about
+**570 MB/s** (66% of the theoretic max of 860 MB/s). 
 
 
 
