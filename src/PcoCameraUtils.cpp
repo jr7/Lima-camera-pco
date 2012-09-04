@@ -56,6 +56,21 @@ char* _timestamp_pcocamerautils() {return "$Id: " __TIMESTAMP__ " (" __FILE__ ")
 //=========================================================================================================
 //=========================================================================================================
 //=========================================================================================================
+char *_pco_get_version(char *output, int lg){
+	char *ptr, *ptrMax;
+
+	ptr = output; *ptr = 0;
+	ptrMax = ptr + lg;
+
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcocamera());
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcosyncctrlobj());
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcointerface());
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcobufferctrlobj());
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcodetinfoctrlobj());
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcocamerautils());
+
+	return output;
+}
 
 static char *getTimestamp(timestampFmt fmtIdx) {
    static char timeline[128];

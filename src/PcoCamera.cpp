@@ -24,6 +24,8 @@
 #define PCO_ERRT_H_CREATE_OBJECT
 #define BYPASS
 
+#define TOUT_MIN_DIMAX 500
+
 //#define BUFF_INFO_SIZE 5000
 
 #define DWORD_MAX ULONG_MAX 
@@ -45,6 +47,8 @@ using namespace lima;
 using namespace lima::Pco;
 
 static char *timebaseUnits[] = {"ns", "us", "ms"};
+
+char *_pco_get_version(char *output, int lg);
 
 void _pco_acq_thread_dimax(void *argin);
 void _pco_acq_thread_edge(void *argin);
@@ -132,11 +136,15 @@ char *xlatPcoCode2Str(int code, tblXlatCode2Str table, int &err) {
 
 //=========================================================================================================
 //=========================================================================================================
+#define BUFF_VERSION 1024
 Camera::Camera(const char *camPar) :
 	m_cam_connected(false),
 	m_acq_frame_nb(1),
 	m_sync(NULL)
 {
+	DEF_FNID;
+	char buff[BUFF_VERSION+1];
+
 	DEB_CONSTRUCTOR();
 	int error=0;
 	m_config = TRUE;
@@ -150,6 +158,8 @@ Camera::Camera(const char *camPar) :
 
 	m_bin.changed = Invalid;
 	m_roi.changed = Invalid;
+
+	printf("=== %s> VERSION\n%s\n", fnId, _pco_get_version(buff, BUFF_VERSION));
 
 	_init();
 	m_config = FALSE;
@@ -170,6 +180,7 @@ void Camera::_init(){
 	m_log.clear();
 	sprintf_s(msg, MSG_SIZE, "*** Pco log %s\n", getTimestamp(Iso));
 	m_log.append(msg);
+
 
 
 	// --- Open Camera
@@ -589,7 +600,7 @@ void _pco_acq_thread_dimax(void *argin) {
 	struct __timeb64 tStart;
 	msElapsedTimeSet(tStart);
 
-	long timeout, msNow, msRec, msXfer;
+	long timeout, timeout0, msNow, msRec, msXfer;
 	int nb_acq_frames;
 	bool requestStop = false;
 
@@ -603,7 +614,9 @@ void _pco_acq_thread_dimax(void *argin) {
 	int nb_frames; 	m_sync->getNbFrames(nb_frames);
 	m_sync->setAcqFrames(0);
 
-	m_pcoData->msAcqTout = timeout = (long) (dwMsSleep * (nb_frames * 1.1));
+	timeout = timeout0 = (long) (dwMsSleep * (nb_frames * 1.1));
+	if(timeout < TOUT_MIN_DIMAX) timeout = TOUT_MIN_DIMAX;
+	m_pcoData->msAcqTout = timeout;
 	_dwValidImageCnt = 0;
 
 	m_sync->setExposing(pcoAcqRecordStart);
@@ -619,7 +632,7 @@ void _pco_acq_thread_dimax(void *argin) {
 		m_pcoData->msAcqTnow = msNow = msElapsedTime(tStart);
 		if(timeout < msNow) { 
 			m_sync->setExposing(pcoAcqRecordTimeout);
-			printf("=== %s [%d]> TIMEOUT!!! timeout[%ld] ms[%ld]\n", fnId, __LINE__, timeout, msNow);
+			printf("=== %s [%d]> TIMEOUT!!! tout0[%ld] tout[%ld] ms[%ld]\n", fnId, __LINE__, timeout0, timeout, msNow);
 			break;
 		}
 	
@@ -664,8 +677,8 @@ void _pco_acq_thread_dimax(void *argin) {
 	}
 	//m_sync->setExposing(status);
 	m_pcoData->msAcqXfer = msXfer = msElapsedTime(tStart);
-	printf("=== %s> EXIT tnow[%ld] tout[%ld] rec[%ld] xfer[%ld] (ms)\n", 
-			fnId, msNow, timeout, msRec, msXfer);
+	printf("=== %s> EXIT tnow[%ld] tout[%ld] tout0[%ld] rec[%ld] xfer[%ld] (ms)\n", 
+			fnId, msNow, timeout, timeout0, msRec, msXfer);
 	_endthread();
 }
 
