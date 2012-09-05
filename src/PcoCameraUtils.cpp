@@ -56,6 +56,7 @@ char* _timestamp_pcocamerautils() {return "$Id: " __TIMESTAMP__ " (" __FILE__ ")
 //=========================================================================================================
 //=========================================================================================================
 //=========================================================================================================
+
 char *_pco_get_version(char *output, int lg){
 	char *ptr, *ptrMax;
 
@@ -236,13 +237,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 
 		key = keys[ikey++] = "timestamp";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
-			ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcocamera());
-			ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcosyncctrlobj());
-			ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcointerface());
-			ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcobufferctrlobj());
-			ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcodetinfoctrlobj());
-			ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcocamerautils());
-			
+			_pco_get_version(ptr, ptrMax - ptr);
 			return output;
 		}
 
@@ -310,7 +305,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			bool rolling, rollingNew;
 
 			if(!_isCameraType(Edge)) {
-				ptr += sprintf_s(ptr, ptrMax - ptr, "%d", 0);
+				ptr += sprintf_s(ptr, ptrMax - ptr, "%d", -1);
 				return output;
 			}
 			
