@@ -416,6 +416,11 @@ void Camera::startAcq()
 	int error;
 	char *msg;
 
+    int iRequestedFrames;
+
+			// live video requested frames = 0
+    m_sync->getNbFrames(iRequestedFrames);
+
     //------------------------------------------------- set binning if needed
     WORD wBinHorz, wBinVert;
     if (m_bin.changed == Changed) {
@@ -459,7 +464,10 @@ void Camera::startAcq()
 
     // ----------------------------------------- storage mode (recorder + sequence)
     if(_isCameraType(Dimax)) {
-		msg = _pcoSet_Storage_subRecord_Mode(error);
+		
+		enumPcoStorageMode mode = (iRequestedFrames > 0) ? RecSeq : Fifo;
+
+		msg = _pcoSet_Storage_subRecord_Mode(mode, error);
 		PCO_THROW_OR_TRACE(error, msg) ;
 	}
 
@@ -491,12 +499,7 @@ void Camera::startAcq()
 	msg = _set_metadata_mode(0, error); PCO_THROW_OR_TRACE(error, msg) ;
 
 	// ------------------------------------------------- arm camera
-    
-	
-	error = PcoCheckError(PCO_ArmCamera(m_handle)); PCO_THROW_OR_TRACE(error, "PCO_ArmCamera") ;
-
-
-
+    error = PcoCheckError(PCO_ArmCamera(m_handle)); PCO_THROW_OR_TRACE(error, "PCO_ArmCamera") ;
 
 		if(_isCameraType(Edge)) {
 			error = PcoCheckError(PCO_GetPixelRate(m_handle, &m_pcoData->dwPixelRate));
@@ -533,14 +536,11 @@ void Camera::startAcq()
 	msg = _get_coc_runtime(error); PCO_THROW_OR_TRACE(error, msg) ;
 
     //------------------------------------------------- checking nr of frames
-    {
+    if(_isCameraType(Dimax)){
         unsigned long framesMax;
-        int iFrames;
-
-        m_sync->getNbFrames(iFrames);
         framesMax = pcoGetFramesMax(m_pcoData->activeRamSegment);
 
-        if ((((unsigned long) iFrames) > framesMax)) {
+        if ((((unsigned long) iRequestedFrames) > framesMax)) {
             throw LIMA_HW_EXC(Error, "frames OUT OF RANGE");
         }
     } 
@@ -613,7 +613,7 @@ void _pco_acq_thread_dimax(void *argin) {
 
 	int nb_frames; 	m_sync->getNbFrames(nb_frames);
 	m_sync->setAcqFrames(0);
-
+!!!todo
 	timeout = timeout0 = (long) (dwMsSleep * (nb_frames * 1.1));
 	if(timeout < TOUT_MIN_DIMAX) timeout = TOUT_MIN_DIMAX;
 	m_pcoData->msAcqTout = timeout;
@@ -872,7 +872,7 @@ char * Camera::_pcoSet_Trig_Acq_Mode(int &error){
 
 //=================================================================================================
 //=================================================================================================
-char * Camera::_pcoSet_Storage_subRecord_Mode(int &error){
+char * Camera::_pcoSet_Storage_subRecord_Mode(enumPcoStorageMode mode, int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 
@@ -880,11 +880,17 @@ char * Camera::_pcoSet_Storage_subRecord_Mode(int &error){
 		// current storage mode
 		// - 0x0000 = [recorder] mode
 		// - 0x0001 = [FIFO buffer] mode
-    m_pcoData->storage_mode = 0;
 		// current recorder submode:
 		// - 0x0000 = [sequence]
 		// - 0x0001 = [ring buffer].
-    m_pcoData->recorder_submode = 0;
+
+	switch(mode) {
+		case RecSeq:  m_pcoData->storage_mode = 0; m_pcoData->recorder_submode = 0; break;
+		case RecRing: m_pcoData->storage_mode = 0; m_pcoData->recorder_submode = 1; break;
+		case Fifo:    m_pcoData->storage_mode = 1; m_pcoData->recorder_submode = 0; break;
+		default: 
+			throw LIMA_HW_EXC(Error,"FATAL - invalid storage mode!" );
+	}
 
     error = PcoCheckError(PCO_SetStorageMode(m_handle, m_pcoData->storage_mode));
 	if(error) return "PCO_SetStorageMode";

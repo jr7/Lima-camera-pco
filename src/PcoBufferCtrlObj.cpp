@@ -343,16 +343,17 @@ int BufferCtrlObj::_xferImag()
 // --------------- get the requested nr of images 
 	int requested_nb_frames;
 	DWORD dwFramesPerBuffer, dwRequestedFrames;
+	DWORD dwRequestedFramesMax =0xFFFF;
 
+// --------------- live video -> nr frames = 0 / idx lima buffers 32b (0...ffff)
 	m_sync->getNbFrames(requested_nb_frames);
-	//m_sync->getAcqFrames(requested_nb_frames);
-	dwRequestedFrames = (DWORD) requested_nb_frames;
+	dwRequestedFrames = (requested_nb_frames > 0) ? (DWORD) requested_nb_frames : dwRequestedFramesMax;
 	dwFramesPerBuffer = m_cam->pcoGetFramesPerBuffer(); // for dimax = 1
 
 
 // --------------- prepare the first buffer 
-  // ------- in PCO DIMAX only 1 image can be retreived
-  //         (dwFramesPerBuffer = 1) ====> (dwFrameLast2assign = dwFrameFirst2assign)
+// ------- in PCO DIMAX only 1 image can be retreived
+//         (dwFramesPerBuffer = 1) ====> (dwFrameLast2assign = dwFrameFirst2assign)
 	dwFrameFirst2assign = 1;
 	dwFrameLast2assign = dwFrameFirst2assign + dwFramesPerBuffer - 1;
 	if(dwFrameLast2assign > dwRequestedFrames) dwFrameLast2assign = dwRequestedFrames;
@@ -367,7 +368,7 @@ int BufferCtrlObj::_xferImag()
 			}
 	}
 
-
+	// Edge cam must be started just after assign buff to avoid lost of img
 	if(m_cam->_isCameraType(Edge)) {
 			m_cam->_pcoSet_RecordingState(1, error);
 	}
@@ -380,7 +381,6 @@ int BufferCtrlObj::_xferImag()
 _RETRY:
 
 	if(	m_requestStop) {return pcoAcqTransferStop;}
-
 
 	// --------------- look if one of buffer is READY and has the NEXT frame => proccess it
     // m_allocatedBufferAssignedFrameFirst[bufIdx] -> first frame in the buffer (we are using only 1 frame per buffer)
@@ -478,7 +478,6 @@ _RETRY:
 			printf("=== %s> WAITOBJ default ????\n", fnId);
 			return pcoAcqWaitError;
     }
-
 
 _WHILE_CONTINUE:
     dwFrameIdx++;

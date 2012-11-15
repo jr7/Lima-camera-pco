@@ -134,6 +134,10 @@ enum enumPcoFamily {
 	Dimax = 1, Edge, EdgeGL, EdgeRolling,
 };
 
+enum enumPcoStorageMode {
+	Fifo = 1, RecSeq, RecRing,
+};
+
 struct stcRoi {
 	enumChange changed;	/* have values been changed ? */
 	unsigned int x[2];	/* ROI min/max in x dir.(note starts at 1)*/
@@ -227,7 +231,7 @@ namespace lima
         char *_talk(char *cmd, char *output, int lg);
 
 		char *_pcoSet_Trig_Acq_Mode(int &error);
-		char *_pcoSet_Storage_subRecord_Mode(int &error);
+		char *_pcoSet_Storage_subRecord_Mode(enumPcoStorageMode, int &error);
 		char *_pcoSet_Exposure_Delay_Time(int &error, int ph);
 		char *_pcoSet_Cameralink_GigE_Parameters(int &error);
 		char *_pcoGet_Camera_Type(int &error);
