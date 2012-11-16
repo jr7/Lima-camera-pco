@@ -51,6 +51,7 @@ static char *timebaseUnits[] = {"ns", "us", "ms"};
 char *_pco_get_version(char *output, int lg);
 
 void _pco_acq_thread_dimax(void *argin);
+void _pco_acq_thread_dimax_fifo(void *argin);
 void _pco_acq_thread_edge(void *argin);
 void _pco_shutter_thread_edge(void *argin);
 
@@ -557,7 +558,11 @@ void Camera::startAcq()
 
 	if(_isCameraType(Dimax)){
 		_pcoSet_RecordingState(1, error);
-		_beginthread( _pco_acq_thread_dimax, 0, (void*) this);
+		if(iRequestedFrames > 0 ) {
+			_beginthread( _pco_acq_thread_dimax, 0, (void*) this);
+		} else {
+			_beginthread( _pco_acq_thread_dimax_fifo, 0, (void*) this);
+		}
 		return;
 	}
 
@@ -613,7 +618,7 @@ void _pco_acq_thread_dimax(void *argin) {
 
 	int nb_frames; 	m_sync->getNbFrames(nb_frames);
 	m_sync->setAcqFrames(0);
-!!!todo
+
 	timeout = timeout0 = (long) (dwMsSleep * (nb_frames * 1.1));
 	if(timeout < TOUT_MIN_DIMAX) timeout = TOUT_MIN_DIMAX;
 	m_pcoData->msAcqTout = timeout;
@@ -662,7 +667,7 @@ void _pco_acq_thread_dimax(void *argin) {
 	m_pcoData->dwMaxImageCnt[wSegment-1] = _dwMaxImageCnt;
 
 	nb_acq_frames = (_dwValidImageCnt < (DWORD) nb_frames) ? _dwValidImageCnt : nb_frames;
-	m_sync->setAcqFrames(nb_acq_frames);
+	//m_sync->setAcqFrames(nb_acq_frames);
 
 
 	m_pcoData->msAcqRec = msRec = msElapsedTime(tStart);
@@ -758,6 +763,44 @@ void _pco_acq_thread_edge(void *argin) {
 	_endthread();
 }
 
+//=====================================================================
+//=====================================================================
+
+void _pco_acq_thread_dimax_fifo(void *argin) {
+	DEF_FNID;
+
+	printf("=== %s> ENTRY\n", fnId);
+
+	Camera* m_cam = (Camera *) argin;
+	SyncCtrlObj* m_sync = m_cam->_getSyncCtrlObj();
+	BufferCtrlObj* m_buffer = m_sync->_getBufferCtrlObj();
+
+	struct stcPcoData *m_pcoData = m_cam->_getPcoData();
+
+	struct __timeb64 tStart;
+	msElapsedTimeSet(tStart);
+	int error;
+	long msXfer;
+	bool requestStop = false;
+
+	HANDLE m_handle = m_cam->getHandle();
+
+	m_sync->setAcqFrames(0);
+
+	pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImag();
+	m_sync->setExposing(status);
+	m_sync->stopAcq();
+	char *msg = m_cam->_pcoSet_RecordingState(0, error);
+	if(error) {
+		printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, msg);
+		//throw LIMA_HW_EXC(Error, "_pcoSet_RecordingState");
+	}
+
+	m_pcoData->msAcqXfer = msXfer = msElapsedTime(tStart);
+	printf("=== %s> EXIT xfer[%ld] (ms) status[%s]\n", 
+			fnId, msXfer, sPcoAcqStatus[status]);
+	_endthread();
+}
 
 //=====================================================================
 //=====================================================================

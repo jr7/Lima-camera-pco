@@ -417,9 +417,6 @@ _RETRY:
 		DEB_TRACE() << "========================================FOUND " << DEB_VAR3(ptrDest, ptrSrc, size);
 #endif
 
-		if(m_cam->_isCameraType(Edge)) {
-			//m_sync->setAcqFrames(dwFrameIdx);
-		}
 
 		HwFrameInfoType frame_info;
 		frame_info.acq_frame_nb = lima_buffer_nb;
@@ -480,12 +477,11 @@ _RETRY:
     }
 
 _WHILE_CONTINUE:
+	m_sync->setAcqFrames(dwFrameIdx);
     dwFrameIdx++;
   } // while(frameIdx ...
 
-		if(m_cam->_isCameraType(Edge)) {
-			m_sync->setAcqFrames(dwFrameIdx-1);
-		}
+  // if(m_cam->_isCameraType(Edge)) {m_sync->setAcqFrames(dwFrameIdx-1);}
 
 	return pcoAcqTransferEnd;
 
