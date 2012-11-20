@@ -196,17 +196,17 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 			break;
 		case Sync::TIMEOUT:
 			msg = "Sync wait TIMEOUT";
-			printf("=== %s> ERROR [%s]\n", fnId, msg);
+			printf("=== %s> ERROR [%s] lima_buffer_nb [%d] timeout [%g]\n", fnId, msg, lima_buffer_nb, timeout);
 			DEB_TRACE() << msg;
 			return -1;
 		case Sync::INTERRUPTED:
 			msg = "Sync wait INTERRUPTED";
-			printf("=== %s> ERROR [%s]\n", fnId, msg);
+			printf("=== %s> ERROR [%s] lima_buffer_nb [%d] timeout [%g]\n", fnId, msg, lima_buffer_nb, timeout);
 			DEB_TRACE() << msg;
 			return -1;
 		default:
 			msg = "Sync wait UNKNOWN STATUS";
-			printf("=== %s> ERROR [%s]\n", fnId, msg);
+			printf("=== %s> ERROR [%s] lima_buffer_nb [%d] timeout [%g]\n", fnId, msg, lima_buffer_nb, timeout);
 			DEB_TRACE() << msg;
 			return -1;
 	}

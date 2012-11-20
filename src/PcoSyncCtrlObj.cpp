@@ -308,6 +308,7 @@ void SyncCtrlObj::startAcq()
 		if(m_buffer) {
 			m_buffer->startAcq();
 			m_started = true;
+			m_buffer->_setRequestStop(false);
 		}
       //else m_cam->startAcq();
     }
@@ -323,7 +324,7 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
   DEF_FNID;
   if(m_started)
     {
-		if(m_buffer->_getRequestStop()) return;
+		//if(m_buffer->_getRequestStop()) return;
 		m_buffer->_setRequestStop(true);
 
 		m_cam->_pcoSet_RecordingState(0, error);
@@ -332,7 +333,6 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
     //  if(clearQueue) - ignored
     }
 
-		
 	m_started = false;
 
 }
@@ -345,7 +345,7 @@ void SyncCtrlObj::getStatus(HwInterface::StatusType& status)
 	// DONE
   DEB_MEMBER_FUNCT();
 DEB_TRACE() << DEB_VAR3(m_started, m_buffer, m_exposing);
-
+ DEF_FNID;
   if(m_started){
       if(m_buffer){
 
@@ -390,5 +390,6 @@ DEB_TRACE() << DEB_VAR3(m_started, m_buffer, m_exposing);
       status.acq = AcqReady;
       status.det = DetIdle;
     }
+
   DEB_RETURN() << DEB_VAR1(status);
 }

@@ -1266,6 +1266,7 @@ char * Camera::_pcoSet_RecordingState(int state, int &error){
 	DEF_FNID;
 	char *msg;
 
+
 	WORD wRecState_new, wRecState_actual;
 
 	wRecState_new = state ? 0x0001 : 0x0000 ; // 0x0001 => START acquisition
