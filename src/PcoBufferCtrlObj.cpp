@@ -343,7 +343,7 @@ int BufferCtrlObj::_xferImag()
 // --------------- get the requested nr of images 
 	int requested_nb_frames;
 	DWORD dwFramesPerBuffer, dwRequestedFrames;
-	DWORD dwRequestedFramesMax =0xFFFF;
+	DWORD dwRequestedFramesMax =0xFFFFFFFF;
 
 // --------------- live video -> nr frames = 0 / idx lima buffers 32b (0...ffff)
 	m_sync->getNbFrames(requested_nb_frames);
