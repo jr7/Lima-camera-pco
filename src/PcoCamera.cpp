@@ -48,21 +48,12 @@ using namespace lima::Pco;
 
 static char *timebaseUnits[] = {"ns", "us", "ms"};
 
-char *_pco_get_version(char *output, int lg);
 
 void _pco_acq_thread_dimax(void *argin);
 void _pco_acq_thread_dimax_fifo(void *argin);
 void _pco_acq_thread_edge(void *argin);
 void _pco_shutter_thread_edge(void *argin);
 
-
-
-char * _timestamp_pcosyncctrlobj();
-char * _timestamp_pcointerface();
-char * _timestamp_pcobufferctrlobj();
-char * _timestamp_pcodetinfoctrlobj();
-//void print_hex_dump_buff(void *ptr_buff, size_t len);
-	
 //=========================================================================================================
 char* _timestamp_pcocamera() {return ID_TIMESTAMP ;}
 //=========================================================================================================
@@ -135,32 +126,53 @@ char *xlatPcoCode2Str(int code, tblXlatCode2Str table, int &err) {
 }
 
 
+
 //=========================================================================================================
 //=========================================================================================================
-#define BUFF_VERSION 1024
+char * _timestamp_pcosyncctrlobj();
+char * _timestamp_pcointerface();
+char * _timestamp_pcobufferctrlobj();
+char * _timestamp_pcodetinfoctrlobj();
+char * _timestamp_pcocamerautils();
+
+stcPcoData::stcPcoData(){
+
+	char *ptr, *ptrMax;
+
+	ptr = version; *ptr = 0;
+	ptrMax = ptr + sizeof(version) - 1;
+
+	ptr += sprintf_s(ptr, ptrMax - ptr, "\n");
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcocamera());
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcosyncctrlobj());
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcointerface());
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcobufferctrlobj());
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcodetinfoctrlobj());
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcocamerautils());
+}
+
+//=========================================================================================================
+//=========================================================================================================
 Camera::Camera(const char *camPar) :
 	m_cam_connected(false),
 	m_acq_frame_nb(1),
 	m_sync(NULL)
 {
 	DEF_FNID;
-	char buff[BUFF_VERSION+1];
 
 	DEB_CONSTRUCTOR();
 	int error=0;
 	m_config = TRUE;
 	DebParams::checkInit();
 
-
 	m_pcoData =new(stcPcoData);
 	if(m_pcoData == NULL)
 		throw LIMA_HW_EXC(Error, "creation error");
-	memset((char *)m_pcoData, 0, sizeof(stcPcoData));
+	//memset((char *)m_pcoData, 0, sizeof(stcPcoData));
+    DEB_ALWAYS()  << DEB_VAR1(m_pcoData->version) ;
 
 	m_bin.changed = Invalid;
 	m_roi.changed = Invalid;
-
-	printf("=== %s> VERSION\n%s\n", fnId, _pco_get_version(buff, BUFF_VERSION));
 
 	_init();
 	m_config = FALSE;
@@ -181,7 +193,6 @@ void Camera::_init(){
 	m_log.clear();
 	sprintf_s(msg, MSG_SIZE, "*** Pco log %s\n", getTimestamp(Iso));
 	m_log.append(msg);
-
 
 
 	// --- Open Camera

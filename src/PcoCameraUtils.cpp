@@ -43,35 +43,11 @@ static char *timebaseUnits[] = {"ns", "us", "ms"};
 #define BUFF_INFO_SIZE 5000
 
 
-char * _timestamp_pcocamera();
-char * _timestamp_pcocamerautils();
-char * _timestamp_pcosyncctrlobj();
-char * _timestamp_pcointerface();
-char * _timestamp_pcobufferctrlobj();
-char * _timestamp_pcodetinfoctrlobj();
 void print_hex_dump_buff(void *ptr_buff, size_t len);
 	
 //=========================================================================================================
 char* _timestamp_pcocamerautils() {return ID_TIMESTAMP ;}
 //=========================================================================================================
-//=========================================================================================================
-//=========================================================================================================
-
-char *_pco_get_version(char *output, int lg){
-	char *ptr, *ptrMax;
-
-	ptr = output; *ptr = 0;
-	ptrMax = ptr + lg;
-
-	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcocamera());
-	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcosyncctrlobj());
-	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcointerface());
-	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcobufferctrlobj());
-	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcodetinfoctrlobj());
-	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcocamerautils());
-
-	return output;
-}
 
 static char *getTimestamp(timestampFmt fmtIdx) {
    static char timeline[128];
@@ -237,7 +213,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 
 		key = keys[ikey++] = "timestamp";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
-			_pco_get_version(ptr, ptrMax - ptr);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "%s", m_pcoData->version);
 			return output;
 		}
 

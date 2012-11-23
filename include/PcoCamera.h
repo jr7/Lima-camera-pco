@@ -30,6 +30,8 @@
 #include "HwMaxImageSizeCallback.h"
 //#include "PcoBufferCtrlObj.h"
 
+#define BUFF_VERSION 1024
+
 #define PCO_EDGE_PIXEL_RATE_MIN 95000000
 #define PCO_EDGE_PIXEL_RATE_MAX 286000000
 #define PCO_EDGE_PIXEL_RATE_LOW 100000000
@@ -124,6 +126,12 @@ struct stcPcoData {
 		int iAllocatedBufferNumber;
 		bool bAllocatedBufferDone;
 		bool bRollingShutter;
+
+		char version[BUFF_VERSION];
+
+
+		stcPcoData();
+
 };
 
 enum enumChange {
