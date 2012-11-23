@@ -1198,6 +1198,11 @@ char *Camera::_pcoGet_Camera_Type(int &error){
 
 	// -- Reset to default settings
 
+
+	error = PcoCheckError(PCO_SetRecordingState(m_handle, 0));
+	msg = "PCO_SetRecordingState";
+	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
+
 	error = PcoCheckError(PCO_ResetSettingsToDefault(m_handle));
 	msg = "PCO_ResetSettingsToDefault";
 	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
