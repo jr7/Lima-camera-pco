@@ -66,6 +66,27 @@ struct stcFrame {
 
 };
 
+class ringLog {
+        enum { bufferSize = 32 };
+        struct data{        
+                time_t timestamp;
+                char str[bufferSize];
+        };
+        
+   public:
+        ringLog(int size);
+        ~ringLog();
+        int add(char *s);
+        int size() {return m_size;};
+        void dumpPrint(bool direction);
+		int dump(char *s, int lgMax, bool direction);
+
+private:
+        int m_capacity;
+        int m_size;
+        int m_head;
+        struct data *buffer;
+};
 
 struct stcTemp {
 	short wCcd, wCam, wPower;
@@ -211,6 +232,7 @@ namespace lima
 		bool _isCameraType(enum enumPcoFamily tp);
 		bool _isConfig(){return m_config; };
 		void _pco_set_shutter_rolling_edge(int &error);
+		void msgLog(char *s) {m_msgLog->add(s); };
 
 	private:
 		SyncCtrlObj*	m_sync;
@@ -260,6 +282,8 @@ namespace lima
 
 		bool _isValid_pixelRate(DWORD dwPixelRate);
 		bool _isValid_Roi(struct stcRoi *new_roi);
+
+		ringLog *m_msgLog;
 
     };
   }

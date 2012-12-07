@@ -165,9 +165,14 @@ Camera::Camera(const char *camPar) :
 	m_config = TRUE;
 	DebParams::checkInit();
 
+	m_msgLog = new ringLog(100) ;
+	if(m_msgLog == NULL)
+		throw LIMA_HW_EXC(Error, "m_msgLog > creation error");
+
+
 	m_pcoData =new(stcPcoData);
 	if(m_pcoData == NULL)
-		throw LIMA_HW_EXC(Error, "creation error");
+		throw LIMA_HW_EXC(Error, "m_pcoData > creation error");
 	//memset((char *)m_pcoData, 0, sizeof(stcPcoData));
     DEB_ALWAYS()  << DEB_VAR1(m_pcoData->version) ;
 

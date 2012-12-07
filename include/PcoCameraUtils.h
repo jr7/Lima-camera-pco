@@ -30,4 +30,7 @@ enum timestampFmt {Iso, FnFull, FnDate};
 
 DLL_EXPORT char *getTimestamp(timestampFmt fmtIdx) ;
 
+
+
+
 #endif

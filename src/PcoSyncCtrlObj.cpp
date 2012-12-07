@@ -302,6 +302,9 @@ void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 void SyncCtrlObj::startAcq()
 {
   DEB_MEMBER_FUNCT();
+  
+  m_cam->msgLog("startAcq");
+
   if(!m_started)
     {
   
@@ -322,6 +325,9 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 
   DEB_MEMBER_FUNCT();
   DEF_FNID;
+
+  m_cam->msgLog("stopAcq");
+
   if(m_started)
     {
 		//if(m_buffer->_getRequestStop()) return;

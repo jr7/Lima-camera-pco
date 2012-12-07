@@ -103,6 +103,8 @@ char *str_trim(char *s) {
 
 char *Camera::talk(char *cmd){
 	static char buff[BUFF_INFO_SIZE +1];
+	sprintf_s(buff, BUFF_INFO_SIZE, "talk> %s", cmd);
+	m_msgLog->add(buff);
 	return _talk(cmd, buff, BUFF_INFO_SIZE);
 }
 
@@ -414,6 +416,15 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			return output;
 		}
 
+		key = keys[ikey++] = "msgLog";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
+
+			ptr += m_msgLog->dump(ptr, ptrMax - ptr, 1);
+			
+			return output;
+		}
+
+
 		key = keys[ikey++] = "dumpData";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 
@@ -580,6 +591,98 @@ void print_hex_dump_buff(void *ptr_buff, size_t len) {
 }
 
 
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
 
 
+ringLog::ringLog(int size) {
+        buffer = new struct data [size];
+        m_capacity = size;
+        m_size = 0;
+        m_head = 0;
+}
+
+ringLog::~ringLog() {
+        delete buffer;
+}
+
+int ringLog::add(char *s) {
+
+        struct data *ptr;
+        int offset;
+        
+        if (m_size < m_capacity){
+                offset = (m_head + m_size) % m_capacity;
+                ptr = buffer + offset;
+                m_size++;
+        } else {
+                ptr = buffer + m_head;
+                m_head = (m_head + 1) % m_capacity;
+                m_size = m_capacity;
+        }
+        
+        ptr->timestamp = time(NULL);
+        strncpy_s(ptr->str, s,bufferSize);
+        return m_size;
+
+}
+
+
+void ringLog::dumpPrint(bool direction) {
+
+        static char timeline[128];
+        struct data *ptr;
+        int offset;
+        time_t ltime;
+        struct tm today;
+        char *fmt = "%Y/%m/%d %H:%M:%S";
+        int i;
+        errno_t err;
+        
+        for(i=0; i< m_size; i++) {
+        
+                offset = direction ? i : m_size -1 -i;
+                
+                ptr = buffer + (m_head + offset) % m_capacity;
+                ltime = ptr->timestamp;
+
+				err = localtime_s( &today, &ltime );
+
+                strftime(timeline, 128, fmt, &today);
+                
+                printf("%s> %s\n", timeline, ptr->str);
+        }
+        
+}
+
+int ringLog::dump(char *s, int lgMax, bool direction) {
+
+        static char timeline[128];
+        struct data *ptr;
+        int offset;
+        time_t ltime;
+        struct tm today;
+        char *fmt = "%Y/%m/%d %H:%M:%S";
+		int linMax = 25 + bufferSize;
+        int i;
+		char *ptrOut;
+        errno_t err;
+        int lg = 0;
+		ptrOut = s;
+
+        for(i=0; (i< m_size) && ((lgMax - lg) > linMax); i++) {
+        
+                offset = direction ? i : m_size -1 -i;
+                
+                ptr = buffer + (m_head + offset) % m_capacity;
+                ltime = ptr->timestamp;
+
+				err = localtime_s( &today, &ltime );
+
+                lg += strftime(s + lg, lgMax - lg, fmt, &today);
+                lg += sprintf_s(s + lg, lgMax - lg, "> %s\n", ptr->str);
+        }
+        
+		return lg;
+}
 
