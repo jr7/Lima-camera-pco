@@ -1577,3 +1577,11 @@ void Camera::_presetPixelRate(DWORD &pixRate, int &error){
 		m_pcoData->dwPixelRateRequested = pixRate;
 		error = 0;
 }
+
+
+//=================================================================================================
+//=================================================================================================
+void Camera::msgLog(char *s) {
+	m_msgLog->add(s); 
+}
+

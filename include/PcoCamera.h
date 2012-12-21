@@ -232,7 +232,7 @@ namespace lima
 		bool _isCameraType(enum enumPcoFamily tp);
 		bool _isConfig(){return m_config; };
 		void _pco_set_shutter_rolling_edge(int &error);
-		void msgLog(char *s) {m_msgLog->add(s); };
+		void msgLog(char *s);
 
 	private:
 		SyncCtrlObj*	m_sync;

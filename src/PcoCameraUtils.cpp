@@ -49,7 +49,7 @@ void print_hex_dump_buff(void *ptr_buff, size_t len);
 char* _timestamp_pcocamerautils() {return ID_TIMESTAMP ;}
 //=========================================================================================================
 
-static char *getTimestamp(timestampFmt fmtIdx) {
+char *getTimestamp(timestampFmt fmtIdx) {
    static char timeline[128];
    errno_t err;
 	time_t ltime;
