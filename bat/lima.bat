@@ -1,2 +1,4 @@
-r:
-cd R:\dserver\classes\ccd\pco_rh\Lima\install\Lima
+call limasetdir
+cd /D %LIMADIR%
+mkdir install/lima
+cd install/Lima

@@ -1,8 +1,10 @@
-r:
-cd R:\dserver\classes\ccd\pco_rh\Lima\third-party\Processlib\sip
+call limasetdir
+cd /D %LIMADIR%\third-party\Processlib\sip
+
 python configure.py
 nmake clean
 nmake
-cd R:\dserver\classes\ccd\pco_rh\Lima
+
+cd /D %LIMADIR%
 windowsSipCompilation.py --config
 windowsSipCompilation.py

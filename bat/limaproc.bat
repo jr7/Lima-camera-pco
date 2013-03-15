@@ -1,2 +1,3 @@
-r:
-cd R:\dserver\classes\ccd\pco_rh\Lima\third-party\Processlib
+call limasetdir
+cd /D %LIMADIR%\third-party\Processlib
+

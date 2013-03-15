@@ -1,2 +1,2 @@
-r:
-cd R:\dserver\classes\ccd\pco_rh\Lima\
+call limasetdir
+cd /D %LIMADIR%
