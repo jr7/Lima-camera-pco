@@ -140,7 +140,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(LimaDir)..\sdkPco\lib\SC2_Cam.lib $(LimaDir)build\msvc\9.0\LimaCore\Release\liblimacore.lib $(LimaDir)third-party\Processlib\build\msvc\9.0\libprocesslib\Release\libprocesslib.lib"
+				AdditionalDependencies="$(SolutionDir)sdkPco\lib\SC2_Cam.lib $(LimaDir)build\msvc\9.0\LimaCore\Release\liblimacore.lib $(LimaDir)third-party\Processlib\build\msvc\9.0\libprocesslib\Release\libprocesslib.lib"
 				OutputFile="$(InputDir)Release\$(ProjectName).dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
