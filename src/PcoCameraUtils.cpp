@@ -201,6 +201,14 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			return output;
 		}
 		
+		key = keys[ikey++] = "acqTime";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
+			ptr += sprintf_s(ptr, ptrMax - ptr, 
+				"acqTime(ms): recNow: %ld timeout: %ld recTime: %ld xferTime: %ld\n", 
+						m_pcoData->msAcqTnow, m_pcoData->msAcqTout, m_pcoData->msAcqRec, m_pcoData->msAcqXfer);
+			return output;
+		}
+
 		key = keys[ikey++] = "cocRunTime";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "%g",  m_pcoData->cocRunTime);
