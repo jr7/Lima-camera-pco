@@ -1153,8 +1153,9 @@ unsigned long Camera::pcoGetFramesMax(int segmentPco){
 		}
 
 
+
 		if(!_isCameraType(Dimax | Pco2k | Pco4k)) {
-			printf("=== %s> unknow camera type [%d]\n", fnId, _getCameraType());
+			printf("=== %s> unknown camera type [%d]\n", fnId, _getCameraType());
 			return -1;
 		}
 
