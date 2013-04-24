@@ -69,7 +69,7 @@ void DetInfoCtrlObj::getMaxImageSize(Size& max_image_size)
 //=========================================================================================================
 void DetInfoCtrlObj::getDetectorImageSize(Size& det_image_size)
 {
-  // ---- DONE
+  // ---- XXXXXXXXXXXXXXXX
   getMaxImageSize(det_image_size);
 }
 

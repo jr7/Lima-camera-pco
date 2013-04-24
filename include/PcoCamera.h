@@ -96,8 +96,14 @@ struct stcTemp {
 
 
 struct stcPcoData {
-	PCO_Description	pcoInfo;	/* camera description structure */
-	PCO_CameraType	stcCamType;
+	PCO_General stcPcoGeneral;
+	PCO_CameraType	stcPcoCamType;
+	PCO_Sensor stcPcoSensor;
+	PCO_Description	stcPcoDescription;	/* camera description structure */
+	PCO_Timing stcPcoTiming;
+	PCO_Storage stcPcoStorage;
+	PCO_Recording stcPcoRecording;
+
 	char model[MODEL_TYPE_SIZE+1], iface[INTERFACE_TYPE_SIZE+1];
 	//int	interface_type;
 
@@ -228,7 +234,7 @@ namespace lima
 		int pcoGetError() {return m_pcoData->pcoError;}
 
 		char *_pcoSet_RecordingState(int state, int &error);
-		WORD _getCameraType() {return m_pcoData->stcCamType.wCamType ; }
+		WORD _getCameraType() {return m_pcoData->stcPcoCamType.wCamType ; }
 		bool _isCameraType(enum enumPcoFamily tp);
 		bool _isConfig(){return m_config; };
 		void _pco_set_shutter_rolling_edge(int &error);

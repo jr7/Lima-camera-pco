@@ -113,7 +113,7 @@ char *Camera::talk(char *cmd){
 char *Camera::_talk(char *_cmd, char *output, int lg){
 	DEB_MEMBER_FUNCT();
 		char cmdBuff[BUFF_INFO_SIZE +1];
-		char *cmd, *key, *keys[NRCMDS];
+		char *cmd, *key, *keys[NRCMDS], *keys_desc[NRCMDS];
 		int ikey = 0;
 		char *tok[NRTOK];
 		int tokNr;
@@ -155,7 +155,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_cocRunTime=[%g s]\n",  m_pcoData->cocRunTime);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_frameRate=[%g fps]\n", m_pcoData->frameRate);
 			
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* Acq (ms) Tnow=[%ld] Tout=[%ld] Rec=[%ld] Xfer=[%ld]\n", 
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* Acq (ms) recTimeNow=[%ld] recTimeout=[%ld] recTimeTotal=[%ld] xferTime=[%ld]\n", 
 						m_pcoData->msAcqTnow, m_pcoData->msAcqTout, m_pcoData->msAcqRec, m_pcoData->msAcqXfer);
 
 			double _exposure, _delay;
@@ -177,8 +177,8 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* dwPixelRateRequested=[%ld](%g MHz) \n",  
 				m_pcoData->dwPixelRateRequested, m_pcoData->dwPixelRateRequested/1000000.);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* Valid dwPixelRate=[%ld][%ld][%ld][%ld] \n",  
-				m_pcoData->pcoInfo.dwPixelRateDESC[0],m_pcoData->pcoInfo.dwPixelRateDESC[1],
-				m_pcoData->pcoInfo.dwPixelRateDESC[2],m_pcoData->pcoInfo.dwPixelRateDESC[3]);
+				m_pcoData->stcPcoDescription.dwPixelRateDESC[0],m_pcoData->stcPcoDescription.dwPixelRateDESC[1],
+				m_pcoData->stcPcoDescription.dwPixelRateDESC[2],m_pcoData->stcPcoDescription.dwPixelRateDESC[3]);
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* wLUT_Identifier[x%04x] wLUT_Parameter [x%04x]\n",
 				m_pcoData->wLUT_Identifier, m_pcoData->wLUT_Parameter);
@@ -201,34 +201,45 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			return output;
 		}
 		
-		key = keys[ikey++] = "acqTime";     //----------------------------------------------------------------
+		key = keys[ikey] = "acqTime";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) for DIMAX only / acq time details (record and transfer time)";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
+
+			if(!_isCameraType(Dimax)) {
+				ptr += sprintf_s(ptr, ptrMax - ptr, "function only for DIMAX");
+				return output;
+			}
+
 			ptr += sprintf_s(ptr, ptrMax - ptr, 
-				"acqTime(ms): recNow: %ld timeout: %ld recTime: %ld xferTime: %ld\n", 
+				"acqTime(ms): recTimeNow: %ld recTimeout: %ld recTimeTotal: %ld xferTime: %ld\n", 
 						m_pcoData->msAcqTnow, m_pcoData->msAcqTout, m_pcoData->msAcqRec, m_pcoData->msAcqXfer);
 			return output;
 		}
 
-		key = keys[ikey++] = "cocRunTime";     //----------------------------------------------------------------
+		key = keys[ikey] = "cocRunTime";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) Camera Operation Code runtime covers the delay, exposure and readout time";
 		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "%g",  m_pcoData->cocRunTime);
 			return output;
 		}
 
-		key = keys[ikey++] = "frameRate";     //----------------------------------------------------------------
+		key = keys[ikey] = "frameRate";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) max frame rate (calculated as 1/cocRunTime)";   
 		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "%g", m_pcoData->frameRate);
 			return output;
 		}
 
-		key = keys[ikey++] = "timestamp";     //----------------------------------------------------------------
+		key = keys[ikey] = "timestamp";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) timestamp of compiled modules";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "%s", m_pcoData->version);
 			return output;
 		}
 
 
-		key = keys[ikey++] = "clTransferParam";     //----------------------------------------------------------------
+		key = keys[ikey] = "clTransferParam";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) CameraLink transfer parameters";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "      baudrate=[%u] %g Kbps\n", m_pcoData->clTransferParam.baudrate, m_pcoData->clTransferParam.baudrate/1000.);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "ClockFrequency=[%u] %g MHz\n", m_pcoData->clTransferParam.ClockFrequency, m_pcoData->clTransferParam.ClockFrequency/1000000.);
@@ -238,23 +249,20 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			return output;
 		}
 
-		key = keys[ikey++] = "maxNbImages";     //----------------------------------------------------------------
+		key = keys[ikey] = "maxNbImages";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) for DIMAX only / max number of images in the active ram segment";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
+			if(!_isCameraType(Dimax)) {
+				ptr += sprintf_s(ptr, ptrMax - ptr, "%d", -1);
+				return output;
+			}
+
 			ptr += sprintf_s(ptr, ptrMax - ptr, "%ld", pcoGetFramesMax(m_pcoData->activeRamSegment));
 			return output;
 		}
 
-		key = keys[ikey++] = "acqTime";     //----------------------------------------------------------------
-		if(_stricmp(cmd, key) == 0){
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* Acq (ms) Tnow=[%ld] Tout=[%ld] Rec=[%ld] Xfer=[%ld]\n", 
-						m_pcoData->msAcqTnow, 
-						m_pcoData->msAcqTout, 
-						m_pcoData->msAcqRec, 
-						m_pcoData->msAcqXfer);
-			return output;
-		}
-
-		key = keys[ikey++] = "allocatedBuffer";     //----------------------------------------------------------------
+		key = keys[ikey] = "allocatedBuffer";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) TODO";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "AllocatedBuffer: Done=[%d] Nr=[%d] Size=[%ld][%g MB]\n", 
 				m_pcoData->bAllocatedBufferDone, 
@@ -264,7 +272,8 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			return output;
 		}
 
-		key = keys[ikey++] = "testCmd";     //----------------------------------------------------------------
+		key = keys[ikey] = "testCmd";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "DISABLED / debug tool";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 
 			if((tokNr == 2) &&  (_stricmp(tok[1], "time")==0)){
@@ -285,7 +294,8 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		}
 
 
-		key = keys[ikey++] = "rollingShutter";     //----------------------------------------------------------------
+		key = keys[ikey] = "rollingShutter";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(RW) for EDGE only / rolling shutter mode";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 			int error;
 			bool rolling, rollingNew;
@@ -316,11 +326,14 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		}
 
 
-		key = keys[ikey++] = "pixelRate";     //----------------------------------------------------------------
+		key = keys[ikey] = "pixelRate";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(RW) pixelrate (Hz) for reading images from the image sensor";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 			DWORD pixRate; int error;
 
-			if(!_isCameraType(Edge) || (tokNr < 0) || (tokNr > 1)) {
+			if(_isCameraType(Dimax) ) tokNr = 0;
+			
+			if( (tokNr < 0) || (tokNr > 1)) {
 				ptr += sprintf_s(ptr, ptrMax - ptr, "-1.0");
 				return output;
 			}
@@ -343,10 +356,30 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			return output;
 		}
 
+		key = keys[ikey] = "pixelRateInfo";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) pixelrate (Hz) for reading images from the image sensor (actual & valid values)";
+		if(_stricmp(cmd, key) == 0){
+			DWORD dwPixRate; int error, i;
+
+		    _pco_GetPixelRate(dwPixRate, error);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "actualRate(Hz):  %ld  validRates:", dwPixRate);
+
+			for(i=0; i<4; i++) {
+				dwPixRate = m_pcoData->stcPcoDescription.dwPixelRateDESC[i];
+				if(dwPixRate){
+					ptr += sprintf_s(ptr, ptrMax - ptr, "  %ld",dwPixRate);
+				}  
+			}	
+			
+			
+			return output;
+
+		}
 
 
 
-		key = keys[ikey++] = "roi";     //----------------------------------------------------------------
+		key = keys[ikey] = "roi";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "TODO";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 
 			if((tokNr != 0) && (tokNr != 4)){
@@ -382,39 +415,42 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		}
 
 
-		key = keys[ikey++] = "camInfo";     //----------------------------------------------------------------
+		key = keys[ikey] = "camInfo";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) detailed cam info (type, if, sn, hw & fw ver, ...)";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "\n");
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* serial number[%d]\n", 
-				m_pcoData->stcCamType.dwSerialNumber);
+				m_pcoData->stcPcoCamType.dwSerialNumber);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* camera type[%x] subtype[%x] [%s]\n", 
-				m_pcoData->stcCamType.wCamType, 
-				m_pcoData->stcCamType.wCamSubType,
+				m_pcoData->stcPcoCamType.wCamType, 
+				m_pcoData->stcPcoCamType.wCamSubType,
 				m_pcoData->model); 
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* interfase[%x]  [%s]\n", 
-				m_pcoData->stcCamType.wInterfaceType,
+				m_pcoData->stcPcoCamType.wInterfaceType,
 				m_pcoData->iface);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* version hw[%lx]  fw[%lx]\n", 
-				m_pcoData->stcCamType.dwHWVersion, 
-				m_pcoData->stcCamType.dwFWVersion);
+				m_pcoData->stcPcoCamType.dwHWVersion, 
+				m_pcoData->stcPcoCamType.dwFWVersion);
 
 			ptr += sprintf_s(ptr, ptrMax - ptr,"%s\n", m_log.c_str());
 			return output;
 		}
 
-		key = keys[ikey++] = "camType";     //----------------------------------------------------------------
+		key = keys[ikey] = "camType";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) cam type, interface, serial number, hardware & firmware version";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "ty[%s] if[%s] sn[%d] hw[%lx] fw[%lx]", 
 				m_pcoData->model, 
 				m_pcoData->iface,
-				m_pcoData->stcCamType.dwSerialNumber,
-				m_pcoData->stcCamType.dwHWVersion, 
-				m_pcoData->stcCamType.dwFWVersion
+				m_pcoData->stcPcoCamType.dwSerialNumber,
+				m_pcoData->stcPcoCamType.dwHWVersion, 
+				m_pcoData->stcPcoCamType.dwFWVersion
 				);
 			return output;
 		}
 
-		key = keys[ikey++] = "lastError";     //----------------------------------------------------------------
+		key = keys[ikey] = "lastError";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) last PCO SDK error";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 			m_pcoData->pcoErrorMsg[ERR_SIZE] = 0;
 			ptr += sprintf_s(ptr, ptrMax - ptr, "[x%08x] [%s]\n", 
@@ -424,7 +460,8 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			return output;
 		}
 
-		key = keys[ikey++] = "msgLog";     //----------------------------------------------------------------
+		key = keys[ikey] = "msgLog";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) log of last cmds executed ";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 
 			ptr += m_msgLog->dump(ptr, ptrMax - ptr, 1);
@@ -433,7 +470,8 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		}
 
 
-		key = keys[ikey++] = "dumpData";     //----------------------------------------------------------------
+		key = keys[ikey] = "dumpData";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) hex dump of the stcPcoData";     
 		if(_stricmp(cmd, key) == 0){
 
 			print_hex_dump_buff(m_pcoData, sizeof(stcPcoData));
@@ -442,10 +480,31 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			return output;
 		}
 
-		key = keys[ikey++] = "?";     //----------------------------------------------------------------
+
+		key = keys[ikey] = "acqEnable";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) acq enable signal status (BNC acq enbl in)";     
+		if(_stricmp(cmd, key) == 0){
+			int error;
+			WORD wAcquEnableState;
+
+			//PCO_GetAcqEnblSignalStatus(HANDLE ph, WORD* wAcquEnableState)
+
+			error = PcoCheckError(PCO_GetAcqEnblSignalStatus(m_handle, &wAcquEnableState));
+			
+			ptr += sprintf_s(ptr, ptrMax - ptr, "%d", wAcquEnableState);
+			
+			return output;
+		}
+
+
+
+
+
+		key = keys[ikey] = "?";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) this help / list of the talk cmds";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 			for(int i = 0; i < ikey; i++) {
-				ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", keys[i]);
+				ptr += sprintf_s(ptr, ptrMax - ptr, "%18s - %s\n", keys[i], keys_desc[i]);
 			}
 			ptr += sprintf_s(ptr, ptrMax - ptr, "--- nrCmds[%d][%d]\n", ikey, NRCMDS);
 			return output;

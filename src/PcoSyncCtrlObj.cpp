@@ -70,42 +70,39 @@ SyncCtrlObj::~SyncCtrlObj()
 //=========================================================================================================
 bool SyncCtrlObj::checkTrigMode(TrigMode trig_mode)
 {
-  DEB_MEMBER_FUNCT();
-  DEB_PARAM() << DEB_VAR1(trig_mode);
+	DEB_MEMBER_FUNCT();
+	DEB_PARAM() << DEB_VAR1(trig_mode);
 
 	// DONE
-  switch(trig_mode){
-    case IntTrig:
-    case IntTrigMult:
-    case ExtTrigSingle:
-      return true;
+	switch(trig_mode){
+		case IntTrig:
+		//case IntTrigMult:
+		case ExtTrigMult:
+		case ExtTrigSingle:
+		case ExtGate:
+			return true;
 
-    default:
-      return false;
-    }
+		default: break;
+	}
+
+	DEB_ALWAYS() << "Trig mode not allowed" << DEB_VAR1(trig_mode);
+	return false;
 }
 
 //=========================================================================================================
 //=========================================================================================================
 void SyncCtrlObj::setTrigMode(TrigMode trig_mode)
 {
-  DEB_MEMBER_FUNCT();
-  DEB_PARAM() << DEB_VAR1(trig_mode);
+	DEB_MEMBER_FUNCT();
+	DEB_PARAM() << DEB_VAR1(trig_mode);
 
 	// DONE
-  if(checkTrigMode(trig_mode)){
-    switch(trig_mode)	{
-      case IntTrig: // 0 SOFT (spec)
-	  case IntTrigMult: // 1 START (spec)
-      case ExtTrigSingle:  // 2 GATE (spec)
-    	  break;
+
+	if(!checkTrigMode(trig_mode)){
+		throw LIMA_HW_EXC(NotSupported,"Trigger type not supported");
 	}
-  }  else {
-    throw LIMA_HW_EXC(NotSupported,"Trigger type not supported");
-  }
 
 	m_trig_mode = trig_mode;
-
 }
 
 //=========================================================================================================
@@ -118,23 +115,53 @@ void SyncCtrlObj::getTrigMode(TrigMode &trig_mode)
 
 //=========================================================================================================
 //=========================================================================================================
-WORD SyncCtrlObj::getPcoAcqMode()
+WORD SyncCtrlObj::xlatLimaTrigMode2PcoAcqMode()
 {
+	WORD ret;
+
 	// DONE
   DEB_MEMBER_FUNCT();
 
+
+	if(!checkTrigMode(m_trig_mode)){
+		throw LIMA_HW_EXC(NotSupported,"Trigger type not supported");
+	}
+
+
+// · acquire mode to be selected:
+// - 0x0000 = [auto] - all images taken are stored
+
+// - 0x0001 = [external] - the external control input <acq enbl> is a static enable signal of
+//            images. If this input is TRUE (level depending on the DIP switch), exposure triggers are
+//            accepted and images are taken. If this signal is set FALSE, all exposure triggers are
+//            ignored and the sensor readout is stopped.
+
+// - 0x0002 = [external] - the external control input <acq enbl> is a dynamic frame start
+//            signal. If this input has got a rising edge TRUE (level depending on the DIP switch), a
+//            frame will be started with modulation mode. This is only available with modulation mode
+//            enabled (see camera description).
+
+
     switch( m_trig_mode)	{
 	  case IntTrig: // 0 SOFT (spec)
-    	  return 0x0000;
+    	  ret= 0x0000;
+			break;
 
-	  case IntTrigMult: // 1 START (spec)
+		case ExtTrigMult:
+		//case IntTrigMult: // 1 START (spec)
 	  case ExtTrigSingle:  // 2 GATE (spec)
-    	  return 0x0001;
+      case ExtGate:  // 2 GATE (spec)
+    	  ret= 0x0001;
+    	  ret= 0x0000;
+			break;
 
 	  default:
 		 throw LIMA_HW_EXC(NotSupported,"Invalid value");
 
 	}
+
+	DEB_ALWAYS() << "returned values" << DEB_VAR2(ret, m_trig_mode);
+	return ret;
 
 }
 
@@ -145,8 +172,17 @@ enum TrigMode { IntTrig 0, IntTrigMult 1, ExtTrigSingle 2, ExtTrigMult 3,
 				ExtGate 4, ExtStartStop 5, Live 6, };
 *******************/
 
-WORD SyncCtrlObj::getPcoTrigMode(){
+WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(){
 	// DONE
+
+	WORD ret;
+
+	DEB_MEMBER_FUNCT();
+
+	if(!checkTrigMode(m_trig_mode)){
+		throw LIMA_HW_EXC(NotSupported,"Trigger type not supported");
+	}
+
 
 	// xlat from lima trig mode to PCO trig mode
   	//------------------------------------------------- triggering mode 
@@ -156,23 +192,40 @@ WORD SyncCtrlObj::getPcoTrigMode(){
 			// the readout of an image. If a CCD is used and the images are taken in a
 			// sequence, then exposures and sensor readout are started simultaneously.
 			// Signals at the trigger input (<exp trig>) are irrelevant.
-		case IntTrig: return 0x0000;  // 0 = SOFT (spec)
+		case IntTrig: 
+			ret= 0x0000;  // 0 = SOFT (spec)
+			break;
 
 			// PCO = 0x0002
 			// A delay / exposure sequence is started at the RISING or FALLING edge
 			// (depending on the DIP switch setting) of the trigger input (<exp trig>).
-		case IntTrigMult: return 0x0002;   // 1 = START (spec)
-			
+		//case IntTrigMult: return 0x0002;   // 1 = START (spec)
+		case ExtTrigMult: 
+			ret= 0x0002;   // 1 = START (spec)
+			break;
+
 			// PCO = 0x0003
 			// The exposure time is defined by the pulse length at the trigger
 			// input(<exp trig>). The delay and exposure time values defined by the
 			// set/request delay and exposure command are ineffective. (Exposure
 			// time length control is also possible for double image mode; exposure
 			// time of the second image is given by the readout time of the first image.)
-		case ExtTrigSingle: return 0x0003;  // 2 = GATE (spec)
-		
-    default: return 0x0000;			  // SOFT
+		case ExtTrigSingle: 
+		case ExtGate: 
+			ret= 0x0003;  // 2 = GATE (spec)
+			break;
+
+    default: 
+		ret= 0x0000;			  // SOFT
+		break;
 	}
+
+
+	DEB_ALWAYS() << "returned values" << DEB_VAR2(ret, m_trig_mode);
+
+	return ret;
+
+
 }
 
 
@@ -189,13 +242,13 @@ void SyncCtrlObj::setExpTime(double exp_time)
 	
 
   if (exp_time <valid_ranges.min_exp_time){ 
-	DEB_TRACE() << "Exposure time out of range"
+	DEB_ALWAYS() << "Exposure time out of range"
 		<< DEB_VAR3(exp_time, valid_ranges.max_exp_time, valid_ranges.min_exp_time);
 	exp_time =valid_ranges.min_exp_time;
   }
 
   if (exp_time >valid_ranges.max_exp_time){ 
-	DEB_TRACE() << "Exposure time out of range"
+	DEB_ALWAYS() << "Exposure time out of range"
 		<< DEB_VAR3(exp_time, valid_ranges.max_exp_time, valid_ranges.min_exp_time);
 	exp_time =valid_ranges.max_exp_time;
   }
@@ -291,8 +344,8 @@ void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 	DEF_FNID;
 	// DONE
 
-	valid_ranges.min_exp_time = m_pcoData->pcoInfo.dwMinExposureDESC * 1e-9 ;	//Minimum exposure time in ns
-  valid_ranges.max_exp_time = m_pcoData->pcoInfo.dwMaxExposureDESC * 1e-3 ;   // Maximum exposure time in ms  
+	valid_ranges.min_exp_time = m_pcoData->stcPcoDescription.dwMinExposureDESC * 1e-9 ;	//Minimum exposure time in ns
+  valid_ranges.max_exp_time = m_pcoData->stcPcoDescription.dwMaxExposureDESC * 1e-3 ;   // Maximum exposure time in ms  
   valid_ranges.min_lat_time = 0.; // Don't know
   valid_ranges.max_lat_time = 0.; // Don't know
 }
