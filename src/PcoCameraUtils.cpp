@@ -381,6 +381,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		key = keys[ikey] = "roi";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "TODO";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
+			int x0, x1, y0, y1, error;
 
 			if((tokNr != 0) && (tokNr != 4)){
 					ptr += sprintf_s(ptr, ptrMax - ptr, "syntax ERROR - %s [x0 y0 x1 y1]", cmd);
@@ -389,28 +390,26 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				
 			if(tokNr == 4){
 				struct stcRoi roi;
-				roi.x[0]= atoi(tok[1]);
-				roi.y[0]= atoi(tok[2]);
-				roi.x[1]= atoi(tok[3]);
-				roi.y[1]= atoi(tok[4]);
+				x0 = roi.x[0]= atoi(tok[1]);
+				y0 = roi.y[0]= atoi(tok[2]);
+				x1 = roi.x[1]= atoi(tok[3]);
+				y1 = roi.y[1]= atoi(tok[4]);
 
-				if(!_isValid_Roi(&roi)){
-					ptr += sprintf_s(ptr, ptrMax - ptr, "value out of range");
+
+				_set_Roi(&roi, error);
+
+				if(error){
+					ptr += sprintf_s(ptr, ptrMax - ptr, "ERROR invalid roi: x0[%d] y0[%d] x1[%d] y1[%d]",
+							x0, y0, x1, y1);
 					return output;
 				}
-
-				m_roi.x[0]= roi.x[0];
-				m_roi.x[1]= roi.x[1];
-				m_roi.y[0]= roi.y[0];
-				m_roi.y[1]= roi.y[1];
-				m_roi.changed = Changed;
 			} 
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* roi X(%d,%d) Y(%d,%d) size(%d,%d)\n",  
 					m_roi.x[0], m_roi.x[1],
 					m_roi.y[0], m_roi.y[1],
 					m_roi.x[1] - m_roi.x[0] + 1, m_roi.y[1] - m_roi.y[0] + 1);
-				return output;
+			return output;
 
 		}
 
@@ -487,8 +486,6 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			int error;
 			WORD wAcquEnableState;
 
-			//PCO_GetAcqEnblSignalStatus(HANDLE ph, WORD* wAcquEnableState)
-
 			error = PcoCheckError(PCO_GetAcqEnblSignalStatus(m_handle, &wAcquEnableState));
 			
 			ptr += sprintf_s(ptr, ptrMax - ptr, "%d", wAcquEnableState);
@@ -497,7 +494,79 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		}
 
 
+		key = keys[ikey] = "hwioSignals";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) for DIMAX/EDGE only / get hw io signals";     
+		if(_stricmp(cmd, key) == 0){
+			int error, i;
 
+			_pco_GetHWIOSignal(error);
+			if(error) {
+				ptr += sprintf_s(ptr, ptrMax - ptr, "ERROR [%d]", error);
+				return output;
+			}
+			//ptr += sprintf_s(ptr, ptrMax - ptr, "signals [%d] [%d]\n", m_pcoData->wNrPcoHWIOSignal0, m_pcoData->wNrPcoHWIOSignal);
+			
+			for(i=0; i< m_pcoData->wNrPcoHWIOSignal; i++) {
+				ptr += sprintf_s(ptr, ptrMax - ptr, 
+					"name[%s] [%s] [%s] [%s] idx[%d] num[%d] \n"
+					"-def:     def[0x%x] type[0x%x] pol[0x%x] filt[0x%x]\n"
+					"-sig:    enab[0x%x] type[0x%x] pol[0x%x] filt[0x%x] sel[0x%x]\n\n", 
+					m_pcoData->stcPcoHWIOSignalDesc[i].strSignalName[0],
+					m_pcoData->stcPcoHWIOSignalDesc[i].strSignalName[1],
+					m_pcoData->stcPcoHWIOSignalDesc[i].strSignalName[2],
+					m_pcoData->stcPcoHWIOSignalDesc[i].strSignalName[3],
+					i, 
+					m_pcoData->stcPcoHWIOSignal[i].wSignalNum,
+
+					m_pcoData->stcPcoHWIOSignalDesc[i].wSignalDefinitions,
+					m_pcoData->stcPcoHWIOSignalDesc[i].wSignalTypes,
+					m_pcoData->stcPcoHWIOSignalDesc[i].wSignalPolarity,
+					m_pcoData->stcPcoHWIOSignalDesc[i].wSignalFilter,
+
+					m_pcoData->stcPcoHWIOSignal[i].wEnabled,
+					m_pcoData->stcPcoHWIOSignal[i].wType,
+					m_pcoData->stcPcoHWIOSignal[i].wPolarity,
+					m_pcoData->stcPcoHWIOSignal[i].wFilterSetting,
+					m_pcoData->stcPcoHWIOSignal[i].wSelected
+					);
+			}
+
+			
+			return output;
+		}
+
+
+		key = keys[ikey] = "sethwioSignals";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) for DIMAX only / get hw io signals";     
+		if(_stricmp(cmd, key) == 0){
+			int error, idx;
+			WORD val;
+
+			if(tokNr != 1){
+				ptr += sprintf_s(ptr, ptrMax - ptr, "ERROR tokNr[%d]", tokNr);
+				return output;
+			}
+
+			_pco_GetHWIOSignal(error);
+			if(error) {
+				ptr += sprintf_s(ptr, ptrMax - ptr, "ERROR [%d]", error);
+				return output;
+			}
+
+    		val = atoi(tok[1]);
+				
+
+			idx = 0;
+			m_pcoData->stcPcoHWIOSignal[idx].wPolarity = val;
+
+	
+			_pco_SetHWIOSignal(idx,error);
+			
+			ptr += sprintf_s(ptr, ptrMax - ptr, "error [%d]", error);
+
+			
+			return output;
+		}
 
 
 		key = keys[ikey] = "?";     //----------------------------------------------------------------

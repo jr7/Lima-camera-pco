@@ -138,6 +138,7 @@ char * _timestamp_pcocamerautils();
 stcPcoData::stcPcoData(){
 
 	char *ptr, *ptrMax;
+	int i;
 
 	ptr = version; *ptr = 0;
 	ptrMax = ptr + sizeof(version) - 1;
@@ -160,6 +161,11 @@ stcPcoData::stcPcoData(){
 	stcPcoTiming.wSize = sizeof(stcPcoTiming);
 	stcPcoStorage.wSize = sizeof(stcPcoStorage);
 	stcPcoRecording.wSize = sizeof(stcPcoRecording);
+
+	for(i=0; i < SIZEARR_stcPcoHWIOSignal; i++) {
+		stcPcoHWIOSignal[i].wSize = sizeof(stcPcoHWIOSignal[i]);
+		stcPcoHWIOSignalDesc[i].wSize = sizeof(stcPcoHWIOSignalDesc[i]);
+	}
 
 }
 
@@ -212,10 +218,9 @@ void Camera::_init(){
 	m_log.append(msg);
 
 
-	// --- Open Camera
+		// --- Open Camera
 	error = PcoCheckError(PCO_OpenCamera(&m_handle, 0));
 	PCO_THROW_OR_TRACE(error, "PCO_OpenCamera") ;
-
 
 	errMsg = _pcoGet_Camera_Type(error);
 	PCO_THROW_OR_TRACE(error, errMsg) ;
@@ -266,12 +271,15 @@ void Camera::_init(){
 	if(!m_cam_connected)
 		throw LIMA_HW_EXC(Error, "Camera not found!");
 
+	_pco_initHWIOSignal(0, error);
 
   DEB_TRACE() << m_log;
   DEB_TRACE() << "END OF CAMERA";
 
 }
 
+//=========================================================================================================
+//=========================================================================================================
 void  Camera::_init_dimax() {
 
 	DEB_CONSTRUCTOR();
@@ -386,6 +394,8 @@ void  Camera::_init_dimax() {
 }
 
 
+//=========================================================================================================
+//=========================================================================================================
 void Camera::_init_edge() {
 
 	m_pcoData->fTransferRateMHzMax = 550.;
@@ -396,6 +406,8 @@ void Camera::_init_edge() {
 
 
 
+//=========================================================================================================
+//=========================================================================================================
 Camera::~Camera()
 {
   DEB_DESTRUCTOR();
@@ -1596,6 +1608,127 @@ bool Camera::_isValid_Roi(struct stcRoi *new_roi){
 	return TRUE;
 }
 
+//=================================================================================================
+//=================================================================================================
+void Camera::_set_Roi(struct stcRoi *new_roi, int &error){
+	
+	Size roi_size;
+	ImageType image_type;
+
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+
+	if(!_isValid_Roi(new_roi)){
+		error = -1;
+		return;
+	}
+
+	if( (m_roi.x[0] != new_roi->x[0]) ||
+		(m_roi.x[1] != new_roi->x[1]) ||
+		(m_roi.y[0] != new_roi->y[0]) ||
+		(m_roi.y[1] != new_roi->y[1]) ) {
+	
+			m_roi.x[0] = new_roi->x[0];
+			m_roi.x[1] = new_roi->x[1];
+			m_roi.y[0] = new_roi->y[0];
+			m_roi.y[1] = new_roi->y[1];
+			m_roi.changed = Changed;
+
+			//void maxImageSizeChanged(const Size& size, ImageType image_type);
+			_get_RoiSize(roi_size);
+			_get_ImageType(image_type);
+			maxImageSizeChanged(roi_size, image_type);
+	}
+
+	error = 0;
+	return;
+}
+
+//=================================================================================================
+//=================================================================================================
+void Camera::_get_Roi(struct stcRoi &roi){
+		
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+
+	roi.x[0] = m_roi.x[0];
+	roi.x[1] = m_roi.x[1];
+	roi.y[0] = m_roi.y[0];
+	roi.y[1] = m_roi.y[1];
+		
+	return;
+}
+
+//=========================================================================================================
+//=========================================================================================================
+void Camera::_get_RoiSize(Size& roi_size)
+{
+	int error, width, height;
+
+	width = m_roi.x[1] - m_roi.x[0] +1;
+	height = m_roi.y[1] - m_roi.y[0] +1;
+
+	roi_size = Size(int(width),int(height));
+
+	error = 0;
+}
+
+//=========================================================================================================
+//=========================================================================================================
+void Camera::_get_ImageType(ImageType& image_type)
+{
+  unsigned int pixbytes;
+  getBytesPerPixel(pixbytes);
+  image_type = (pixbytes == 2) ? Bpp16 : Bpp8;
+}
+
+//=================================================================================================
+//=================================================================================================
+void Camera::_get_PixelSize(double& x_size,double &y_size)
+{  
+    // ---- TODO
+	// pixel size in micrometer (???)
+  x_size = y_size = -1.;		// @todo don't know
+
+}
+
+//=================================================================================================
+//=================================================================================================
+void Camera::_set_ImageType(ImageType curr_image_type)
+{
+    // ---- DONE
+	// only check if it valid, BUT don't set it ????
+  switch(curr_image_type)
+    {
+    case Bpp16:
+    case Bpp8:
+      break;
+
+    default:
+      throw LIMA_HW_EXC(InvalidValue,"This image type is not Managed");
+    }
+
+}
+//=========================================================================================================
+//=========================================================================================================
+void Camera::_get_DetectorType(std::string& det_type)
+{
+    // ---- DONE
+   det_type = "Pco";
+}
+
+//=========================================================================================================
+//=========================================================================================================
+void Camera::_get_MaxImageSize(Size& max_image_size)
+{
+
+  // ---- DONE
+  DWORD width,height;
+
+  getMaxWidthHeight(width,height);
+  max_image_size = Size(int(width),int(height));
+
+}
 
 //=================================================================================================
 //=================================================================================================
@@ -1638,6 +1771,113 @@ void Camera::_pco_GetPixelRate(DWORD &pixRate, int &error){
 	    PCO_THROW_OR_TRACE(error, "PCO_GetPixelRate") ;
 
 		pixRate = m_pcoData->dwPixelRate;
+}
+
+
+
+//=================================================================================================
+//=================================================================================================
+void Camera::_pco_GetHWIOSignal(int &error){
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+
+	int i, imax;
+		error = 0;
+
+		if(!( _isCameraType(Dimax) || _isCameraType(Edge))  ) {
+			error = -1;
+			return;
+		}
+
+		error |= PcoCheckError(PCO_GetHWIOSignalCount(m_handle, &m_pcoData->wNrPcoHWIOSignal0));
+
+		imax = m_pcoData->wNrPcoHWIOSignal = 
+			(m_pcoData->wNrPcoHWIOSignal0 <= SIZEARR_stcPcoHWIOSignal) ? m_pcoData->wNrPcoHWIOSignal0 : SIZEARR_stcPcoHWIOSignal;
+
+		//DEB_ALWAYS()  << "--- size" << DEB_VAR3(imax, m_pcoData->wNrPcoHWIOSignal0 , m_pcoData->wNrPcoHWIOSignal ) ;
+
+		for(i=0; i< imax; i++) {
+			//DEB_ALWAYS()  << "---  descriptor" << DEB_VAR2(i, m_pcoData->stcPcoHWIOSignalDesc[i].wSize) ;
+			error |= PcoCheckError(PCO_GetHWIOSignalDescriptor(m_handle, i, &m_pcoData->stcPcoHWIOSignalDesc[i]));
+			//DEB_ALWAYS()  << "---  signal" << DEB_VAR2(i, m_pcoData->stcPcoHWIOSignal[i].wSize) ;
+			error |= PcoCheckError(PCO_GetHWIOSignal(m_handle, i, &m_pcoData->stcPcoHWIOSignal[i]));
+		}
+
+}
+
+
+//=================================================================================================
+//=================================================================================================
+
+/**************************************************************************************************
+	name[Acquire Enable] idx[0] num[0]
+	-def:     def[0x1] type[0xf] pol[0x3] filt[0x7]
+	-sig:    enab[0x1] type[0x1] pol[0x1] filt[0x1] sel[0x0]
+
+	name[Exposure Trigger] idx[1] num[1]
+	-def:     def[0x1] type[0xf] pol[0xc] filt[0x7]
+	-sig:    enab[0x1] type[0x1] pol[0x4] filt[0x1] sel[0x0]
+
+	name[Status Expos] idx[2] num[2]
+	-def:     def[0x3] type[0x1] pol[0x3] filt[0x0]
+	-sig:    enab[0x1] type[0x1] pol[0x1] filt[0x0] sel[0x0]
+
+	name[Ready Status] idx[3] num[3]
+	-def:     def[0x3] type[0x1] pol[0x3] filt[0x0]
+	-sig:    enab[0x1] type[0x1] pol[0x1] filt[0x0] sel[0x0]
+
+	name[Set Ready] idx[4] num[4]
+	-def:     def[0x1] type[0xf] pol[0x3] filt[0x7]
+	-sig:    enab[0x1] type[0x1] pol[0x1] filt[0x1] sel[0x0]
+**************************************************************************************************/
+
+
+void Camera::_pco_initHWIOSignal(int mode, int &error){
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+
+	int  _err, idx;
+	error = 0;
+	char *name;
+	WORD val;
+
+
+	if(!( _isCameraType(Dimax) || _isCameraType(Edge))  ) {
+		error = -1;
+		return;
+	}
+
+	_pco_GetHWIOSignal(_err); error |= _err;
+
+	//	name[Acquire Enable] idx[0] num[0]
+	idx = 0; val = 2;
+	name = m_pcoData->stcPcoHWIOSignalDesc[idx].strSignalName[0];
+	m_pcoData->stcPcoHWIOSignal[idx].wPolarity = 2;
+
+	_pco_SetHWIOSignal(idx, _err); error |= _err;
+
+	DEB_ALWAYS() << "set PcoHWIOSignal polarity "  << DEB_VAR3(name, idx, val) ;
+
+
+}
+
+
+
+//=================================================================================================
+//=================================================================================================
+void Camera::_pco_SetHWIOSignal(int sigNum, int &error){
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+
+
+		if(!( _isCameraType(Dimax) || _isCameraType(Edge))  || 
+			(sigNum < 0) || (sigNum >= m_pcoData->wNrPcoHWIOSignal) ) {
+			error = -1;
+			return;
+		}
+
+		error = PcoCheckError(PCO_SetHWIOSignal(m_handle, sigNum, &m_pcoData->stcPcoHWIOSignal[sigNum]));
+
 }
 
 //=================================================================================================

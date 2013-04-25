@@ -55,13 +55,7 @@ DetInfoCtrlObj::~DetInfoCtrlObj()
 //=========================================================================================================
 void DetInfoCtrlObj::getMaxImageSize(Size& max_image_size)
 {
-
-  // ---- DONE
-  DWORD width,height;
-
-  m_cam->getMaxWidthHeight(width,height);
-  max_image_size = Size(int(width),int(height));
-
+	  m_cam->_get_MaxImageSize(max_image_size); 
 }
 
 
@@ -69,8 +63,7 @@ void DetInfoCtrlObj::getMaxImageSize(Size& max_image_size)
 //=========================================================================================================
 void DetInfoCtrlObj::getDetectorImageSize(Size& det_image_size)
 {
-  // ---- XXXXXXXXXXXXXXXX
-  getMaxImageSize(det_image_size);
+	m_cam->_get_RoiSize(det_image_size);
 }
 
 
@@ -78,10 +71,7 @@ void DetInfoCtrlObj::getDetectorImageSize(Size& det_image_size)
 //=========================================================================================================
 void DetInfoCtrlObj::getDefImageType(ImageType& def_image_type)
 {
-    // ---- DONE
-  unsigned int pixbytes;
-  m_cam->getBytesPerPixel(pixbytes);
-    def_image_type = (pixbytes == 2) ? Bpp16 : Bpp8;
+	m_cam->_get_ImageType( def_image_type);
 }
 
 
@@ -98,38 +88,16 @@ void DetInfoCtrlObj::getCurrImageType(ImageType& curr_image_type)
 //=========================================================================================================
 void DetInfoCtrlObj::setCurrImageType(ImageType curr_image_type)
 {
-    // ---- DONE
-	// only check if it valid, BUT don't set it ????
-  switch(curr_image_type)
-    {
-    case Bpp16:
-    case Bpp8:
-      break;
-
-    default:
-      throw LIMA_HW_EXC(InvalidValue,"This image type is not Managed");
-    }
-
+	m_cam->_set_ImageType(curr_image_type);
 }
 
 
 //=========================================================================================================
 //=========================================================================================================
-#if 0
-void DetInfoCtrlObj::getPixelSize(double& pixel_size)
-{  
-    // ---- DONE for the moment
-	// pixel size in micrometer (???)
-  pixel_size = -1.;		// @todo don't know
-}
-#endif
 
 void DetInfoCtrlObj::getPixelSize(double& x_size,double &y_size)
 {  
-    // ---- TODO
-	// pixel size in micrometer (???)
-  x_size = y_size = -1.;		// @todo don't know
-
+	m_cam->_get_PixelSize(x_size, y_size);
 }
 
 
@@ -138,8 +106,7 @@ void DetInfoCtrlObj::getPixelSize(double& x_size,double &y_size)
 //=========================================================================================================
 void DetInfoCtrlObj::getDetectorType(std::string& det_type)
 {
-    // ---- DONE
-   det_type = "Pco";
+	m_cam->_get_DetectorType(det_type);
 }
 
 

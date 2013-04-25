@@ -151,9 +151,12 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoAcqMode()
 		//case IntTrigMult: // 1 START (spec)
 	  case ExtTrigSingle:  // 2 GATE (spec)
       case ExtGate:  // 2 GATE (spec)
-    	  ret= 0x0001;
+#ifdef DISABLE_ACQ_ENBL_SIGNAL
     	  ret= 0x0000;
-			break;
+#else
+		  ret= 0x0001;
+#endif
+		  break;
 
 	  default:
 		 throw LIMA_HW_EXC(NotSupported,"Invalid value");

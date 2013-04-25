@@ -30,6 +30,8 @@
 #include "HwMaxImageSizeCallback.h"
 //#include "PcoBufferCtrlObj.h"
 
+#define DISABLE_ACQ_ENBL_SIGNAL
+
 #define BUFF_VERSION 1024
 
 #define PCO_EDGE_PIXEL_RATE_MIN 95000000
@@ -94,7 +96,7 @@ struct stcTemp {
 	short wSetpoint;
 };
 
-
+#define SIZEARR_stcPcoHWIOSignal 10
 struct stcPcoData {
 	PCO_General stcPcoGeneral;
 	PCO_CameraType	stcPcoCamType;
@@ -103,6 +105,11 @@ struct stcPcoData {
 	PCO_Timing stcPcoTiming;
 	PCO_Storage stcPcoStorage;
 	PCO_Recording stcPcoRecording;
+	PCO_Single_Signal_Desc stcPcoHWIOSignalDesc[SIZEARR_stcPcoHWIOSignal];
+	PCO_Signal stcPcoHWIOSignal[SIZEARR_stcPcoHWIOSignal];
+	WORD wNrPcoHWIOSignal0;
+	WORD wNrPcoHWIOSignal;
+
 
 	char model[MODEL_TYPE_SIZE+1], iface[INTERFACE_TYPE_SIZE+1];
 	//int	interface_type;
@@ -198,6 +205,7 @@ namespace lima
     class  DLL_EXPORT  Camera : public HwMaxImageSizeCallbackGen
     {
       friend class Interface;
+	  friend class DetInfoCtrlObj;
       friend class SyncCtrlObj;
       DEB_CLASS_NAMESPC(DebModCamera,"Camera","Pco");
       public:
@@ -288,6 +296,17 @@ namespace lima
 
 		bool _isValid_pixelRate(DWORD dwPixelRate);
 		bool _isValid_Roi(struct stcRoi *new_roi);
+		void _set_Roi(struct stcRoi *new_roi, int &error);
+		void _get_Roi(struct stcRoi &roi);
+		void _get_RoiSize(Size& roi_size);
+		void _get_ImageType(ImageType& image_type);
+		void _get_PixelSize(double& x_size,double &y_size);
+		void _set_ImageType(ImageType curr_image_type);
+		void _get_DetectorType(std::string& det_type);
+		void _get_MaxImageSize(Size& max_image_size);
+		void _pco_GetHWIOSignal(int &error);
+		void _pco_SetHWIOSignal(int sigNum, int &error);
+		void _pco_initHWIOSignal(int mode, int &error);
 
 		ringLog *m_msgLog;
 
