@@ -21,62 +21,36 @@
  along with this program; if not, see <http://www.gnu.org/licenses/>.
 ###########################################################################
 **************************************************************************/
-#ifndef PCOINTERFACE_H
-#define PCOINTERFACE_H
+#ifndef PCOROICTRLOBJ_H
+#define PCOROICTRLOBJ_H
 
-
-
-#include "LimaCompatibility.h"
-
+#include "Pco.h"
+#include "HwRoiCtrlObj.h"
 #include "Debug.h"
-#include "HwInterface.h"
-#include "PcoCamera.h"
-
-
 
 namespace lima
 {
   namespace Pco
   {
     class Camera;
-    class DetInfoCtrlObj;
-    class BufferCtrlObj;
-    class SyncCtrlObj;
-    class RoiCtrlObj;
-
-    class  DLL_EXPORT Interface : public HwInterface
+    class DLL_EXPORT  RoiCtrlObj : public HwRoiCtrlObj
     {
-      DEB_CLASS_NAMESPC(DebModCamera, "Interface", "Pco");
+      DEB_CLASS_NAMESPC(DebModCamera, "RoiCtrlObj","Pco");
 
     public:
-      Interface(Camera*);
-      virtual ~Interface();
+      RoiCtrlObj(Camera*);
+      virtual ~RoiCtrlObj();
 
-      virtual void getCapList(CapList &) const;
-
-      virtual void reset(ResetLevel reset_level);
-      virtual void prepareAcq();
-      virtual void startAcq();
-      virtual void stopAcq();
-      virtual void getStatus(StatusType& status);
-
-      virtual int getNbAcquiredFrames();
-      virtual int getNbHwAcquiredFrames();
-
-      double getCocRunTime(){ return m_cam->pcoGetCocRunTime() ;};
-      double getFrameRate(){ return m_cam->pcoGetFrameRate() ;};
-
+      virtual void setRoi(const Roi& set_roi);
+      virtual void getRoi(Roi& hw_roi);
+      virtual void checkRoi(const Roi& set_roi, Roi& hw_roi);
 
     private:
-      Camera* 		m_cam;
-      DetInfoCtrlObj* 	m_det_info;
-      BufferCtrlObj* 	m_buffer;
-      SyncCtrlObj* 	m_sync;
-      RoiCtrlObj*       m_roi;
+      Camera* 			m_cam;
+      HANDLE& 		m_handle;
     };
 
   } // namespace Pco
-
 } // namespace lima
 
-#endif // PCOINTERFACE_H
+#endif // PCOROICTRLOBJ_H
