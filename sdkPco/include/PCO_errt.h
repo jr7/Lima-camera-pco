@@ -140,8 +140,12 @@ static char* PCO_ERROR_DRIVER_TXT[] =
   "Driver IO-Function not supported.",             // 0x80002013  PCO_ERROR_DRIVER_FUNCTION_NOT_SUPPORTED
   "Buffer failed because device power off.",       // 0x80002014  PCO_ERROR_DRIVER_BUFFER_SYSTEMOFF
 
-  "", "", "",                                      // 0x80002015 - 0x80002017
-  "", "", "", "", "", "", "", "",                  // 0x80002018 - 0x8000201F
+  "Device is disconnected or power off.",          // 0x80002015  PCO_ERROR_DRIVER_DEVICEOFF
+  "Necessary system resource not available.",      // 0x80002016  PCO_ERROR_DRIVER_RESOURCE
+  "Busreset occured during system call.",          // 0x80002017  PCO_ERROR_DRIVER_BUSRESET
+  "Image(s) lost in transfer",                     // 0x80002018  PCO_ERROR_DRIVER_BUFFER_LOSTIMAGE  
+
+  "", "", "", "", "", "", "",                  // 0x80002019 - 0x8000201F
 
   "A call to a windows-function fails.",           // 0x80002020  PCO_ERROR_DRIVER_SYSERR
   "",                                              // 0x80002021  
@@ -391,9 +395,9 @@ const int DRIVERWARNING_MSGNUM = sizeof(PCO_ERROR_DRIVERWARNING_TXT) / sizeof(PC
 static char* PCO_ERROR_SDKDLLWARNING_TXT[] = 
 {
   "No error.",                                     // 0x00000000  PCO_NOERROR
-  "Buffers are still allocated"                    // 0xC0003001 PCO_WARNING_SDKDLL_BUFFER_STILL_ALLOKATED
-  "No Images are in the board buffer"              // 0xC0003002 PCO_WARNING_SDKDLL_NO_IMAGE_BOARD
-  "value change when testing COC"                  // 0xC0003003 PCO_WARNING_SDKDLL_COC_VALCHANGE
+  "Buffers are still allocated",                   // 0xC0003001 PCO_WARNING_SDKDLL_BUFFER_STILL_ALLOKATED
+  "No Images are in the board buffer",             // 0xC0003002 PCO_WARNING_SDKDLL_NO_IMAGE_BOARD
+  "value change when testing COC",                 // 0xC0003003 PCO_WARNING_SDKDLL_COC_VALCHANGE
   "string buffer to short for replacement"         // 0xC0003004 PCO_WARNING_SDKDLL_COC_STR_SHORT
 };
 
@@ -437,7 +441,9 @@ void PCO_GetErrorText(DWORD dwerr, char* pbuf, DWORD dwlen)
   if (dwlen < 40)
     return;
 
-  if (dwerr == PCO_NOERROR)
+  index = dwerr & PCO_ERROR_CODE_MASK;
+
+  if ((dwerr == PCO_NOERROR) || (index == 0))
   {
     sprintf_s(pbuf, dwlen, "No error.");
     return;
@@ -489,9 +495,11 @@ void PCO_GetErrorText(DWORD dwerr, char* pbuf, DWORD dwlen)
         case PCI525_ERROR_DRIVER:          devicetxt = "Sensicam driver";    break;
 
         case PCO_ERROR_DRIVER_FIREWIRE:    devicetxt = "Firewire driver";    break;
-        case PCO_ERROR_DRIVER_USB:         devicetxt = "Usb driver";    break;
+        case PCO_ERROR_DRIVER_USB:         devicetxt = "USB 2.0 driver";    break;
         case PCO_ERROR_DRIVER_GIGE:        devicetxt = "GigE driver";    break;
         case PCO_ERROR_DRIVER_CAMERALINK:  devicetxt = "CameraLink driver";    break;
+        case PCO_ERROR_DRIVER_USB3:        devicetxt = "USB 3.0 driver";    break;
+        case PCO_ERROR_DRIVER_WLAN:        devicetxt = "WLan driver";    break;
         default: devicetxt = "Unknown device";
       }
       break;
@@ -530,8 +538,6 @@ void PCO_GetErrorText(DWORD dwerr, char* pbuf, DWORD dwlen)
 
   // -- evaluate error information within complete error code --- //
   // ------------------------------------------------------------ //
-
-  index = dwerr & PCO_ERROR_CODE_MASK;
 
   if (dwerr & PCO_ERROR_IS_COMMON)
   {

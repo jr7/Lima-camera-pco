@@ -42,13 +42,20 @@
 //-----------------------------------------------------------------//
 
 #if !defined SC2_SDKADDENDUM_H
+#define SC2_SDKADDENDUM_H
 
-typedef struct _PCO1394_ISO_PARAMS {
-   unsigned int bandwidth_bytes;         // 0...4096; recommended: 2000 (default 4096)
-   unsigned int speed_of_isotransfer;    // 1,2,4; recommended: 4 (default 4)
-   unsigned int number_of_isochannel;    // -1...7; -1 automatic search, 0...7 manual selection
-   unsigned int number_of_iso_buffers;   // 16...256; recommended: 128 (default 128)
-   unsigned int byte_per_isoframe;       // 0...4096; recommended: 2000 (default 4096)
+typedef struct _PCO1394_ISO_PARAMS
+{
+   DWORD bandwidth_bytes;         // number of byte to allocate on the bus for isochronous transfers
+                                  // 0...4096; recommended: 2048 (default 4096)
+   DWORD speed_of_isotransfer;    // speed to use when allocating bandwidth
+                                  // 1,2,4; recommended: 4 (default 4)
+   DWORD number_of_isochannel;    // number of channel to use on the bus
+                                  // 0...7 + additional bits (default AUTO_CHANNEL)
+   DWORD number_of_iso_buffers;   // number of buffers to use when allocating transfer resources
+                                  // depends on image size, auto adjusted from the driver
+                                  // 16...256; recommended: 32 (default 32)
+   DWORD byte_per_isoframe;       // 0...4096; information only
 }PCO1394_ISO_PARAM;
 
 #define PCO_1394_AUTO_CHANNEL   0x200
@@ -57,16 +64,23 @@ typedef struct _PCO1394_ISO_PARAMS {
 #define PCO_1394_DEFAULT_BANDWIDTH 4096
 #define PCO_1394_DEFAULT_SPEED 4
 #define PCO_1394_DEFAULT_CHANNEL 0x00
-#define PCO_1394_DEFAULT_ISOBUFFER 128
-#define PCO_1394_DEFAULT_ISOFARME_BYTE 4096
+#define PCO_1394_DEFAULT_ISOBUFFER 32
+
+typedef struct _PCO_1394_TRANSFER_PARAM
+{
+   PCO1394_ISO_PARAM iso_param;
+   DWORD bytes_avaiable;       //bytes avaiable on the bus 
+   DWORD dummy[15];            //for future use, set to zero
+}PCO_1394_TRANSFER_PARAM;
 
 
-typedef struct _PCO_SC2_CL_TRANSFER_PARAMS {
-   unsigned int   baudrate;              // serial baudrate: 9600, 19200, 38400
-   unsigned int   ClockFrequency;        // Pixelclock in Hz: 40000000,66000000,80000000
-   unsigned int   CCline;    // Usage of CameraLink CC1-CC4 lines, use value returned by Get 
-   unsigned int   DataFormat;// register with Testpattern and Datasplitter switch, use value retunred by Get
-   unsigned int   Transmit;  // single or continuous transmitting images, 0-single, 1-continuous
+typedef struct _PCO_SC2_CL_TRANSFER_PARAMS
+{
+   DWORD   baudrate;         // serial baudrate: 9600, 19200, 38400, 56400, 115200
+   DWORD   ClockFrequency;   // Pixelclock in Hz: 40000000,66000000,80000000
+   DWORD   CCline;           // Usage of CameraLink CC1-CC4 lines, use value returned by Get 
+   DWORD   DataFormat;       // see defines below, use value returned by Get
+   DWORD   Transmit;         // single or continuous transmitting images, 0-single, 1-continuous
 }PCO_SC2_CL_TRANSFER_PARAM;
 
 #define PCO_CL_DEFAULT_BAUDRATE 9600
@@ -181,6 +195,8 @@ typedef struct _IMAGE_TRANSFER_MODE_PARAM
 
 #define TIME_M      0x1000 
 #define TIME_MD     0x2000 
- 
+#define THREAD_ID   0x4000 
+#define CPU_ID      0x8000           // not on XP
+
 
 #endif

@@ -229,6 +229,8 @@ DWORD GetErrorSource(DWORD dwerr);
 #define PCO_ERROR_DRIVER_USB               0x00310000    // error inside the usb driver
 #define PCO_ERROR_DRIVER_GIGE              0x00320000    // error inside the GigE driver
 #define PCO_ERROR_DRIVER_CAMERALINK        0x00330000    // error inside the CameraLink driver
+#define PCO_ERROR_DRIVER_USB3              0x00340000    // error inside the usb 3.0 driver
+#define PCO_ERROR_DRIVER_WLAN              0x00350000    // error inside the usb 3.0 driver
 
 // obsolete (will be removed in a future release):
 // SC2_ERROR_DRIVER renamed to PCO_ERROR_DRIVER_xyz
@@ -319,6 +321,11 @@ DWORD GetErrorSource(DWORD dwerr);
 #define PCO_ERROR_DRIVER_OUTBUFFER_SIZE             0x80002012 // iobuffer out too small for DeviceIO call
 #define PCO_ERROR_DRIVER_FUNCTION_NOT_SUPPORTED     0x80002013 // this DeviceIO is not supported
 #define PCO_ERROR_DRIVER_BUFFER_SYSTEMOFF           0x80002014 // buffer returned because system sleep
+#define PCO_ERROR_DRIVER_DEVICEOFF                  0x80002015 // device is disconnected
+#define PCO_ERROR_DRIVER_RESOURCE                   0x80002016 // required system resource not avaiable
+#define PCO_ERROR_DRIVER_BUSRESET                   0x80002017 // busreset occured during system call
+#define PCO_ERROR_DRIVER_BUFFER_LOSTIMAGE           0x80002018 // lost image status from grabber
+
 
 #define PCO_ERROR_DRIVER_SYSERR                     0x80002020 // a call to a windows-function fails
 #define PCO_ERROR_DRIVER_REGERR                     0x80002022 // error in reading/writing to registry
@@ -477,6 +484,9 @@ DWORD GetErrorSource(DWORD dwerr);
 
 #define PCO_ERROR_FIRMWARE_CORRECTION_DATA_INVALID  0x80001028 // Corr mode not possible due to invalid data
 #define PCO_ERROR_FIRMWARE_CCDCAL_NOT_FINISHED      0x80001029 // calibration is not finished
+
+#define PCO_ERROR_FIRMWARE_IMAGE_TRANSFER_PENDING   0x8000102A // no new image transfer can be started, because
+                                                               //   the previous image transfer is pending
 
 
 #define PCO_ERROR_FIRMWARE_COC_TRIGGER_INVALID      0x80001030 // COC Trigger setting invalid

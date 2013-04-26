@@ -1,0 +1,39 @@
+#!/bin/bash
+#--------------------------------------------------------
+
+#FROM=/segfs/bliss/projects/LIMA/package/WIN32/PCO/sdkPco
+
+FROM=/segfs/bliss/projects/LIMA/package/WIN32/PCO/SDK/pco.sdk_116/pco.sdk.116
+
+TO=/segfs/dserver/classes/ccd/pco_rh/Lima/camera/pco/sdkPco
+
+
+cpfile() {
+  echo
+  echo "------------- $1"
+  md5sum ${FROM}/$1  ${TO}/$1
+
+  cp -fpr ${FROM}/$1  ${TO}/$1
+
+  echo "-------- copied"
+  md5sum ${FROM}/$1  ${TO}/$1
+  ls -l ${TO}/$1
+
+}
+
+cpdir() {
+  echo
+  echo "------------- $1"
+  
+  cp -fpr ${FROM}/$1/  ${TO}/
+
+  echo "-------- copied"
+  ls -l ${TO}/$1
+
+}
+
+cpfile bin/SC2_Cam.dll
+cpfile bin/sc2_cl_me4.dll
+cpfile lib/SC2_Cam.lib
+
+cpdir include

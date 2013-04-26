@@ -138,8 +138,9 @@
 #define PCO_INTERFACE_USB    6         // USB 2.0
 #define PCO_INTERFACE_CL_ME4 7         // Cameralink Silicon Software Me4
 #define PCO_INTERFACE_USB3   8         // USB 3.0
+#define PCO_INTERFACE_WLAN   9         // WLan (Only control path, not data path)
 
-#define PCO_LASTINTERFACE PCO_INTERFACE_USB3
+#define PCO_LASTINTERFACE PCO_INTERFACE_WLAN
 
 #define PCO_INTERFACE_CL_SER 10
 #define PCO_INTERFACE_GENERIC 20
@@ -566,7 +567,7 @@ typedef struct
   WORD        ZZwDummy[PCO_STORAGEDUMMY];                                 // 188
 } PCO_Storage;
 
-#define PCO_RECORDINGDUMMY 33
+#define PCO_RECORDINGDUMMY 22
 typedef struct
 {
   WORD        wSize;                   // Sizeof this struct
@@ -587,6 +588,9 @@ typedef struct
   WORD        wMetaDataMode;           // Metadata mode 0: off, 1: meta data will be added to image data
   WORD        wMetaDataSize;           // Size of metadata
   WORD        wMetaDataVersion;        // Version info for metadata
+  WORD        ZZwDummy1;
+  DWORD       dwAcquModeExNumberImages;// Number of images for extended acquire mode
+  DWORD       dwAcquModeExReserved[4]; // Reserved for future use
   WORD        ZZwDummy[PCO_RECORDINGDUMMY];                                               // 100
 } PCO_Recording;
 

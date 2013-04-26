@@ -263,18 +263,24 @@ SC2_SDK_FUNC int WINAPI PCO_GetCameraSetup(HANDLE ph, WORD *wType, DWORD *dwSetu
 // In: HANDLE ph -> Handle to a previously opened camera.
 //     WORD* wType -> Pointer to a word to get the actual type (Can be NULL to query wLen).
 //     DWORD* dwSetup -> Pointer to a dword array (Can be NULL to query wLen)
-//     WORD *wLen -> WORD Pointer to get the length of the array
+//     WORD *wLen -> WORD Pointer to get the length of the array in DWORDS
 // Out: int -> Error message.
 
 SC2_SDK_FUNC int WINAPI PCO_SetCameraSetup(HANDLE ph, WORD wType, DWORD *dwSetup, WORD wLen);
 // Sets the camera setup structure (see camera specific structures)
-// Camera must be reinitialized do activate new setup (Close-Open)
+// Camera must be reinitialized do activate new setup: Reboot(optional)-Close-Open
 // Not applicable to all cameras.
 // See sc2_defs.h for valid flags: -- Defines for Get / Set Camera Setup
 // In: HANDLE ph -> Handle to a previously opened camera.
 //     WORD wType -> Word to set the actual type
 //     DWORD* dwSetup -> Pointer to a dword array
-//     WORD wLen -> WORD to set the length of the array
+//     WORD wLen -> WORD to set the length of the array in DWORDs
+// Out: int -> Error message.
+
+
+SC2_SDK_FUNC int WINAPI PCO_RebootCamera(HANDLE ph);
+// Reboot camera. Call a PCO_CloseCamera afterwards and wait at least 10 seconds before reopening it.
+// In: HANDLE ph -> Handle to a previously opened camera.
 // Out: int -> Error message.
 
 SC2_SDK_FUNC int WINAPI PCO_GetPowerSaveMode(HANDLE ph, WORD *wMode, WORD *wDelayMinutes);
@@ -901,13 +907,13 @@ SC2_SDK_FUNC int WINAPI PCO_SetPowerDownMode(HANDLE ph, WORD wPowerDownMode);
 SC2_SDK_FUNC int WINAPI PCO_GetUserPowerDownTime(HANDLE ph, DWORD* dwPowerDownTime);
 // Gets the power down time of the camera.
 // In: HANDLE ph -> Handle to a previously opened camera.
-//     WORD* wPowerDownTime -> Pointer to a WORD variable to receive the power down time.
+//     DWORD* dwPowerDownTime -> Pointer to a DWORD variable to receive the power down time.
 // Out: int -> Error message.
 
 SC2_SDK_FUNC int WINAPI PCO_SetUserPowerDownTime(HANDLE ph, DWORD dwPowerDownTime);
 // Sets the power down time of the camera, if available.
 // In: HANDLE ph -> Handle to a previously opened camera.
-//     WORD* wPowerDownTime -> Pointer to a WORD variable to receive the power down time.
+//     DWORD* dwPowerDownTime -> Pointer to a DWORD variable to set the power down time.
 // Out: int -> Error message.
 
 SC2_SDK_FUNC int WINAPI PCO_GetExpTrigSignalStatus(HANDLE ph, WORD* wExpTrgSignal);
@@ -1206,6 +1212,22 @@ SC2_SDK_FUNC int WINAPI PCO_SetAcquireMode(HANDLE ph, WORD wAcquMode);
 // Sets the acquire mode of the camera.
 // In: HANDLE ph -> Handle to a previously opened camera.
 //     WORD wAcquMode -> WORD variable to hold the acquire mode.
+// Out: int -> Error message.
+
+SC2_SDK_FUNC int WINAPI PCO_GetAcquireModeEx(HANDLE ph, WORD* wAcquMode, DWORD* dwNumberImages, DWORD* dwReserved);
+// Gets the acquire mode of the camera.
+// In: HANDLE ph -> Handle to a previously opened camera.
+//     WORD* wAcquMode -> Pointer to a WORD variable to receive the acquire mode.
+//     DWORD* dwNumberImages -> Pointer to a DWORD variable to receive the number of images (for mode sequence).
+//     DWORD* dwReserved -> Pointer to 4 DWORDs to receive future settings (actually set to zero, pointer can be NULL).
+// Out: int -> Error message.
+
+SC2_SDK_FUNC int WINAPI PCO_SetAcquireModeEx(HANDLE ph, WORD wAcquMode, DWORD dwNumberImages, DWORD* dwReserved);
+// Sets the acquire mode of the camera.
+// In: HANDLE ph -> Handle to a previously opened camera.
+//     WORD wAcquMode -> WORD variable to set the acquire mode.
+//     DWORD dwNumberImages -> DWORD variable to set the number of images (for mode sequence).
+//     DWORD* dwReserved -> Pointer to 4 DWORDs to set future settings (set to zero, pointer can be NULL).
 // Out: int -> Error message.
 
 SC2_SDK_FUNC int WINAPI PCO_GetAcqEnblSignalStatus(HANDLE ph, WORD* wAcquEnableState);
@@ -1734,7 +1756,7 @@ SC2_SDK_FUNC int WINAPI PCO_GetTransferParameter(HANDLE ph, void* buffer, int il
 // Out: int -> Error message.
 
 SC2_SDK_FUNC int WINAPI PCO_CamLinkSetImageParameters(HANDLE ph, WORD wxres, WORD wyres);
-// Neccessary while using a CamLink interface
+// Necessary while using a CamLink interface
 // If there is a change in buffer size (ROI, binning) this function has to be called 
 // with the new x and y resolution. Additionally this function has to be called, if you
 // switch to another camRAM segment and like to get images.
@@ -1746,8 +1768,8 @@ SC2_SDK_FUNC int WINAPI PCO_CamLinkSetImageParameters(HANDLE ph, WORD wxres, WOR
 SC2_SDK_FUNC int WINAPI PCO_SetTimeouts(HANDLE ph, void *buf_in,unsigned int size_in);
 // Here you can set the timeouts for the driver.
 // In: HANDLE ph -> Handle to a previously opened camera.
-//     void *buffer -> Pointer to an array to set the timeout parameters.
-//     int ilen -> Total length of the buffer in bytes.
+//     void *buffer -> Pointer to an array to set the timeout parameters. Use unsigned int array.
+//     int ilen -> Total length of the buffer in array elements, e.g. 3 for [0][1][2].
 // [0]: command-timeout,   200ms default, Time to wait while a command is sent.
 // [1]: image-timeout,    3000ms default, Time to wait while an image is transferred.
 // [2]: transfer-timeout, 1000ms default, Time to wait till the transfer channel expires.
@@ -1804,6 +1826,8 @@ SC2_SDK_FUNC int WINAPI PCO_AddBufferExtern(HANDLE ph, HANDLE hEvent, WORD wActS
 //                         This value has to be set to 0, if you are running in preview mode.
 //     DWORD dwLastImage -> DWORD variable to hold the image number of the last image to be retrieved
 //                         This value has to be set to 0, if you are running in preview mode.
+//     DWORD dwSynch -> DWORD variable to hold the synchronization parameter. Only valid with 1394 interface.
+//                      Set to 0x00010001 with 1394, else set to zero.
 //     void *pBuf -> Pointer to the buffer (represents the image data)
 //     DWORD dwLen -> DWORD to set the length of the image buffer
 //     DWORD *dwStatus -> DWORD pointer to get the buffer status (The driver will write the content)
@@ -1869,11 +1893,6 @@ SC2_SDK_FUNC int WINAPI PCO_WriteHeadEEProm(HANDLE ph, WORD wAddress, BYTE bData
 //     WORD wAddress -> WORD variable to hold the eeprom address
 //     BYTE bData -> Byte variable to hold the eeprom data.
 //     WORD wLen -> Length parameter (not used up to now)
-// Out: int -> Error message.
-
-SC2_SDK_FUNC int WINAPI PCO_RebootCamera(HANDLE ph);
-// Reboot camera. Call a PCO_CloseCamera afterwards and wait at least 10 seconds before reopening it.
-// In: HANDLE ph -> Handle to a previously opened camera.
 // Out: int -> Error message.
 
 /////////////////////////////////////////////////////////////////////

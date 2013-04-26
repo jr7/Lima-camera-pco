@@ -262,6 +262,8 @@
 #define SENSOR_KAI4020CM          0x0141      // Kodak
 #define SENSOR_KAI4021M           0x0142      // Kodak slow roi
 #define SENSOR_KAI4021CM          0x0143      // Kodak slow roi
+#define SENSOR_KAI4022M           0x0144      // Kodak 4022 monochrom
+#define SENSOR_KAI4022CM          0x0145      // Kodak 4022 color
 
 #define SENSOR_KAI11000M          0x0150      // Kodak
 #define SENSOR_KAI11000CM         0x0151      // Kodak
@@ -276,6 +278,7 @@
 
 #define SENSOR_CIS2051_V1_FI_BW   0x2000      //Fairchild front illuminated
 #define SENSOR_CIS2051_V1_FI_COL  0x2001
+#define SENSOR_CIS1042_V1_FI_BW   0x2002
 #define SENSOR_CIS2051_V1_BI_BW   0x2010      //Fairchild back illuminated
 
 //obsolete #define SENSOR_CCD87           0x2010         // E2V
@@ -284,6 +287,8 @@
 
 #define SENSOR_CYPRESS_RR_V1_BW   0x3000      // CYPRESS RoadRunner V1 B/W
 #define SENSOR_CYPRESS_RR_V1_COL  0x3001      // CYPRESS RoadRunner V1 Color
+
+#define SENSOR_CSEM_QMFLIM2_BW    0x4000      // CSEM QMFLIM V2 B/W
 
 
 // ------------------------------------------------------------------------ //
@@ -324,6 +329,8 @@ const PCO_SENSOR_TYPE_DEF far pco_sensor[] =
                SENSOR_KAI4020CM,  "Kodak KAI4020CM",
                SENSOR_KAI4021M,   "Kodak KAI4021M",
                SENSOR_KAI4021CM,  "Kodak KAI4021CM",
+               SENSOR_KAI4022M,   "Kodak KAI4022M",
+               SENSOR_KAI4022CM,  "Kodak KAI4022CM",
                SENSOR_KAI11000M,  "Kodak KAI11000M",
                SENSOR_KAI11000CM, "Kodak KAI11000CM",
                SENSOR_KAI11002M,  "Kodak KAI11002M",
@@ -335,13 +342,14 @@ const PCO_SENSOR_TYPE_DEF far pco_sensor[] =
                SENSOR_MV13COL, "Micron MV13COL",
                // Other sensor types
                SENSOR_TC285SPD, "TI TC285SPD",
-			   
+               
 			   SENSOR_CYPRESS_RR_V1_BW,  "Cypress Roadrunner V1 BW",
 			   SENSOR_CYPRESS_RR_V1_COL, "Cypress Roadrunner V1 Color",
-
+               
                SENSOR_CIS2051_V1_FI_BW, "Fairchild CIS2051 V1 I-Front BW",
-               SENSOR_CIS2051_V1_BI_BW, "Fairchild CIS2051 V1 I-Back BW"
-
+               SENSOR_CIS2051_V1_BI_BW, "Fairchild CIS2051 V1 I-Back BW",
+               
+               SENSOR_CSEM_QMFLIM2_BW, "CSEM QMFLIM V2 BW"
 };
 
 const int far PCO_SENSOR_TYPE_DEF_NUM = sizeof(pco_sensor) / sizeof(pco_sensor[0]);
@@ -388,6 +396,8 @@ extern const int far PCO_SENSOR_TYPE_DEF_NUM;
 #define GENERALCAPS1_CCM                               0x00020000 // Camera has CCM
 #define GENERALCAPS1_EXTERNAL_SYNC                     0x00040000 // Camera can be synced externally
 #define GENERALCAPS1_NO_GLOBAL_SHUTTER                 0x00080000 // Camera does not support global shutter
+#define GENERALCAPS1_GLOBAL_RESET_MODE                 0x00100000 // Camera supports global reset rolling readout
+#define GENERALCAPS1_EXT_ACQUIRE                       0x00200000 // Camera supports extended acquire command
 
 //#define GENERALCAPS_ENHANCE_DESCRIPTOR_x             0x10000000 // reserved for future desc.
 //#define GENERALCAPS_ENHANCE_DESCRIPTOR_x             0x20000000 // reserved for future desc.
@@ -417,6 +427,7 @@ extern const int far PCO_SENSOR_TYPE_DEF_NUM;
   // Camera setup parameter for pco.edge:
 #define PCO_EDGE_SETUP_ROLLING_SHUTTER 0x00000001         // rolling shutter
 #define PCO_EDGE_SETUP_GLOBAL_SHUTTER  0x00000002         // global shutter
+#define PCO_EDGE_SETUP_GLOBAL_RESET    0x00000004         // global reset rolling readout
 
 // ------------------------------------------------------------------------ //
 // -- Defines for Read/Write Mailbox & Get Mailbox Status Commands: ------- //
@@ -657,9 +668,20 @@ extern const int far PCO_SENSOR_TYPE_DEF_NUM;
 // -- Defines for Get/Set Acquire Mode Command: --------------------------- //
 // ------------------------------------------------------------------------ //
 
-#define ACQUIRE_MODE_AUTO                    0     // normal auto mode
-#define ACQUIRE_MODE_EXTERNAL                1     // ext. as enable signal
-#define ACQUIRE_MODE_EXTERNAL_FRAME_TRIGGER  2     // ext. as frame trigger
+#define ACQUIRE_MODE_AUTO                    0x0000   // normal auto mode
+#define ACQUIRE_MODE_EXTERNAL                0x0001   // ext. as enable signal
+#define ACQUIRE_MODE_EXTERNAL_FRAME_TRIGGER  0x0002   // ext. as frame trigger
+#define ACQUIRE_MODE_USE_FOR_LIVEVIEW        0x0003   // use acq. for live view
+#define ACQUIRE_MODE_IMAGE_SEQUENCE          0x0004   // use acq. for image sequence
+
+// ------------------------------------------------------------------------ //
+// -- Defines for Get/Set Acquire Mode Command: --------------------------- //
+// ------------------------------------------------------------------------ //
+
+#define ACQUIRE_CONTROL_OFF                  0x0000     // use external signal
+#define ACQUIRE_CONTROL_FORCE_LOW            0x0001     // force aquire  low
+#define ACQUIRE_CONTROL_FORCE_HIGH           0x0002     // force acquire high
+
 
 
 // ------------------------------------------------------------------------ //
@@ -719,6 +741,7 @@ extern const int far PCO_SENSOR_TYPE_DEF_NUM;
 #define PLAY_IMAGES_MODE_SLOW_FORWARD                         0x0003
 #define PLAY_IMAGES_MODE_SLOW_REWIND                          0x0004
 #define PLAY_IMAGES_MODE_REPLAY_AT_END                        0x0100
+#define PLAY_IMAGES_MODE_EXT_CONTROL                          0x4000
 
 #define PLAY_IMAGES_MODE_IS_FORWARD                           0x0001
 
@@ -813,13 +836,51 @@ extern const int far PCO_SENSOR_TYPE_DEF_NUM;
 #define HDSDI_FORMAT_720P5994_SINGLE_LINK_RAW10BIT_1_IMAGE        0x0027
 #define HDSDI_FORMAT_720P5994_SINGLE_LINK_RAW10BIT_2_IMAGES       0x0028
 
+#define HDSDI_FORMAT_OPTIONS_TIMECODE_OUT                         0x0001
+#define HDSDI_FORMAT_OPTIONS_RECORD_ENABLE_FLAG                   0x0002
+#define HDSDI_FORMAT_OPTIONS_VIEWER_3G_OUT                        0x0040
+#define HDSDI_FORMAT_OPTIONS_LINKAD_3G_OUT                        0x0080
+
+
+// ------------------------------------------------------------------------ //
+// -- Defines for Get Interface Status for HD/SDI: ------------------------ //
+// ------------------------------------------------------------------------ //
+
+#define HDSDI_STATUS_OUTPUT_ACTIVE                             0x00000001
+#define HDSDI_STATUS_GENLOCK_AVAIL                             0x00000002
+#define HDSDI_STATUS_GENLOCK_LOCKED                            0x00000004
+#define HDSDI_STATUS_RECORD_IDLE                               0x00000008
+#define HDSDI_STATUS_RECORD_ON                                 0x00000010
+#define HDSDI_STATUS_PLAY_ACTIVE                               0x00000020
+
+#define HDSDI_ERROR_INIT_FAILED                                0x00000001
+#define HDSDI_ERROR_NO_RESPONSE                                0x00000002
+#define HDSDI_ERROR_GENLOCK_PLL_UNLOCKED                       0x00000004
+#define HDSDI_ERROR_GENLOCK_WRONG_FORMAT                       0x00000008
+
+
+// ------------------------------------------------------------------------ //
+// -- Defines for Get White Balance Status: ------------------------------- //
+// ------------------------------------------------------------------------ //
+
+#define WHITE_BALANCE_STATUS_DEFAULT                              0x0000
+#define WHITE_BALANCE_STATUS_IN_PROGRESS                          0x0100
+#define WHITE_BALANCE_STATUS_SUCCESS                              0x0001
+#define WHITE_BALANCE_STATUS_TIMEOUT                              0x8001
+#define WHITE_BALANCE_STATUS_FAILED                               0x8002
+
 
 // ------------------------------------------------------------------------ //
 // -- Defines for Get / Set Color Settings: ------------------------------- //
 // ------------------------------------------------------------------------ //
 
 #define COLOR_PROC_OPTIONS_COLOR_REFINE                           0x0001
-#define COLOR_PROC_OPTIONS_USE_REC709                             0x0002
+//#define COLOR_PROC_OPTIONS_USE_REC709                             0x0002
+//#define COLOR_PROC_OPTIONS_USE_LOG90                              0x0004
+
+#define COLOR_SETTINGS_LUT_NOT_USED                               0x0000                             
+#define COLOR_SETTINGS_LUT_REC709                                 0x1001
+#define COLOR_SETTINGS_LUT_LOG90                                  0x1002
 
 
 // ------------------------------------------------------------------------ //
