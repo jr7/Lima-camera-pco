@@ -203,6 +203,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\src\PcoRoiCtrlObj.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\src\PcoSyncCtrlObj.cpp"
 				>
 			</File>
@@ -234,6 +238,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\include\PcoInterface.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\include\PcoRoiCtrlObj.h"
 				>
 			</File>
 			<File
