@@ -41,7 +41,7 @@ class RoiCtrlObj : HwRoiCtrlObj
 %End
 
  public:
-	RoiCtrlObj(Camera& cam);
+        RoiCtrlObj(Pco::Camera *cam);
 	virtual ~RoiCtrlObj();
 
 	virtual void checkRoi(const Roi& set_roi, Roi& hw_roi /Out/);
