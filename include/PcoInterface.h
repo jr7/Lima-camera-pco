@@ -42,6 +42,7 @@ namespace lima
     class DetInfoCtrlObj;
     class BufferCtrlObj;
     class SyncCtrlObj;
+    class RoiCtrlObj;
 
     class  DLL_EXPORT Interface : public HwInterface
     {
@@ -71,6 +72,7 @@ namespace lima
       DetInfoCtrlObj* 	m_det_info;
       BufferCtrlObj* 	m_buffer;
       SyncCtrlObj* 	m_sync;
+      RoiCtrlObj*       m_roi;
     };
 
   } // namespace Pco
