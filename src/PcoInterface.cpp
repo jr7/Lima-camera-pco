@@ -45,13 +45,21 @@ Interface::Interface(Camera *cam) :
   m_cam(cam)
 {
   DEB_CONSTRUCTOR();
-  m_roi = new RoiCtrlObj(cam);
+  m_RoiCtrlObj = new RoiCtrlObj(cam);
   m_det_info = new DetInfoCtrlObj(cam);
   m_buffer = new BufferCtrlObj(cam);
   m_sync = new SyncCtrlObj(cam, m_buffer);
   cam->m_sync = m_sync;
 
-  	DEB_TRACE() << DEB_VAR2(cam, m_buffer);
+  DEB_ALWAYS() << "=================================";
+  HwRoiCtrlObj *base_roi = m_RoiCtrlObj;
+  DEB_ALWAYS() << DEB_VAR2(m_RoiCtrlObj, base_roi);
+  DEB_ALWAYS() << DEB_VAR1(m_det_info);
+  DEB_ALWAYS() << DEB_VAR1(m_buffer);
+  DEB_ALWAYS() << DEB_VAR1(m_sync);
+  DEB_ALWAYS() << "=================================";
+
+  DEB_TRACE() << DEB_VAR2(cam, m_buffer);
 
   if(m_buffer){
     m_buffer->m_sync = m_sync;
@@ -61,11 +69,12 @@ Interface::Interface(Camera *cam) :
 
 //=========================================================================================================
 //=========================================================================================================
-Interface::~Interface()
+  RoiCtrlObj *Interface::m_RoiCtrlObj = NULL;
+  Interface::~Interface()
 {
 	// DONE
 	DEB_DESTRUCTOR();
-  delete m_roi;
+  delete m_RoiCtrlObj;
   delete m_buffer;
   delete m_det_info;
   delete m_sync;
@@ -76,10 +85,11 @@ Interface::~Interface()
 void Interface::getCapList(CapList &cap_list) const
 {
 	// DONE
+  cap_list.push_back(HwCap(m_RoiCtrlObj));
   cap_list.push_back(HwCap(m_sync));
   cap_list.push_back(HwCap(m_det_info));
   cap_list.push_back(HwCap(m_buffer));
-  cap_list.push_back(HwCap(m_roi));
+  
 }
 
 //=========================================================================================================

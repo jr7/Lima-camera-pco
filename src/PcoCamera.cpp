@@ -134,6 +134,7 @@ char * _timestamp_pcointerface();
 char * _timestamp_pcobufferctrlobj();
 char * _timestamp_pcodetinfoctrlobj();
 char * _timestamp_pcocamerautils();
+char * _timestamp_pcoroictrlobj();
 
 stcPcoData::stcPcoData(){
 
@@ -150,6 +151,7 @@ stcPcoData::stcPcoData(){
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcobufferctrlobj());
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcodetinfoctrlobj());
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcocamerautils());
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcoroictrlobj());
 
 	stcPcoGeneral.wSize = sizeof(stcPcoGeneral);
 	stcPcoGeneral.strCamType.wSize = sizeof(stcPcoGeneral.strCamType);
@@ -634,11 +636,13 @@ void _pco_acq_thread_dimax(void *argin) {
 
 	DWORD _dwValidImageCnt, _dwMaxImageCnt;
 
-	printf("=== %s> ENTRY\n", fnId);
+
+	printf("=== %s %s> ENTRY\n", fnId, getTimestamp(Iso));
 
 	Camera* m_cam = (Camera *) argin;
 	SyncCtrlObj* m_sync = m_cam->_getSyncCtrlObj();
 	BufferCtrlObj* m_buffer = m_sync->_getBufferCtrlObj();
+
 
 	struct stcPcoData *m_pcoData = m_cam->_getPcoData();
 	
@@ -762,7 +766,8 @@ void _pco_shutter_thread_edge(void *argin) {
 	DEF_FNID;
 	int error;
 
-	printf("=== %s> ENTRY\n", fnId);
+	printf("=== %s %s> ENTRY\n", fnId, getTimestamp(Iso));
+
 	Camera* m_cam = (Camera *) argin;
 	m_cam->_pco_set_shutter_rolling_edge(error);
 
@@ -1580,7 +1585,7 @@ bool Camera::_isValid_pixelRate(DWORD dwPixelRate){
 
 //=================================================================================================
 //=================================================================================================
-bool Camera::_isValid_Roi(struct stcRoi *new_roi){
+bool Camera::_isValid_Roi(Roi &new_roi){
 		
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
@@ -1589,10 +1594,11 @@ bool Camera::_isValid_Roi(struct stcRoi *new_roi){
 	int yMax = m_pcoData->stcPcoDescription.wMaxVertResStdDESC;
 	int xSteps = m_pcoData->stcPcoDescription.wRoiHorStepsDESC;
 	int ySteps = m_pcoData->stcPcoDescription.wRoiVertStepsDESC;
-	int x0 = new_roi->x[0];
-	int x1 = new_roi->x[1];
-	int y0 = new_roi->y[0];
-	int y1 = new_roi->y[1];
+
+	int x0 = new_roi.getTopLeft().x+1;
+	int x1 = new_roi.getBottomRight().x+1;
+	int y0 = new_roi.getTopLeft().y+1;
+	int y1 = new_roi.getBottomRight().y+1;
 
 	if(
 		(x0 < 1) || (x0 > x1) || (x1 > xMax) ||
@@ -1608,12 +1614,12 @@ bool Camera::_isValid_Roi(struct stcRoi *new_roi){
 	return TRUE;
 }
 
+
 //=================================================================================================
 //=================================================================================================
-void Camera::_set_Roi(struct stcRoi *new_roi, int &error){
+void Camera::_set_Roi(Roi &new_roi, int &error){
 	
 	Size roi_size;
-	ImageType image_type;
 
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
@@ -1623,41 +1629,41 @@ void Camera::_set_Roi(struct stcRoi *new_roi, int &error){
 		return;
 	}
 
-	if( (m_roi.x[0] != new_roi->x[0]) ||
-		(m_roi.x[1] != new_roi->x[1]) ||
-		(m_roi.y[0] != new_roi->y[0]) ||
-		(m_roi.y[1] != new_roi->y[1]) ) {
 	
-			m_roi.x[0] = new_roi->x[0];
-			m_roi.x[1] = new_roi->x[1];
-			m_roi.y[0] = new_roi->y[0];
-			m_roi.y[1] = new_roi->y[1];
-			m_roi.changed = Changed;
-
-			//void maxImageSizeChanged(const Size& size, ImageType image_type);
-			_get_RoiSize(roi_size);
-			_get_ImageType(image_type);
-			maxImageSizeChanged(roi_size, image_type);
-	}
+		m_roi.x[0] = new_roi.getTopLeft().x+1;
+		m_roi.x[1] = new_roi.getBottomRight().x+1;
+		m_roi.y[0] = new_roi.getTopLeft().y+1;
+		m_roi.y[1] = new_roi.getBottomRight().y+1;
+		m_roi.changed = Changed;
 
 	error = 0;
-	return;
+	return ;
 }
+
+
 
 //=================================================================================================
 //=================================================================================================
-void Camera::_get_Roi(struct stcRoi &roi){
+
+void Camera::_get_Roi(Roi &roi){
 		
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 
-	roi.x[0] = m_roi.x[0];
-	roi.x[1] = m_roi.x[1];
-	roi.y[0] = m_roi.y[0];
-	roi.y[1] = m_roi.y[1];
-		
-	return;
+	roi.setTopLeft(Point(m_roi.x[0]-1, m_roi.y[0]-1));
+	roi.setSize(Size(m_roi.x[1]-m_roi.x[0]+1, m_roi.y[1]-m_roi.y[0]+1));
+	
 }
+
+void Camera::_get_MaxRoi(Roi &roi){
+		
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+
+	roi.setTopLeft(Point(0, 0));
+	roi.setSize(Size(m_pcoData->maxWidth, m_pcoData->maxHeight));
+}
+
 
 //=========================================================================================================
 //=========================================================================================================
@@ -1878,6 +1884,17 @@ void Camera::_pco_SetHWIOSignal(int sigNum, int &error){
 
 		error = PcoCheckError(PCO_SetHWIOSignal(m_handle, sigNum, &m_pcoData->stcPcoHWIOSignal[sigNum]));
 
+}
+
+
+//=================================================================================================
+//=================================================================================================
+void Camera::_get_XYsteps(Point &xy_steps){
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+
+		xy_steps.x = m_pcoData->maxwidth_step;
+		xy_steps.y = m_pcoData->maxheight_step;
 }
 
 //=================================================================================================

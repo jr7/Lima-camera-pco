@@ -382,6 +382,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		keys_desc[ikey++] = "TODO";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 			int x0, x1, y0, y1, error;
+			Roi new_roi;
 
 			if((tokNr != 0) && (tokNr != 4)){
 					ptr += sprintf_s(ptr, ptrMax - ptr, "syntax ERROR - %s [x0 y0 x1 y1]", cmd);
@@ -395,8 +396,11 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				x1 = roi.x[1]= atoi(tok[3]);
 				y1 = roi.y[1]= atoi(tok[4]);
 
+				new_roi.setTopLeft(Point(x0-1, y0-1));
+				new_roi.setSize(Size(x1-x0+1, y1-y0+1));
 
-				_set_Roi(&roi, error);
+				//_set_Roi(&roi, error);
+				_set_Roi(new_roi, error);
 
 				if(error){
 					ptr += sprintf_s(ptr, ptrMax - ptr, "ERROR invalid roi: x0[%d] y0[%d] x1[%d] y1[%d]",
