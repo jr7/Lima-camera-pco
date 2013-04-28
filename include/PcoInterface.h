@@ -73,6 +73,7 @@ namespace lima
       BufferCtrlObj* 	m_buffer;
       SyncCtrlObj* 	m_sync;
       RoiCtrlObj*       m_RoiCtrlObj;
+      static RoiCtrlObj*       m_RoiCtrlObjXXX;
     };
 
   } // namespace Pco
