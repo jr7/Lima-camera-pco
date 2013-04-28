@@ -152,6 +152,17 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 					m_roi.y[0], m_roi.y[1],
 					m_roi.x[1] - m_roi.x[0] + 1, m_roi.y[1] - m_roi.y[0] + 1);
 
+			{
+			Point top_left = m_RoiLima.getTopLeft();
+			Point bot_right = m_RoiLima.getBottomRight();
+			Size size = m_RoiLima.getSize();
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* roiLima XY0(%d,%d) XY1(%d,%d) size(%d,%d)\n",  
+					top_left.x, top_left.y,
+					bot_right.x, bot_right.y,
+					size.getWidth(), size.getHeight());
+			}
+
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_cocRunTime=[%g s]\n",  m_pcoData->cocRunTime);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_frameRate=[%g fps]\n", m_pcoData->frameRate);
 			
@@ -413,6 +424,20 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 					m_roi.x[0], m_roi.x[1],
 					m_roi.y[0], m_roi.y[1],
 					m_roi.x[1] - m_roi.x[0] + 1, m_roi.y[1] - m_roi.y[0] + 1);
+
+
+			{
+			Point top_left = m_RoiLima.getTopLeft();
+			Point bot_right = m_RoiLima.getBottomRight();
+			Size size = m_RoiLima.getSize();
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* roiLima XY0(%d,%d) XY1(%d,%d) size(%d,%d)\n",  
+					top_left.x, top_left.y,
+					bot_right.x, bot_right.y,
+					size.getWidth(), size.getHeight());
+			}
+
+
 			return output;
 
 		}

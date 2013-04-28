@@ -69,7 +69,6 @@ void RoiCtrlObj::setRoi(const Roi& set_roi)
 	// DEB_ALWAYS() << DEB_VAR1(set_roi);
 
 	Roi hw_roi;
-	int error;
 	
     if (set_roi.isEmpty()) {
 		m_cam->_get_MaxRoi(hw_roi);

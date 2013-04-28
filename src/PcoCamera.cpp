@@ -28,7 +28,6 @@
 
 //#define BUFF_INFO_SIZE 5000
 
-#define DWORD_MAX ULONG_MAX 
 
 #include <cstdlib>
 #include <process.h>
@@ -50,7 +49,7 @@ static char *timebaseUnits[] = {"ns", "us", "ms"};
 
 
 void _pco_acq_thread_dimax(void *argin);
-void _pco_acq_thread_dimax_fifo(void *argin);
+void _pco_acq_thread_dimax_live(void *argin);
 void _pco_acq_thread_edge(void *argin);
 void _pco_shutter_thread_edge(void *argin);
 
@@ -244,6 +243,8 @@ void Camera::_init(){
 	m_roi.x[1] = m_pcoData->maxWidth;
 	m_roi.y[1] = m_pcoData->maxHeight;
 	m_roi.changed = Changed;
+
+	_get_MaxRoi(m_RoiLima);
 
 	sprintf_s(msg, MSG_SIZE, "* CCD Size = X[%d] x Y[%d] (%d bits)\n", m_pcoData->maxWidth, m_pcoData->maxHeight, m_pcoData->bitsPerPix);
 	DEB_TRACE() <<   msg;
@@ -485,6 +486,18 @@ void Camera::startAcq()
 
     if(m_roi.changed == Valid) m_roi.changed = Changed;    //+++++++++ TEST / FORCE WRITE ROI
     if (m_roi.changed == Changed) {
+
+		{
+			Point top_left = m_RoiLima.getTopLeft();
+			Point bot_right = m_RoiLima.getBottomRight();
+			Size size = m_RoiLima.getSize();
+
+			wRoiX0 = (WORD)top_left.x + 1;
+			wRoiY0 = (WORD)top_left.y + 1;
+			wRoiX1 = (WORD)bot_right.x + 1; 
+			wRoiY1 = (WORD)bot_right.y + 1;
+		}
+
         wRoiX0 = (WORD)m_roi.x[0]; wRoiX1 = (WORD)m_roi.x[1];
         wRoiY0 = (WORD)m_roi.y[0]; wRoiY1 = (WORD)m_roi.y[1];
 
@@ -509,7 +522,8 @@ void Camera::startAcq()
     // ----------------------------------------- storage mode (recorder + sequence)
     if(_isCameraType(Dimax)) {
 		
-		enumPcoStorageMode mode = (iRequestedFrames > 0) ? RecSeq : Fifo;
+			// live video requested frames = 0
+		enumPcoStorageMode mode = (iRequestedFrames > 0) ? RecSeq : RecRing;
 
 		msg = _pcoSet_Storage_subRecord_Mode(mode, error);
 		PCO_THROW_OR_TRACE(error, msg) ;
@@ -604,7 +618,7 @@ void Camera::startAcq()
 		if(iRequestedFrames > 0 ) {
 			_beginthread( _pco_acq_thread_dimax, 0, (void*) this);
 		} else {
-			_beginthread( _pco_acq_thread_dimax_fifo, 0, (void*) this);
+			_beginthread( _pco_acq_thread_dimax_live, 0, (void*) this);
 		}
 		return;
 	}
@@ -821,7 +835,7 @@ void _pco_acq_thread_edge(void *argin) {
 //=====================================================================
 //=====================================================================
 
-void _pco_acq_thread_dimax_fifo(void *argin) {
+void _pco_acq_thread_dimax_live(void *argin) {
 	DEF_FNID;
 
 	printf("=== %s> ENTRY\n", fnId);
@@ -920,6 +934,9 @@ unsigned long Camera::pcoGetFramesMax(int segmentPco){
 			return -1;
 		}
 
+		xroisize = m_RoiLima.getSize().getWidth();
+		yroisize = m_RoiLima.getSize().getHeight();
+
 		xroisize = m_roi.x[1] - m_roi.x[0] + 1;
 		yroisize = m_roi.y[1] - m_roi.y[0] + 1;
 
@@ -968,18 +985,40 @@ char * Camera::_pcoSet_Trig_Acq_Mode(int &error){
 
 
 //=================================================================================================
+// ----------------------------------------- storage mode (recorder + sequence)
+// current storage mode
+//
+// case RecSeq
+// case RecRing
+// - 0x0000 = [recorder] mode
+//		. images are recorded and stored within the internal camera memory (camRAM)
+//      . Live View transfers the most recent image to the PC (for viewing / monitoring)
+//      . indexed or total image readout after the recording has been stopped
+//
+// case Fifo
+// - 0x0001 = [FIFO buffer] mode
+//      . all images taken are transferred to the PC in chronological order
+//      . camera memory (camRAM) is used as huge FIFO buffer to bypass short bottlenecks in data transmission
+//      . if buffer overflows, the oldest images are overwritten
+//      . if Set Recorder = [stop] is sent, recording is stopped and the transfer of the current image to the PC is finished.
+//      . Images not read are stored within the segment and can be read with the Read Image From Segment command.
+//
+// current recorder submode:
+//
+// case RecSeq
+// - 0x0000 = [sequence]
+//      . recording is stopped when the allocated buffer is full
+//
+// case RecRing
+// - 0x0001 = [ring buffer].
+//      . camera records continuously into ring buffer
+//      . if the allocated buffer overflows, the oldest images are overwritten
+//      . recording is stopped by software or disabling acquire signal (<acq enbl>)
 //=================================================================================================
 char * Camera::_pcoSet_Storage_subRecord_Mode(enumPcoStorageMode mode, int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 
-	    // ----------------------------------------- storage mode (recorder + sequence)
-		// current storage mode
-		// - 0x0000 = [recorder] mode
-		// - 0x0001 = [FIFO buffer] mode
-		// current recorder submode:
-		// - 0x0000 = [sequence]
-		// - 0x0001 = [ring buffer].
 
 	switch(mode) {
 		case RecSeq:  m_pcoData->storage_mode = 0; m_pcoData->recorder_submode = 0; break;
@@ -1004,8 +1043,6 @@ char * Camera::_pcoSet_Storage_subRecord_Mode(enumPcoStorageMode mode, int &erro
 //=================================================================================================
 //=================================================================================================
 
-// 4294967295.0 = pow(2., 32) - 1.
-#define DWORD_MAX_FLOAT 4294967295.0
 
 char* Camera::_pcoSet_Exposure_Delay_Time(int &error, int ph){
 	DEB_MEMBER_FUNCT();
@@ -1629,12 +1666,15 @@ void Camera::_set_Roi(Roi &new_roi, int &error){
 		return;
 	}
 
-	
+	    // pco roi 1->max, Roi 0->max-1
+
 		m_roi.x[0] = new_roi.getTopLeft().x+1;
 		m_roi.x[1] = new_roi.getBottomRight().x+1;
 		m_roi.y[0] = new_roi.getTopLeft().y+1;
 		m_roi.y[1] = new_roi.getBottomRight().y+1;
 		m_roi.changed = Changed;
+
+		m_RoiLima = new_roi;
 
 	error = 0;
 	return ;
@@ -1650,8 +1690,11 @@ void Camera::_get_Roi(Roi &roi){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 
+	roi = m_RoiLima;
+
 	roi.setTopLeft(Point(m_roi.x[0]-1, m_roi.y[0]-1));
 	roi.setSize(Size(m_roi.x[1]-m_roi.x[0]+1, m_roi.y[1]-m_roi.y[0]+1));
+
 	
 }
 
@@ -1670,6 +1713,8 @@ void Camera::_get_MaxRoi(Roi &roi){
 void Camera::_get_RoiSize(Size& roi_size)
 {
 	int error, width, height;
+
+	roi_size = m_RoiLima.getSize();
 
 	width = m_roi.x[1] - m_roi.x[0] +1;
 	height = m_roi.y[1] - m_roi.y[0] +1;

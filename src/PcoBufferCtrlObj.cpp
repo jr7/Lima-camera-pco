@@ -165,7 +165,7 @@ b.) Input parameter:
 //===================================================================================================================
 #define BUFFER_DUMMY_IMG_LEN	(2 * 2016 * 2016)
 
-int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, DWORD dwRequestedFrames, int bufIdx) {
+int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, DWORD dwRequestedFrames, int bufIdx, bool live_mode) {
 	
 	DEF_FNID;
 	static char _buffer[2][BUFFER_DUMMY_IMG_LEN]; 
@@ -284,7 +284,7 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 	// to the LIMA allocated one
 
 
-	  DWORD dwFrame =  (m_cam->_isCameraType(Edge)) ? 0 :  dwFrameFirst;
+	  DWORD dwFrame =  (m_cam->_isCameraType(Edge) || live_mode) ? 0 :  dwFrameFirst;
 	  sErr =  m_cam->_PcoCheckError(PCO_AddBufferEx(m_handle, \
 				dwFrame, dwFrame, \
 				m_allocBuff.pcoAllocBufferNr[bufIdx], \
@@ -336,6 +336,7 @@ int BufferCtrlObj::_xferImag()
 	int bufIdx;
 	int error;
 	int lima_buffer_nb;
+	bool live_mode;
 
 	int maxWaitTimeout = 10;
 
@@ -343,11 +344,20 @@ int BufferCtrlObj::_xferImag()
 // --------------- get the requested nr of images 
 	int requested_nb_frames;
 	DWORD dwFramesPerBuffer, dwRequestedFrames;
-	DWORD dwRequestedFramesMax =0xFFFFFFFF;
+	DWORD dwRequestedFramesMax =DWORD_MAX;
 
 // --------------- live video -> nr frames = 0 / idx lima buffers 32b (0...ffff)
 	m_sync->getNbFrames(requested_nb_frames);
-	dwRequestedFrames = (requested_nb_frames > 0) ? (DWORD) requested_nb_frames : dwRequestedFramesMax;
+	
+	if(requested_nb_frames > 0){
+		dwRequestedFrames = (DWORD) requested_nb_frames;
+		live_mode =false;
+	} else {
+		dwRequestedFrames = dwRequestedFramesMax;
+		live_mode = true;
+	}
+		
+		dwRequestedFrames = (requested_nb_frames > 0) ? (DWORD) requested_nb_frames : dwRequestedFramesMax;
 	dwFramesPerBuffer = m_cam->pcoGetFramesPerBuffer(); // for dimax = 1
 
 
@@ -362,7 +372,7 @@ int BufferCtrlObj::_xferImag()
 						// --------------- if needed prepare the next buffer 
 		if(dwFrameFirst2assign > dwRequestedFrames) break;
 			bufIdx = i;
-			if(error = _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx)) {
+			if(error = _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx,live_mode)) {
 				DEB_TRACE() << "ERROR _assignImage2Buffer";
 					return pcoAcqPcoError;
 			}
@@ -425,7 +435,7 @@ _RETRY:
         //----- the image dwFrameIdx is already in the buffer -> callback!
 		if(m_requestStop) {return pcoAcqTransferStop;}
         if(dwFrameFirst2assign <= dwRequestedFrames) {
-			if(error = _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx)) {
+			if(error = _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx, live_mode)) {
 				return pcoAcqPcoError;
 			}
         }

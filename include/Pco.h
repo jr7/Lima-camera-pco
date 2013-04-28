@@ -47,6 +47,11 @@
 
 #include <math.h>
 
+
+#define DWORD_MAX ULONG_MAX 
+// 4294967295.0 = pow(2., 32) - 1.
+#define DWORD_MAX_FLOAT 4294967295.0
+
 #define ERR_SIZE	256
 #define ERRMSG_SIZE	(256+128)
 #define MODEL_TYPE_SIZE	32

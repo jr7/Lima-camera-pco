@@ -248,6 +248,58 @@
 				RelativePath="..\..\..\..\include\PcoSyncCtrlObj.h"
 				>
 			</File>
+			<Filter
+				Name="PCOsdk"
+				>
+				<File
+					RelativePath="..\..\..\..\sdkPco\include\Pco_ConvDlgExport.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\sdkPco\include\Pco_ConvExport.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\sdkPco\include\Pco_ConvStructures.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\sdkPco\include\PCO_err.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\sdkPco\include\PCO_errt.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\sdkPco\include\PCO_Structures.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\sdkPco\include\SC2_CamExport.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\sdkPco\include\sc2_common.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\sdkPco\include\sc2_defs.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\sdkPco\include\SC2_DialogExport.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\sdkPco\include\SC2_SDKAddendum.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\sdkPco\include\sc2_SDKStructures.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

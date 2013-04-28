@@ -88,7 +88,7 @@ namespace lima
 		SoftBufferCtrlObj::Sync *m_bufferSync;
 		Cond cond;
 		Camera* m_cam;
-		int _assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, DWORD dwRequestedFrames, int bufIdx);
+		int _assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, DWORD dwRequestedFrames, int bufIdx, bool live_mode);
 		
 		void _pcoAllocBuffers();
 		struct stcAllocBuff m_allocBuff;

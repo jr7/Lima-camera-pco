@@ -265,8 +265,7 @@ namespace lima
 
         struct stcBinning m_bin;
         struct stcRoi m_roi;
-
-		Roi m_roiXXX;
+		Roi m_RoiLima;
 		
 		//struct stcSize m_size;
 
