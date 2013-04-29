@@ -123,6 +123,7 @@ struct stcPcoData {
     WORD    activeRamSegment;				/* active ram segment */
 
       	//WORD		m_acq_mode;
+      	bool		bExtTrigEnabled;
       	WORD		storage_mode;
       	WORD		recorder_submode;
 		unsigned long	frames_per_buffer; 
@@ -208,6 +209,7 @@ namespace lima
 	  friend class DetInfoCtrlObj;
       friend class SyncCtrlObj;
 	  friend class RoiCtrlObj;
+	  friend class BufferCtrlObj;
 
       DEB_CLASS_NAMESPC(DebModCamera,"Camera","Pco");
       public:

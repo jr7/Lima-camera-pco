@@ -175,7 +175,7 @@ enum TrigMode { IntTrig 0, IntTrigMult 1, ExtTrigSingle 2, ExtTrigMult 3,
 				ExtGate 4, ExtStartStop 5, Live 6, };
 *******************/
 
-WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(){
+WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(bool &ext_trig){
 	// DONE
 
 	WORD ret;
@@ -195,7 +195,9 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(){
 			// the readout of an image. If a CCD is used and the images are taken in a
 			// sequence, then exposures and sensor readout are started simultaneously.
 			// Signals at the trigger input (<exp trig>) are irrelevant.
+	    default: 
 		case IntTrig: 
+			ext_trig = false;
 			ret= 0x0000;  // 0 = SOFT (spec)
 			break;
 
@@ -204,6 +206,7 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(){
 			// (depending on the DIP switch setting) of the trigger input (<exp trig>).
 		//case IntTrigMult: return 0x0002;   // 1 = START (spec)
 		case ExtTrigMult: 
+			ext_trig = true;
 			ret= 0x0002;   // 1 = START (spec)
 			break;
 
@@ -215,12 +218,11 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(){
 			// time of the second image is given by the readout time of the first image.)
 		case ExtTrigSingle: 
 		case ExtGate: 
+			ext_trig = true;
 			ret= 0x0003;  // 2 = GATE (spec)
 			break;
 
-    default: 
-		ret= 0x0000;			  // SOFT
-		break;
+	
 	}
 
 

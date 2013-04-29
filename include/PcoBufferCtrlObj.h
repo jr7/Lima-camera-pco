@@ -64,6 +64,8 @@ namespace lima
     class DLL_EXPORT BufferCtrlObj : public SoftBufferCtrlObj
     {
       friend class Interface;
+	  friend class Camera;
+
       DEB_CLASS_NAMESPC(DebModCamera,"BufferCtrlObj","Pco");
 	
     

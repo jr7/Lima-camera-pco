@@ -588,6 +588,9 @@ void Camera::startAcq()
 
 	error = PcoCheckError(PCO_GetSizes(m_handle, &m_pcoData->wXResActual, &m_pcoData->wYResActual, &m_pcoData->wXResMax, &m_pcoData->wYResMax));
     PCO_THROW_OR_TRACE(error, "PCO_GetSizes") ;
+
+	m_sync->_getBufferCtrlObj()->_pcoAllocBuffers();
+
 	msg = _prepare_cameralink_interface(error); PCO_THROW_OR_TRACE(error, msg) ;
 	msg = _pcoSet_Exposure_Delay_Time(error,1); PCO_THROW_OR_TRACE(error, msg) ;
 	error = PcoCheckError(PCO_ArmCamera(m_handle)); PCO_THROW_OR_TRACE(error, "PCO_ArmCamera") ;
@@ -681,7 +684,6 @@ void _pco_acq_thread_dimax(void *argin) {
 	timeout = timeout0 = (long) (dwMsSleep * (nb_frames * 1.1));
 	if(timeout < TOUT_MIN_DIMAX) timeout = TOUT_MIN_DIMAX;
     
-	timeout = timeout0 = 20000;
 	m_pcoData->msAcqTout = timeout;
 	_dwValidImageCnt = 0;
 
@@ -696,7 +698,7 @@ void _pco_acq_thread_dimax(void *argin) {
 		}
 
 		m_pcoData->msAcqTnow = msNow = msElapsedTime(tStart);
-		if(timeout < msNow) { 
+		if((timeout < msNow) && !m_pcoData->bExtTrigEnabled) { 
 			//m_sync->setExposing(pcoAcqRecordTimeout);
 			m_sync->stopAcq();
 			m_sync->setExposing(pcoAcqStop);
@@ -967,7 +969,7 @@ char * Camera::_pcoSet_Trig_Acq_Mode(int &error){
 	
 	DEF_FNID;
 	//------------------------------------------------- triggering mode 
-	WORD trigmode = m_sync->xlatLimaTrigMode2PcoTrigMode();
+	WORD trigmode = m_sync->xlatLimaTrigMode2PcoTrigMode(m_pcoData->bExtTrigEnabled);
     error = PcoCheckError(PCO_SetTriggerMode(m_handle, trigmode));
 	if(error) return "PCO_SetTriggerMode";
 	//PCO_THROW_OR_TRACE(error, "PCO_SetTriggerMode") ;

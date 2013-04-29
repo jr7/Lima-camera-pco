@@ -56,41 +56,41 @@ namespace lima
     {
       DEB_CLASS_NAMESPC(DebModCamera,"SyncCtrlObj","Pco");
     public:
-      SyncCtrlObj(Camera*, BufferCtrlObj*);
-      virtual ~SyncCtrlObj();
+		SyncCtrlObj(Camera*, BufferCtrlObj*);
+		virtual ~SyncCtrlObj();
 
-      virtual bool checkTrigMode(TrigMode trig_mode);
-      virtual void setTrigMode(TrigMode  trig_mode);
-      virtual void getTrigMode(TrigMode& trig_mode);
+		virtual bool checkTrigMode(TrigMode trig_mode);
+		virtual void setTrigMode(TrigMode  trig_mode);
+		virtual void getTrigMode(TrigMode& trig_mode);
 
-      virtual void setExpTime(double  exp_time);
-      virtual void getExpTime(double& exp_time);
+		virtual void setExpTime(double  exp_time);
+		virtual void getExpTime(double& exp_time);
 
-      virtual void setLatTime(double  lat_time);
-      virtual void getLatTime(double& lat_time);
+		virtual void setLatTime(double  lat_time);
+		virtual void getLatTime(double& lat_time);
 
-      virtual void setNbFrames(int  nb_frames);
-      virtual void getNbFrames(int& nb_frames);
+		virtual void setNbFrames(int  nb_frames);
+		virtual void getNbFrames(int& nb_frames);
 			// these two functions calls the upper ones get/setNbFrames
-      virtual void setNbHwFrames(int  nb_frames);
-      virtual void getNbHwFrames(int& nb_frames);
+		virtual void setNbHwFrames(int  nb_frames);
+		virtual void getNbHwFrames(int& nb_frames);
 
-	  void setAcqFrames(int  nb_acq_frames) { m_nb_acq_frames = nb_acq_frames; }
-      void getAcqFrames(int& nb_acq_frames){ nb_acq_frames = m_nb_acq_frames; }
+		void setAcqFrames(int  nb_acq_frames) { m_nb_acq_frames = nb_acq_frames; }
+		void getAcqFrames(int& nb_acq_frames){ nb_acq_frames = m_nb_acq_frames; }
 
-      virtual void getValidRanges(ValidRangesType& valid_ranges);
+		virtual void getValidRanges(ValidRangesType& valid_ranges);
 
-      void startAcq();
-      void stopAcq(bool clearQueue = true);
-      
-      void getStatus(HwInterface::StatusType&);
+		void startAcq();
+		void stopAcq(bool clearQueue = true);
 
-		WORD xlatLimaTrigMode2PcoTrigMode();
+		void getStatus(HwInterface::StatusType&);
+
+		WORD xlatLimaTrigMode2PcoTrigMode(bool &ext_trig);
 		WORD xlatLimaTrigMode2PcoAcqMode();
-	
+
 		BufferCtrlObj* _getBufferCtrlObj() {return m_buffer;}
-       void setExposing(pcoAcqStatus exposing) {m_exposing = exposing;}
-       void setStarted(bool started) {m_started = started;}
+		void setExposing(pcoAcqStatus exposing) {m_exposing = exposing;}
+		void setStarted(bool started) {m_started = started;}
 		pcoAcqStatus getExposing() {return m_exposing;}
 
 	

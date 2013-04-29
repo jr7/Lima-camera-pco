@@ -78,7 +78,7 @@ void BufferCtrlObj::prepareAcq()
 {
 	DEB_MEMBER_FUNCT();
 
-	_pcoAllocBuffers();
+	//_pcoAllocBuffers();
 
 	FrameDim dim;
 
@@ -234,19 +234,19 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 	if(myBuffer == NULL) {
 		msg = "ERROR myBuffer = NULL";
 		printf("=== %s> ERROR [%s]\n", fnId, msg);
-		DEB_TRACE() << msg;
+		DEB_ALWAYS() << msg;
 		return -1;
 	}
 
 	if(myBufferLen < dwLen) {
 		msg = "ERROR invalid myBufferLen";
-		DEB_TRACE() << msg << DEB_VAR2(myBufferLen, dwLen);
-		printf("=== %s> ERROR [%s]\n", fnId, msg);
+		DEB_ALWAYS() << msg << DEB_VAR2(myBufferLen, dwLen);
+		printf("=== %s> ERROR [%s] myBufferLen[%d] dwLen[%d]\n", fnId, msg, myBufferLen, dwLen);
 		return -1;
 	}
 	if(m_ImageBufferSize < (int) dwLen) {
 		msg = "ERROR invalid m_ImageBufferSize";
-		DEB_TRACE() << msg << DEB_VAR2(m_ImageBufferSize, dwLen);
+		DEB_ALWAYS() << msg << DEB_VAR2(m_ImageBufferSize, dwLen);
 		printf("=== %s> ERROR [%s]\n", fnId, msg);
 		return -1;
 	}
@@ -401,7 +401,7 @@ _RETRY:
 		  // lima frame nr is from 0 .... N-1        
 		  lima_buffer_nb = dwFrameIdx -1; // this frame was already readout to the buffer
 
-		DEB_TRACE() << "========================================FOUND " << DEB_VAR3(lima_buffer_nb, dwFrameIdx, bufIdx);
+		DEB_ALWAYS() << "========================================FOUND " << DEB_VAR3(lima_buffer_nb, dwFrameIdx, bufIdx);
 
 #ifdef USING_PCO_ALLOCATED_BUFFERS
 		// we are using the PCO allocated buffer, so this buffer must be copied to the lima buffer
@@ -409,6 +409,9 @@ _RETRY:
 		void *ptrSrc = (void *) m_allocBuff.pcoAllocBufferPtr[bufIdx];
 		size_t size = m_allocBuff.dwPcoAllocBufferSize[bufIdx];
 		SHORT sBufNr = 	m_allocBuff.pcoAllocBufferNr[bufIdx];
+
+		DEB_ALWAYS() << "========================================FOUND " << DEB_VAR4(ptrDest, ptrSrc, size, sBufNr);
+
 		DWORD dwStatusDll, dwStatusDrv;
 		if(	m_requestStop) {return pcoAcqTransferStop;}
 
@@ -421,10 +424,10 @@ _RETRY:
 				dwStatusDll, dwStatusDrv, errPco,
 				m_cam->_PcoCheckError(dwStatusDrv, error));
 		}
+		
 
 		memcpy(ptrDest, ptrSrc, size);
 
-		DEB_TRACE() << "========================================FOUND " << DEB_VAR3(ptrDest, ptrSrc, size);
 #endif
 
 
@@ -529,19 +532,27 @@ void BufferCtrlObj::_pcoAllocBuffers() {
 	}
 
 #ifdef USING_PCO_ALLOCATED_BUFFERS 
+	
+	_pcoAllocBuffersFree();
+	
 	// we are using pco allocated buffer, we must to allocate them
     int error = 0;
     char *sErr;
 	DWORD _dwMaxWidth, _dwMaxHeight;
+	WORD _wArmWidth, _wArmHeight;
     WORD _wBitPerPixel;
     unsigned int _bytesPerPixel;
 
 	if(!m_allocBuff.pcoAllocBufferDone){
-		m_cam->getMaxWidthHeight(_dwMaxWidth, _dwMaxHeight);
 		m_cam->getBytesPerPixel(_bytesPerPixel);
 		m_cam->getBitsPerPixel(_wBitPerPixel);
 
-		DWORD _dwAllocatedBufferSize = _dwMaxWidth * _dwMaxHeight * (DWORD) _bytesPerPixel;
+		//m_cam->getMaxWidthHeight(_dwMaxWidth, _dwMaxHeight); // max
+		m_cam->getArmWidthHeight(_wArmWidth, _wArmHeight);  // actual
+
+		DWORD _dwAllocatedBufferSize = (DWORD) _wArmWidth * (DWORD) _wArmHeight * (DWORD) _bytesPerPixel;
+
+		DEB_ALWAYS() << DEB_VAR4( _dwAllocatedBufferSize, _dwMaxWidth, _dwMaxHeight, _bytesPerPixel);
 
 		m_pcoData->iAllocatedBufferNumber =  PCO_BUFFER_NREVENTS;
 		m_pcoData->dwAllocatedBufferSize = _dwAllocatedBufferSize;
@@ -557,8 +568,8 @@ void BufferCtrlObj::_pcoAllocBuffers() {
 					), error);
 
 				if(error) {
-    				DEB_TRACE() << sErr;
-    				DEB_TRACE() << DEB_VAR1(_dwAllocatedBufferSize);
+    				DEB_ALWAYS() << sErr;
+    				DEB_ALWAYS() << DEB_VAR1(_dwAllocatedBufferSize);
 					THROW_HW_ERROR(NotSupported) << sErr;
 				}
 				m_allocBuff.dwPcoAllocBufferSize[bufIdx] = _dwAllocatedBufferSize;
@@ -570,6 +581,8 @@ void BufferCtrlObj::_pcoAllocBuffers() {
 
 }
 
+//===================================================================================================================
+//===================================================================================================================
 void BufferCtrlObj::_pcoAllocBuffersFree() {
 
 	DEB_MEMBER_FUNCT();
