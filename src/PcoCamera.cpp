@@ -168,6 +168,7 @@ stcPcoData::stcPcoData(){
 		stcPcoHWIOSignalDesc[i].wSize = sizeof(stcPcoHWIOSignalDesc[i]);
 	}
 
+	debugLevel = 0;
 }
 
 //=========================================================================================================
@@ -484,8 +485,10 @@ void Camera::startAcq()
     WORD wRoiX0, wRoiY0; // Roi upper left x y
     WORD wRoiX1, wRoiY1; // Roi lower right x y
 
-    if(m_roi.changed == Valid) m_roi.changed = Changed;    //+++++++++ TEST / FORCE WRITE ROI
-    if (m_roi.changed == Changed) {
+    
+	if(m_roi.changed == Valid) m_roi.changed = Changed;    //+++++++++ TEST / FORCE WRITE ROI
+	m_roi.changed = Changed;
+	if (m_roi.changed == Changed) {
 
 		{
 			Point top_left = m_RoiLima.getTopLeft();
@@ -501,7 +504,9 @@ void Camera::startAcq()
         wRoiX0 = (WORD)m_roi.x[0]; wRoiX1 = (WORD)m_roi.x[1];
         wRoiY0 = (WORD)m_roi.y[0]; wRoiY1 = (WORD)m_roi.y[1];
 
-		DEB_TRACE() << DEB_VAR4(wRoiX0, wRoiY0, wRoiX1, wRoiY1);
+		if(_getDebug(1)) {
+			DEB_ALWAYS() << DEB_VAR5(m_RoiLima, wRoiX0, wRoiY0, wRoiX1, wRoiY1);
+		}
 
         error = PcoCheckError(PCO_SetROI(m_handle, wRoiX0, wRoiY0, wRoiX1, wRoiY1));
         PCO_THROW_OR_TRACE(error, "PCO_SetROI") ;
@@ -511,7 +516,10 @@ void Camera::startAcq()
 
 	error = PcoCheckError(PCO_GetROI(m_handle, &wRoiX0, &wRoiY0, &wRoiX1, &wRoiY1));
     PCO_THROW_OR_TRACE(error, "PCO_GetROI") ;
-	DEB_TRACE() << DEB_VAR4(wRoiX0, wRoiY0, wRoiX1, wRoiY1);
+
+	if(_getDebug(1)) {
+		DEB_ALWAYS() << DEB_VAR4(wRoiX0, wRoiY0, wRoiX1, wRoiY1);
+	}
 
 
 	//------------------------------------------------- triggering mode 
@@ -942,7 +950,7 @@ unsigned long Camera::pcoGetFramesMax(int segmentPco){
 		xroisize = m_roi.x[1] - m_roi.x[0] + 1;
 		yroisize = m_roi.y[1] - m_roi.y[0] + 1;
 
-		pixPerFrame = (unsigned long long)xroisize * (unsigned long long)xroisize;
+		pixPerFrame = (unsigned long long)xroisize * (unsigned long long)yroisize;
 
 		if(pixPerFrame <0) {
 			printf("=== %s> ERROR pixPerFrame[%lld]\n", fnId, pixPerFrame);
@@ -1102,6 +1110,11 @@ char* Camera::_pcoSet_Exposure_Delay_Time(int &error, int ph){
             break;
         }
     }
+
+    if(_getDebug(1)) {
+		DEB_ALWAYS() << DEB_VAR3(_exposure, dwExposure, wExposure_base);
+		DEB_ALWAYS() << DEB_VAR3(_delay,  dwDelay, wDelay_base);
+	}
 
 	error = PcoCheckError(PCO_SetDelayExposureTime(m_handle, dwDelay, dwExposure, wDelay_base, wExposure_base));
 	if(error) {
@@ -1624,20 +1637,58 @@ bool Camera::_isValid_pixelRate(DWORD dwPixelRate){
 
 //=================================================================================================
 //=================================================================================================
-bool Camera::_isValid_Roi(Roi &new_roi){
+bool Camera::_isValid_Roi(const Roi &new_roi, Roi &fixed_roi){
 		
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
+
+	int diffx0, diffx1, diffy0, diffy1 ;
+	bool fixed;
+	int xn0, xn1, yn0, yn1;
+	int x0, x1, y0, y1;
 
 	int xMax = m_pcoData->stcPcoDescription.wMaxHorzResStdDESC;
 	int yMax = m_pcoData->stcPcoDescription.wMaxVertResStdDESC;
 	int xSteps = m_pcoData->stcPcoDescription.wRoiHorStepsDESC;
 	int ySteps = m_pcoData->stcPcoDescription.wRoiVertStepsDESC;
 
-	int x0 = new_roi.getTopLeft().x+1;
-	int x1 = new_roi.getBottomRight().x+1;
-	int y0 = new_roi.getTopLeft().y+1;
-	int y1 = new_roi.getBottomRight().y+1;
+	xn0 = x0 = new_roi.getTopLeft().x+1;
+	xn1 = x1 = new_roi.getBottomRight().x+1;
+	yn0 = y0 = new_roi.getTopLeft().y+1;
+	yn1 = y1 = new_roi.getBottomRight().y+1;
+
+	fixed = false;
+	if ((diffx0 = ((xn0 - 1) % xSteps)  ) != 0 ) {xn0 -= diffx0; fixed = true;}
+	if ((diffx1 = ((xn1) % xSteps)) != 0 ) {xn1 += xSteps - diffx1; fixed = true;}
+	if ((diffy0 = ((yn0 - 1) % ySteps)) != 0 ) {yn0 -= diffy0; fixed = true;}
+	if ((diffy1 = ((yn1) % ySteps)) != 0 ) {yn1 += ySteps - diffy1; fixed = true;;}
+
+	if(_getDebug(1)) {
+		if(fixed) {
+			DEB_ALWAYS()  << DEB_VAR4(diffx0, diffx1, diffy0, diffy1) ;
+		}
+	}
+
+	if(
+		(xn0 < 1) || (xn0 > xn1) || (xn1 > xMax) ||
+		(yn0 < 1) || (yn0 > yn1) || (yn1 > yMax) ||
+		(((xn0 - 1) % xSteps) != 0) ||((xn1 % xSteps) != 0) ||
+		(((yn0 - 1) % ySteps) != 0) ||((yn1 % ySteps) != 0) ) {
+
+		fixed_roi = new_roi;
+
+		 if(_getDebug(1)) {
+			DEB_ALWAYS()  << DEB_VAR4(x0, x1, xSteps, xMax) ;
+			DEB_ALWAYS()  << DEB_VAR4(y0, y1, ySteps, yMax) ;
+			DEB_ALWAYS() << "BAD fixed roi"  << DEB_VAR4(xn0, xn1, xSteps, xMax) ;
+			DEB_ALWAYS() << "BAD fixed roi" << DEB_VAR4(yn0, yn1, ySteps, yMax) ;
+		 }
+		 return FALSE;
+	}
+
+	fixed_roi.setTopLeft(Point(xn0-1, yn0-1));
+	fixed_roi.setSize(Size(xn1 -xn0+1, yn1-yn0+1));
+
 
 	if(
 		(x0 < 1) || (x0 > x1) || (x1 > xMax) ||
@@ -1645,31 +1696,42 @@ bool Camera::_isValid_Roi(Roi &new_roi){
 		(((x0 - 1) % xSteps) != 0) ||((x1 % xSteps) != 0) ||
 		(((y0 - 1) % ySteps) != 0) ||((y1 % ySteps) != 0) ) {
 			
-	 DEB_ALWAYS()  << DEB_VAR4(x0, x1, xSteps, xMax) ;
-	 DEB_ALWAYS()  << DEB_VAR4(y0, y1, ySteps, yMax) ;
-			return FALSE;
+		 if(_getDebug(1)) {
+			DEB_ALWAYS() << "BAD orig roi" << DEB_VAR4(x0, x1, xSteps, xMax) ;
+			DEB_ALWAYS() << "BAD orig roi" << DEB_VAR4(y0, y1, ySteps, yMax) ;
+			DEB_ALWAYS() << "OK fixed roi"  << DEB_VAR4(xn0, xn1, xSteps, xMax) ;
+			DEB_ALWAYS() << "OK fixed roi" << DEB_VAR4(yn0, yn1, ySteps, yMax) ;
+		 }
+		return FALSE;
 	}
 		
-	return TRUE;
+	 if(_getDebug(1)) {
+		 DEB_ALWAYS() << "OK fixed roi"  << DEB_VAR4(xn0, xn1, xSteps, xMax) ;
+		 DEB_ALWAYS() << "OK fixed roi" << DEB_VAR4(yn0, yn1, ySteps, yMax) ;
+	 }
+	 return TRUE;
 }
 
 
 //=================================================================================================
 //=================================================================================================
-void Camera::_set_Roi(Roi &new_roi, int &error){
+void Camera::_set_Roi(const Roi &new_roi, int &error){
 	
 	Size roi_size;
 
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 
-	if(!_isValid_Roi(new_roi)){
+	Roi fixed_roi;
+
+	if(!_isValid_Roi(new_roi, fixed_roi)){
 		error = -1;
 		return;
 	}
 
 	    // pco roi 1->max, Roi 0->max-1
 
+#if 0
 		m_roi.x[0] = new_roi.getTopLeft().x+1;
 		m_roi.x[1] = new_roi.getBottomRight().x+1;
 		m_roi.y[0] = new_roi.getTopLeft().y+1;
@@ -1677,7 +1739,22 @@ void Camera::_set_Roi(Roi &new_roi, int &error){
 		m_roi.changed = Changed;
 
 		m_RoiLima = new_roi;
+#else
+		m_roi.x[0] = fixed_roi.getTopLeft().x+1;
+		m_roi.x[1] = fixed_roi.getBottomRight().x+1;
+		m_roi.y[0] = fixed_roi.getTopLeft().y+1;
+		m_roi.y[1] = fixed_roi.getBottomRight().y+1;
+		m_roi.changed = Changed;
 
+		m_RoiLima = fixed_roi;
+
+
+#endif
+
+	if(_getDebug(1)) {
+		DEB_ALWAYS() << DEB_VAR1(m_RoiLima);
+	}	
+		
 	error = 0;
 	return ;
 }

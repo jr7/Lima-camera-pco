@@ -51,15 +51,6 @@ Interface::Interface(Camera *cam) :
   m_sync = new SyncCtrlObj(cam, m_buffer);
   cam->m_sync = m_sync;
 
-#if 0
-  DEB_ALWAYS() << "=================================";
-  HwRoiCtrlObj *base_roi = m_RoiCtrlObj;
-  DEB_ALWAYS() << DEB_VAR2(m_RoiCtrlObj, base_roi);
-  DEB_ALWAYS() << DEB_VAR1(m_det_info);
-  DEB_ALWAYS() << DEB_VAR1(m_buffer);
-  DEB_ALWAYS() << DEB_VAR1(m_sync);
-  DEB_ALWAYS() << "=================================";
-#endif
 
   DEB_TRACE() << DEB_VAR2(cam, m_buffer);
 

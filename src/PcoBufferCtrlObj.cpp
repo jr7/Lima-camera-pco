@@ -83,8 +83,10 @@ void BufferCtrlObj::prepareAcq()
 	FrameDim dim;
 
 	getFrameDim(dim);
+
 	m_ImageBufferSize = dim.getMemSize();
 
+	if(m_cam->_getDebug(1)) {DEB_ALWAYS() << DEB_VAR2(dim, m_ImageBufferSize);}
 	DEB_TRACE() << DEB_VAR1(m_ImageBufferSize);
 
 }
@@ -231,6 +233,15 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
     DWORD dwLen = wArmWidth * wArmHeight * bytesPerPixel;
     //DWORD dwAllocatedBufferSize = dwMaxWidth * dwMaxHeight * (DWORD) bytesPerPixel;
 
+ 	myBufferLen = m_ImageBufferSize = dwLen;
+
+
+	FrameDim dim;
+	getFrameDim(dim);
+	int dimSize = dim.getMemSize();
+
+	if(m_cam->_getDebug(1)) {DEB_ALWAYS() << DEB_VAR4(dwLen, dimSize, myBuffer, lima_buffer_nb);}
+	
 	if(myBuffer == NULL) {
 		msg = "ERROR myBuffer = NULL";
 		printf("=== %s> ERROR [%s]\n", fnId, msg);
@@ -401,16 +412,17 @@ _RETRY:
 		  // lima frame nr is from 0 .... N-1        
 		  lima_buffer_nb = dwFrameIdx -1; // this frame was already readout to the buffer
 
-		DEB_ALWAYS() << "========================================FOUND " << DEB_VAR3(lima_buffer_nb, dwFrameIdx, bufIdx);
+		 if(m_cam->_getDebug(1)) {	DEB_ALWAYS() << "========================================FOUND " << DEB_VAR3(lima_buffer_nb, dwFrameIdx, bufIdx); }
 
 #ifdef USING_PCO_ALLOCATED_BUFFERS
 		// we are using the PCO allocated buffer, so this buffer must be copied to the lima buffer
 		void * ptrDest = (void *)m_allocBuff.limaAllocBufferPtr[bufIdx];
 		void *ptrSrc = (void *) m_allocBuff.pcoAllocBufferPtr[bufIdx];
+		size_t sizeLima = m_allocBuff.dwLimaAllocBufferSize[bufIdx];
 		size_t size = m_allocBuff.dwPcoAllocBufferSize[bufIdx];
 		SHORT sBufNr = 	m_allocBuff.pcoAllocBufferNr[bufIdx];
 
-		DEB_ALWAYS() << "========================================FOUND " << DEB_VAR4(ptrDest, ptrSrc, size, sBufNr);
+		if(m_cam->_getDebug(1)) {DEB_ALWAYS() << "========================================FOUND " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);}
 
 		DWORD dwStatusDll, dwStatusDrv;
 		if(	m_requestStop) {return pcoAcqTransferStop;}
@@ -426,7 +438,9 @@ _RETRY:
 		}
 		
 
+		if(m_cam->_getDebug(1)) {DEB_ALWAYS() << "===== " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);}
 		memcpy(ptrDest, ptrSrc, size);
+		if(m_cam->_getDebug(1)) {DEB_ALWAYS() << "===== " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);}
 
 #endif
 
@@ -442,6 +456,7 @@ _RETRY:
 				return pcoAcqPcoError;
 			}
         }
+		if(m_cam->_getDebug(1)) {DEB_ALWAYS() << "===== " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);}
         goto _WHILE_CONTINUE;
       }
     } // for
@@ -547,12 +562,12 @@ void BufferCtrlObj::_pcoAllocBuffers() {
 		m_cam->getBytesPerPixel(_bytesPerPixel);
 		m_cam->getBitsPerPixel(_wBitPerPixel);
 
-		//m_cam->getMaxWidthHeight(_dwMaxWidth, _dwMaxHeight); // max
+		m_cam->getMaxWidthHeight(_dwMaxWidth, _dwMaxHeight); // max
 		m_cam->getArmWidthHeight(_wArmWidth, _wArmHeight);  // actual
 
 		DWORD _dwAllocatedBufferSize = (DWORD) _wArmWidth * (DWORD) _wArmHeight * (DWORD) _bytesPerPixel;
 
-		DEB_ALWAYS() << DEB_VAR4( _dwAllocatedBufferSize, _dwMaxWidth, _dwMaxHeight, _bytesPerPixel);
+		if(m_cam->_getDebug(1)) {DEB_ALWAYS() << DEB_VAR4( _dwAllocatedBufferSize, _wArmWidth, _wArmHeight, _bytesPerPixel);}
 
 		m_pcoData->iAllocatedBufferNumber =  PCO_BUFFER_NREVENTS;
 		m_pcoData->dwAllocatedBufferSize = _dwAllocatedBufferSize;

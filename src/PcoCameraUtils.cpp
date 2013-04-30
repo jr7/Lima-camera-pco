@@ -443,6 +443,20 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		}
 
 
+
+		key = keys[ikey] = "debug";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(RW) pco debug level";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
+			
+			if((tokNr == 2)){
+					sscanf_s(tok[1], "0x%llx",  &m_pcoData->debugLevel);
+			}
+			
+			ptr += sprintf_s(ptr, ptrMax - ptr, "0x%llx",  m_pcoData->debugLevel);
+			return output;
+		}
+
+
 		key = keys[ikey] = "camInfo";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "(R) detailed cam info (type, if, sn, hw & fw ver, ...)";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
@@ -851,3 +865,11 @@ int ringLog::dump(char *s, int lgMax, bool direction) {
 		return lg;
 }
 
+//=========================================================================================================
+//=========================================================================================================
+
+unsigned long long Camera::_getDebug(unsigned long long mask = ULLONG_MAX){
+
+		return m_pcoData->debugLevel & mask;
+
+}

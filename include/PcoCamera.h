@@ -109,6 +109,7 @@ struct stcPcoData {
 	PCO_Signal stcPcoHWIOSignal[SIZEARR_stcPcoHWIOSignal];
 	WORD wNrPcoHWIOSignal0;
 	WORD wNrPcoHWIOSignal;
+	unsigned long long debugLevel;
 
 
 	char model[MODEL_TYPE_SIZE+1], iface[INTERFACE_TYPE_SIZE+1];
@@ -302,8 +303,9 @@ namespace lima
 
 		bool _isValid_pixelRate(DWORD dwPixelRate);
 		
-		bool _isValid_Roi(Roi &new_roi);
-		void _set_Roi(Roi &roi, int &error);
+		bool _isValid_Roi(const Roi &new_roi, Roi &fixed_roi);
+		//bool _isValid_Roi(Roi &new_roi);
+		void _set_Roi(const Roi &roi, int &error);
 		void _get_Roi(Roi &roi);
 		void _get_MaxRoi(Roi &roi);
 		void _get_RoiSize(Size& roi_size);
@@ -317,6 +319,7 @@ namespace lima
 		void _pco_GetHWIOSignal(int &error);
 		void _pco_SetHWIOSignal(int sigNum, int &error);
 		void _pco_initHWIOSignal(int mode, int &error);
+		unsigned long long _getDebug(unsigned long long mask);
 
 		ringLog *m_msgLog;
 
