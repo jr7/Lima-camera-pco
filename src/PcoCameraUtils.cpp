@@ -445,14 +445,18 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 
 
 		key = keys[ikey] = "debug";     //----------------------------------------------------------------
-		keys_desc[ikey++] = "(RW) pco debug level";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(RW) pco debug level [<new value in hex format (0x123)>]";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
-			
-			if((tokNr == 2)){
-					sscanf_s(tok[1], "0x%llx",  &m_pcoData->debugLevel);
+			int nr;
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "0x%llx",  m_pcoData->debugLevel);
+
+			if((tokNr == 1)){
+					nr = sscanf_s(tok[1], "0x%llx",  &m_pcoData->debugLevel);
+					ptr += sprintf_s(ptr, ptrMax - ptr, "\n%s>  ",  (nr == 1) ? "changed OK": "NOT changed");
+					ptr += sprintf_s(ptr, ptrMax - ptr, "0x%llx",  m_pcoData->debugLevel);
 			}
 			
-			ptr += sprintf_s(ptr, ptrMax - ptr, "0x%llx",  m_pcoData->debugLevel);
 			return output;
 		}
 
