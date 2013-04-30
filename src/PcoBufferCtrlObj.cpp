@@ -439,8 +439,17 @@ _RETRY:
 		
 
 		if(m_cam->_getDebug(1)) {DEB_ALWAYS() << "===== " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);}
-		memcpy(ptrDest, ptrSrc, size);
-		if(m_cam->_getDebug(1)) {DEB_ALWAYS() << "===== " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);}
+		
+		if(m_cam->_getDebug(0x100)){
+			int val = dwFrameIdx & 0xf;
+			memset(ptrDest, val, size);
+			DEB_ALWAYS() << "===== dummy image!!! " << DEB_VAR1(val);
+		} else {
+			memcpy(ptrDest, ptrSrc, size);
+		}		
+		
+		
+		if(m_cam->_getDebug(2)) {DEB_ALWAYS() << "===== after xfer pco buffer to lima " << DEB_VAR6(ptrDest, ptrSrc, size, sizeLima, sBufNr, dwFrameIdx);}
 
 #endif
 
