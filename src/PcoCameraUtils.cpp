@@ -302,9 +302,10 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		keys_desc[ikey++] = "(R) TODO";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "timeDimax: \n"
-												"   [%s]  record (ms)=[%ld]\n"
-												"   [%s]    xfer (ms)=[%ld]\n",
- 				getTimestamp(Iso, m_pcoData->msAcqRecTimestamp), m_pcoData->msAcqRec, 
+												"   [%s]  record (ms)=[%ld]\n",
+				getTimestamp(Iso, m_pcoData->msAcqRecTimestamp), m_pcoData->msAcqRec); 
+			
+			ptr += sprintf_s(ptr, ptrMax - ptr, "   [%s]    xfer (ms)=[%ld]\n",
  				getTimestamp(Iso, m_pcoData->msAcqXferTimestamp), m_pcoData->msAcqXfer);
 			
 			return output;
