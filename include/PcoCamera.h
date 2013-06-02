@@ -151,7 +151,10 @@ struct stcPcoData {
 		unsigned int maxHeight;        //unsigned int ymax;
 
 		WORD wMetaDataMode, wMetaDataSize, wMetaDataVersion;
+		
 		long msAcqRec, msAcqXfer, msAcqTout, msAcqTnow;
+		time_t msAcqRecTimestamp, msAcqXferTimestamp, msAcqToutTimestamp, msAcqTnowTimestamp;
+
 		DWORD dwPixelRate, dwPixelRateRequested;
 		double fTransferRateMHzMax;
 
@@ -160,6 +163,7 @@ struct stcPcoData {
 
 		DWORD dwAllocatedBufferSize;
 		int iAllocatedBufferNumber;
+		int iAllocatedBufferNumberLima;
 		bool bAllocatedBufferDone;
 		bool bRollingShutter;
 

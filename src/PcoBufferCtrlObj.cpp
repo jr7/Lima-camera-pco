@@ -195,6 +195,7 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 	switch(status){
 		case Sync::AVAILABLE:
 			myBuffer = buffer_mgr.getFrameBufferPtr(lima_buffer_nb);
+			buffer_mgr.getNbBuffers(m_cam->m_pcoData->iAllocatedBufferNumberLima);
 			break;
 		case Sync::TIMEOUT:
 			msg = "Sync wait TIMEOUT";
@@ -240,7 +241,7 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 	getFrameDim(dim);
 	int dimSize = dim.getMemSize();
 
-	if(m_cam->_getDebug(1)) {DEB_ALWAYS() << DEB_VAR4(dwLen, dimSize, myBuffer, lima_buffer_nb);}
+	if(m_cam->_getDebug(1)) {DEB_ALWAYS() << DEB_VAR5(dwLen, dimSize, myBuffer, lima_buffer_nb, m_cam->m_pcoData->iAllocatedBufferNumberLima);}
 	
 	if(myBuffer == NULL) {
 		msg = "ERROR myBuffer = NULL";

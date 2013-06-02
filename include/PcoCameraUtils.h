@@ -28,7 +28,7 @@
 
 enum timestampFmt {Iso, FnFull, FnDate};
 
-char *getTimestamp(timestampFmt fmtIdx) ;
+char *getTimestamp(timestampFmt fmtIdx, time_t xtime = 0) ;
 
 
 

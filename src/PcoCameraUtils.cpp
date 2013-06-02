@@ -49,7 +49,7 @@ void print_hex_dump_buff(void *ptr_buff, size_t len);
 char* _timestamp_pcocamerautils() {return ID_TIMESTAMP ;}
 //=========================================================================================================
 
-char *getTimestamp(timestampFmt fmtIdx) {
+char *getTimestamp(timestampFmt fmtIdx, time_t xtime) {
    static char timeline[128];
    errno_t err;
 	time_t ltime;
@@ -64,12 +64,21 @@ char *getTimestamp(timestampFmt fmtIdx) {
     case FnFull: fmt = "%Y-%m-%d-%H%M%S"; break;
   }
 
-	time( &ltime );
+	if(xtime == 0) 
+		time( &ltime );
+	else
+		ltime = xtime;
+
+
+
 	err = localtime_s( &today, &ltime );
 	strftime(timeline, 128, fmt, &today );
       
 	return timeline;
 }
+
+
+
 
 //====================================================================
 //====================================================================
@@ -275,13 +284,32 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		key = keys[ikey] = "allocatedBuffer";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "(R) TODO";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
-			ptr += sprintf_s(ptr, ptrMax - ptr, "AllocatedBuffer: Done=[%d] Nr=[%d] Size=[%ld][%g MB]\n", 
-				m_pcoData->bAllocatedBufferDone, 
+			ptr += sprintf_s(ptr, ptrMax - ptr, "PCO API allocated buffers:\n"
+												"    allocated=[%s] nr of buffers=[%d] size=[%ld B][%g MB]\n" 
+												"LIMA allocated buffers: \n"
+												"    nr of buffers=[%d] \n", 
+				m_pcoData->bAllocatedBufferDone ? "TRUE" : "FALSE", 
 				m_pcoData->iAllocatedBufferNumber, 
-				m_pcoData->dwAllocatedBufferSize, m_pcoData->dwAllocatedBufferSize/1000000.);
+				m_pcoData->dwAllocatedBufferSize, m_pcoData->dwAllocatedBufferSize/1000000.,
+				m_pcoData->iAllocatedBufferNumberLima);
+
+
+			return output;
+		}
+
+
+		key = keys[ikey] = "timeDimax";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) TODO";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
+			ptr += sprintf_s(ptr, ptrMax - ptr, "timeDimax: \n"
+												"   [%s]  record (ms)=[%ld]\n"
+												"   [%s]    xfer (ms)=[%ld]\n",
+ 				getTimestamp(Iso, m_pcoData->msAcqRecTimestamp), m_pcoData->msAcqRec, 
+ 				getTimestamp(Iso, m_pcoData->msAcqXferTimestamp), m_pcoData->msAcqXfer);
 			
 			return output;
 		}
+
 
 		key = keys[ikey] = "testCmd";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "DISABLED / debug tool";     //----------------------------------------------------------------

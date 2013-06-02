@@ -21,6 +21,7 @@
  along with this program; if not, see <http://www.gnu.org/licenses/>.
 ###########################################################################
 **************************************************************************/
+
 #define PCO_ERRT_H_CREATE_OBJECT
 #define BYPASS
 
@@ -168,6 +169,18 @@ stcPcoData::stcPcoData(){
 		stcPcoHWIOSignalDesc[i].wSize = sizeof(stcPcoHWIOSignalDesc[i]);
 	}
 
+	bAllocatedBufferDone = 
+		false;
+	
+	msAcqRecTimestamp = msAcqXferTimestamp =
+			time(NULL);
+
+	msAcqRec = msAcqXfer =
+	iAllocatedBufferNumber = 
+	dwAllocatedBufferSize = 
+	iAllocatedBufferNumberLima =
+		0;
+
 	debugLevel = 0;
 }
 
@@ -190,7 +203,7 @@ Camera::Camera(const char *camPar) :
 		throw LIMA_HW_EXC(Error, "m_msgLog > creation error");
 
 
-	m_pcoData =new(stcPcoData);
+	m_pcoData =new stcPcoData();
 	if(m_pcoData == NULL)
 		throw LIMA_HW_EXC(Error, "m_pcoData > creation error");
 	//memset((char *)m_pcoData, 0, sizeof(stcPcoData));
@@ -638,6 +651,7 @@ void Camera::startAcq()
 	return;
 }
 
+
 //==========================================================================================================
 //==========================================================================================================
 
@@ -744,7 +758,10 @@ void _pco_acq_thread_dimax(void *argin) {
 	//m_sync->setAcqFrames(nb_acq_frames);
 
 
+	// dimax recording time
 	m_pcoData->msAcqRec = msRec = msElapsedTime(tStart);
+	m_pcoData->msAcqRecTimestamp = time(NULL);
+
 	msElapsedTimeSet(tStart);
 
 	if(m_buffer->_getRequestStop()) {
@@ -759,7 +776,10 @@ void _pco_acq_thread_dimax(void *argin) {
 
 
 	//m_sync->setExposing(status);
+	// dimax xfer time
 	m_pcoData->msAcqXfer = msXfer = msElapsedTime(tStart);
+	m_pcoData->msAcqXferTimestamp = time(NULL);
+
 	printf("=== %s> EXIT tnow[%ld] tout[%ld] tout0[%ld] rec[%ld] xfer[%ld] (ms)\n", 
 			fnId, msNow, timeout, timeout0, msRec, msXfer);
 	_endthread();
@@ -866,6 +886,11 @@ void _pco_acq_thread_dimax_live(void *argin) {
 
 	m_sync->setAcqFrames(0);
 
+	// dimax recording time -> live NO record
+	m_pcoData->msAcqRec  = 0;
+	m_pcoData->msAcqRecTimestamp = time(NULL);
+
+
 	pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImag();
 	m_sync->setExposing(status);
 	m_sync->stopAcq();
@@ -875,7 +900,9 @@ void _pco_acq_thread_dimax_live(void *argin) {
 		//throw LIMA_HW_EXC(Error, "_pcoSet_RecordingState");
 	}
 
+	// dimax xfer time
 	m_pcoData->msAcqXfer = msXfer = msElapsedTime(tStart);
+	m_pcoData->msAcqXferTimestamp = time(NULL);
 	printf("=== %s> EXIT xfer[%ld] (ms) status[%s]\n", 
 			fnId, msXfer, sPcoAcqStatus[status]);
 	_endthread();
