@@ -78,6 +78,7 @@ char *getTimestamp(timestampFmt fmtIdx, time_t xtime) {
 }
 
 
+time_t getTimestamp() { return time(NULL); }
 
 
 //====================================================================
@@ -835,7 +836,7 @@ int ringLog::add(char *s) {
                 m_size = m_capacity;
         }
         
-        ptr->timestamp = time(NULL);
+        ptr->timestamp = getTimestamp();
         strncpy_s(ptr->str, s,bufferSize);
         return m_size;
 

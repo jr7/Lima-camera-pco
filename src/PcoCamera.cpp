@@ -173,7 +173,7 @@ stcPcoData::stcPcoData(){
 		false;
 	
 	msAcqRecTimestamp = msAcqXferTimestamp =
-			time(NULL);
+			getTimestamp();
 
 	msAcqRec = msAcqXfer =
 	iAllocatedBufferNumber = 
@@ -760,7 +760,7 @@ void _pco_acq_thread_dimax(void *argin) {
 
 	// dimax recording time
 	m_pcoData->msAcqRec = msRec = msElapsedTime(tStart);
-	m_pcoData->msAcqRecTimestamp = time(NULL);
+	m_pcoData->msAcqRecTimestamp = getTimestamp();
 
 	msElapsedTimeSet(tStart);
 
@@ -778,7 +778,7 @@ void _pco_acq_thread_dimax(void *argin) {
 	//m_sync->setExposing(status);
 	// dimax xfer time
 	m_pcoData->msAcqXfer = msXfer = msElapsedTime(tStart);
-	m_pcoData->msAcqXferTimestamp = time(NULL);
+	m_pcoData->msAcqXferTimestamp = getTimestamp();
 
 	printf("=== %s> EXIT tnow[%ld] tout[%ld] tout0[%ld] rec[%ld] xfer[%ld] (ms)\n", 
 			fnId, msNow, timeout, timeout0, msRec, msXfer);
@@ -888,7 +888,7 @@ void _pco_acq_thread_dimax_live(void *argin) {
 
 	// dimax recording time -> live NO record
 	m_pcoData->msAcqRec  = 0;
-	m_pcoData->msAcqRecTimestamp = time(NULL);
+	m_pcoData->msAcqRecTimestamp = getTimestamp();
 
 
 	pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImag();
@@ -902,7 +902,7 @@ void _pco_acq_thread_dimax_live(void *argin) {
 
 	// dimax xfer time
 	m_pcoData->msAcqXfer = msXfer = msElapsedTime(tStart);
-	m_pcoData->msAcqXferTimestamp = time(NULL);
+	m_pcoData->msAcqXferTimestamp = getTimestamp();
 	printf("=== %s> EXIT xfer[%ld] (ms) status[%s]\n", 
 			fnId, msXfer, sPcoAcqStatus[status]);
 	_endthread();

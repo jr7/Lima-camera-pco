@@ -24,13 +24,13 @@
 #ifndef PCOCAMERAUTILS_H
 #define PCOCAMERAUTILS_H
 
+#include <time.h>
 #include "Compatibility.h"
 
 enum timestampFmt {Iso, FnFull, FnDate};
 
 char *getTimestamp(timestampFmt fmtIdx, time_t xtime = 0) ;
 
-
-
+time_t getTimestamp();\
 
 #endif
