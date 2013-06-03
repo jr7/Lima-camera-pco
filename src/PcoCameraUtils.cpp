@@ -482,8 +482,10 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 
 			if((tokNr == 1)){
 					nr = sscanf_s(tok[1], "0x%llx",  &m_pcoData->debugLevel);
-					ptr += sprintf_s(ptr, ptrMax - ptr, "\n%s>  ",  (nr == 1) ? "changed OK": "NOT changed");
+					ptr += sprintf_s(ptr, ptrMax - ptr, "   %s>  ",  (nr == 1) ? "changed OK": "NOT changed");
 					ptr += sprintf_s(ptr, ptrMax - ptr, "0x%llx",  m_pcoData->debugLevel);
+			
+					DEB_ALWAYS() << output ;
 			}
 			
 			return output;

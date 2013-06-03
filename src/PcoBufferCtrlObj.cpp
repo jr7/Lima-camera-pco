@@ -189,30 +189,46 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 
 #ifdef COMPILE_WAIT_CONDITION
 	Sync::Status status;
-	AutoMutex lock(cond.mutex()); 
-	status = m_bufferSync->wait(lima_buffer_nb, timeout);
+	AutoMutex lock(cond.mutex());
 
-	switch(status){
-		case Sync::AVAILABLE:
-			myBuffer = buffer_mgr.getFrameBufferPtr(lima_buffer_nb);
-			buffer_mgr.getNbBuffers(m_cam->m_pcoData->iAllocatedBufferNumberLima);
-			break;
-		case Sync::TIMEOUT:
-			msg = "Sync wait TIMEOUT";
-			printf("=== %s> ERROR [%s] lima_buffer_nb [%d] timeout [%g]\n", fnId, msg, lima_buffer_nb, timeout);
-			DEB_TRACE() << msg;
-			return -1;
-		case Sync::INTERRUPTED:
-			msg = "Sync wait INTERRUPTED";
-			printf("=== %s> ERROR [%s] lima_buffer_nb [%d] timeout [%g]\n", fnId, msg, lima_buffer_nb, timeout);
-			DEB_TRACE() << msg;
-			return -1;
-		default:
-			msg = "Sync wait UNKNOWN STATUS";
-			printf("=== %s> ERROR [%s] lima_buffer_nb [%d] timeout [%g]\n", fnId, msg, lima_buffer_nb, timeout);
-			DEB_TRACE() << msg;
-			return -1;
+	Timestamp t0 = Timestamp::now();
+
+	for (bool doit = true; doit; ) {
+		double wait_timeout = timeout - double(Timestamp::now() - t0);
+		if (wait_timeout <= 0) {
+				msg = "Sync wait INTERRUPTED + TIMEOUT";
+				printf("=== %s> ERROR [%s] lima_buffer_nb [%d] timeout [%g]\n", fnId, msg, lima_buffer_nb, timeout);
+				DEB_TRACE() << msg;
+				return -1;
+		}
+
+		status = m_bufferSync->wait(lima_buffer_nb, wait_timeout);
+		if(m_cam->_getDebug(4)) {DEB_ALWAYS() << DEB_VAR3(lima_buffer_nb, timeout, status);}
+
+		switch(status){
+			case Sync::AVAILABLE:
+				myBuffer = buffer_mgr.getFrameBufferPtr(lima_buffer_nb);
+				buffer_mgr.getNbBuffers(m_cam->m_pcoData->iAllocatedBufferNumberLima);
+				doit = false;
+				break;
+			case Sync::TIMEOUT:
+				msg = "Sync wait TIMEOUT";
+				printf("=== %s> ERROR [%s] lima_buffer_nb [%d] timeout [%g]\n", fnId, msg, lima_buffer_nb, timeout);
+				DEB_TRACE() << msg;
+				return -1;
+			case Sync::INTERRUPTED:
+				msg = "Sync wait INTERRUPTED";
+				printf("=== %s> ERROR [%s] lima_buffer_nb [%d] timeout [%g]\n", fnId, msg, lima_buffer_nb, timeout);
+				DEB_TRACE() << msg;
+				break;
+			default:
+				msg = "Sync wait UNKNOWN STATUS";
+				printf("=== %s> ERROR [%s] lima_buffer_nb [%d] timeout [%g]\n", fnId, msg, lima_buffer_nb, timeout);
+				DEB_TRACE() << msg;
+				return -1;
+		}
 	}
+
 #else
 #pragma message ("============================================== BYPASSED ----- COMPILE_WAIT_CONDITION -----")
 
