@@ -1,10 +1,8 @@
-.. image:: Under_cons.jpg
-
 PCO
 ---
 
-.. image:: pco.dimax-255x255.jpg
-.. image:: pco.edge.jpg
+.. image:: pco-dimax-255x255.jpg
+.. image:: pco-edge.jpg
 
 
 Intoduction

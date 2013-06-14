@@ -1,5 +1,4 @@
-.. image:: pco.edge.jpg
-.. image:: Under_cons.jpg
+.. image:: pco-edge.jpg
 
 
 PC characteristics (used for PCO EDGE at ESRF)
