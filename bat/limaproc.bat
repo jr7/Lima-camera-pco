@@ -1,3 +1,3 @@
 call limasetdir
-cd /D %LIMADIR%\third-party\Processlib
+cd /D %GITLIMADIR%\third-party\Processlib
 

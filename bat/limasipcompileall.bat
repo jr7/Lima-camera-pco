@@ -1,10 +1,10 @@
 call limasetdir
-cd /D %LIMADIR%\third-party\Processlib\sip
+cd /D %GITLIMADIR%\third-party\Processlib\sip
 
 python configure.py
 nmake clean
 nmake
 
-cd /D %LIMADIR%
+cd /D %GITLIMADIR%
 windowsSipCompilation.py --config
 windowsSipCompilation.py

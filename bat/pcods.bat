@@ -1,3 +1,3 @@
-c:
-cd c:\blissadm\lima\pco\install
+call limasetdir
+cd /D %LIMAPCODIR%
 python LimaCCDs.py pco

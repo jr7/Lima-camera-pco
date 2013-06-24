@@ -141,6 +141,8 @@ stcPcoData::stcPcoData(){
 	char *ptr, *ptrMax;
 	int i;
 
+	memset(this, 0, sizeof(struct stcPcoData));
+
 	ptr = version; *ptr = 0;
 	ptrMax = ptr + sizeof(version) - 1;
 
@@ -175,13 +177,14 @@ stcPcoData::stcPcoData(){
 	msAcqRecTimestamp = msAcqXferTimestamp =
 			getTimestamp();
 
-	msAcqRec = msAcqXfer =
+	/* msAcqRec = msAcqXfer =
 	iAllocatedBufferNumber = 
 	dwAllocatedBufferSize = 
 	iAllocatedBufferNumberLima =
 		0;
 
 	debugLevel = 0;
+	*/
 }
 
 //=========================================================================================================

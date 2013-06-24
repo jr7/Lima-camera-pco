@@ -1,6 +1,4 @@
 call limasetdir
-cd /D %LIMADIR%
-mkdir install
-cd install
+cd /D %GITLIMADIR%\install
 dir *.py
 

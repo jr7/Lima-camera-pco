@@ -1,2 +1,2 @@
 call limasetdir
-cd /D %LIMADIR%
+cd /D %GITLIMADIR%
