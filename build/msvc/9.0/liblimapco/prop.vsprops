@@ -6,6 +6,6 @@
 	>
 	<UserMacro
 		Name="LimaDir"
-		Value="$(SolutionDir)..\..\"
+		Value="$(ProjectDir)..\..\..\..\..\..\"
 	/>
 </VisualStudioPropertySheet>
