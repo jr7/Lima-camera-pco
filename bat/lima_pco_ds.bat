@@ -19,7 +19,7 @@ c:
 @echo on
 cd c:\blissadm\lima\pco\%1
 
-python LimaCCDs.py pcodimax2 -ORBendPoint giop:tcp:160.103.35.39:
+python LimaCCDs.py pcodimax1 -ORBendPoint giop:tcp:160.103.35.39:
 pause 
 
 :eof
