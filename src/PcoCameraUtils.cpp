@@ -155,7 +155,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr,"**** %s [begin]\n", __FUNCTION__);
 
 
-			ptr += sprintf_s(ptr, ptrMax - ptr,"**** PCO Info\n");
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* --- PCO info ---\n");
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* timestamp[%s]\n", getTimestamp(Iso));
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* cam_name[%s]\n", m_pcoData->camera_name);
 
@@ -178,8 +178,6 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* cocRunTime[%g] (s) frameRate[%g] (fps)\n",  
 				m_pcoData->cocRunTime, m_pcoData->frameRate);
 			
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* Acq recTimeNow[%ld] recTimeout[%ld] recTimeTotal[%ld] xferTime[%ld] (ms)\n", 
-						m_pcoData->msAcqTnow, m_pcoData->msAcqTout, m_pcoData->msAcqRec, m_pcoData->msAcqXfer);
 
 			double _exposure, _delay;
 			struct lima::HwSyncCtrlObj::ValidRangesType valid_ranges;
@@ -218,6 +216,13 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->dwMaxImageCnt[%d]=[%ld]\n", segmentArr, m_pcoData->dwMaxImageCnt[segmentArr]);
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* storage_mode[%d] recorder_submode[%d]\n", 
 					m_pcoData->storage_mode, m_pcoData->recorder_submode);
+				ptr += sprintf_s(ptr, ptrMax - ptr, 
+					"* Acq: frm[%d] rec[%ld] xfer[%ld] recNow[%ld] recTout[%ld] (ms) [%s]\n",
+					m_pcoData->trace_nb_frames,
+					m_pcoData->msAcqRec, m_pcoData->msAcqXfer,  
+					m_pcoData->msAcqTnow, m_pcoData->msAcqTout, 
+					getTimestamp(Iso, m_pcoData->msAcqRecTimestamp));
+
 			}
 
 			ptr += sprintf_s(ptr, ptrMax - ptr,"**** %s [end]\n", __FUNCTION__);
@@ -308,12 +313,10 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			}
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, 
-				"* frm[%d] rec[%ld] xfer[%ld] recNow[%ld] recTout[%ld] (ms) [%s]\n",
+				"* Acq: frm[%d] rec[%ld] xfer[%ld] recNow[%ld] recTout[%ld] (ms) [%s]\n",
 				m_pcoData->trace_nb_frames,
-				m_pcoData->msAcqRec, 
-				m_pcoData->msAcqXfer,  
-				m_pcoData->msAcqTnow, 
-				m_pcoData->msAcqTout, 
+				m_pcoData->msAcqRec, m_pcoData->msAcqXfer,  
+				m_pcoData->msAcqTnow, m_pcoData->msAcqTout, 
 				getTimestamp(Iso, m_pcoData->msAcqRecTimestamp));
 
 			return output;
