@@ -27,6 +27,8 @@
 #include <sys/timeb.h>
 #include <time.h>
 
+#include "HwSyncCtrlObj.h"
+
 #include "Exceptions.h"
 
 #include "PcoCameraUtils.h"
@@ -173,22 +175,20 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 					size.getWidth(), size.getHeight());
 			}
 
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_cocRunTime=[%g s]\n",  m_pcoData->cocRunTime);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_frameRate=[%g fps]\n", m_pcoData->frameRate);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* cocRunTime[%g] (s) frameRate[%g] (fps)\n",  
+				m_pcoData->cocRunTime, m_pcoData->frameRate);
 			
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* Acq (ms) recTimeNow=[%ld] recTimeout=[%ld] recTimeTotal=[%ld] xferTime=[%ld]\n", 
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* Acq recTimeNow[%ld] recTimeout[%ld] recTimeTotal[%ld] xferTime[%ld] (ms)\n", 
 						m_pcoData->msAcqTnow, m_pcoData->msAcqTout, m_pcoData->msAcqRec, m_pcoData->msAcqXfer);
 
 			double _exposure, _delay;
+			struct lima::HwSyncCtrlObj::ValidRangesType valid_ranges;
+			m_sync->getValidRanges(valid_ranges);
 			m_sync->getExpTime(_exposure);
 			m_sync->getLatTime(_delay);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->storage_mode=[%d]\n", m_pcoData->storage_mode);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->recorder_submode=[%d]\n", m_pcoData->recorder_submode);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* exp[%g] min[%g] max[%g] (s)\n", _exposure, valid_ranges.min_exp_time,valid_ranges.max_exp_time );
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* delay[%g] min[%g] max[%g] (s)\n", _delay, valid_ranges.min_lat_time, valid_ranges.max_lat_time);
 			
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* _exposure=[%g s]\n", _exposure);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* _delay=[%g s]\n", _delay);
-			
-
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* wXResActual=[%d] wYResActual=[%d] \n",  m_pcoData->wXResActual,  m_pcoData->wYResActual);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* wXResMax=[%d] wYResMax=[%d] \n",  m_pcoData->wXResMax,  m_pcoData->wYResMax);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* wMetaDataSize=[%d] wMetaDataVersion=[%d] \n",  m_pcoData->wMetaDataSize,  m_pcoData->wMetaDataVersion);
@@ -209,31 +209,31 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_sync->getNbFrames=[%d frames]\n", iFrames);
 
 			if(_isCameraType(Dimax)){
-				ptr += sprintf_s(ptr, ptrMax - ptr, "* DIMAX info\n");
+				ptr += sprintf_s(ptr, ptrMax - ptr, "* --- DIMAX info ---\n");
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* PcoActiveSegment=[%d]\n", segmentArr+1);
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->dwMaxFramesInSegment[%d]=[%d frames]\n", segmentArr, m_pcoData->dwMaxFramesInSegment[segmentArr]);
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->dwSegmentSize[%d]=[%d pages]\n", segmentArr, m_pcoData->dwSegmentSize[segmentArr]);
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->wPixPerPage[%d pix]\n", m_pcoData->wPixPerPage);
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->dwValidImageCnt[%d]=[%ld]\n", segmentArr, m_pcoData->dwValidImageCnt[segmentArr]);
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->dwMaxImageCnt[%d]=[%ld]\n", segmentArr, m_pcoData->dwMaxImageCnt[segmentArr]);
+				ptr += sprintf_s(ptr, ptrMax - ptr, "* storage_mode[%d] recorder_submode[%d]\n", 
+					m_pcoData->storage_mode, m_pcoData->recorder_submode);
 			}
 
 			ptr += sprintf_s(ptr, ptrMax - ptr,"**** %s [end]\n", __FUNCTION__);
 			return output;
 		}
 		
-		key = keys[ikey] = "acqTime";     //----------------------------------------------------------------
-		keys_desc[ikey++] = "(R) for DIMAX only / acq time details (record and transfer time)";     //----------------------------------------------------------------
+		key = keys[ikey] = "expDelayTime";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) exposure and delay time";
 		if(_stricmp(cmd, key) == 0){
+			double _exposure, _delay;
 
-			if(!_isCameraType(Dimax)) {
-				ptr += sprintf_s(ptr, ptrMax - ptr, "function only for DIMAX");
-				return output;
-			}
+			m_sync->getExpTime(_exposure);
+			m_sync->getLatTime(_delay);
+			
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* exp[%g] delay[%g] (s)\n", _exposure, _delay);
 
-			ptr += sprintf_s(ptr, ptrMax - ptr, 
-				"acqTime(ms): recTimeNow: %ld recTimeout: %ld recTimeTotal: %ld xferTime: %ld\n", 
-						m_pcoData->msAcqTnow, m_pcoData->msAcqTout, m_pcoData->msAcqRec, m_pcoData->msAcqXfer);
 			return output;
 		}
 
@@ -243,7 +243,6 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "%g",  m_pcoData->cocRunTime);
 			return output;
 		}
-
 		key = keys[ikey] = "frameRate";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "(R) max frame rate (calculated as 1/cocRunTime)";   
 		if(_stricmp(cmd, key) == 0){
@@ -300,17 +299,26 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 
 
 		key = keys[ikey] = "timeDimax";     //----------------------------------------------------------------
-		keys_desc[ikey++] = "(R) TODO";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) for DIMAX only / acq time details (record and transfer time)";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
-			ptr += sprintf_s(ptr, ptrMax - ptr, "timeDimax: \n"
-												"   [%s]  record (ms)=[%ld]\n",
-				getTimestamp(Iso, m_pcoData->msAcqRecTimestamp), m_pcoData->msAcqRec); 
-			
-			ptr += sprintf_s(ptr, ptrMax - ptr, "   [%s]    xfer (ms)=[%ld]\n",
- 				getTimestamp(Iso, m_pcoData->msAcqXferTimestamp), m_pcoData->msAcqXfer);
-			
+
+			if(!_isCameraType(Dimax)) {
+				ptr += sprintf_s(ptr, ptrMax - ptr, "* ERROR - only for DIMAX");
+				return output;
+			}
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, 
+				"* frm[%d] rec[%ld] xfer[%ld] recNow[%ld] recTout[%ld] (ms) [%s]\n",
+				m_pcoData->trace_nb_frames,
+				m_pcoData->msAcqRec, 
+				m_pcoData->msAcqXfer,  
+				m_pcoData->msAcqTnow, 
+				m_pcoData->msAcqTout, 
+				getTimestamp(Iso, m_pcoData->msAcqRecTimestamp));
+
 			return output;
 		}
+
 
 
 		key = keys[ikey] = "testCmd";     //----------------------------------------------------------------

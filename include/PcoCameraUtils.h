@@ -27,7 +27,7 @@
 #include <time.h>
 #include "Compatibility.h"
 
-enum timestampFmt {Iso, FnFull, FnDate};
+enum timestampFmt {Iso=1, FnFull, FnDate};
 
 char *getTimestamp(timestampFmt fmtIdx, time_t xtime = 0) ;
 

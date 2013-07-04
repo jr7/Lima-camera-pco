@@ -154,6 +154,7 @@ struct stcPcoData {
 		
 		long msAcqRec, msAcqXfer, msAcqTout, msAcqTnow;
 		time_t msAcqRecTimestamp, msAcqXferTimestamp, msAcqToutTimestamp, msAcqTnowTimestamp;
+		int trace_nb_frames;
 
 		DWORD dwPixelRate, dwPixelRateRequested;
 		double fTransferRateMHzMax;

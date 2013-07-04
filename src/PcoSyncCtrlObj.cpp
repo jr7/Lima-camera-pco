@@ -291,10 +291,11 @@ void SyncCtrlObj::getExpTime(double &exp_time)
 void SyncCtrlObj::setLatTime(double  lat_time)
 {
 	// DONE
-  //No latency managed
+  DEB_MEMBER_FUNCT();
   //delay ???
 
   m_lat_time = lat_time;
+  DEB_PARAM() << DEB_VAR2(m_lat_time, lat_time);
 }
 
 //=========================================================================================================
@@ -302,8 +303,11 @@ void SyncCtrlObj::setLatTime(double  lat_time)
 void SyncCtrlObj::getLatTime(double& lat_time)
 {
 	// DONE
+  DEB_MEMBER_FUNCT();
+
   //m_lat_time = 0.;
   lat_time = m_lat_time;		// Don't know - delay????
+  DEB_PARAM() << DEB_VAR2(m_lat_time, lat_time);
 }
 
 //=========================================================================================================
@@ -350,9 +354,11 @@ void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 	// DONE
 
 	valid_ranges.min_exp_time = m_pcoData->stcPcoDescription.dwMinExposureDESC * 1e-9 ;	//Minimum exposure time in ns
-  valid_ranges.max_exp_time = m_pcoData->stcPcoDescription.dwMaxExposureDESC * 1e-3 ;   // Maximum exposure time in ms  
-  valid_ranges.min_lat_time = 0.; // Don't know
-  valid_ranges.max_lat_time = 0.; // Don't know
+	valid_ranges.max_exp_time = m_pcoData->stcPcoDescription.dwMaxExposureDESC * 1e-3 ;   // Maximum exposure time in ms  
+
+	valid_ranges.min_lat_time = m_pcoData->stcPcoDescription.dwMinDelayDESC * 1e-9 ; // Minimum delay time in ns
+	valid_ranges.max_lat_time = m_pcoData->stcPcoDescription.dwMaxDelayDESC * 1e-3 ; // Maximum delay time in ms
+
 }
 
 //=========================================================================================================

@@ -764,6 +764,7 @@ void _pco_acq_thread_dimax(void *argin) {
 	// dimax recording time
 	m_pcoData->msAcqRec = msRec = msElapsedTime(tStart);
 	m_pcoData->msAcqRecTimestamp = getTimestamp();
+	m_pcoData->trace_nb_frames = nb_acq_frames;
 
 	msElapsedTimeSet(tStart);
 
