@@ -924,12 +924,14 @@ void Camera::reset()
 //=========================================================================================================
 //=========================================================================================================
 int Camera::PcoCheckError(int err) {
+	DEB_MEMBER_FUNCT();
+
 	static char lastErrorMsg[500];
 	if (err != 0) {
 		DWORD dwErr = err;
 		m_pcoData->pcoError = err;
 		PCO_GetErrorText(dwErr, m_pcoData->pcoErrorMsg, ERR_SIZE-14);
-		printf("===> [x%08x][%s]\n", dwErr, m_pcoData->pcoErrorMsg);
+		DEB_ALWAYS() << DEB_VAR1(m_pcoData->pcoErrorMsg);
 		return (err);
 	}
 	return (err);
@@ -1133,6 +1135,9 @@ char* Camera::_pcoSet_Exposure_Delay_Time(int &error, int ph){
             break;
         }
     }
+
+
+
     //====================================== TODO set/get the value of ccd.delay now is 0 
     for (wDelay_base = 0; wDelay_base < 3; wDelay_base++) {
         factor = pow((float) 10, (int) (wDelay_base * 3 - 9));
@@ -1142,6 +1147,13 @@ char* Camera::_pcoSet_Exposure_Delay_Time(int &error, int ph){
         }
     }
 
+		// round the 3 LSB 
+		// fixed the problem with max exp 0.04s -> 40 000 001 ns -> error dll (max 40 000 000)
+
+	if(dwExposure > 8000) dwExposure = (dwExposure | 7) ^7;
+	if(dwDelay > 8000) dwDelay = (dwDelay | 7) ^7;
+
+
     if(_getDebug(1)) {
 		DEB_ALWAYS() << DEB_VAR3(_exposure, dwExposure, wExposure_base);
 		DEB_ALWAYS() << DEB_VAR3(_delay,  dwDelay, wDelay_base);
@@ -1149,8 +1161,8 @@ char* Camera::_pcoSet_Exposure_Delay_Time(int &error, int ph){
 
 	error = PcoCheckError(PCO_SetDelayExposureTime(m_handle, dwDelay, dwExposure, wDelay_base, wExposure_base));
 	if(error) {
-		DEB_TRACE() << DEB_VAR2(_exposure, _delay);	
-		DEB_TRACE() << DEB_VAR4(dwDelay, dwExposure, wDelay_base, wExposure_base);	
+		DEB_ALWAYS() << DEB_VAR2(_exposure, _delay);	
+		DEB_ALWAYS() << DEB_VAR4(dwDelay, dwExposure, wDelay_base, wExposure_base);	
 		return "PCO_SetDelayExposureTime";
 	}
 

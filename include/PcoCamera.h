@@ -170,7 +170,11 @@ struct stcPcoData {
 
 		char version[BUFF_VERSION];
 
-
+		double min_exp_time, min_exp_time_err;
+		double max_exp_time, max_exp_time_err;
+		double min_lat_time, min_lat_time_err;
+		double max_lat_time, max_lat_time_err;
+		
 		stcPcoData();
 
 };

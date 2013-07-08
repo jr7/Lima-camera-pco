@@ -243,28 +243,40 @@ void SyncCtrlObj::setExpTime(double exp_time)
 
 	ValidRangesType valid_ranges;
   getValidRanges(valid_ranges);
+  double diff;
 
+
+	if ((exp_time >= valid_ranges.min_exp_time) &&
+				(exp_time <= valid_ranges.max_exp_time))	{
+		m_exp_time = exp_time;
+		return;
+	}
+
+	if (exp_time < m_pcoData->min_exp_time_err){
+	  diff = exp_time - valid_ranges.min_exp_time;
+	  DEB_ALWAYS() << "Exposure time out of range (exp < min): "
+		<< DEB_VAR3(diff, exp_time, valid_ranges.min_exp_time);
+	  THROW_HW_ERROR(NotSupported) << "Exposure time out of range" ;
+	}
+
+	if (exp_time > m_pcoData->max_exp_time_err){ 
+		diff = exp_time - valid_ranges.max_exp_time;
+		DEB_ALWAYS() << "Exposure time out of range (exp > max): "
+			<< DEB_VAR3(diff, exp_time, valid_ranges.max_exp_time);
+		THROW_HW_ERROR(NotSupported) << "Exposure time out of range" ;
+	}
+
+	if (exp_time < valid_ranges.min_exp_time){
+		m_exp_time = m_pcoData->min_exp_time;
+		DEB_ALWAYS() << "Exp time fixed " << DEB_VAR2(m_exp_time, exp_time);
+		return;
+	}
+
+	m_exp_time = m_pcoData->max_exp_time;
+	DEB_ALWAYS() << "Exp time fixed " << DEB_VAR2(m_exp_time, exp_time);
+	return;
 	
-
-  if (exp_time <valid_ranges.min_exp_time){ 
-	DEB_ALWAYS() << "Exposure time out of range"
-		<< DEB_VAR3(exp_time, valid_ranges.max_exp_time, valid_ranges.min_exp_time);
-	exp_time =valid_ranges.min_exp_time;
-  }
-
-  if (exp_time >valid_ranges.max_exp_time){ 
-	DEB_ALWAYS() << "Exposure time out of range"
-		<< DEB_VAR3(exp_time, valid_ranges.max_exp_time, valid_ranges.min_exp_time);
-	exp_time =valid_ranges.max_exp_time;
-  }
-
-  if ((exp_time <valid_ranges.min_exp_time)||(exp_time >valid_ranges.max_exp_time)){ 
-	  THROW_HW_ERROR(NotSupported) << "Exposure time out of range"
-		 << DEB_VAR3(exp_time, valid_ranges.min_exp_time, valid_ranges.max_exp_time);
-  }
-
-  m_exp_time = exp_time;
-
+	
 
 }
 
@@ -353,11 +365,27 @@ void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 	DEF_FNID;
 	// DONE
 
-	valid_ranges.min_exp_time = m_pcoData->stcPcoDescription.dwMinExposureDESC * 1e-9 ;	//Minimum exposure time in ns
-	valid_ranges.max_exp_time = m_pcoData->stcPcoDescription.dwMaxExposureDESC * 1e-3 ;   // Maximum exposure time in ms  
+/*
+	valid_ranges.min_exp_time = float(m_pcoData->stcPcoDescription.dwMinExposureDESC * 1e-9) ;	//Minimum exposure time in ns
+	valid_ranges.max_exp_time = float(m_pcoData->stcPcoDescription.dwMaxExposureDESC * 1e-3) ;   // Maximum exposure time in ms  
 
-	valid_ranges.min_lat_time = m_pcoData->stcPcoDescription.dwMinDelayDESC * 1e-9 ; // Minimum delay time in ns
-	valid_ranges.max_lat_time = m_pcoData->stcPcoDescription.dwMaxDelayDESC * 1e-3 ; // Maximum delay time in ms
+	valid_ranges.min_lat_time = float(m_pcoData->stcPcoDescription.dwMinDelayDESC * 1e-9) ; // Minimum delay time in ns
+	valid_ranges.max_lat_time = float(m_pcoData->stcPcoDescription.dwMaxDelayDESC * 1e-3) ; // Maximum delay time in ms
+*/
+
+
+	m_pcoData->min_exp_time = (m_pcoData->stcPcoDescription.dwMinExposureDESC) * 1e-9 ;	//Minimum exposure time in ns
+	valid_ranges.min_exp_time = m_pcoData->min_exp_time_err = m_pcoData->min_exp_time - 1e-9 ;	
+
+	m_pcoData->max_exp_time = (m_pcoData->stcPcoDescription.dwMaxExposureDESC) * 1e-3 ;   // Maximum exposure time in ms  
+	valid_ranges.max_exp_time = m_pcoData->max_exp_time_err = m_pcoData->max_exp_time + 1e-3 ;	
+
+	m_pcoData->min_lat_time = (m_pcoData->stcPcoDescription.dwMinDelayDESC) * 1e-9 ; // Minimum delay time in ns
+	valid_ranges.min_lat_time = m_pcoData->min_lat_time_err = m_pcoData->min_lat_time - 1e-9 ;	
+
+	m_pcoData->max_lat_time = (m_pcoData->stcPcoDescription.dwMaxDelayDESC) * 1e-3 ; // Maximum delay time in ms
+	valid_ranges.max_lat_time = m_pcoData->max_lat_time_err = m_pcoData->max_lat_time + 1e-3 ;	
+
 
 }
 
