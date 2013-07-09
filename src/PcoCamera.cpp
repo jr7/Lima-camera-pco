@@ -1087,7 +1087,7 @@ char * Camera::_pcoSet_Storage_subRecord_Mode(enumPcoStorageMode mode, int &erro
 //=================================================================================================
 //=================================================================================================
 
-// 4294967295.0 = pow(2., 32) - 1.
+// 4294967295.0 = double(DWORD(0xFFFFFFFF)) 
 #define DWORD_MAX_FLOAT 4294967295.0
 
 #define	MAX_DWORD_MS (double(4294967295.0e-3))
@@ -1102,17 +1102,13 @@ void _pco_time2dwbase(double exp_time, DWORD &dwExp, WORD &wBase) {
 		// max DWORD 0xFFFFFFFF = 4294967295.0
 		// find the lowest unit (ns -> us -> ms) which does not overflow DWORD
     
-	if(exp_time <= MAX_DWORD_NS) {   // ns(base=0)
-		dwExp = DWORD(exp_time * 1.0e9);
-		wBase = 0;
-	} else 	if(exp_time <= MAX_DWORD_US) {  // us(base=1)
-		dwExp = DWORD(exp_time * 1.0e6);
-		wBase = 1;
-	} else {  //ms(base=2)
-		dwExp = DWORD(exp_time * 1.0e3);
-		wBase = 2;
+	if(exp_time <= MAX_DWORD_NS) {   
+		dwExp = DWORD(exp_time * 1.0e9); wBase = 0; // ns
+	} else 	if(exp_time <= MAX_DWORD_US) {  
+		dwExp = DWORD(exp_time * 1.0e6); wBase = 1; // us
+	} else {  
+		dwExp = DWORD(exp_time * 1.0e3); wBase = 2; // ms
 	}
-
 
 	DWORD mask = 0x7;
 	DWORD min = 0x1000;
