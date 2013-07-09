@@ -53,6 +53,7 @@ void _pco_acq_thread_dimax(void *argin);
 void _pco_acq_thread_dimax_live(void *argin);
 void _pco_acq_thread_edge(void *argin);
 void _pco_shutter_thread_edge(void *argin);
+void _pco_time2dwbase(double exp_time, DWORD &dwExp, WORD &wBase);
 
 //=========================================================================================================
 char* _timestamp_pcocamera() {return ID_TIMESTAMP ;}
@@ -1086,16 +1087,56 @@ char * Camera::_pcoSet_Storage_subRecord_Mode(enumPcoStorageMode mode, int &erro
 //=================================================================================================
 //=================================================================================================
 
+// 4294967295.0 = pow(2., 32) - 1.
+#define DWORD_MAX_FLOAT 4294967295.0
 
+#define	MAX_DWORD_MS (double(4294967295.0e-3))
+#define	MAX_DWORD_US (double(4294967295.0e-6))
+#define	MAX_DWORD_NS (double(4294967295.0e-9))
+
+
+void _pco_time2dwbase(double exp_time, DWORD &dwExp, WORD &wBase) {
+	// conversion time(s) to PCO standard DWORD + UNIT(ms, us, ns)
+		// exp & lat time is saved in seconds (LIMA). 
+		// PCO requires them expressed in DWORD as ms(base=2), us(base=1) or ns(base=0)
+		// max DWORD 0xFFFFFFFF = 4294967295.0
+		// find the lowest unit (ns -> us -> ms) which does not overflow DWORD
+    
+	if(exp_time <= MAX_DWORD_NS) {   // ns(base=0)
+		dwExp = DWORD(exp_time * 1.0e9);
+		wBase = 0;
+	} else 	if(exp_time <= MAX_DWORD_US) {  // us(base=1)
+		dwExp = DWORD(exp_time * 1.0e6);
+		wBase = 1;
+	} else {  //ms(base=2)
+		dwExp = DWORD(exp_time * 1.0e3);
+		wBase = 2;
+	}
+
+
+	DWORD mask = 0x7;
+	DWORD min = 0x1000;
+
+	if(dwExp > min){
+		dwExp |= mask;
+		dwExp ^= mask;
+	}
+
+	return;
+}
+
+
+//=================================================================================================
+//=================================================================================================
 char* Camera::_pcoSet_Exposure_Delay_Time(int &error, int ph){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
-    float factor;
 	bool doIt;
+
 
     DWORD dwExposure, dwDelay;
 	WORD wExposure_base, wDelay_base;
-    double _exposure, _delay, val;
+    double _exposure, _delay;
     m_sync->getExpTime(_exposure);
     m_sync->getLatTime(_delay);
 	double _delay0 = _delay;
@@ -1104,7 +1145,6 @@ char* Camera::_pcoSet_Exposure_Delay_Time(int &error, int ph){
 	
 	if(ph != 0){ 
 		doIt = FALSE;
-
 
 		if((_isCameraType(Edge)) && (m_pcoData->dwPixelRate >= PCO_EDGE_PIXEL_RATE_HIGH) ) {
 			double pixels = ((double) m_pcoData->wXResActual)* ((double) m_pcoData->wYResActual);
@@ -1117,55 +1157,24 @@ char* Camera::_pcoSet_Exposure_Delay_Time(int &error, int ph){
 				doIt = TRUE;
 				printf("--- %s> delay forced [%g] -> [%g]\n", fnId, _delay0, _delay);
 			}
-			//if (period > _delay + _exposure) {
-			//	_delay = period  - _exposure;
-			//	printf("--- %s> delay forced [%g] -> [%g]\n", fnId, _delay0, _delay);
-			//}
 		}
 	}
 
 	if(!doIt) return fnId;
 
-		// exp/lat time is saved in s. PCO requires it expressed in ms(=2), us(=1), ns(=0)
-	// test time expressed in ns(=0), us(=1), ms(=2) up not overflow max precision in 32 bits
-    for (wExposure_base = 0; wExposure_base < 3; wExposure_base++) {  // base 0(ns), 1(us), 2(ms)
-        factor = pow((float)10, (int) (wExposure_base * 3 - 9));		// factor 10E-9, 10E-6, 10E-3
-        if ( (val = (_exposure / factor)) <= DWORD_MAX_FLOAT) {		// multiply by 10E9, 10E6, 10E3
-            dwExposure = (DWORD) val;			// exposure max precision in 32 bits, exposure base 0(ns)  1(us)  2(ms)
-            break;
-        }
-    }
+	_pco_time2dwbase(_exposure, dwExposure, wExposure_base);
+	_pco_time2dwbase(_delay,  dwDelay, wDelay_base);
 
+	error = PcoCheckError(PCO_SetDelayExposureTime(m_handle, dwDelay, dwExposure, wDelay_base, wExposure_base));
 
-
-    //====================================== TODO set/get the value of ccd.delay now is 0 
-    for (wDelay_base = 0; wDelay_base < 3; wDelay_base++) {
-        factor = pow((float) 10, (int) (wDelay_base * 3 - 9));
-        if ( (val = (_delay / factor)) <= DWORD_MAX_FLOAT) {
-            dwDelay = (DWORD) val;
-            break;
-        }
-    }
-
-		// round the 3 LSB 
-		// fixed the problem with max exp 0.04s -> 40 000 001 ns -> error dll (max 40 000 000)
-
-	if(dwExposure > 8000) dwExposure = (dwExposure | 7) ^7;
-	if(dwDelay > 8000) dwDelay = (dwDelay | 7) ^7;
-
-
-    if(_getDebug(1)) {
+	if(error || _getDebug(1)) {
 		DEB_ALWAYS() << DEB_VAR3(_exposure, dwExposure, wExposure_base);
 		DEB_ALWAYS() << DEB_VAR3(_delay,  dwDelay, wDelay_base);
 	}
 
-	error = PcoCheckError(PCO_SetDelayExposureTime(m_handle, dwDelay, dwExposure, wDelay_base, wExposure_base));
 	if(error) {
-		DEB_ALWAYS() << DEB_VAR2(_exposure, _delay);	
-		DEB_ALWAYS() << DEB_VAR4(dwDelay, dwExposure, wDelay_base, wExposure_base);	
 		return "PCO_SetDelayExposureTime";
 	}
-
 
 	return fnId;
 }
