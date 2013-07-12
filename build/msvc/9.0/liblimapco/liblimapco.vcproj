@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="liblimapco"
 	ProjectGUID="{D821F68F-28BF-4A97-BF3C-83DCA6405475}"
 	RootNamespace="liblimapco"
@@ -201,7 +201,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)include&quot;;&quot;$(LimaDir)hardware\include&quot;;&quot;$(LimaDir)common\include&quot;;&quot;$(LimaDir)third-party\Processlib\core\include\WindowSpecific&quot;;&quot;$(LimaDir)third-party\Processlib\core\include&quot;;&quot;$(SolutionDir)sdkPco\include&quot;;&quot;$(LimaDir)..\sdkPco\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)..\..\..\..\include&quot;;&quot;$(ProjectDir)..\..\..\..\..\..\common\include&quot;;&quot;$(ProjectDir)..\..\..\..\..\..\hardware\include&quot;;&quot;$(ProjectDir)..\..\..\..\..\..\third-party\Processlib\core\include\WindowSpecific&quot;;&quot;$(ProjectDir)..\..\..\..\..\..\third-party\Processlib\core\include&quot;;&quot;$(ProjectDir)..\..\..\..\sdkPco\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBLIMAPCO_EXPORTS;LIMA_PROCESSCORE_DLL;LIMA_PROCESSCORE_BUILD;_WIN32_WINNT=0x0502"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -221,7 +221,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionDir)sdkPco\lib\SC2_Cam.lib $(LimaDir)build\msvc\9.0\LimaCore\Release\liblimacore.lib $(LimaDir)third-party\Processlib\build\msvc\9.0\libprocesslib\Release\libprocesslib.lib"
+				AdditionalDependencies="$(ProjectDir)..\..\..\..\sdkPco\lib\SC2_Cam.lib $(InputDir)..\..\..\..\..\..\build\msvc\9.0\LimaCore\Release\liblimacore.lib $(InputDir)..\..\..\..\..\..\third-party\Processlib\build\msvc\9.0\libprocesslib\Release\libprocesslib.lib"
 				OutputFile="$(InputDir)Release\$(ProjectName).dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
