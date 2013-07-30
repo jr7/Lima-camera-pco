@@ -54,6 +54,8 @@ struct stcXlatCode2Str {
 
 #define PCO_MAXSEGMENTS 4
 
+#define LEN_DUMP 128
+char DLL_EXPORT *_hex_dump_bytes(void *obj, size_t lenObj, char *buff, size_t lenBuff);
 
 
 struct stcFrame {
@@ -170,9 +172,9 @@ struct stcPcoData {
 
 		char version[BUFF_VERSION];
 
-		double min_exp_time, min_exp_time_err;
+		double min_exp_time, min_exp_time_err, step_exp_time;
 		double max_exp_time, max_exp_time_err;
-		double min_lat_time, min_lat_time_err;
+		double min_lat_time, min_lat_time_err, step_lat_time;
 		double max_lat_time, max_lat_time_err;
 		
 		stcPcoData();

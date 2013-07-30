@@ -184,8 +184,24 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			m_sync->getValidRanges(valid_ranges);
 			m_sync->getExpTime(_exposure);
 			m_sync->getLatTime(_delay);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* exp[%g] min[%g] max[%g] (s)\n", _exposure, valid_ranges.min_exp_time,valid_ranges.max_exp_time );
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* delay[%g] min[%g] max[%g] (s)\n", _delay, valid_ranges.min_lat_time, valid_ranges.max_lat_time);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* exp[%g s] min[%g us] max[%g ms] step[%g us]\n", 
+				_exposure, 
+				m_pcoData->stcPcoDescription.dwMinExposureDESC * 1.0e-3,
+				m_pcoData->stcPcoDescription.dwMaxExposureDESC * 1.0,
+				m_pcoData->stcPcoDescription.dwMinExposureStepDESC * 1.0e-3  );
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* valid exp min[%g us] max[%g ms]\n", 
+				valid_ranges.min_exp_time * 1.0e6, valid_ranges.max_exp_time * 1.0e3);
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* delay[%g s] min[%g us] max[%g ms] step[%g us]\n", 
+				_delay, 
+				m_pcoData->stcPcoDescription.dwMinDelayDESC * 1.0e-3,
+				m_pcoData->stcPcoDescription.dwMaxDelayDESC * 1.0,
+
+				m_pcoData->stcPcoDescription.dwMinDelayStepDESC * 1.0e-3  );
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* valid delay min[%g us] max[%g ms]\n", 
+				valid_ranges.min_lat_time * 1.0e6, valid_ranges.max_lat_time * 1.0e3);
+
 			
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* wXResActual=[%d] wYResActual=[%d] \n",  m_pcoData->wXResActual,  m_pcoData->wYResActual);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* wXResMax=[%d] wYResMax=[%d] \n",  m_pcoData->wXResMax,  m_pcoData->wYResMax);
@@ -722,6 +738,30 @@ char *dword_to_hex(char *s, DWORD dword)
   s = word_to_hex(s, dword >> 16);
   return word_to_hex(s, (WORD) dword);
   
+}
+
+
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
+char *_hex_dump_bytes(void *obj, size_t lenObj, char *buff, size_t lenBuff) {
+	char *ptr = buff;
+	char *ptrMax = buff + lenBuff;
+	char *ptrObj = (char *) obj;
+
+	memset(buff, ' ', lenBuff);
+
+	for(unsigned int i=0; i< lenObj; i++) {
+
+		if(ptr+3 > ptrMax) break;
+		ptr = byte_to_hex(ptr, *ptrObj ++);
+		if(ptr+1 == ptrMax) break;
+		ptr++;
+
+	}
+
+	*ptr = 0; 
+	return buff;
+
 }
 
 //--------------------------------------------------------------------

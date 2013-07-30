@@ -229,8 +229,6 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(bool &ext_trig){
 	DEB_ALWAYS() << "returned values" << DEB_VAR2(ret, m_trig_mode);
 
 	return ret;
-
-
 }
 
 
@@ -245,9 +243,25 @@ void SyncCtrlObj::setExpTime(double exp_time)
   getValidRanges(valid_ranges);
   double diff;
 
+#if 0
+  char buff[LEN_DUMP];
 
-	if ((exp_time >= valid_ranges.min_exp_time) &&
-				(exp_time <= valid_ranges.max_exp_time))	{
+  _hex_dump_bytes(&exp_time, sizeof(exp_time), buff, LEN_DUMP);
+	DEB_ALWAYS() << DEB_VAR2(exp_time, buff);
+
+	_hex_dump_bytes(&valid_ranges.min_exp_time, sizeof(valid_ranges.min_exp_time), buff, LEN_DUMP);
+	DEB_ALWAYS() << DEB_VAR2(valid_ranges.min_exp_time, buff);
+
+	_hex_dump_bytes(&m_pcoData->min_exp_time, sizeof(m_pcoData->min_exp_time), buff, LEN_DUMP);
+	DEB_ALWAYS() << DEB_VAR2(m_pcoData->min_exp_time, buff);
+
+	_hex_dump_bytes(&m_pcoData->min_exp_time_err, sizeof(m_pcoData->min_exp_time_err), buff, LEN_DUMP);
+	DEB_ALWAYS() << DEB_VAR2(m_pcoData->min_exp_time_err, buff);
+
+#endif
+
+
+	if ((exp_time >= m_pcoData->min_exp_time) && (exp_time <= m_pcoData->max_exp_time))	{
 		m_exp_time = exp_time;
 		return;
 	}
@@ -266,7 +280,7 @@ void SyncCtrlObj::setExpTime(double exp_time)
 		THROW_HW_ERROR(NotSupported) << "Exposure time out of range" ;
 	}
 
-	if (exp_time < valid_ranges.min_exp_time){
+	if (exp_time < m_pcoData->min_exp_time){
 		m_exp_time = m_pcoData->min_exp_time;
 		DEB_ALWAYS() << "Exp time fixed " << DEB_VAR2(m_exp_time, exp_time);
 		return;
@@ -275,9 +289,6 @@ void SyncCtrlObj::setExpTime(double exp_time)
 	m_exp_time = m_pcoData->max_exp_time;
 	DEB_ALWAYS() << "Exp time fixed " << DEB_VAR2(m_exp_time, exp_time);
 	return;
-	
-	
-
 }
 
 //=========================================================================================================
@@ -290,8 +301,8 @@ void SyncCtrlObj::getExpTime(double &exp_time)
   getValidRanges(valid_ranges);
 	// DONE
   
-  if (m_exp_time < valid_ranges.min_exp_time) m_exp_time = valid_ranges.min_exp_time;
-  else if (m_exp_time > valid_ranges.max_exp_time) m_exp_time = valid_ranges.max_exp_time;
+  if (m_exp_time < m_pcoData->min_exp_time) m_exp_time = m_pcoData->min_exp_time;
+  else if (m_exp_time > m_pcoData->max_exp_time) m_exp_time = m_pcoData->max_exp_time;
   
 
   exp_time = m_exp_time;
@@ -374,17 +385,22 @@ void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 */
 
 
+	m_pcoData->step_exp_time = (m_pcoData->stcPcoDescription.dwMinExposureStepDESC) * 1e-9 ;	//step exposure time in ns
+	
 	m_pcoData->min_exp_time = (m_pcoData->stcPcoDescription.dwMinExposureDESC) * 1e-9 ;	//Minimum exposure time in ns
-	valid_ranges.min_exp_time = m_pcoData->min_exp_time_err = m_pcoData->min_exp_time - 1e-9 ;	
+	valid_ranges.min_exp_time = m_pcoData->min_exp_time_err = m_pcoData->min_exp_time - m_pcoData->step_exp_time ;	
 
 	m_pcoData->max_exp_time = (m_pcoData->stcPcoDescription.dwMaxExposureDESC) * 1e-3 ;   // Maximum exposure time in ms  
-	valid_ranges.max_exp_time = m_pcoData->max_exp_time_err = m_pcoData->max_exp_time + 1e-3 ;	
+	valid_ranges.max_exp_time = m_pcoData->max_exp_time_err = m_pcoData->max_exp_time + m_pcoData->step_exp_time ;	
+
+
+	m_pcoData->step_lat_time = (m_pcoData->stcPcoDescription.dwMinDelayStepDESC) * 1e-9 ;	//step delay time in ns
 
 	m_pcoData->min_lat_time = (m_pcoData->stcPcoDescription.dwMinDelayDESC) * 1e-9 ; // Minimum delay time in ns
-	valid_ranges.min_lat_time = m_pcoData->min_lat_time_err = m_pcoData->min_lat_time - 1e-9 ;	
+	valid_ranges.min_lat_time = m_pcoData->min_lat_time_err = m_pcoData->min_lat_time - m_pcoData->step_lat_time ;	
 
 	m_pcoData->max_lat_time = (m_pcoData->stcPcoDescription.dwMaxDelayDESC) * 1e-3 ; // Maximum delay time in ms
-	valid_ranges.max_lat_time = m_pcoData->max_lat_time_err = m_pcoData->max_lat_time + 1e-3 ;	
+	valid_ranges.max_lat_time = m_pcoData->max_lat_time_err = m_pcoData->max_lat_time + m_pcoData->step_lat_time ;	
 
 
 }
