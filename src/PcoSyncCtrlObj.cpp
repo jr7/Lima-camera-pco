@@ -376,15 +376,6 @@ void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 	DEF_FNID;
 	// DONE
 
-/*
-	valid_ranges.min_exp_time = float(m_pcoData->stcPcoDescription.dwMinExposureDESC * 1e-9) ;	//Minimum exposure time in ns
-	valid_ranges.max_exp_time = float(m_pcoData->stcPcoDescription.dwMaxExposureDESC * 1e-3) ;   // Maximum exposure time in ms  
-
-	valid_ranges.min_lat_time = float(m_pcoData->stcPcoDescription.dwMinDelayDESC * 1e-9) ; // Minimum delay time in ns
-	valid_ranges.max_lat_time = float(m_pcoData->stcPcoDescription.dwMaxDelayDESC * 1e-3) ; // Maximum delay time in ms
-*/
-
-
 	m_pcoData->step_exp_time = (m_pcoData->stcPcoDescription.dwMinExposureStepDESC) * 1e-9 ;	//step exposure time in ns
 	
 	m_pcoData->min_exp_time = (m_pcoData->stcPcoDescription.dwMinExposureDESC) * 1e-9 ;	//Minimum exposure time in ns
@@ -397,7 +388,8 @@ void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 	m_pcoData->step_lat_time = (m_pcoData->stcPcoDescription.dwMinDelayStepDESC) * 1e-9 ;	//step delay time in ns
 
 	m_pcoData->min_lat_time = (m_pcoData->stcPcoDescription.dwMinDelayDESC) * 1e-9 ; // Minimum delay time in ns
-	valid_ranges.min_lat_time = m_pcoData->min_lat_time_err = m_pcoData->min_lat_time - m_pcoData->step_lat_time ;	
+	valid_ranges.min_lat_time = m_pcoData->min_lat_time_err = 
+		(m_pcoData->min_lat_time < m_pcoData->step_lat_time) ? m_pcoData->min_lat_time : m_pcoData->min_lat_time - m_pcoData->step_lat_time ;
 
 	m_pcoData->max_lat_time = (m_pcoData->stcPcoDescription.dwMaxDelayDESC) * 1e-3 ; // Maximum delay time in ms
 	valid_ranges.max_lat_time = m_pcoData->max_lat_time_err = m_pcoData->max_lat_time + m_pcoData->step_lat_time ;	

@@ -701,13 +701,14 @@ void _pco_acq_thread_dimax(void *argin) {
 
 	
 	WORD wSegment = m_cam->pcoGetActiveRamSegment(); 
-	DWORD dwMsSleep = (DWORD) (m_cam->pcoGetCocRunTime() * 1000.);
-	if(dwMsSleep == 0) dwMsSleep = 1;
+	double msPerFrame = (m_cam->pcoGetCocRunTime() * 1000.);
+	DWORD dwMsSleepOneFrame = (DWORD) (msPerFrame + 0.5);	// 4/5 rounding
+	if(dwMsSleepOneFrame == 0) dwMsSleepOneFrame = 1;		// min sleep
 
 	int nb_frames; 	m_sync->getNbFrames(nb_frames);
 	m_sync->setAcqFrames(0);
 
-	timeout = timeout0 = (long) (dwMsSleep * (nb_frames * 1.1));
+	timeout = timeout0 = (long) (msPerFrame * (nb_frames * 1.3));	// 30% guard
 	if(timeout < TOUT_MIN_DIMAX) timeout = TOUT_MIN_DIMAX;
     
 	m_pcoData->msAcqTout = timeout;
@@ -716,7 +717,7 @@ void _pco_acq_thread_dimax(void *argin) {
 	m_sync->setExposing(pcoAcqRecordStart);
 
 	while(_dwValidImageCnt <  (DWORD) nb_frames) {
-		Sleep(dwMsSleep);	
+		Sleep(dwMsSleepOneFrame);	// sleep 1 frame
 		msg = m_cam->_PcoCheckError(PCO_GetNumberOfImagesInSegment(m_handle, wSegment, &_dwValidImageCnt, &_dwMaxImageCnt), error);
 		if(error) {
 			printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, msg);
