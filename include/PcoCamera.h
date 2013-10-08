@@ -34,6 +34,18 @@
 
 #define BUFF_VERSION 1024
 
+//--------------------------------------- debug const for talk
+#define DBG_BUFF           0x00000001
+#define DBG_XFER2LIMA      0x00000002
+#define DBG_LIMABUFF       0x00000004
+#define DBG_EXP            0x00000008
+
+#define DBG_DUMMY_IMG      0x00000100
+#define DBG_ROI            0x00001000
+//---------------------------------------
+
+
+
 #define PCO_EDGE_PIXEL_RATE_MIN 95000000
 #define PCO_EDGE_PIXEL_RATE_MAX 286000000
 #define PCO_EDGE_PIXEL_RATE_LOW 100000000
@@ -98,6 +110,7 @@ struct stcTemp {
 	short wSetpoint;
 };
 
+
 #define SIZEARR_stcPcoHWIOSignal 10
 struct stcPcoData {
 	PCO_General stcPcoGeneral;
@@ -113,6 +126,7 @@ struct stcPcoData {
 	WORD wNrPcoHWIOSignal;
 	unsigned long long debugLevel;
 
+	DWORD dwPixelRateMax;
 
 	char model[MODEL_TYPE_SIZE+1], iface[INTERFACE_TYPE_SIZE+1];
 	//int	interface_type;
@@ -154,9 +168,21 @@ struct stcPcoData {
 
 		WORD wMetaDataMode, wMetaDataSize, wMetaDataVersion;
 		
-		long msAcqRec, msAcqXfer, msAcqTout, msAcqTnow;
+		long msAcqRec, msAcqXfer, msAcqTout, msAcqTnow, msAcqAll;
 		time_t msAcqRecTimestamp, msAcqXferTimestamp, msAcqToutTimestamp, msAcqTnowTimestamp;
 		int trace_nb_frames;
+
+		struct stcTraceAcq{
+			DWORD nrImgRecorded;
+			DWORD maxImgCount;
+			int nrImgRequested;
+			long msTotal, msRecord, msRecordLoop, msXfer, msTout;
+			double msImgCoc;
+			double sExposure, sDelay;
+			time_t endRecordTimestamp;
+			time_t endXferTimestamp;
+			char *fnId;
+		} traceAcq;
 
 		DWORD dwPixelRate, dwPixelRateRequested;
 		double fTransferRateMHzMax;
@@ -186,7 +212,11 @@ enum enumChange {
 };
 
 enum enumPcoFamily {
-	Dimax = 1, Edge, EdgeGL, EdgeRolling,
+	Dimax       = 1<<0, 
+	Edge        = 1<<1, 
+	EdgeGL      = 1<<2,
+	EdgeRolling = 1<<3, 
+	Pco2k       = 1<<4,
 };
 
 enum enumPcoStorageMode {
@@ -259,7 +289,7 @@ namespace lima
 
 		char *_pcoSet_RecordingState(int state, int &error);
 		WORD _getCameraType() {return m_pcoData->stcPcoCamType.wCamType ; }
-		bool _isCameraType(enum enumPcoFamily tp);
+		bool _isCameraType(int tp);
 		bool _isConfig(){return m_config; };
 		void _pco_set_shutter_rolling_edge(int &error);
 		void msgLog(char *s);

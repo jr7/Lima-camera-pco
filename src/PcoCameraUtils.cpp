@@ -229,12 +229,20 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			m_sync->getNbFrames(iFrames);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_sync->getNbFrames=[%d frames]\n", iFrames);
 
-			if(_isCameraType(Dimax)){
+            unsigned int pixbytes; getBytesPerPixel(pixbytes);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* pixBits[%d] pixBytes[%d]\n",  
+				m_pcoData->bitsPerPix,pixbytes);
+
+			if(_isCameraType(Dimax | Pco2k)){
+				
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* --- DIMAX info ---\n");
+				ptr += sprintf_s(ptr, ptrMax - ptr, "* pagesInRam[%ld] pixPerPage[%d] bytesPerPix[%d] ramGB[%.3g]\n",  
+					m_pcoData->dwRamSize, m_pcoData->wPixPerPage,pixbytes,
+					(1.0e-9 * m_pcoData->dwRamSize) * m_pcoData->wPixPerPage * pixbytes);
+
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* PcoActiveSegment=[%d]\n", segmentArr+1);
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->dwMaxFramesInSegment[%d]=[%d frames]\n", segmentArr, m_pcoData->dwMaxFramesInSegment[segmentArr]);
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->dwSegmentSize[%d]=[%d pages]\n", segmentArr, m_pcoData->dwSegmentSize[segmentArr]);
-				ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->wPixPerPage[%d pix]\n", m_pcoData->wPixPerPage);
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->dwValidImageCnt[%d]=[%ld]\n", segmentArr, m_pcoData->dwValidImageCnt[segmentArr]);
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->dwMaxImageCnt[%d]=[%ld]\n", segmentArr, m_pcoData->dwMaxImageCnt[segmentArr]);
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* storage_mode[%d] recorder_submode[%d]\n", 
@@ -337,21 +345,67 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		keys_desc[ikey++] = "(R) for DIMAX only / acq time details (record and transfer time)";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 
-			if(!_isCameraType(Dimax)) {
-				ptr += sprintf_s(ptr, ptrMax - ptr, "* ERROR - only for DIMAX");
+			if(!(_isCameraType(Dimax) || _isCameraType(Pco2k))) {
+				ptr += sprintf_s(ptr, ptrMax - ptr, "* ERROR - only for DIMAX / 2K");
 				return output;
 			}
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, 
-				"* Acq: frm[%d] rec[%ld] xfer[%ld] recNow[%ld] recTout[%ld] (ms) [%s]\n",
+				"* Acq: frm[%d] rec[%ld] xfer[%ld] recLoopTime[%ld] recLoopTout[%ld] acqAll[%ld] (ms) [%s]\n",
 				m_pcoData->trace_nb_frames,
 				m_pcoData->msAcqRec, m_pcoData->msAcqXfer,  
 				m_pcoData->msAcqTnow, m_pcoData->msAcqTout, 
+				m_pcoData->msAcqAll, 
 				getTimestamp(Iso, m_pcoData->msAcqRecTimestamp));
 
 			return output;
 		}
 
+
+		key = keys[ikey] = "traceAcq";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) for DIMAX only / trace details";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
+
+			if(!(_isCameraType(Dimax) || _isCameraType(Pco2k))) {
+				ptr += sprintf_s(ptr, ptrMax - ptr, "* ERROR - only for DIMAX / 2K");
+				return output;
+			}
+
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, 
+				"* fnId[%s]\n",
+				m_pcoData->traceAcq.fnId);
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, 
+				"* nrImgRequested[%d] nrImgRecorded[%d] maxImgCount[%d]\n",
+				m_pcoData->traceAcq.nrImgRequested,
+				m_pcoData->traceAcq.nrImgRecorded,
+				m_pcoData->traceAcq.maxImgCount);
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, 
+				"* msRecordLoop[%ld] msRecord[%ld] endRecord[%s]\n",
+				m_pcoData->traceAcq.msRecordLoop,
+				m_pcoData->traceAcq.msRecord,
+				getTimestamp(Iso, m_pcoData->traceAcq.endRecordTimestamp));
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, 
+				"* msXfer[%ld] endXfer[%s]\n",
+				m_pcoData->traceAcq.msXfer,
+				getTimestamp(Iso, m_pcoData->traceAcq.endXferTimestamp));
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, 
+				"* msImgCoc[%.3g] fps[%.3g] msTout[%ld] msTotal[%ld]\n",
+				m_pcoData->traceAcq.msImgCoc, 1000. / m_pcoData->traceAcq.msImgCoc,
+				m_pcoData->traceAcq.msTout,
+				m_pcoData->traceAcq.msTotal);
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, 
+				"* msExposure[%g] msDelay[%g]\n",
+				m_pcoData->traceAcq.sExposure * 1000.,
+				m_pcoData->traceAcq.sDelay * 1000.);
+
+			return output;
+		}
 
 
 		key = keys[ikey] = "testCmd";     //----------------------------------------------------------------
@@ -530,6 +584,18 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 					DEB_ALWAYS() << output ;
 			}
 			
+#define _PRINT_DBG( x )	ptr += sprintf_s(ptr, ptrMax - ptr, "%15s  0x%08x\n", #x, x ) 	
+
+			if((tokNr == 0)){
+				ptr += sprintf_s(ptr, ptrMax - ptr, "\n");
+				_PRINT_DBG( DBG_BUFF ) ;
+				_PRINT_DBG( DBG_XFER2LIMA ) ;
+				_PRINT_DBG( DBG_LIMABUFF ) ;
+				_PRINT_DBG( DBG_EXP ) ;
+				_PRINT_DBG( DBG_DUMMY_IMG ) ;
+				_PRINT_DBG( DBG_ROI ) ;
+			}
+
 			return output;
 		}
 
