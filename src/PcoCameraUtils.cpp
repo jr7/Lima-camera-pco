@@ -207,6 +207,13 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* wXResMax=[%d] wYResMax=[%d] \n",  m_pcoData->wXResMax,  m_pcoData->wYResMax);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* wMetaDataSize=[%d] wMetaDataVersion=[%d] \n",  m_pcoData->wMetaDataSize,  m_pcoData->wMetaDataVersion);
 
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* maxWidth=[%d] maxHeight=[%d] \n",  m_pcoData->maxWidth,  m_pcoData->maxHeight);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* maxwidth_step=[%d] maxheight_step=[%d] \n",  m_pcoData->maxwidth_step,  m_pcoData->maxheight_step);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* bitsPerPix=[%d] bytesPerPix=[%d] \n",  m_pcoData->bitsPerPix,  m_pcoData->bytesPerPix);
+			
+
+
+
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* dwPixelRate=[%ld](%g MHz)\n",  
 				m_pcoData->dwPixelRate, m_pcoData->dwPixelRate/1000000.);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* dwPixelRateRequested=[%ld](%g MHz) \n",  
@@ -305,13 +312,20 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		key = keys[ikey] = "allocatedBuffer";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "(R) TODO";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
+			int sizeBytes = m_pcoData->wXResActual * m_pcoData->wYResActual * m_pcoData->bytesPerPix;
+			ptr += sprintf_s(ptr, ptrMax - ptr, "IMAGE info:\n"
+			                                    "    X=[%d] Y=[%d] bytesPerPix=[%d] size=[%d B]\n",  
+				m_pcoData->wXResActual,  m_pcoData->wYResActual, m_pcoData->bytesPerPix, sizeBytes);
+			
 			ptr += sprintf_s(ptr, ptrMax - ptr, "PCO API allocated buffers:\n"
-												"    allocated=[%s] nr of buffers=[%d] size=[%ld B][%g MB]\n" 
-												"LIMA allocated buffers: \n"
-												"    nr of buffers=[%d] \n", 
+												"    allocated=[%s] nrBuff=[%d] size=[%ld B][%g MB] imgPerBuff[%d]\n", 
 				m_pcoData->bAllocatedBufferDone ? "TRUE" : "FALSE", 
 				m_pcoData->iAllocatedBufferNumber, 
 				m_pcoData->dwAllocatedBufferSize, m_pcoData->dwAllocatedBufferSize/1000000.,
+				m_pcoData->dwAllocatedBufferSize/sizeBytes);
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "LIMA allocated buffers: \n"
+												"    nr of buffers=[%d] \n", 
 				m_pcoData->iAllocatedBufferNumberLima);
 
 

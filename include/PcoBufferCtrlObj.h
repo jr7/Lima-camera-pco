@@ -81,10 +81,14 @@ namespace lima
         
 	  
         int _xferImag();
+        int _xferImagMult();
+		void * BufferCtrlObj::_getLimaBuffer(int lima_buffer_nb, Sync::Status &status);
 		  
 		bool _getRequestStop() { return m_requestStop;}
 		void _setRequestStop(bool requestStop) { m_requestStop = requestStop;}
 		void _pcoAllocBuffersFree();
+		void _pcoAllocBuffersInfo(int &nr, DWORD &size);
+
 	
 	private:
 		SoftBufferCtrlObj::Sync *m_bufferSync;
@@ -92,7 +96,7 @@ namespace lima
 		Camera* m_cam;
 		int _assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, DWORD dwRequestedFrames, int bufIdx, bool live_mode);
 		
-		void _pcoAllocBuffers();
+		void _pcoAllocBuffers(bool max = false);
 		struct stcAllocBuff m_allocBuff;
 		unsigned long	m_frames_per_buffer;
 		//-------------------------------------------------------------

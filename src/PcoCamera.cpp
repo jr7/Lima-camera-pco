@@ -774,7 +774,8 @@ void _pco_acq_thread_dimax(void *argin) {
 
 		m_sync->setExposing(pcoAcqStop);
 	} else {
-			pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImag();
+			//pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImag();
+			pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImagMult();
 			m_sync->setExposing(status);
 
 			if(!m_buffer->_getRequestStop()) m_sync->stopAcq();
