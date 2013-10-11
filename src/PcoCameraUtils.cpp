@@ -317,6 +317,18 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			return output;
 		}
 
+		key = keys[ikey] = "dumpRecordedImg";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) for DIMAX only / TODO";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
+			int res, nrImages, error;
+
+			res = dumpRecordedImages(nrImages, error);
+
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "res[%d] nrImages[%d] error[0x%x] ", res, nrImages, error);
+			return output;
+		}
+
 		key = keys[ikey] = "allocatedBuffer";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "(R) TODO";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){

@@ -1562,6 +1562,45 @@ char * Camera::_pcoSet_RecordingState(int state, int &error){
 
 //=================================================================================================
 //=================================================================================================
+int Camera::dumpRecordedImages(int &nrImages, int &error){
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+	char *msg;
+
+	HANDLE m_handle = getHandle();
+	WORD wSegment = pcoGetActiveRamSegment(); 
+	DWORD _dwValidImageCnt, _dwMaxImageCnt;
+
+
+	WORD wRecState_actual;
+
+	nrImages = -1;
+
+	if(!_isCameraType(Dimax)) return -2;
+
+	error = PcoCheckError(PCO_GetRecordingState(m_handle, &wRecState_actual));
+	msg = "PCO_GetRecordingState";
+	PCO_PRINT_ERR(error, msg); 	
+	
+	if (error) return -100;
+	if(wRecState_actual != 0) return -1;
+
+
+	msg = _PcoCheckError(PCO_GetNumberOfImagesInSegment(m_handle, wSegment, &_dwValidImageCnt, &_dwMaxImageCnt), error);
+	if(error) {
+		printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, msg);
+		throw LIMA_HW_EXC(Error, "PCO_GetNumberOfImagesInSegment");
+	}
+
+	nrImages = _dwValidImageCnt;
+
+	return 0;
+
+}
+
+
+//=================================================================================================
+//=================================================================================================
 char *Camera::_get_coc_runtime(int &error){
 		
 	DEB_MEMBER_FUNCT();

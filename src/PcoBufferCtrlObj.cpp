@@ -675,6 +675,18 @@ int BufferCtrlObj::_xferImagMult()
 	dwFrameIdx = 1;
 	bufIdx = 0;
 
+		DWORD _dwValidImageCnt, _dwMaxImageCnt;
+
+		sErr = m_cam->_PcoCheckError(PCO_GetNumberOfImagesInSegment(m_handle, wSegment, &_dwValidImageCnt, &_dwMaxImageCnt), error);
+		if(error) {
+			printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, sErr);
+			throw LIMA_HW_EXC(Error, "PCO_GetNumberOfImagesInSegment");
+		}
+
+		if(m_cam->_getDebug(0x400)){
+			DEB_ALWAYS() << DEB_VAR3(dwRequestedFrames,_dwValidImageCnt, _dwMaxImageCnt);
+		}	
+
 	while(dwFrameIdx <= dwRequestedFrames) {
 		bufIdx++; if(bufIdx >= _iPcoAllocatedBuffNr) bufIdx = 0;
 		sBufNr = m_allocBuff.pcoAllocBufferNr[bufIdx];
@@ -726,22 +738,27 @@ int BufferCtrlObj::_xferImagMult()
 		}
 
 #endif
-
-		char *ptrSrc = (char *) m_allocBuff.pcoAllocBufferPtr[bufIdx];
+		void *ptrSrc =  m_allocBuff.pcoAllocBufferPtr[bufIdx];
 		
 		for(iPcoFrame = dwFrameIdxFirst; iPcoFrame <= (int) dwFrameIdxLast; iPcoFrame++ ) {
 			iLimaFrame = iPcoFrame -1;
 
 			ptrLimaBuffer = _getLimaBuffer(iLimaFrame, status);
 
-			if(ptrLimaBuffer = NULL) {
+			if(ptrLimaBuffer == NULL) {
 
-
+				DEB_ALWAYS() << DEB_VAR3(ptrLimaBuffer, iLimaFrame, status);
+				THROW_HW_ERROR(NotSupported) << "Lima ptr = NULL";
 			}
 
-			memcpy(ptrLimaBuffer, ptrSrc, dwFrameSize);
-			ptrSrc += dwFrameSize;
 
+		if(m_cam->_getDebug(0x100)){
+			DEB_ALWAYS() << DEB_VAR3( ptrLimaBuffer, ptrSrc, dwFrameSize);
+		}
+
+			memcpy(ptrLimaBuffer, ptrSrc, dwFrameSize);
+			ptrSrc = ((char *)ptrSrc) + dwFrameSize;
+			
 			HwFrameInfoType frame_info;
 			frame_info.acq_frame_nb = iLimaFrame;
 			m_buffer_cb_mgr.newFrameReady(frame_info);
