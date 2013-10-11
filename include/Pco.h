@@ -58,7 +58,7 @@
 #define MSG_SIZE	512
 #define BUFF_XLAT_SIZE 128
 
-#define ID_TIMESTAMP "$Id: [" __DATE__ " " __TIME__ "] [" __TIMESTAMP__ "] (" __FILE__ ") $"
+#define ID_TIMESTAMP "$Id: [" __DATE__ " " __TIME__ "] [" __TIMESTAMP__ "] [" __FILE__ "] $"
 
 typedef DWORD tPvUint32;
 typedef int tPvErr;

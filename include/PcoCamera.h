@@ -166,7 +166,7 @@ struct stcPcoData {
 		unsigned int maxWidth;		// unsigned int xmax;		/* Max size */
 		unsigned int maxHeight;        //unsigned int ymax;
 
-		WORD wMetaDataMode, wMetaDataSize, wMetaDataVersion;
+		WORD bMetaDataAllowed, wMetaDataMode, wMetaDataSize, wMetaDataVersion;
 		
 		long msAcqRec, msAcqXfer, msAcqTout, msAcqTnow, msAcqAll;
 		time_t msAcqRecTimestamp, msAcqXferTimestamp, msAcqToutTimestamp, msAcqTnowTimestamp;
