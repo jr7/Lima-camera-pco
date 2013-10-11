@@ -136,6 +136,7 @@ char * _timestamp_pcobufferctrlobj();
 char * _timestamp_pcodetinfoctrlobj();
 char * _timestamp_pcocamerautils();
 char * _timestamp_pcoroictrlobj();
+char *_split_date(char *s);
 
 stcPcoData::stcPcoData(){
 
@@ -148,13 +149,13 @@ stcPcoData::stcPcoData(){
 	ptrMax = ptr + sizeof(version) - 1;
 
 	ptr += sprintf_s(ptr, ptrMax - ptr, "\n");
-	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcocamera());
-	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcosyncctrlobj());
-	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcointerface());
-	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcobufferctrlobj());
-	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcodetinfoctrlobj());
-	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcocamerautils());
-	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcoroictrlobj());
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcocamera()));
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcosyncctrlobj()));
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcointerface()));
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcobufferctrlobj()));
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcodetinfoctrlobj()));
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcocamerautils()));
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcoroictrlobj()));
 
 	stcPcoGeneral.wSize = sizeof(stcPcoGeneral);
 	stcPcoGeneral.strCamType.wSize = sizeof(stcPcoGeneral.strCamType);
@@ -806,8 +807,13 @@ void _pco_acq_thread_dimax(void *argin) {
 	if(m_buffer->_getRequestStop()) {
 		m_sync->setExposing(pcoAcqStop);
 	} else {
-			//pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImag();
-			pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImagMult();
+			pcoAcqStatus status;
+
+			if(m_cam->_isCameraType(Pco2k))
+				status = (pcoAcqStatus) m_buffer->_xferImag();
+			else
+				status = (pcoAcqStatus) m_buffer->_xferImagMult();
+
 			m_sync->setExposing(status);
 
 			if(!m_buffer->_getRequestStop()) m_sync->stopAcq();
@@ -1434,6 +1440,7 @@ char *Camera::_pcoGet_Camera_Type(int &error){
 	}	
 	
 
+	m_pcoData->bMetaDataAllowed = !!(m_pcoData->stcPcoDescription.dwGeneralCapsDESC1 & GENERALCAPS1_METADATA) ;
 
 
 	// -- Get General

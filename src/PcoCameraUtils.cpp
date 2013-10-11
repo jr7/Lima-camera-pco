@@ -46,6 +46,8 @@ static char *timebaseUnits[] = {"ns", "us", "ms"};
 
 
 void print_hex_dump_buff(void *ptr_buff, size_t len);
+int __xlat_date(char *s1, char &ptrTo, int lenTo) ;
+char *_xlat_date(char *s1, char *s2, char *s3) ;
 	
 //=========================================================================================================
 char* _timestamp_pcocamerautils() {return ID_TIMESTAMP ;}
@@ -82,7 +84,83 @@ char *getTimestamp(timestampFmt fmtIdx, time_t xtime) {
 
 time_t getTimestamp() { return time(NULL); }
 
+//====================================================================
+//====================================================================
+//$Id: [Oct  8 2013 15:21:07] [Tue Oct  8 15:21:07 2013] (..\..\..\..\src\PcoCamera.cpp) $
 
+#define LEN_BUFF_DATE 128
+#define TOKNR_DT 5
+
+
+int __xlat_date(char *s1, char &ptrTo, int lenTo) {
+	char *tok[TOKNR_DT];
+	char *tokNext = NULL;
+	int tokNr, iM, iD, iY, i;
+	char *ptr;
+	char *months = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec";
+	char *sM, *sT;
+	char buff[LEN_BUFF_DATE+1];
+
+	strcpy_s(buff, LEN_BUFF_DATE, s1);
+	ptr = buff;
+
+	for(tokNr = i = 0; i < TOKNR_DT; i++) {
+		if( (tok[i] = strtok_s(ptr, " ", &tokNext)) == NULL) break;
+		ptr = NULL;
+		tokNr = i+1;
+	}
+
+	if(tokNr == 4) {
+		// Oct  8 2013 15:21:07
+		sM = tok[0]; iD = atoi(tok[1]); iY = atoi(tok[2]); sT = tok[3]; 
+	} else if(tokNr == 5) {
+		// Tue Oct  8 15:21:07 2013
+		sM = tok[1]; iD = atoi(tok[2]); iY = atoi(tok[4]); sT = tok[3]; 
+	} else {
+		sM = "xxx"; iD = 99; iY = 9999; sT = "99:99:99"; 
+	}
+	
+	ptr = strstr(months,sM);
+	iM = (ptr != NULL) ? ( int(ptr - months) / 4) + 1 : 99;
+
+
+	return sprintf_s(&ptrTo, lenTo, "%04d/%02d/%02d %s", iY, iM, iD, sT);
+}
+
+char *_xlat_date(char *s1, char *s2, char *s3) {
+	static char buff[LEN_BUFF_DATE+1];
+	char *ptr = buff;
+	char *ptrMax = buff + LEN_BUFF_DATE;
+
+	ptr += sprintf_s(ptr, ptrMax - ptr, "$Id: comp[");
+	ptr += __xlat_date(s1, *ptr, ptrMax - ptr);
+	ptr += sprintf_s(ptr, ptrMax - ptr, "] file[");
+	ptr += __xlat_date(s2, *ptr, ptrMax - ptr);
+	ptr += sprintf_s(ptr, ptrMax - ptr, "] [%s] $", s3);
+	return buff;
+	
+}
+
+char *_split_date(char *s) {
+	static char s1[LEN_BUFF_DATE+1];
+	static char s2[LEN_BUFF_DATE+1];
+	static char s3[LEN_BUFF_DATE+1];
+	char *ptr1, *ptr2;
+
+	ptr1 = strchr(s,'[');
+	ptr2 = strchr(ptr1,']');
+	strncpy_s(s1, LEN_BUFF_DATE, ptr1+1, ptr2-ptr1-1);
+
+	ptr1 = strchr(ptr2,'[');
+	ptr2 = strchr(ptr1,']');
+	strncpy_s(s2, LEN_BUFF_DATE, ptr1+1, ptr2-ptr1-1);
+
+	ptr1 = strchr(ptr2,'[');
+	ptr2 = strchr(ptr1,']');
+	strncpy_s(s3, LEN_BUFF_DATE, ptr1+1, ptr2-ptr1-1);
+
+	return _xlat_date(s1, s2, s3);
+}
 //====================================================================
 //====================================================================
 
@@ -205,7 +283,8 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* wXResActual=[%d] wYResActual=[%d] \n",  m_pcoData->wXResActual,  m_pcoData->wYResActual);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* wXResMax=[%d] wYResMax=[%d] \n",  m_pcoData->wXResMax,  m_pcoData->wYResMax);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* wMetaDataSize=[%d] wMetaDataVersion=[%d] \n",  m_pcoData->wMetaDataSize,  m_pcoData->wMetaDataVersion);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* bMetaDataAllowed=[%d] wMetaDataSize=[%d] wMetaDataVersion=[%d] \n",  
+				m_pcoData->bMetaDataAllowed, m_pcoData->wMetaDataSize,  m_pcoData->wMetaDataVersion);
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* maxWidth=[%d] maxHeight=[%d] \n",  m_pcoData->maxWidth,  m_pcoData->maxHeight);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* maxwidth_step=[%d] maxheight_step=[%d] \n",  m_pcoData->maxwidth_step,  m_pcoData->maxheight_step);
