@@ -217,6 +217,7 @@ enum enumPcoFamily {
 	EdgeGL      = 1<<2,
 	EdgeRolling = 1<<3, 
 	Pco2k       = 1<<4,
+	Pco4k       = 1<<5,
 };
 
 enum enumPcoStorageMode {

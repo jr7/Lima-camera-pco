@@ -312,7 +312,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* pixBits[%d] pixBytes[%d]\n",  
 				m_pcoData->bitsPerPix,pixbytes);
 
-			if(_isCameraType(Dimax | Pco2k)){
+			if(_isCameraType(Dimax | Pco2k  | Pco4k)){
 				
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* --- DIMAX info ---\n");
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* pagesInRam[%ld] pixPerPage[%d] bytesPerPix[%d] ramGB[%.3g]\n",  
@@ -424,7 +424,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		keys_desc[ikey++] = "(R) for DIMAX only / acq time details (record and transfer time)";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 
-			if(!(_isCameraType(Dimax) || _isCameraType(Pco2k))) {
+			if(!(_isCameraType(Dimax | Pco4k | Pco2k))) {
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* ERROR - only for DIMAX / 2K");
 				return output;
 			}
@@ -445,7 +445,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		keys_desc[ikey++] = "(R) for DIMAX only / trace details";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 
-			if(!(_isCameraType(Dimax) || _isCameraType(Pco2k))) {
+			if(!(_isCameraType(Dimax | Pco2k  | Pco4k))) {
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* ERROR - only for DIMAX / 2K");
 				return output;
 			}

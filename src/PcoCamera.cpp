@@ -282,6 +282,7 @@ void Camera::_init(){
 	
 	if(_isCameraType(Dimax)) _init_dimax();
 	else if(_isCameraType(Pco2k)) _init_dimax();
+	else if(_isCameraType(Pco4k)) _init_dimax();
 	else if(_isCameraType(Edge)) _init_edge();
 	else {
 		char msg[MSG_SIZE+1];
@@ -609,7 +610,7 @@ void Camera::startAcq()
 			m_pcoData->dwPixelRateRequested = 0;
 		}
 
-		if(_isCameraType(Pco2k)) {
+		if(_isCameraType(Pco2k | Pco4k)) {
 			DWORD _dwPixelRate;
 
 			error = PcoCheckError(PCO_GetPixelRate(m_handle, &m_pcoData->dwPixelRate));
@@ -673,7 +674,7 @@ void Camera::startAcq()
 		return;
 	}
 
-	if(_isCameraType(Dimax | Pco2k)){
+	if(_isCameraType(Dimax | Pco2k | Pco4k)){
 		_pcoSet_RecordingState(1, error);
 		if(iRequestedFrames > 0 ) {
 			_beginthread( _pco_acq_thread_dimax, 0, (void*) this);
@@ -809,7 +810,7 @@ void _pco_acq_thread_dimax(void *argin) {
 	} else {
 			pcoAcqStatus status;
 
-			if(m_cam->_isCameraType(Pco2k))
+			if(m_cam->_isCameraType(Pco2k | Pco4k))
 				status = (pcoAcqStatus) m_buffer->_xferImag();
 			else
 				status = (pcoAcqStatus) m_buffer->_xferImagMult();
@@ -1027,7 +1028,7 @@ unsigned long Camera::pcoGetFramesMax(int segmentPco){
 		}
 
 
-		if(!_isCameraType(Dimax | Pco2k)) {
+		if(!_isCameraType(Dimax | Pco2k | Pco4k)) {
 			printf("=== %s> unknow camera type [%d]\n", fnId, _getCameraType());
 			return -1;
 		}
@@ -1299,7 +1300,7 @@ char *Camera::_prepare_cameralink_interface(int &error){
 			//_pcoData.clTransferParam.Transmit = m_pcoData->clTransferParam.Transmit;
 			m_pcoData->clTransferParam.DataFormat=PCO_CL_DATAFORMAT_2x12; //=2
 	} else
-	if(_isCameraType(Pco2k)){
+	if(_isCameraType(Pco2k | Pco4k)){
 		// -------------------- pco2k -> GigE		
 	} else
 	if(_isCameraType(EdgeGL)) {
@@ -1968,6 +1969,9 @@ bool Camera::_isCameraType(int tp){
 		case CAMERATYPE_PCO2000:
 			return !!(tp & Pco2k) ;
 
+		case CAMERATYPE_PCO4000:
+			return !!(tp & Pco4k) ;
+
 
 		default:
 			return FALSE;
@@ -2006,7 +2010,7 @@ void Camera::_pco_GetHWIOSignal(int &error){
 	int i, imax;
 		error = 0;
 
-		if(!( _isCameraType(Dimax | Edge | Pco2k))  ) {
+		if(!( _isCameraType(Dimax | Edge | Pco2k | Pco4k))  ) {
 			error = -1;
 			return;
 		}
