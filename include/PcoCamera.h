@@ -289,6 +289,8 @@ namespace lima
 		int pcoGetError() {return m_pcoData->pcoError;}
 
 		char *_pcoSet_RecordingState(int state, int &error);
+		int dumpRecordedImages(int &nrImages, int &error);
+
 		WORD _getCameraType() {return m_pcoData->stcPcoCamType.wCamType ; }
 		bool _isCameraType(int tp);
 		bool _isConfig(){return m_config; };
