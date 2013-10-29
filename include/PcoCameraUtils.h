@@ -32,5 +32,7 @@ enum timestampFmt {Iso=1, FnFull, FnDate};
 char *getTimestamp(timestampFmt fmtIdx, time_t xtime = 0) ;
 
 time_t getTimestamp();
+char *_checkLogFiles() ;
+
 
 #endif

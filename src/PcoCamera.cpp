@@ -48,7 +48,6 @@ using namespace lima::Pco;
 
 static char *timebaseUnits[] = {"ns", "us", "ms"};
 
-
 void _pco_acq_thread_dimax(void *argin);
 void _pco_acq_thread_dimax_live(void *argin);
 void _pco_acq_thread_edge(void *argin);
@@ -212,7 +211,7 @@ Camera::Camera(const char *camPar) :
 	if(m_pcoData == NULL)
 		throw LIMA_HW_EXC(Error, "m_pcoData > creation error");
 	//memset((char *)m_pcoData, 0, sizeof(stcPcoData));
-    DEB_ALWAYS()  << DEB_VAR1(m_pcoData->version) ;
+    DEB_ALWAYS()  << DEB_VAR1(m_pcoData->version) << _checkLogFiles();
 
 	m_bin.changed = Invalid;
 	m_roi.changed = Invalid;
@@ -246,11 +245,24 @@ void Camera::_init(){
 	PCO_THROW_OR_TRACE(error, errMsg) ;
 
 
+	// -- Initialise ADC
+	// Pixel data can be read out using one ADC (better linearity) or in parallel using two ADCs (faster).
+	m_pcoData->wNumADC = m_pcoData->stcPcoDescription.wNumADCsDESC;
 
-		// -- Initialise adc, size, bin, roi
-	m_pcoData->nr_adc= 1;
-	m_pcoData->max_adc = m_pcoData->stcPcoDescription.wNumADCsDESC;
+	WORD wADCOperation;
+	error = PcoCheckError(PCO_GetADCOperation(m_handle, &wADCOperation));
 
+	if(wADCOperation != 1){
+		wADCOperation = 1;
+		error = PcoCheckError(PCO_SetADCOperation(m_handle, wADCOperation));
+		error = PcoCheckError(PCO_GetADCOperation(m_handle, &wADCOperation));
+	}
+	m_pcoData->wNowADC= wADCOperation;
+	
+
+
+
+		// -- Initialise size, bin, roi
 	m_pcoData->maxWidth = (unsigned int) m_pcoData->stcPcoDescription.wMaxHorzResStdDESC; // ds->ccd.size.xmax,
 	m_pcoData->maxHeight= (unsigned int) m_pcoData->stcPcoDescription.wMaxVertResStdDESC; // ds->ccd.size.ymax,
 	m_pcoData->bitsPerPix = (unsigned int) m_pcoData->stcPcoDescription.wDynResDESC; // ds->ccd.size.bits
@@ -267,7 +279,7 @@ void Camera::_init(){
 
 	_get_MaxRoi(m_RoiLima);
 
-	sprintf_s(msg, MSG_SIZE, "* CCD Size = X[%d] x Y[%d] (%d bits)\n", m_pcoData->maxWidth, m_pcoData->maxHeight, m_pcoData->bitsPerPix);
+	sprintf_s(msg, MSG_SIZE, "* CCD Size = X[%d] * Y[%d] (%d bits)\n", m_pcoData->maxWidth, m_pcoData->maxHeight, m_pcoData->bitsPerPix);
 	DEB_TRACE() <<   msg;
 	m_log.append(msg);
 	
@@ -330,11 +342,18 @@ void  Camera::_init_dimax() {
 		m_pcoData->dwRamSize = ramSize;     // nr of pages of the ram
 		m_pcoData->wPixPerPage = pageSize;    // nr of pixels of the page
 
-		sprintf_s(msg, MSG_SIZE, "* RAM number of pages [%ld]  PAGE number of pixels [%d]\n",  
-				m_pcoData->dwRamSize, m_pcoData->wPixPerPage);
+		sprintf_s(msg, MSG_SIZE, "* ramPages[%ld] pixPerPage[%d] bitsPerPix[%d]\n",  
+				m_pcoData->dwRamSize, m_pcoData->wPixPerPage, m_pcoData->bitsPerPix);
 		DEB_TRACE() <<   msg;
 		m_log.append(msg);
-
+		
+		double nrBytes = (double) m_pcoData->dwRamSize  * (double) m_pcoData->wPixPerPage * 
+			(double)m_pcoData->bitsPerPix / 9.; // 8 bits data + 1 bit CRC -> 9
+		
+		sprintf_s(msg, MSG_SIZE, "* camMemorySize [%lld B] [%g GB]\n",  
+				(long long int) nrBytes, nrBytes/GIGABYTE);
+		DEB_TRACE() <<   msg;
+		m_log.append(msg);
 
 		// ----------------- get initial seg Size - images & print
 

@@ -39,12 +39,17 @@
 #define DBG_XFER2LIMA      0x00000002
 #define DBG_LIMABUFF       0x00000004
 #define DBG_EXP            0x00000008
+#define DBG_XFERMULT       0x00000010
+#define DBG_XFERMULT1      0x00000020
+#define DBG_ASSIGN_BUFF    0x00000040
 
 #define DBG_DUMMY_IMG      0x00000100
 #define DBG_ROI            0x00001000
 //---------------------------------------
 
-
+#define KILOBYTE (1024)
+#define MEGABYTE (KILOBYTE * KILOBYTE)
+#define GIGABYTE (KILOBYTE * MEGABYTE)
 
 #define PCO_EDGE_PIXEL_RATE_MIN 95000000
 #define PCO_EDGE_PIXEL_RATE_MAX 286000000
@@ -156,7 +161,7 @@ struct stcPcoData {
         char		sensor_type[64];
 
         
-        unsigned int    nr_adc, max_adc;
+        WORD    wNowADC, wNumADC;
         unsigned int    maxwidth_step, maxheight_step;
 
         struct stcTemp temperature;
