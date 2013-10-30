@@ -26,6 +26,7 @@
 #define BYPASS
 
 #define TOUT_MIN_DIMAX 500
+#define ERROR_MSG_LINE 128
 
 //#define BUFF_INFO_SIZE 5000
 
@@ -731,7 +732,7 @@ void _pco_acq_thread_dimax(void *argin) {
 
 	DWORD _dwValidImageCnt, _dwMaxImageCnt;
 
-	printf("=== %s %s> ENTRY\n", fnId, getTimestamp(Iso));
+	printf("=== %s [%d]> %s ENTRY\n",  fnId, __LINE__,getTimestamp(Iso));
 
 	Camera* m_cam = (Camera *) argin;
 	SyncCtrlObj* m_sync = m_cam->_getSyncCtrlObj();
@@ -756,7 +757,11 @@ void _pco_acq_thread_dimax(void *argin) {
 	DWORD dwMsSleepOneFrame = (DWORD) (msPerFrame + 0.5);	// 4/5 rounding
 	if(dwMsSleepOneFrame == 0) dwMsSleepOneFrame = 1;		// min sleep
 
+	bool nb_frames_fixed = false;
 	int nb_frames; 	m_sync->getNbFrames(nb_frames);
+	m_pcoData->traceAcq.init();
+	m_pcoData->traceAcq.nrImgRequested0 = nb_frames;
+
 	m_sync->setAcqFrames(0);
 
 	timeout = timeout0 = (long) (msPerFrame * (nb_frames * 1.3));	// 30% guard
@@ -775,13 +780,21 @@ void _pco_acq_thread_dimax(void *argin) {
 		}
 
 		m_pcoData->msAcqTnow = msNow = msElapsedTime(tStart);
-		if(_dwValidImageCnt >=  (DWORD) nb_frames) break;
+		if( ((DWORD) nb_frames > _dwMaxImageCnt) ){
+			nb_frames_fixed = true;
+			printf("=== %s [%d]> ERROR INVALID NR FRAMES fixed nb_frames[%d] _dwMaxImageCnt[%d]\n", 
+				fnId, __LINE__, nb_frames, _dwMaxImageCnt);
+			m_sync->setExposing(pcoAcqError);
+			break;
+		}
+
+		if(  (_dwValidImageCnt >= (DWORD) nb_frames)) break;
 
 		if((timeout < msNow) && !m_pcoData->bExtTrigEnabled) { 
 			//m_sync->setExposing(pcoAcqRecordTimeout);
 			m_sync->stopAcq();
 			m_sync->setExposing(pcoAcqStop);
-			printf("=== %s line[%d]> TIMEOUT!!! tout[(%ld) 0(%ld)] recLoopTime[%ld ms] lastImgRecorded[%ld] nrImgRequested[%d]\n", 
+			printf("=== %s [%d]> TIMEOUT!!! tout[(%ld) 0(%ld)] recLoopTime[%ld ms] lastImgRecorded[%ld] nrImgRequested[%d]\n", 
 				fnId, __LINE__, timeout, timeout0, msNow, _dwValidImageCnt, nb_frames);
 			break;
 		}
@@ -801,45 +814,51 @@ void _pco_acq_thread_dimax(void *argin) {
 		throw LIMA_HW_EXC(Error, "_pcoSet_RecordingState");
 	}
 
-	if(m_sync->getExposing() == pcoAcqRecordStart) m_sync->setExposing(pcoAcqRecordEnd);
+	if(!nb_frames_fixed) {
+		if(m_sync->getExposing() == pcoAcqRecordStart) m_sync->setExposing(pcoAcqRecordEnd);
 
-	msg = m_cam->_PcoCheckError(PCO_GetNumberOfImagesInSegment(m_handle, wSegment, &_dwValidImageCnt, &_dwMaxImageCnt), error);
-	if(error) {
-		printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, msg);
-		throw LIMA_HW_EXC(Error, "PCO_GetNumberOfImagesInSegment");
-	}
+		msg = m_cam->_PcoCheckError(PCO_GetNumberOfImagesInSegment(m_handle, wSegment, &_dwValidImageCnt, &_dwMaxImageCnt), error);
+		if(error) {
+			printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, msg);
+			throw LIMA_HW_EXC(Error, "PCO_GetNumberOfImagesInSegment");
+		}
 
-	m_pcoData->dwValidImageCnt[wSegment-1] = 
-		m_pcoData->traceAcq.nrImgRecorded = _dwValidImageCnt;
-	m_pcoData->dwMaxImageCnt[wSegment-1] =
-		m_pcoData->traceAcq.maxImgCount = _dwMaxImageCnt;
+		m_pcoData->dwValidImageCnt[wSegment-1] = 
+			m_pcoData->traceAcq.nrImgRecorded = _dwValidImageCnt;
 
-	nb_acq_frames = (_dwValidImageCnt < (DWORD) nb_frames) ? _dwValidImageCnt : nb_frames;
-	//m_sync->setAcqFrames(nb_acq_frames);
+		nb_acq_frames = (_dwValidImageCnt < (DWORD) nb_frames) ? _dwValidImageCnt : nb_frames;
+		//m_sync->setAcqFrames(nb_acq_frames);
 
-	// dimax recording time
-	m_pcoData->msAcqRec = msRec = msElapsedTime(tStart);
-	m_pcoData->traceAcq.endRecordTimestamp = m_pcoData->msAcqRecTimestamp = getTimestamp();
-	m_pcoData->traceAcq.nrImgRequested = nb_acq_frames;
 
-	msElapsedTimeSet(tStart);
+		// dimax recording time
+		m_pcoData->msAcqRec = msRec = msElapsedTime(tStart);
+		m_pcoData->traceAcq.endRecordTimestamp = m_pcoData->msAcqRecTimestamp = getTimestamp();
+		m_pcoData->traceAcq.nrImgAcquired = nb_acq_frames;
+		m_pcoData->traceAcq.nrImgRequested = nb_frames;
 
-	if(m_buffer->_getRequestStop()) {
-		m_sync->setExposing(pcoAcqStop);
-	} else {
-			pcoAcqStatus status;
+		msElapsedTimeSet(tStart);
 
-			if(m_cam->_isCameraType(Pco2k | Pco4k))
-				status = (pcoAcqStatus) m_buffer->_xferImag();
-			else
-				status = (pcoAcqStatus) m_buffer->_xferImagMult();
+		if(m_buffer->_getRequestStop()) {
+			m_sync->setExposing(pcoAcqStop);
+		} else {
+				pcoAcqStatus status;
 
-			m_sync->setExposing(status);
+				if(m_cam->_isCameraType(Pco2k | Pco4k)){
+					status = (pcoAcqStatus) m_buffer->_xferImag();
+					if(nb_frames_fixed) status = pcoAcqError;
+				}else{
+					status = (pcoAcqStatus) m_buffer->_xferImagMult();
+				}
+				m_sync->setExposing(status);
 
-			if(!m_buffer->_getRequestStop()) m_sync->stopAcq();
-	}
+				if(!m_buffer->_getRequestStop()) m_sync->stopAcq();
+		}
+	} // if nb_frames_fixed
 
 	//m_sync->setExposing(status);
+	m_pcoData->dwMaxImageCnt[wSegment-1] =
+			m_pcoData->traceAcq.maxImgCount = _dwMaxImageCnt;
+
 	// dimax xfer time
 	m_pcoData->msAcqXfer = msXfer = msElapsedTime(tStart);
 	m_pcoData->msAcqAll = msAll = msElapsedTime(tStart0);
@@ -858,9 +877,10 @@ void _pco_acq_thread_dimax(void *argin) {
 	
 
 
-	printf("=== %s> EXIT imgRecorded[%d] coc[%g] recLoopTime[%ld] "
+	printf("=== %s [%d]> EXIT imgRecorded[%d] coc[%g] recLoopTime[%ld] "
 			"tout[(%ld) 0(%ld)] rec[%ld] xfer[%ld] all[%ld](ms)\n", 
-			fnId, _dwValidImageCnt, msPerFrame, msNow, timeout, timeout0, msRec, msXfer, msAll);
+			fnId, __LINE__, _dwValidImageCnt, msPerFrame, msNow, timeout, timeout0, msRec, msXfer, msAll);
+
 	_endthread();
 }
 
@@ -1965,6 +1985,11 @@ void Camera::_get_PixelSize(double& x_size,double &y_size)
 {  
     // ---- TODO
 	// pixel size in micrometer (???)
+
+	if( _isCameraType(Pco4k)) {
+		x_size = y_size = 9.0;		
+		return;
+	}
   x_size = y_size = -1.;		// @todo don't know
 
 }

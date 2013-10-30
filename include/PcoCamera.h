@@ -42,12 +42,14 @@
 #define DBG_XFERMULT       0x00000010
 #define DBG_XFERMULT1      0x00000020
 #define DBG_ASSIGN_BUFF    0x00000040
+#define DBG_STATUS		   0x00000080
+
 
 #define DBG_DUMMY_IMG      0x00000100
 #define DBG_ROI            0x00001000
 //---------------------------------------
 
-#define KILOBYTE (1024)
+#define KILOBYTE (1024LL)
 #define MEGABYTE (KILOBYTE * KILOBYTE)
 #define GIGABYTE (KILOBYTE * MEGABYTE)
 
@@ -181,12 +183,15 @@ struct stcPcoData {
 			DWORD nrImgRecorded;
 			DWORD maxImgCount;
 			int nrImgRequested;
+			int nrImgRequested0;
+			int nrImgAcquired;
 			long msTotal, msRecord, msRecordLoop, msXfer, msTout;
 			double msImgCoc;
 			double sExposure, sDelay;
 			time_t endRecordTimestamp;
 			time_t endXferTimestamp;
 			char *fnId;
+			void init();
 		} traceAcq;
 
 		DWORD dwPixelRate, dwPixelRateRequested;

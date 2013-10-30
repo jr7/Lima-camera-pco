@@ -497,5 +497,7 @@ DEB_TRACE() << DEB_VAR3(m_started, m_buffer, m_exposing);
       status.det = DetIdle;
     }
 
+  if(m_cam->_getDebug(DBG_STATUS)) {DEB_ALWAYS() << DEB_VAR2(m_exposing, status);}	
+
   DEB_RETURN() << DEB_VAR1(status);
 }
