@@ -75,13 +75,11 @@ char *getTimestamp(timestampFmt fmtIdx, time_t xtime) {
 		time( &ltime );
 	else
 		ltime = xtime;
-
 	err = localtime_s( &today, &ltime );
 	strftime(timeline, 128, fmt, &today );
       
 	return timeline;
 }
-
 
 time_t getTimestamp() { return time(NULL); }
 
