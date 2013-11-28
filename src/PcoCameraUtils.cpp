@@ -76,8 +76,6 @@ char *getTimestamp(timestampFmt fmtIdx, time_t xtime) {
 	else
 		ltime = xtime;
 
-
-
 	err = localtime_s( &today, &ltime );
 	strftime(timeline, 128, fmt, &today );
       
