@@ -54,7 +54,6 @@ char *_xlat_date(char *s1, char *s2, char *s3) ;
 	
 //=========================================================================================================
 char* _timestamp_pcocamerautils() {return ID_TIMESTAMP ;}
-
 //=========================================================================================================
 
 char *getTimestamp(timestampFmt fmtIdx, time_t xtime) {
