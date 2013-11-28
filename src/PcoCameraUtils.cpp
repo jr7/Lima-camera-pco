@@ -37,6 +37,7 @@
 #include "PcoCamera.h"
 #include "PcoSyncCtrlObj.h"
 #include "PcoBufferCtrlObj.h"
+#include "PcoGitVersion.h"
 
 
 using namespace lima;
