@@ -38,7 +38,6 @@
 #include "PcoSyncCtrlObj.h"
 #include "PcoBufferCtrlObj.h"
 
-
 using namespace lima;
 using namespace lima::Pco;
 
