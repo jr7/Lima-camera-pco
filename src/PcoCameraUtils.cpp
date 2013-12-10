@@ -327,8 +327,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* storage_mode[%d] recorder_submode[%d]\n", 
 					m_pcoData->storage_mode, m_pcoData->recorder_submode);
 				ptr += sprintf_s(ptr, ptrMax - ptr, 
-					"* Acq: frm[%d] rec[%ld] xfer[%ld] recNow[%ld] recTout[%ld] (ms) [%s]\n",
-					m_pcoData->trace_nb_frames,
+					"* Acq: rec[%ld] xfer[%ld] recNow[%ld] recTout[%ld] (ms) [%s]\n",
 					m_pcoData->msAcqRec, m_pcoData->msAcqXfer,  
 					m_pcoData->msAcqTnow, m_pcoData->msAcqTout, 
 					getTimestamp(Iso, m_pcoData->msAcqRecTimestamp));
@@ -442,12 +441,12 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			}
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, 
-				"* Acq: frm[%d] rec[%ld] xfer[%ld] recLoopTime[%ld] recLoopTout[%ld] acqAll[%ld] (ms) [%s]\n",
-				m_pcoData->trace_nb_frames,
+				"* Acq: rec[%ld] xfer[%ld] recLoopTime[%ld] recLoopTout[%ld] acqAll[%ld] (ms) [%s]\n",
 				m_pcoData->msAcqRec, m_pcoData->msAcqXfer,  
 				m_pcoData->msAcqTnow, m_pcoData->msAcqTout, 
 				m_pcoData->msAcqAll, 
 				getTimestamp(Iso, m_pcoData->msAcqRecTimestamp));
+
 
 			return output;
 		}
@@ -464,8 +463,26 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, 
-				"* fnId[%s]\n",
-				m_pcoData->traceAcq.fnId);
+				"* fnId[%s] nrEvents[%d]\n",
+				m_pcoData->traceAcq.fnId,
+				PCO_BUFFER_NREVENTS);
+
+			Point top_left = m_RoiLima.getTopLeft();
+			Point bot_right = m_RoiLima.getBottomRight();
+			Size size = m_RoiLima.getSize();			
+			unsigned int bytesPerPix; getBytesPerPixel(bytesPerPix);
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* roiLima xy0[%d,%d] xy1[%d,%d] size[%d,%d]\n",  
+					top_left.x, top_left.y,
+					bot_right.x, bot_right.y,
+					size.getWidth(), size.getHeight());
+
+			int imgSize = size.getWidth()* size.getHeight() * bytesPerPix;
+			int totSize = imgSize*m_pcoData->traceAcq.nrImgRequested;
+			double mbTotSize =  totSize/(1024.*1024.);
+			double xferSpeed = mbTotSize / m_pcoData->traceAcq.msXfer * 1000.;
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* imgSize[%d B] totSize[%d B][%g MB] xferSpeed[%g MB/s]\n",  
+					imgSize, totSize, mbTotSize, xferSpeed);
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, 
 				"* nrImgRequested[%d] nrImgRecorded[%d] maxImgCount[%d]\n",
@@ -683,7 +700,10 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				_PRINT_DBG( DBG_XFER2LIMA ) ;
 				_PRINT_DBG( DBG_LIMABUFF ) ;
 				_PRINT_DBG( DBG_EXP ) ;
-				_PRINT_DBG( DBG_DUMMY_IMG ) ;
+				_PRINT_DBG( DBG_XFERMULT ) ;
+				_PRINT_DBG( DBG_XFERMULT1 ) ;
+				_PRINT_DBG( DBG_ASSIGN_BUFF ) ;
+				
 				_PRINT_DBG( DBG_ROI ) ;
 			}
 
@@ -695,18 +715,51 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		keys_desc[ikey++] = "(R) detailed cam info (type, if, sn, hw & fw ver, ...)";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "\n");
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* serial number[%d]\n", 
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* dwSerialNumber[%d]\n", 
 				m_pcoData->stcPcoCamType.dwSerialNumber);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* camera type[%x] subtype[%x] [%s]\n", 
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* wCamType[%x] wCamSubType[%x] [%s]\n", 
 				m_pcoData->stcPcoCamType.wCamType, 
 				m_pcoData->stcPcoCamType.wCamSubType,
 				m_pcoData->model); 
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* interfase[%x]  [%s]\n", 
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* wInterfaceType[%x]  [%s]\n", 
 				m_pcoData->stcPcoCamType.wInterfaceType,
 				m_pcoData->iface);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* version hw[%lx]  fw[%lx]\n", 
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* dwHWVersion[%lx]  dwFWVersion[%lx] <- not used\n", 
 				m_pcoData->stcPcoCamType.dwHWVersion, 
 				m_pcoData->stcPcoCamType.dwFWVersion);
+			
+			int nrDev, iDev;
+
+			nrDev=m_pcoData->stcPcoCamType.strHardwareVersion.BoardNum;
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* Hardware_DESC device[%d]  szName          wBatchNo/wRevision   wVariant\n", nrDev);
+			for(iDev = 0; iDev< nrDev; iDev++) {
+				PCO_SC2_Hardware_DESC *ptrhw;
+				ptrhw = &m_pcoData->stcPcoCamType.strHardwareVersion.Board[iDev];
+				ptr += sprintf_s(ptr, ptrMax - ptr, "* %20d      %-18s   %4d.%-4d    %4d\n", 
+					iDev, 
+					ptrhw->szName,
+					ptrhw->wBatchNo,
+					ptrhw->wRevision,
+					ptrhw->wVariant
+					);
+			}
+			
+
+			nrDev=m_pcoData->stcPcoCamType.strFirmwareVersion.DeviceNum;
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* Firmware_DESC device[%d]  szName          bMajorRev/Minor   wVariant\n", nrDev);
+			for(iDev = 0; iDev< nrDev; iDev++) {
+				PCO_SC2_Firmware_DESC *ptrfw;
+				ptrfw = &m_pcoData->stcPcoCamType.strFirmwareVersion.Device[iDev];
+				ptr += sprintf_s(ptr, ptrMax - ptr, "* %20d      %-18s   %4d.%-4d    %4d\n", 
+					iDev,
+					ptrfw->szName,
+					ptrfw->bMajorRev,
+					ptrfw->bMinorRev,
+					ptrfw->wVariant
+					);
+			}
+			
+
 
 			ptr += sprintf_s(ptr, ptrMax - ptr,"%s\n", m_log.c_str());
 			return output;

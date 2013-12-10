@@ -39,6 +39,9 @@
 #define DBG_XFER2LIMA      0x00000002
 #define DBG_LIMABUFF       0x00000004
 #define DBG_EXP            0x00000008
+#define DBG_XFERMULT       0x00000010
+#define DBG_XFERMULT1      0x00000020
+#define DBG_ASSIGN_BUFF    0x00000040
 
 #define DBG_DUMMY_IMG      0x00000100
 #define DBG_ROI            0x00001000
@@ -57,7 +60,7 @@
 
 #define PCO_CL_BAUDRATE_115K2	115200
 
-#define PCO_BUFFER_NREVENTS 2
+#define PCO_BUFFER_NREVENTS 4
 struct stcXlatCode2Str {
 		int code;
 		char *str;
@@ -170,7 +173,6 @@ struct stcPcoData {
 		
 		long msAcqRec, msAcqXfer, msAcqTout, msAcqTnow, msAcqAll;
 		time_t msAcqRecTimestamp, msAcqXferTimestamp, msAcqToutTimestamp, msAcqTnowTimestamp;
-		int trace_nb_frames;
 
 		struct stcTraceAcq{
 			DWORD nrImgRecorded;
@@ -204,7 +206,7 @@ struct stcPcoData {
 		double max_lat_time, max_lat_time_err;
 		
 		stcPcoData();
-
+		void traceAcqClean();
 };
 
 enum enumChange {

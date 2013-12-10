@@ -29,25 +29,27 @@
 
 #include "HwBufferMgr.h"
 
-
+#define PCO_MAX_NR_ALLOCATED_BUFFERS 8
 
 struct stcAllocBuff {
 		bool pcoAllocBufferDone;
 		bool createEventsDone;
 		
-		SHORT	pcoAllocBufferNr[8];				// bufnrM buffer number allocated by PCO_AllocateBuffer
-        WORD	*pcoAllocBufferPtr[8];			// buffer allocated by PCO_AllocateBuffer
-        DWORD	dwPcoAllocBufferSize[8];			// buffer allocated by PCO_AllocateBuffer
+		SHORT	pcoAllocBufferNr[PCO_MAX_NR_ALLOCATED_BUFFERS];				// bufnrM buffer number allocated by PCO_AllocateBuffer
+        WORD	*pcoAllocBufferPtr[PCO_MAX_NR_ALLOCATED_BUFFERS];			// buffer allocated by PCO_AllocateBuffer
+        DWORD	dwPcoAllocBufferSize[PCO_MAX_NR_ALLOCATED_BUFFERS];			// buffer allocated by PCO_AllocateBuffer
 
-		WORD	*limaAllocBufferPtr[8];			// buffer allocated by Lima
-        DWORD	dwLimaAllocBufferSize[8];			// buffer allocated by Lima
+		WORD	*limaAllocBufferPtr[PCO_MAX_NR_ALLOCATED_BUFFERS];			// buffer allocated by Lima
+        DWORD	dwLimaAllocBufferSize[PCO_MAX_NR_ALLOCATED_BUFFERS];			// buffer allocated by Lima
+		DWORD	dwStatus[8];			// PCO_AddBufferEx status/error return
 
-		//HANDLE bufferEvent[8];
-        HANDLE bufferAllocEvent[8];
+		//HANDLE bufferEvent[PCO_MAX_NR_ALLOCATED_BUFFERS];
+        HANDLE bufferAllocEvent[PCO_MAX_NR_ALLOCATED_BUFFERS];
 
-        DWORD bufferAssignedFrameFirst[8];
-        DWORD bufferAssignedFrameLast[8];
-        int bufferReady[8];
+        DWORD bufferAssignedFrameFirst[PCO_MAX_NR_ALLOCATED_BUFFERS];
+        DWORD bufferAssignedFrameLast[PCO_MAX_NR_ALLOCATED_BUFFERS];
+        int bufferReady[PCO_MAX_NR_ALLOCATED_BUFFERS];
+
 
 };
 
@@ -81,6 +83,7 @@ namespace lima
         
 	  
         int _xferImag();
+        int _xferImagTest();
         int _xferImagMult();
 		void * BufferCtrlObj::_getLimaBuffer(int lima_buffer_nb, Sync::Status &status);
 		  

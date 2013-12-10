@@ -32,7 +32,7 @@
 
 #include <cstdlib>
 #include <process.h>
-
+#include <sys/stat.h>
 #include <sys/timeb.h>
 #include <time.h>
 
@@ -48,7 +48,7 @@ using namespace lima::Pco;
 
 static char *timebaseUnits[] = {"ns", "us", "ms"};
 
-
+char *_checkLogFiles();
 void _pco_acq_thread_dimax(void *argin);
 void _pco_acq_thread_dimax_live(void *argin);
 void _pco_acq_thread_edge(void *argin);
@@ -138,6 +138,12 @@ char * _timestamp_pcocamerautils();
 char * _timestamp_pcoroictrlobj();
 char *_split_date(char *s);
 
+
+void stcPcoData::traceAcqClean(){
+	void *ptr = &this->traceAcq;
+	memset(ptr, 0, sizeof(struct stcTraceAcq));
+}
+
 stcPcoData::stcPcoData(){
 
 	char *ptr, *ptrMax;
@@ -212,7 +218,7 @@ Camera::Camera(const char *camPar) :
 	if(m_pcoData == NULL)
 		throw LIMA_HW_EXC(Error, "m_pcoData > creation error");
 	//memset((char *)m_pcoData, 0, sizeof(stcPcoData));
-    DEB_ALWAYS()  << DEB_VAR1(m_pcoData->version) ;
+    DEB_ALWAYS()  << DEB_VAR1(m_pcoData->version) << _checkLogFiles();
 
 	m_bin.changed = Invalid;
 	m_roi.changed = Invalid;
@@ -718,6 +724,8 @@ void _pco_acq_thread_dimax(void *argin) {
 	BufferCtrlObj* m_buffer = m_sync->_getBufferCtrlObj();
 
 	struct stcPcoData *m_pcoData = m_cam->_getPcoData();
+	m_pcoData->traceAcqClean();
+	m_pcoData->traceAcq.fnId = fnId;
 	
 	char *msg;
 	struct __timeb64 tStart, tStart0;
@@ -733,17 +741,23 @@ void _pco_acq_thread_dimax(void *argin) {
 	
 	WORD wSegment = m_cam->pcoGetActiveRamSegment(); 
 	double msPerFrame = (m_cam->pcoGetCocRunTime() * 1000.);
+	m_pcoData->traceAcq.msImgCoc = msPerFrame;
+
 	DWORD dwMsSleepOneFrame = (DWORD) (msPerFrame + 0.5);	// 4/5 rounding
 	if(dwMsSleepOneFrame == 0) dwMsSleepOneFrame = 1;		// min sleep
 
 	int nb_frames; 	m_sync->getNbFrames(nb_frames);
+	m_pcoData->traceAcq.nrImgRequested = nb_frames;
 	m_sync->setAcqFrames(0);
 
 	timeout = timeout0 = (long) (msPerFrame * (nb_frames * 1.3));	// 30% guard
 	if(timeout < TOUT_MIN_DIMAX) timeout = TOUT_MIN_DIMAX;
     
-	m_pcoData->msAcqTout = timeout;
+	m_pcoData->traceAcq.msTout = m_pcoData->msAcqTout = timeout;
 	_dwValidImageCnt = 0;
+
+	m_sync->getExpTime(m_pcoData->traceAcq.sExposure);
+	m_sync->getLatTime(m_pcoData->traceAcq.sDelay);
 
 	m_sync->setExposing(pcoAcqRecordStart);
 
@@ -754,7 +768,14 @@ void _pco_acq_thread_dimax(void *argin) {
 			throw LIMA_HW_EXC(Error, "PCO_GetNumberOfImagesInSegment");
 		}
 
+		m_pcoData->dwValidImageCnt[wSegment-1] = 
+			m_pcoData->traceAcq.nrImgRecorded = _dwValidImageCnt;
+		m_pcoData->dwMaxImageCnt[wSegment-1] =
+			m_pcoData->traceAcq.maxImgCount = _dwMaxImageCnt;
+
 		m_pcoData->msAcqTnow = msNow = msElapsedTime(tStart);
+		m_pcoData->traceAcq.msRecordLoop = msNow;
+	
 		if(_dwValidImageCnt >=  (DWORD) nb_frames) break;
 
 		if((timeout < msNow) && !m_pcoData->bExtTrigEnabled) { 
@@ -800,7 +821,6 @@ void _pco_acq_thread_dimax(void *argin) {
 	// dimax recording time
 	m_pcoData->msAcqRec = msRec = msElapsedTime(tStart);
 	m_pcoData->traceAcq.endRecordTimestamp = m_pcoData->msAcqRecTimestamp = getTimestamp();
-	m_pcoData->traceAcq.nrImgRequested = nb_acq_frames;
 
 	msElapsedTimeSet(tStart);
 
@@ -812,7 +832,9 @@ void _pco_acq_thread_dimax(void *argin) {
 			if(m_cam->_isCameraType(Pco2k))
 				status = (pcoAcqStatus) m_buffer->_xferImag();
 			else
-				status = (pcoAcqStatus) m_buffer->_xferImagMult();
+				//status = (pcoAcqStatus) m_buffer->_xferImagMult();
+				status = (pcoAcqStatus) m_buffer->_xferImagTest();
+				//status = (pcoAcqStatus) m_buffer->_xferImag();
 
 			m_sync->setExposing(status);
 
@@ -829,12 +851,7 @@ void _pco_acq_thread_dimax(void *argin) {
 	m_pcoData->traceAcq.msRecordLoop = msNow;
 	m_pcoData->traceAcq.msXfer = msXfer;
 	m_pcoData->traceAcq.msTotal= msAll;
-	m_pcoData->traceAcq.msImgCoc = msPerFrame;
-	m_pcoData->traceAcq.msTout = timeout;
-	m_pcoData->traceAcq.fnId = fnId;
 
-	m_sync->getExpTime(m_pcoData->traceAcq.sExposure);
-	m_sync->getLatTime(m_pcoData->traceAcq.sDelay);
 	
 
 
@@ -1563,6 +1580,7 @@ char * Camera::_pcoSet_RecordingState(int state, int &error){
 		PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 	}
 
+	DEB_ALWAYS() <<  DEB_VAR4(error, state, wRecState_actual, wRecState_new);
 	return fnId;
 
 }
@@ -2174,3 +2192,49 @@ void Camera::msgLog(char *s) {
 	m_msgLog->add(s); 
 }
 
+#define PATH_PCO_LOG_FILES "C:\\ProgramData\\pco\\"
+
+char *_checkLogFiles() {
+	const char *logFiles[] = {"C:\\ProgramData\\pco\\SC2_Cam.log", 
+						"C:\\ProgramData\\pco\\PCO_CDlg.log", 
+						"C:\\ProgramData\\pco\\PCO_Conv.log",
+						NULL};
+	const char **ptr = logFiles;
+	char *logOn = "\n\n"		
+		"###############################################################################\n"
+		"###############################################################################\n"
+		"###############################################################################\n"
+		"###                                                                         ###\n"
+		"###                           !!!  ATTENTION !!!                            ###\n"
+		"###                                                                         ###\n"
+		"###                     THE PCO LOG FILES ARE ENABLED                       ###\n"
+		"###                                                                         ###\n"
+		"###                 this option is ONLY for DEBUG & TESTS                   ###\n"
+		"###                                                                         ###\n"
+		"###                   it downgrades the acquisition time                    ###\n"
+		"###                                                                         ###\n"
+		"###                                                                         ###\n"
+		"###     to DISABLE it:                                                      ###\n"
+		"###          * stop the device server                                       ###\n"
+		"###          * open the directory C:\\ProgramData\\pco\\                       ###\n"
+		"###          * rename all the .log files as .txt                            ###\n"
+		"###          * start again the device server                                ###\n"
+		"###                                                                         ###\n"
+		"###############################################################################\n"
+		"###############################################################################\n"
+		"###############################################################################\n\n\n";
+
+	char *logOff = "";
+	struct stat fileStat;
+	int error;
+	bool found = false;
+
+	while(*ptr != NULL) {
+		error = stat(*ptr, &fileStat);
+		//printf("----------- [%d][%s]\n", error, *ptr);
+ 		found |= !error;
+		ptr++;
+	}
+	return found ? logOn : logOff;	
+};
+	
