@@ -3,12 +3,37 @@ PCO
 
 .. image:: pco-dimax-255x255.jpg
 .. image:: pco-edge.jpg
+.. image:: pco-2000-255x141.jpg
 
 
 Intoduction
 ```````````
 
-- **TODO**
+- **PCO camera systems** 
+ - PCO develops specialized fast and sensitive video camera systems, mainly for scientific applications; 
+   which covers digital camera systems with high dynamic range, high resolution, high speed and low noise. 
+   `PCO home page <http://www.pco.de/>`_
+ 
+- **Product overview and technical data of the PCO cameras supported in LIMA**
+ 
+ - **PCO-dimax:** 
+   High speed 12 bit CMOS camera with fast image rates of 1469 frames per second (fps) at full resolution of 1920 x 1080 pixel. 
+   `(tech data) <http://www.pco.de/categories/high-speed-cameras/pcodimax-hd/>`_
+ 
+ - **PCO-edge:**
+   Extremely low noise sCMOS camera with fast frame rates (100 fps), wide dynamic range (1:27000), high quantum efficiency, 
+   high resolution (2560 x 2160) and large field of view.
+   `(tech data) <http://www.pco.de/categories/scmos-cameras/pcoedge-42/>`_
+ 
+ - **PCO-2000:**
+   High resolution (2048 x 2048 pixel) and low noise 14bit CCD cooled camera system with internal image memory (camRAM), 
+   allows fast image recording with 160 MB/s. The available exposure times range from 500 ns to 49 days.
+   `(tech data) <http://www.pco.de/categories/sensitive-cameras/pco2000/>`_
+ 
+ - **PCO-4000:**
+   High resolution (4008 x 2672 pixel) and low noise 14bit CCD cooled camera system with internal image memory (camRAM),
+   allows fast image recording with 128 MB/s. The available exposure times range from 5 us to 49 days.
+   `(tech data) <http://www.pco.de/categories/sensitive-cameras/pco4000/>`_
 
 
 Module configuration
