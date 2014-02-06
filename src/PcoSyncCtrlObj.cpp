@@ -68,21 +68,33 @@ SyncCtrlObj::~SyncCtrlObj()
 
 //=========================================================================================================
 //=========================================================================================================
+
+/******************************************************************************
+enum TrigMode {
+	IntTrig,IntTrigMult,
+	ExtTrigSingle, ExtTrigMult,
+	ExtGate, ExtStartStop, ExtTrigReadout,
+};
+******************************************************************************/
+
 bool SyncCtrlObj::checkTrigMode(TrigMode trig_mode)
 {
 	DEB_MEMBER_FUNCT();
 	DEB_PARAM() << DEB_VAR1(trig_mode);
 
-	// DONE
 	switch(trig_mode){
+
 		case IntTrig:
-		//case IntTrigMult:
 		case ExtTrigMult:
-		case ExtTrigSingle:
 		case ExtGate:
 			return true;
 
-		default: break;
+		case IntTrigMult:
+		case ExtTrigSingle:
+		case ExtStartStop:
+		case ExtTrigReadout:
+		default: 
+			break;
 	}
 
 	DEB_ALWAYS() << "Trig mode not allowed" << DEB_VAR1(trig_mode);
@@ -115,6 +127,15 @@ void SyncCtrlObj::getTrigMode(TrigMode &trig_mode)
 
 //=========================================================================================================
 //=========================================================================================================
+/******************************************************************************
+enum TrigMode {
+	IntTrig,IntTrigMult,
+	ExtTrigSingle, ExtTrigMult,
+	ExtGate, ExtStartStop, ExtTrigReadout,
+};
+******************************************************************************/
+
+
 WORD SyncCtrlObj::xlatLimaTrigMode2PcoAcqMode()
 {
 	WORD ret;
@@ -149,7 +170,6 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoAcqMode()
 
 		case ExtTrigMult:
 		//case IntTrigMult: // 1 START (spec)
-	  case ExtTrigSingle:  // 2 GATE (spec)
       case ExtGate:  // 2 GATE (spec)
 #ifdef DISABLE_ACQ_ENBL_SIGNAL
     	  ret= 0x0000;
@@ -170,10 +190,6 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoAcqMode()
 
 //=========================================================================================================
 //=========================================================================================================
-/*************
-enum TrigMode { IntTrig 0, IntTrigMult 1, ExtTrigSingle 2, ExtTrigMult 3,
-				ExtGate 4, ExtStartStop 5, Live 6, };
-*******************/
 
 WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(bool &ext_trig){
 	// DONE
@@ -216,7 +232,6 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(bool &ext_trig){
 			// set/request delay and exposure command are ineffective. (Exposure
 			// time length control is also possible for double image mode; exposure
 			// time of the second image is given by the readout time of the first image.)
-		case ExtTrigSingle: 
 		case ExtGate: 
 			ext_trig = true;
 			ret= 0x0003;  // 2 = GATE (spec)
