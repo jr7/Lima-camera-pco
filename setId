@@ -4,7 +4,9 @@
 # this script fails in LIMA and PROCLIB if it is run as post-commit
 #   .../Lima/.git/modules/camera/pco/hooks/post-commit
 #
-#   change to other directory inside the git proc???
+# problem related with the change to other directory during the 
+#   git process??? 
+#      (cd ../.. ;) (cd ../../third-party/Processlib ;)
 #======================================================================
 
 FILE="./include/PcoGitVersion.h"
