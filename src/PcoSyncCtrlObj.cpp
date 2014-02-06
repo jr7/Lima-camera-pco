@@ -97,7 +97,7 @@ bool SyncCtrlObj::checkTrigMode(TrigMode trig_mode)
 			break;
 	}
 
-	DEB_ALWAYS() << "Trig mode not allowed" << DEB_VAR1(trig_mode);
+	//DEB_ALWAYS() << "<Trig mode not allowed>  " << DEB_VAR1(trig_mode);
 	return false;
 }
 
