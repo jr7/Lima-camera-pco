@@ -32,7 +32,7 @@
 
 #define DISABLE_ACQ_ENBL_SIGNAL
 
-#define BUFF_VERSION 1024
+#define BUFF_VERSION 2048
 
 //--------------------------------------- debug const for talk
 #define DBG_BUFF           0x00000001

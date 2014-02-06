@@ -59,6 +59,7 @@ void _pco_time2dwbase(double exp_time, DWORD &dwExp, WORD &wBase);
 //=========================================================================================================
 char* _timestamp_pcocamera() {return ID_TIMESTAMP ;}
 char * _timestamp_pcogitversion(){return PCO_GIT_VERSION ;};
+char * _timestamp_proclibgitversion(){return PROCLIB_GIT_VERSION ;};
 char * _timestamp_limagitversion(){return LIMA_GIT_VERSION ;};
 
 //=========================================================================================================
@@ -141,6 +142,7 @@ char * _timestamp_pcodetinfoctrlobj();
 char * _timestamp_pcocamerautils();
 char * _timestamp_pcoroictrlobj();
 char * _timestamp_pcogitversion();
+char * _timestamp_proclibgitversion();
 char *_split_date(char *s);
 
 stcPcoData::stcPcoData(){
@@ -163,6 +165,7 @@ stcPcoData::stcPcoData(){
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcoroictrlobj()));
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcogitversion());
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_limagitversion());
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_proclibgitversion());
 
 	stcPcoGeneral.wSize = sizeof(stcPcoGeneral);
 	stcPcoGeneral.strCamType.wSize = sizeof(stcPcoGeneral.strCamType);
