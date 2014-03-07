@@ -413,6 +413,10 @@
 				RelativePath="..\..\..\..\notes\pcods_c.txt"
 				>
 			</File>
+			<File
+				RelativePath="..\..\..\..\VERSION.log"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>
