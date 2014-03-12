@@ -1,0 +1,28 @@
+#!/bin/sh
+
+#======================================================================
+# this script fails in LIMA and PROCLIB if it is run as post-commit
+#   .../Lima/.git/modules/camera/pco/hooks/post-commit
+#
+# problem related with the change to other directory during the 
+#   git process??? 
+#      (cd ../.. ;) (cd ../../third-party/Processlib ;)
+#======================================================================
+
+FILE="./include/PcoGitVersion.h"
+
+DT=`date +"%Y/%m/%d %H:%M:%S"`
+
+PCOREV=`git log -n 1 --date=iso --format=format:"rev[%ad] head[%h][%H]" HEAD || echo "ERROR"`
+LIMAREV=`cd ../.. ; git log -n 1 --date=iso --format=format:"rev[%ad] head[%h][%H]" HEAD || echo "ERROR"`
+PROCLIBREV=`cd ../../third-party/Processlib ; git log -n 1 --date=iso --format=format:"rev[%ad] head[%h][%H]" HEAD || echo "ERROR"`
+
+{
+echo "#define     PCO_GIT_VERSION \"\$Id:     PCO ${PCOREV} at [${DT}] \$\"" 
+echo "#define    LIMA_GIT_VERSION \"\$Id:    LIMA ${LIMAREV} at [${DT}] \$\"" 
+echo "#define PROCLIB_GIT_VERSION \"\$Id: PROCLIB ${PROCLIBREV} at [${DT}] \$\"" 
+} > ${FILE}
+
+cat ${FILE}
+
+

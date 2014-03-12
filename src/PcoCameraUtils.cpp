@@ -24,6 +24,8 @@
 #include <cstdlib>
 #include <process.h>
 
+#include <sys/stat.h>
+
 #include <sys/timeb.h>
 #include <time.h>
 
@@ -36,7 +38,6 @@
 #include "PcoSyncCtrlObj.h"
 #include "PcoBufferCtrlObj.h"
 
-
 using namespace lima;
 using namespace lima::Pco;
 
@@ -44,6 +45,8 @@ static char *timebaseUnits[] = {"ns", "us", "ms"};
 
 #define BUFF_INFO_SIZE 5000
 
+//#define PRINTLINES { for(int i = 0; i<50;i++) printf("=====  %s [%d]/[%d]\n", __FILE__, __LINE__,i); }
+#define PRINTLINES
 
 void print_hex_dump_buff(void *ptr_buff, size_t len);
 int __xlat_date(char *s1, char &ptrTo, int lenTo) ;
@@ -53,6 +56,13 @@ char *_xlat_date(char *s1, char *s2, char *s3) ;
 char* _timestamp_pcocamerautils() {return ID_TIMESTAMP ;}
 //=========================================================================================================
 
+//=========================================================================================================
+// dummy comments for test 02ccc
+//=========================================================================================================
+
+
+//=========================================================================================================
+//=========================================================================================================
 char *getTimestamp(timestampFmt fmtIdx, time_t xtime) {
    static char timeline[128];
    errno_t err;
@@ -72,15 +82,11 @@ char *getTimestamp(timestampFmt fmtIdx, time_t xtime) {
 		time( &ltime );
 	else
 		ltime = xtime;
-
-
-
 	err = localtime_s( &today, &ltime );
 	strftime(timeline, 128, fmt, &today );
       
 	return timeline;
 }
-
 
 time_t getTimestamp() { return time(NULL); }
 
@@ -190,6 +196,18 @@ char *str_trim(char *s) {
 
 //=========================================================================================================
 //=========================================================================================================
+void stcPcoData::stcTraceAcq::init(){
+	nrImgRecorded = 
+	maxImgCount = 
+	nrImgRequested =
+	nrImgRequested0 =
+	nrImgAcquired = 
+	msTotal = msRecord = msRecordLoop = msXfer = msTout = 0;
+	msImgCoc =
+	sExposure = sDelay = 0;
+	endRecordTimestamp = endXferTimestamp = 0;
+	fnId = NULL;
+}
 
 char *Camera::talk(char *cmd){
 	static char buff[BUFF_INFO_SIZE +1];
@@ -435,7 +453,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		keys_desc[ikey++] = "(R) for DIMAX only / acq time details (record and transfer time)";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 
-			if(!(_isCameraType(Dimax) || _isCameraType(Pco2k))) {
+			if(!(_isCameraType(Dimax | Pco2k | Pco4k))) {
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* ERROR - only for DIMAX / 2K");
 				return output;
 			}
@@ -456,7 +474,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		keys_desc[ikey++] = "(R) for DIMAX only / trace details";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 
-			if(!(_isCameraType(Dimax) || _isCameraType(Pco2k))) {
+			if(!(_isCameraType(Dimax | Pco2k | Pco4k))) {
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* ERROR - only for DIMAX / 2K");
 				return output;
 			}
@@ -485,8 +503,10 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 					imgSize, totSize, mbTotSize, xferSpeed);
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, 
-				"* nrImgRequested[%d] nrImgRecorded[%d] maxImgCount[%d]\n",
+				"* nrImgRequested0[%d] nrImgRequested[%d] nrImgAcquired[%d] nrImgRecorded[%d] maxImgCount[%d]\n",
+				m_pcoData->traceAcq.nrImgRequested0,
 				m_pcoData->traceAcq.nrImgRequested,
+				m_pcoData->traceAcq.nrImgAcquired,
 				m_pcoData->traceAcq.nrImgRecorded,
 				m_pcoData->traceAcq.maxImgCount);
 
@@ -703,7 +723,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				_PRINT_DBG( DBG_XFERMULT ) ;
 				_PRINT_DBG( DBG_XFERMULT1 ) ;
 				_PRINT_DBG( DBG_ASSIGN_BUFF ) ;
-				
+				_PRINT_DBG( DBG_STATUS ) ;
 				_PRINT_DBG( DBG_ROI ) ;
 			}
 
@@ -743,10 +763,11 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 					ptrhw->wVariant
 					);
 			}
-			
 
 			nrDev=m_pcoData->stcPcoCamType.strFirmwareVersion.DeviceNum;
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* Firmware_DESC device[%d]  szName          bMajorRev/Minor   wVariant\n", nrDev);
+			ptr += sprintf_s(ptr, ptrMax - ptr, 
+				"* Firmware_DESC device[%d]  szName          bMajorRev/Minor   wVariant\n", nrDev);
+
 			for(iDev = 0; iDev< nrDev; iDev++) {
 				PCO_SC2_Firmware_DESC *ptrfw;
 				ptrfw = &m_pcoData->stcPcoCamType.strFirmwareVersion.Device[iDev];
@@ -758,8 +779,36 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 					ptrfw->wVariant
 					);
 			}
-			
 
+			PCO_FW_Vers strFirmwareVersion;
+			WORD wblock = 0;
+			int iCnt, err;
+			err =  PCO_GetFirmwareInfo(m_handle, wblock++, &strFirmwareVersion);
+			nrDev = (err == PCO_NOERROR) ? strFirmwareVersion.DeviceNum : 0;
+
+			if(nrDev > 0){
+				ptr += sprintf_s(ptr, ptrMax - ptr, 
+					"* Firmware_DESC device[%d]  szName          bMajorRev/Minor   wVariant (PCO_GetFirmwareInfo)\n", 
+					nrDev);
+
+				for(iDev = 0, iCnt = 0; iDev< nrDev; iDev++, iCnt++) {
+					PCO_SC2_Firmware_DESC *ptrfw;
+					if(iCnt >= 10) {
+						iCnt = 0;
+						err =  PCO_GetFirmwareInfo(m_handle, wblock++, &strFirmwareVersion);
+						if (err != PCO_NOERROR) break;
+					} // iCnt
+					
+					ptrfw = &strFirmwareVersion.Device[iCnt];
+					ptr += sprintf_s(ptr, ptrMax - ptr, "* %20d      %-18s   %4d.%-4d    %4d\n", 
+						iDev, ptrfw->szName, ptrfw->bMajorRev, ptrfw->bMinorRev, ptrfw->wVariant);
+				} // for
+			} // if nrDev
+
+			WORD wADCOperation;
+			err = PCO_GetADCOperation(m_handle, &wADCOperation);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* ADC wADCOperation[%d] wNumADCsDESC[%d]\n", 
+					wADCOperation, m_pcoData->stcPcoDescription.wNumADCsDESC);
 
 			ptr += sprintf_s(ptr, ptrMax - ptr,"%s\n", m_log.c_str());
 			return output;
@@ -1184,3 +1233,51 @@ unsigned long long Camera::_getDebug(unsigned long long mask = ULLONG_MAX){
 		return m_pcoData->debugLevel & mask;
 
 }
+//=========================================================================================================
+//=========================================================================================================
+
+char *_checkLogFiles() {
+	const char *logFiles[] = {
+		"C:\\ProgramData\\pco\\SC2_Cam.log", 
+		"C:\\ProgramData\\pco\\PCO_CDlg.log", 
+		"C:\\ProgramData\\pco\\PCO_Conv.log",
+		NULL};
+	const char **ptr = logFiles;
+	char *logOn = "\n\n"		
+		"###############################################################################\n"
+		"###############################################################################\n"
+		"###############################################################################\n"
+		"###                                                                         ###\n"
+		"###                           !!!  ATTENTION !!!                            ###\n"
+		"###                                                                         ###\n"
+		"###                     THE PCO LOG FILES ARE ENABLED                       ###\n"
+		"###                                                                         ###\n"
+		"###                 this option is ONLY for DEBUG & TESTS                   ###\n"
+		"###                                                                         ###\n"
+		"###                   it downgrades the acquisition time                    ###\n"
+		"###                                                                         ###\n"
+		"###                                                                         ###\n"
+		"###     to DISABLE it:                                                      ###\n"
+		"###          * stop the device server                                       ###\n"
+		"###          * open the directory C:\\ProgramData\\pco\\                       ###\n"
+		"###          * rename all the .log files as .txt                            ###\n"
+		"###          * start again the device server                                ###\n"
+		"###                                                                         ###\n"
+		"###############################################################################\n"
+		"###############################################################################\n"
+		"###############################################################################\n\n\n";
+
+	char *logOff = "";
+	struct stat fileStat;
+	int error;
+	bool found = false;
+
+	while(*ptr != NULL) {
+		error = stat(*ptr, &fileStat);
+		//printf("----------- [%d][%s]\n", error, *ptr);
+ 		found |= !error;
+		ptr++;
+	}
+	return found ? logOn : logOff;	
+};
+	

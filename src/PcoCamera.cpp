@@ -26,6 +26,7 @@
 #define BYPASS
 
 #define TOUT_MIN_DIMAX 500
+#define ERROR_MSG_LINE 128
 
 //#define BUFF_INFO_SIZE 5000
 
@@ -42,6 +43,7 @@
 #include "PcoSyncCtrlObj.h"
 #include "PcoBufferCtrlObj.h"
 #include "PcoCameraUtils.h"
+#include "PcoGitVersion.h"
 
 using namespace lima;
 using namespace lima::Pco;
@@ -57,6 +59,10 @@ void _pco_time2dwbase(double exp_time, DWORD &dwExp, WORD &wBase);
 
 //=========================================================================================================
 char* _timestamp_pcocamera() {return ID_TIMESTAMP ;}
+char * _timestamp_pcogitversion(){return PCO_GIT_VERSION ;};
+char * _timestamp_proclibgitversion(){return PROCLIB_GIT_VERSION ;};
+char * _timestamp_limagitversion(){return LIMA_GIT_VERSION ;};
+
 //=========================================================================================================
 
 //=========================================================================================================
@@ -136,6 +142,8 @@ char * _timestamp_pcobufferctrlobj();
 char * _timestamp_pcodetinfoctrlobj();
 char * _timestamp_pcocamerautils();
 char * _timestamp_pcoroictrlobj();
+char * _timestamp_pcogitversion();
+char * _timestamp_proclibgitversion();
 char *_split_date(char *s);
 
 
@@ -162,6 +170,9 @@ stcPcoData::stcPcoData(){
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcodetinfoctrlobj()));
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcocamerautils()));
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcoroictrlobj()));
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcogitversion());
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_limagitversion());
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_proclibgitversion());
 
 	stcPcoGeneral.wSize = sizeof(stcPcoGeneral);
 	stcPcoGeneral.strCamType.wSize = sizeof(stcPcoGeneral.strCamType);
@@ -252,11 +263,24 @@ void Camera::_init(){
 	PCO_THROW_OR_TRACE(error, errMsg) ;
 
 
+	// -- Initialise ADC
+	// Pixel data can be read out using one ADC (better linearity) or in parallel using two ADCs (faster).
+	m_pcoData->wNumADC = m_pcoData->stcPcoDescription.wNumADCsDESC;
 
-		// -- Initialise adc, size, bin, roi
-	m_pcoData->nr_adc= 1;
-	m_pcoData->max_adc = m_pcoData->stcPcoDescription.wNumADCsDESC;
+	WORD wADCOperation;
+	error = PcoCheckError(PCO_GetADCOperation(m_handle, &wADCOperation));
 
+	if(wADCOperation != 1){
+		wADCOperation = 1;
+		error = PcoCheckError(PCO_SetADCOperation(m_handle, wADCOperation));
+		error = PcoCheckError(PCO_GetADCOperation(m_handle, &wADCOperation));
+	}
+	m_pcoData->wNowADC= wADCOperation;
+	
+
+
+
+		// -- Initialise size, bin, roi
 	m_pcoData->maxWidth = (unsigned int) m_pcoData->stcPcoDescription.wMaxHorzResStdDESC; // ds->ccd.size.xmax,
 	m_pcoData->maxHeight= (unsigned int) m_pcoData->stcPcoDescription.wMaxVertResStdDESC; // ds->ccd.size.ymax,
 	m_pcoData->bitsPerPix = (unsigned int) m_pcoData->stcPcoDescription.wDynResDESC; // ds->ccd.size.bits
@@ -273,7 +297,7 @@ void Camera::_init(){
 
 	_get_MaxRoi(m_RoiLima);
 
-	sprintf_s(msg, MSG_SIZE, "* CCD Size = X[%d] x Y[%d] (%d bits)\n", m_pcoData->maxWidth, m_pcoData->maxHeight, m_pcoData->bitsPerPix);
+	sprintf_s(msg, MSG_SIZE, "* CCD Size = X[%d] * Y[%d] (%d bits)\n", m_pcoData->maxWidth, m_pcoData->maxHeight, m_pcoData->bitsPerPix);
 	DEB_TRACE() <<   msg;
 	m_log.append(msg);
 	
@@ -288,6 +312,7 @@ void Camera::_init(){
 	
 	if(_isCameraType(Dimax)) _init_dimax();
 	else if(_isCameraType(Pco2k)) _init_dimax();
+	else if(_isCameraType(Pco4k)) _init_dimax();
 	else if(_isCameraType(Edge)) _init_edge();
 	else {
 		char msg[MSG_SIZE+1];
@@ -335,11 +360,18 @@ void  Camera::_init_dimax() {
 		m_pcoData->dwRamSize = ramSize;     // nr of pages of the ram
 		m_pcoData->wPixPerPage = pageSize;    // nr of pixels of the page
 
-		sprintf_s(msg, MSG_SIZE, "* RAM number of pages [%ld]  PAGE number of pixels [%d]\n",  
-				m_pcoData->dwRamSize, m_pcoData->wPixPerPage);
+		sprintf_s(msg, MSG_SIZE, "* ramPages[%ld] pixPerPage[%d] bitsPerPix[%d]\n",  
+				m_pcoData->dwRamSize, m_pcoData->wPixPerPage, m_pcoData->bitsPerPix);
 		DEB_TRACE() <<   msg;
 		m_log.append(msg);
-
+		
+		double nrBytes = (double) m_pcoData->dwRamSize  * (double) m_pcoData->wPixPerPage * 
+			(double)m_pcoData->bitsPerPix / 9.; // 8 bits data + 1 bit CRC -> 9
+		
+		sprintf_s(msg, MSG_SIZE, "* camMemorySize [%lld B] [%g GB]\n",  
+				(long long int) nrBytes, nrBytes/GIGABYTE);
+		DEB_TRACE() <<   msg;
+		m_log.append(msg);
 
 		// ----------------- get initial seg Size - images & print
 
@@ -615,7 +647,7 @@ void Camera::startAcq()
 			m_pcoData->dwPixelRateRequested = 0;
 		}
 
-		if(_isCameraType(Pco2k)) {
+		if(_isCameraType(Pco2k | Pco4k)) {
 			DWORD _dwPixelRate;
 
 			error = PcoCheckError(PCO_GetPixelRate(m_handle, &m_pcoData->dwPixelRate));
@@ -679,7 +711,7 @@ void Camera::startAcq()
 		return;
 	}
 
-	if(_isCameraType(Dimax | Pco2k)){
+	if(_isCameraType(Dimax | Pco2k | Pco4k)){
 		_pcoSet_RecordingState(1, error);
 		if(iRequestedFrames > 0 ) {
 			_beginthread( _pco_acq_thread_dimax, 0, (void*) this);
@@ -717,7 +749,7 @@ void _pco_acq_thread_dimax(void *argin) {
 
 	DWORD _dwValidImageCnt, _dwMaxImageCnt;
 
-	printf("=== %s %s> ENTRY\n", fnId, getTimestamp(Iso));
+	printf("=== %s [%d]> %s ENTRY\n",  fnId, __LINE__,getTimestamp(Iso));
 
 	Camera* m_cam = (Camera *) argin;
 	SyncCtrlObj* m_sync = m_cam->_getSyncCtrlObj();
@@ -746,8 +778,12 @@ void _pco_acq_thread_dimax(void *argin) {
 	DWORD dwMsSleepOneFrame = (DWORD) (msPerFrame + 0.5);	// 4/5 rounding
 	if(dwMsSleepOneFrame == 0) dwMsSleepOneFrame = 1;		// min sleep
 
+	bool nb_frames_fixed = false;
 	int nb_frames; 	m_sync->getNbFrames(nb_frames);
-	m_pcoData->traceAcq.nrImgRequested = nb_frames;
+	//m_pcoData->traceAcq.nrImgRequested = nb_frames;
+	m_pcoData->traceAcq.init();
+	m_pcoData->traceAcq.nrImgRequested0 = nb_frames;
+
 	m_sync->setAcqFrames(0);
 
 	timeout = timeout0 = (long) (msPerFrame * (nb_frames * 1.3));	// 30% guard
@@ -776,13 +812,21 @@ void _pco_acq_thread_dimax(void *argin) {
 		m_pcoData->msAcqTnow = msNow = msElapsedTime(tStart);
 		m_pcoData->traceAcq.msRecordLoop = msNow;
 	
-		if(_dwValidImageCnt >=  (DWORD) nb_frames) break;
+		if( ((DWORD) nb_frames > _dwMaxImageCnt) ){
+			nb_frames_fixed = true;
+			printf("=== %s [%d]> ERROR INVALID NR FRAMES fixed nb_frames[%d] _dwMaxImageCnt[%d]\n", 
+				fnId, __LINE__, nb_frames, _dwMaxImageCnt);
+			m_sync->setExposing(pcoAcqError);
+			break;
+		}
+
+		if(  (_dwValidImageCnt >= (DWORD) nb_frames)) break;
 
 		if((timeout < msNow) && !m_pcoData->bExtTrigEnabled) { 
 			//m_sync->setExposing(pcoAcqRecordTimeout);
 			m_sync->stopAcq();
 			m_sync->setExposing(pcoAcqStop);
-			printf("=== %s line[%d]> TIMEOUT!!! tout[(%ld) 0(%ld)] recLoopTime[%ld ms] lastImgRecorded[%ld] nrImgRequested[%d]\n", 
+			printf("=== %s [%d]> TIMEOUT!!! tout[(%ld) 0(%ld)] recLoopTime[%ld ms] lastImgRecorded[%ld] nrImgRequested[%d]\n", 
 				fnId, __LINE__, timeout, timeout0, msNow, _dwValidImageCnt, nb_frames);
 			break;
 		}
@@ -802,46 +846,52 @@ void _pco_acq_thread_dimax(void *argin) {
 		throw LIMA_HW_EXC(Error, "_pcoSet_RecordingState");
 	}
 
-	if(m_sync->getExposing() == pcoAcqRecordStart) m_sync->setExposing(pcoAcqRecordEnd);
+	if(!nb_frames_fixed) {
+		if(m_sync->getExposing() == pcoAcqRecordStart) m_sync->setExposing(pcoAcqRecordEnd);
 
-	msg = m_cam->_PcoCheckError(PCO_GetNumberOfImagesInSegment(m_handle, wSegment, &_dwValidImageCnt, &_dwMaxImageCnt), error);
-	if(error) {
-		printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, msg);
-		throw LIMA_HW_EXC(Error, "PCO_GetNumberOfImagesInSegment");
-	}
+		msg = m_cam->_PcoCheckError(PCO_GetNumberOfImagesInSegment(m_handle, wSegment, &_dwValidImageCnt, &_dwMaxImageCnt), error);
+		if(error) {
+			printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, msg);
+			throw LIMA_HW_EXC(Error, "PCO_GetNumberOfImagesInSegment");
+		}
 
-	m_pcoData->dwValidImageCnt[wSegment-1] = 
-		m_pcoData->traceAcq.nrImgRecorded = _dwValidImageCnt;
-	m_pcoData->dwMaxImageCnt[wSegment-1] =
-		m_pcoData->traceAcq.maxImgCount = _dwMaxImageCnt;
+		m_pcoData->dwValidImageCnt[wSegment-1] = 
+			m_pcoData->traceAcq.nrImgRecorded = _dwValidImageCnt;
 
-	nb_acq_frames = (_dwValidImageCnt < (DWORD) nb_frames) ? _dwValidImageCnt : nb_frames;
-	//m_sync->setAcqFrames(nb_acq_frames);
+		nb_acq_frames = (_dwValidImageCnt < (DWORD) nb_frames) ? _dwValidImageCnt : nb_frames;
+		//m_sync->setAcqFrames(nb_acq_frames);
 
-	// dimax recording time
-	m_pcoData->msAcqRec = msRec = msElapsedTime(tStart);
-	m_pcoData->traceAcq.endRecordTimestamp = m_pcoData->msAcqRecTimestamp = getTimestamp();
 
-	msElapsedTimeSet(tStart);
+		// dimax recording time
+		m_pcoData->msAcqRec = msRec = msElapsedTime(tStart);
+		m_pcoData->traceAcq.endRecordTimestamp = m_pcoData->msAcqRecTimestamp = getTimestamp();
+		m_pcoData->traceAcq.nrImgAcquired = nb_acq_frames;
+		m_pcoData->traceAcq.nrImgRequested = nb_frames;
 
-	if(m_buffer->_getRequestStop()) {
-		m_sync->setExposing(pcoAcqStop);
-	} else {
-			pcoAcqStatus status;
+		msElapsedTimeSet(tStart);
 
-			if(m_cam->_isCameraType(Pco2k))
-				status = (pcoAcqStatus) m_buffer->_xferImag();
-			else
-				//status = (pcoAcqStatus) m_buffer->_xferImagMult();
-				status = (pcoAcqStatus) m_buffer->_xferImagTest();
-				//status = (pcoAcqStatus) m_buffer->_xferImag();
+		if(m_buffer->_getRequestStop()) {
+			m_sync->setExposing(pcoAcqStop);
+		} else {
+				pcoAcqStatus status;
 
-			m_sync->setExposing(status);
+				if(m_cam->_isCameraType(Pco2k | Pco4k)){
+					status = (pcoAcqStatus) m_buffer->_xferImag();
+					if(nb_frames_fixed) status = pcoAcqError;
+				}else{
+					status = (pcoAcqStatus) m_buffer->_xferImagMult();
+					//status = (pcoAcqStatus) m_buffer->_xferImagTest(); <---- DIMAX
+				}
+				m_sync->setExposing(status);
 
-			if(!m_buffer->_getRequestStop()) m_sync->stopAcq();
-	}
+				if(!m_buffer->_getRequestStop()) m_sync->stopAcq();
+		}
+	} // if nb_frames_fixed
 
 	//m_sync->setExposing(status);
+	m_pcoData->dwMaxImageCnt[wSegment-1] =
+			m_pcoData->traceAcq.maxImgCount = _dwMaxImageCnt;
+
 	// dimax xfer time
 	m_pcoData->msAcqXfer = msXfer = msElapsedTime(tStart);
 	m_pcoData->msAcqAll = msAll = msElapsedTime(tStart0);
@@ -855,9 +905,10 @@ void _pco_acq_thread_dimax(void *argin) {
 	
 
 
-	printf("=== %s> EXIT imgRecorded[%d] coc[%g] recLoopTime[%ld] "
+	printf("=== %s [%d]> EXIT imgRecorded[%d] coc[%g] recLoopTime[%ld] "
 			"tout[(%ld) 0(%ld)] rec[%ld] xfer[%ld] all[%ld](ms)\n", 
-			fnId, _dwValidImageCnt, msPerFrame, msNow, timeout, timeout0, msRec, msXfer, msAll);
+			fnId, __LINE__, _dwValidImageCnt, msPerFrame, msNow, timeout, timeout0, msRec, msXfer, msAll);
+
 	_endthread();
 }
 
@@ -1044,7 +1095,7 @@ unsigned long Camera::pcoGetFramesMax(int segmentPco){
 		}
 
 
-		if(!_isCameraType(Dimax | Pco2k)) {
+		if(!_isCameraType(Dimax | Pco2k | Pco4k)) {
 			printf("=== %s> unknow camera type [%d]\n", fnId, _getCameraType());
 			return -1;
 		}
@@ -1316,7 +1367,7 @@ char *Camera::_prepare_cameralink_interface(int &error){
 			//_pcoData.clTransferParam.Transmit = m_pcoData->clTransferParam.Transmit;
 			m_pcoData->clTransferParam.DataFormat=PCO_CL_DATAFORMAT_2x12; //=2
 	} else
-	if(_isCameraType(Pco2k)){
+	if(_isCameraType(Pco2k | Pco4k)){
 		// -------------------- pco2k -> GigE		
 	} else
 	if(_isCameraType(EdgeGL)) {
@@ -1963,6 +2014,11 @@ void Camera::_get_PixelSize(double& x_size,double &y_size)
 {  
     // ---- TODO
 	// pixel size in micrometer (???)
+
+	if( _isCameraType(Pco4k)) {
+		x_size = y_size = 9.0;		
+		return;
+	}
   x_size = y_size = -1.;		// @todo don't know
 
 }
@@ -2025,6 +2081,9 @@ bool Camera::_isCameraType(int tp){
 		case CAMERATYPE_PCO2000:
 			return !!(tp & Pco2k) ;
 
+		case CAMERATYPE_PCO4000:
+			return !!(tp & Pco4k) ;
+
 
 		default:
 			return FALSE;
@@ -2063,7 +2122,7 @@ void Camera::_pco_GetHWIOSignal(int &error){
 	int i, imax;
 		error = 0;
 
-		if(!( _isCameraType(Dimax | Edge | Pco2k))  ) {
+		if(!( _isCameraType(Dimax | Edge | Pco2k | Pco4k))  ) {
 			error = -1;
 			return;
 		}

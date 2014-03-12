@@ -150,13 +150,8 @@ void Interface::getStatus(StatusType& status)
 int Interface::getNbAcquiredFrames()
 {
   DEB_MEMBER_FUNCT();
-	// DONE
 
-  int aNbAcquiredFrames;
-  if(m_buffer)
-    aNbAcquiredFrames = m_buffer->getNbAcquiredFrames();
-  else
-    aNbAcquiredFrames = m_cam->getNbAcquiredFrames();
+  int aNbAcquiredFrames = getNbHwAcquiredFrames();
 
   DEB_RETURN() << DEB_VAR1(aNbAcquiredFrames);
   return aNbAcquiredFrames;
@@ -166,7 +161,8 @@ int Interface::getNbAcquiredFrames()
 //=========================================================================================================
 int Interface::getNbHwAcquiredFrames()
 {
-	// DONE
-  return getNbAcquiredFrames();
+	int nb_acq_frames;
+	m_sync->getAcqFrames(nb_acq_frames);
+	return nb_acq_frames;
 }
 

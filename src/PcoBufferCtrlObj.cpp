@@ -1041,8 +1041,9 @@ void BufferCtrlObj::_pcoAllocBuffers(bool max) {
 					), error);
 
 				if(error) {
-    				DEB_ALWAYS() << sErr;
-    				DEB_ALWAYS() << DEB_VAR1(_dwAllocatedBufferSize);
+					int nrEvents = PCO_BUFFER_NREVENTS;
+    				DEB_ALWAYS() << sErr << "\n" 
+    						<< DEB_VAR3(nrEvents, bufIdx,_dwAllocatedBufferSize);
 					THROW_HW_ERROR(NotSupported) << sErr;
 				}
 				m_allocBuff.dwPcoAllocBufferSize[bufIdx] = _dwAllocatedBufferSize;

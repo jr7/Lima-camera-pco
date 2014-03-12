@@ -32,7 +32,7 @@
 
 #define DISABLE_ACQ_ENBL_SIGNAL
 
-#define BUFF_VERSION 1024
+#define BUFF_VERSION 2048
 
 //--------------------------------------- debug const for talk
 #define DBG_BUFF           0x00000001
@@ -42,12 +42,15 @@
 #define DBG_XFERMULT       0x00000010
 #define DBG_XFERMULT1      0x00000020
 #define DBG_ASSIGN_BUFF    0x00000040
+#define DBG_STATUS		   0x00000080
 
 #define DBG_DUMMY_IMG      0x00000100
 #define DBG_ROI            0x00001000
 //---------------------------------------
 
-
+#define KILOBYTE (1024LL)
+#define MEGABYTE (KILOBYTE * KILOBYTE)
+#define GIGABYTE (KILOBYTE * MEGABYTE)
 
 #define PCO_EDGE_PIXEL_RATE_MIN 95000000
 #define PCO_EDGE_PIXEL_RATE_MAX 286000000
@@ -159,7 +162,7 @@ struct stcPcoData {
         char		sensor_type[64];
 
         
-        unsigned int    nr_adc, max_adc;
+        WORD    wNowADC, wNumADC;
         unsigned int    maxwidth_step, maxheight_step;
 
         struct stcTemp temperature;
@@ -178,12 +181,15 @@ struct stcPcoData {
 			DWORD nrImgRecorded;
 			DWORD maxImgCount;
 			int nrImgRequested;
+			int nrImgRequested0;
+			int nrImgAcquired;
 			long msTotal, msRecord, msRecordLoop, msXfer, msTout;
 			double msImgCoc;
 			double sExposure, sDelay;
 			time_t endRecordTimestamp;
 			time_t endXferTimestamp;
 			char *fnId;
+			void init();
 		} traceAcq;
 
 		DWORD dwPixelRate, dwPixelRateRequested;
@@ -219,6 +225,7 @@ enum enumPcoFamily {
 	EdgeGL      = 1<<2,
 	EdgeRolling = 1<<3, 
 	Pco2k       = 1<<4,
+	Pco4k       = 1<<5,
 };
 
 enum enumPcoStorageMode {
