@@ -318,6 +318,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\include\PcoGitVersion.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\include\PcoInterface.h"
 				>
 			</File>
@@ -389,32 +393,14 @@
 			>
 		</Filter>
 		<Filter
-			Name="notes"
+			Name="doc"
 			>
 			<File
-				RelativePath="..\..\..\..\notes\notes.txt"
-				>
-				<FileConfiguration
-					Name="Release_Win7_Sync|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\..\notes\pcods_c.txt"
+				RelativePath="..\..\..\..\doc\notes.txt"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\VERSION.log"
+				RelativePath="..\..\..\..\doc\VERSION.log"
 				>
 			</File>
 		</Filter>

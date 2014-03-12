@@ -1,0 +1,3 @@
+# 2013/03/12 - include git version
+  - file ./include/PcoGitVersion.h
+  - after commit -> run setID -> build again

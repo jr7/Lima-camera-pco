@@ -2251,49 +2251,5 @@ void Camera::msgLog(char *s) {
 	m_msgLog->add(s); 
 }
 
-#define PATH_PCO_LOG_FILES "C:\\ProgramData\\pco\\"
 
-char *_checkLogFiles() {
-	const char *logFiles[] = {"C:\\ProgramData\\pco\\SC2_Cam.log", 
-						"C:\\ProgramData\\pco\\PCO_CDlg.log", 
-						"C:\\ProgramData\\pco\\PCO_Conv.log",
-						NULL};
-	const char **ptr = logFiles;
-	char *logOn = "\n\n"		
-		"###############################################################################\n"
-		"###############################################################################\n"
-		"###############################################################################\n"
-		"###                                                                         ###\n"
-		"###                           !!!  ATTENTION !!!                            ###\n"
-		"###                                                                         ###\n"
-		"###                     THE PCO LOG FILES ARE ENABLED                       ###\n"
-		"###                                                                         ###\n"
-		"###                 this option is ONLY for DEBUG & TESTS                   ###\n"
-		"###                                                                         ###\n"
-		"###                   it downgrades the acquisition time                    ###\n"
-		"###                                                                         ###\n"
-		"###                                                                         ###\n"
-		"###     to DISABLE it:                                                      ###\n"
-		"###          * stop the device server                                       ###\n"
-		"###          * open the directory C:\\ProgramData\\pco\\                       ###\n"
-		"###          * rename all the .log files as .txt                            ###\n"
-		"###          * start again the device server                                ###\n"
-		"###                                                                         ###\n"
-		"###############################################################################\n"
-		"###############################################################################\n"
-		"###############################################################################\n\n\n";
 
-	char *logOff = "";
-	struct stat fileStat;
-	int error;
-	bool found = false;
-
-	while(*ptr != NULL) {
-		error = stat(*ptr, &fileStat);
-		//printf("----------- [%d][%s]\n", error, *ptr);
- 		found |= !error;
-		ptr++;
-	}
-	return found ? logOn : logOff;	
-};
-	
