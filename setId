@@ -16,11 +16,13 @@ DT=`date +"%Y/%m/%d %H:%M:%S"`
 PCOREV=`git log -n 1 --date=iso --format=format:"rev[%ad] head[%h][%H]" HEAD || echo "ERROR"`
 LIMAREV=`cd ../.. ; git log -n 1 --date=iso --format=format:"rev[%ad] head[%h][%H]" HEAD || echo "ERROR"`
 PROCLIBREV=`cd ../../third-party/Processlib ; git log -n 1 --date=iso --format=format:"rev[%ad] head[%h][%H]" HEAD || echo "ERROR"`
+LIBCONFIGREV=`cd ../../third-party/libconfig ; git log -n 1 --date=iso --format=format:"rev[%ad] head[%h][%H]" HEAD || echo "ERROR"`
 
 {
-echo "#define     PCO_GIT_VERSION \"\$Id:     PCO ${PCOREV} at [${DT}] \$\"" 
-echo "#define    LIMA_GIT_VERSION \"\$Id:    LIMA ${LIMAREV} at [${DT}] \$\"" 
-echo "#define PROCLIB_GIT_VERSION \"\$Id: PROCLIB ${PROCLIBREV} at [${DT}] \$\"" 
+echo "#define        PCO_GIT_VERSION \"\$Id:       PCO ${PCOREV} at [${DT}] \$\"" 
+echo "#define       LIMA_GIT_VERSION \"\$Id:      LIMA ${LIMAREV} at [${DT}] \$\"" 
+echo "#define    PROCLIB_GIT_VERSION \"\$Id:   PROCLIB ${PROCLIBREV} at [${DT}] \$\"" 
+echo "#define  LIBCONFIG_GIT_VERSION \"\$Id: LIBCONFIG ${LIBCONFIGREV} at [${DT}] \$\"" 
 } > ${FILE}
 
 cat ${FILE}

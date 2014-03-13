@@ -57,10 +57,19 @@ void _pco_acq_thread_edge(void *argin);
 void _pco_shutter_thread_edge(void *argin);
 void _pco_time2dwbase(double exp_time, DWORD &dwExp, WORD &wBase);
 
+char * _timestamp_pcosyncctrlobj();
+char * _timestamp_pcointerface();
+char * _timestamp_pcobufferctrlobj();
+char * _timestamp_pcodetinfoctrlobj();
+char * _timestamp_pcocamerautils();
+char * _timestamp_pcoroictrlobj();
+char *_split_date(char *s);
+
 //=========================================================================================================
 char* _timestamp_pcocamera() {return ID_TIMESTAMP ;}
 char * _timestamp_pcogitversion(){return PCO_GIT_VERSION ;};
 char * _timestamp_proclibgitversion(){return PROCLIB_GIT_VERSION ;};
+char * _timestamp_libconfiggitversion(){return LIBCONFIG_GIT_VERSION ;};
 char * _timestamp_limagitversion(){return LIMA_GIT_VERSION ;};
 
 //=========================================================================================================
@@ -136,15 +145,7 @@ char *xlatPcoCode2Str(int code, tblXlatCode2Str table, int &err) {
 
 //=========================================================================================================
 //=========================================================================================================
-char * _timestamp_pcosyncctrlobj();
-char * _timestamp_pcointerface();
-char * _timestamp_pcobufferctrlobj();
-char * _timestamp_pcodetinfoctrlobj();
-char * _timestamp_pcocamerautils();
-char * _timestamp_pcoroictrlobj();
-char * _timestamp_pcogitversion();
-char * _timestamp_proclibgitversion();
-char *_split_date(char *s);
+
 
 
 void stcPcoData::traceAcqClean(){
@@ -173,6 +174,9 @@ stcPcoData::stcPcoData(){
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcogitversion());
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_limagitversion());
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_proclibgitversion());
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_libconfiggitversion());
+	
+
 
 	stcPcoGeneral.wSize = sizeof(stcPcoGeneral);
 	stcPcoGeneral.strCamType.wSize = sizeof(stcPcoGeneral.strCamType);
