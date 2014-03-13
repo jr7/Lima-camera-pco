@@ -1,3 +1,23 @@
+# 2013/03/13
+  - include line & file in Pco check error
+  - set compatibility of nr ADC between dimax (1) and pco4k (2)
+
 # 2013/03/12 - include git version
   - file ./include/PcoGitVersion.h
   - after commit -> run setID -> build again
+  
+OPID15@WID15DIMAX2 /c/blissadm/git/lima (core-1.3)
+$ git checkout 12f5b15
+M       camera/pco
+Note: checking out '12f5b15'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by performing another checkout.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -b with the checkout command again. Example:
+
+  git checkout -b new_branch_name
+
+HEAD is now at 12f5b15... pco - merge 2k, 4k, dimax - pco-1.3.1a

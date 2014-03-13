@@ -280,6 +280,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\src\PcoHwEventCtrlObj.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\src\PcoInterface.cpp"
 				>
 			</File>
@@ -319,6 +323,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\include\PcoGitVersion.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\include\PcoHwEventCtrlObj.h"
 				>
 			</File>
 			<File

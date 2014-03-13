@@ -293,7 +293,8 @@ namespace lima
 
 		SyncCtrlObj*	_getSyncCtrlObj() { return m_sync;}
 		struct stcPcoData * _getPcoData() {return  m_pcoData; }
-		char* _PcoCheckError(int err, int&error) ;
+		
+		char* _PcoCheckError(int line, char *file, int err, int&error) ;
 		int pcoGetError() {return m_pcoData->pcoError;}
 
 		char *_pcoSet_RecordingState(int state, int &error);
@@ -328,8 +329,9 @@ namespace lima
 		int		m_acq_frame_nb;
 		bool m_config;
 
-        int PcoCheckError(int err);
-        void _allocBuffer();
+        int PcoCheckError(int line, char *file, int err);
+
+		void _allocBuffer();
 
         char *_talk(char *cmd, char *output, int lg);
 

@@ -21,65 +21,38 @@
  along with this program; if not, see <http://www.gnu.org/licenses/>.
 ###########################################################################
 **************************************************************************/
-#ifndef PCOINTERFACE_H
-#define PCOINTERFACE_H
+#ifndef PCOHWEVENTCTRLOBJ_H
+#define PCOHWEVENTCTRLOBJ_H
 
-
-
-#include "LimaCompatibility.h"
-
+#include "Pco.h"
+#include "HwEventCtrlObj.h"
 #include "Debug.h"
-#include "HwInterface.h"
-#include "PcoCamera.h"
-
-
 
 namespace lima
 {
   namespace Pco
   {
     class Camera;
-    class DetInfoCtrlObj;
-    class BufferCtrlObj;
-    class SyncCtrlObj;
-    class RoiCtrlObj;
-    class PcoHwEventCtrlObj;
-
-    class  DLL_EXPORT Interface : public HwInterface
+	class DLL_EXPORT  PcoHwEventCtrlObj : public lima::HwEventCtrlObj
     {
-      DEB_CLASS_NAMESPC(DebModCamera, "Interface", "Pco");
+      DEB_CLASS_NAMESPC(DebModCamera, "PcoHwEventCtrlObj","Pco");
 
     public:
-      Interface(Camera*);
-      virtual ~Interface();
+      PcoHwEventCtrlObj(Camera*);
+      virtual ~PcoHwEventCtrlObj();
 
-      virtual void getCapList(CapList &) const;
+	  void   registerEventCallback(EventCallback& cb);
+	  void unregisterEventCallback(EventCallback& cb);
+	  bool hasRegisteredCallback();
 
-      virtual void reset(ResetLevel reset_level);
-      virtual void prepareAcq();
-      virtual void startAcq();
-      virtual void stopAcq();
-      virtual void getStatus(StatusType& status);
-
-      virtual int getNbAcquiredFrames();
-      virtual int getNbHwAcquiredFrames();
-
-      double getCocRunTime(){ return m_cam->pcoGetCocRunTime() ;};
-      double getFrameRate(){ return m_cam->pcoGetFrameRate() ;};
-
+	  void reportEvent(Event *event);
 
     private:
-      Camera* 		m_cam;
-      DetInfoCtrlObj* 	m_det_info;
-      BufferCtrlObj* 	m_buffer;
-      SyncCtrlObj* 	m_sync;
-      RoiCtrlObj*       m_RoiCtrlObj;
-      PcoHwEventCtrlObj*       m_HwEventCtrlObj;
-      static RoiCtrlObj*       m_RoiCtrlObjXXX;
+      Camera* 			m_cam;
+      HANDLE& 		m_handle;
     };
 
   } // namespace Pco
-
 } // namespace lima
 
-#endif // PCOINTERFACE_H
+#endif // PCOHWEVENTCTRLOBJ_H

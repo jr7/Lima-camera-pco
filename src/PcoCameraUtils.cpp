@@ -865,7 +865,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			int error;
 			WORD wAcquEnableState;
 
-			error = PcoCheckError(PCO_GetAcqEnblSignalStatus(m_handle, &wAcquEnableState));
+			error = PcoCheckError(__LINE__, __FILE__, PCO_GetAcqEnblSignalStatus(m_handle, &wAcquEnableState));
 			
 			ptr += sprintf_s(ptr, ptrMax - ptr, "%d", wAcquEnableState);
 			

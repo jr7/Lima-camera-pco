@@ -294,11 +294,11 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 
 #ifndef USING_PCO_ALLOCATED_BUFFERS 
 	  WORD wActSeg = m_cam->pcoGetActiveRamSegment();
-    	sErr = m_cam->_PcoCheckError(PCO_GetActiveRamSegment(m_handle, &wActSeg), error);
+    	sErr = m_cam->_PcoCheckError(__LINE__, __FILE__, PCO_GetActiveRamSegment(m_handle, &wActSeg), error);
         //_PCO_TRACE("PCO_GetActiveRamSegment", sErr) ;
 
 		// the data transfer is made directly to the buffer allocated by LIMA		
-	sErr =  m_cam->_PcoCheckError(PCO_AddBufferExtern(m_handle, hEvent,wActSeg,dwFrameFirst, dwFrameLast, dwSynch, myBuffer, \
+	sErr =  m_cam->_PcoCheckError(__LINE__, __FILE__, PCO_AddBufferExtern(m_handle, hEvent,wActSeg,dwFrameFirst, dwFrameLast, dwSynch, myBuffer, \
 	            dwLen, &dwStatus), error);
 	if(error) {
     	DEB_TRACE() << sErr;
@@ -320,7 +320,7 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 	}
 
 
-	  sErr =  m_cam->_PcoCheckError(PCO_AddBufferEx(m_handle, \
+	  sErr =  m_cam->_PcoCheckError(__LINE__, __FILE__, PCO_AddBufferEx(m_handle, \
 				dwFrame, dwFrame, iPcoBufIdx, \
 				wArmWidth, wArmHeight, wBitPerPixel), error) ;
 	if(m_cam->_getDebug(DBG_ASSIGN_BUFF)) 
@@ -466,7 +466,7 @@ _RETRY:
 				dwFrameIdx, dwRequestedFrames, bufIdx,
 				size, ((DWORD) ptrDest), ((DWORD) ptrSrc),
 				dwStatusDll, dwStatusDrv, errPco,
-				m_cam->_PcoCheckError(dwStatusDrv, error));
+				m_cam->_PcoCheckError(__LINE__, __FILE__, dwStatusDrv, error));
 		}
 		
 
@@ -669,7 +669,7 @@ int BufferCtrlObj::_xferImagTest()
 					dwFrameIdx, dwRequestedFrames, bufIdx,
 					size, ((DWORD) ptrDest), ((DWORD) ptrSrc),
 					dwStatusDll, dwStatusDrv, errPco,
-					m_cam->_PcoCheckError(dwStatusDrv, error));
+					m_cam->_PcoCheckError(__LINE__, __FILE__, dwStatusDrv, error));
 			}
 
 			if(m_cam->_getDebug(DBG_BUFF)) {DEB_ALWAYS() << "===== " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);}
@@ -864,7 +864,7 @@ int BufferCtrlObj::_xferImagMult()
 
 		DWORD _dwValidImageCnt, _dwMaxImageCnt;
 
-		sErr = m_cam->_PcoCheckError(PCO_GetNumberOfImagesInSegment(m_handle, wSegment, &_dwValidImageCnt, &_dwMaxImageCnt), error);
+		sErr = m_cam->_PcoCheckError(__LINE__, __FILE__, PCO_GetNumberOfImagesInSegment(m_handle, wSegment, &_dwValidImageCnt, &_dwMaxImageCnt), error);
 		if(error) {
 			printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, sErr);
 			throw LIMA_HW_EXC(Error, "PCO_GetNumberOfImagesInSegment");
@@ -890,7 +890,7 @@ int BufferCtrlObj::_xferImagMult()
 #if 0
 
 		//==================== Adds a allocated buffer to the driver queue
-		sErr =  m_cam->_PcoCheckError(PCO_AddBufferEx(m_handle, \
+		sErr =  m_cam->_PcoCheckError(__LINE__, __FILE__, PCO_AddBufferEx(m_handle, \
 				dwFrameIdxFirst, dwFrameIdxLast, \
 				sBufNr, \
 				_wArmWidth, _wArmHeight, _wBitPerPixel), error);
@@ -903,7 +903,7 @@ int BufferCtrlObj::_xferImagMult()
 		//========================= get frames !!!!!!!!!!!!!!!
 #endif
 
-		sErr =  m_cam->_PcoCheckError(PCO_GetImageEx(m_handle, \
+		sErr =  m_cam->_PcoCheckError(__LINE__, __FILE__, PCO_GetImageEx(m_handle, \
 			wSegment, dwFrameIdxFirst, dwFrameIdxLast, \
 			sBufNr, _wArmWidth, _wArmHeight, _wBitPerPixel), error);
 
@@ -921,7 +921,7 @@ int BufferCtrlObj::_xferImagMult()
 				dwFrameIdxFirst, dwFrameIdxLast, bufIdx,
 				_dwPcoAllocatedBuffSize, 
 				dwStatusDll, dwStatusDrv, errPco,
-				m_cam->_PcoCheckError(dwStatusDrv, error));
+				m_cam->_PcoCheckError(__LINE__, __FILE__, dwStatusDrv, error));
 		}
 
 #endif
@@ -1033,7 +1033,7 @@ void BufferCtrlObj::_pcoAllocBuffers(bool max) {
 		//-------------- allocate 2 buffers (0,1) and received the handle, mem ptr, events
 			for(bufIdx = 0; bufIdx < PCO_BUFFER_NREVENTS ; bufIdx ++) {
 				m_allocBuff.pcoAllocBufferNr[bufIdx] = -1;
-				sErr = m_cam->_PcoCheckError(PCO_AllocateBuffer(m_handle, \
+				sErr = m_cam->_PcoCheckError(__LINE__, __FILE__, PCO_AllocateBuffer(m_handle, \
 					&m_allocBuff.pcoAllocBufferNr[bufIdx], \
 					_dwAllocatedBufferSize, \
 					&m_allocBuff.pcoAllocBufferPtr[bufIdx], \
@@ -1123,7 +1123,7 @@ void BufferCtrlObj::_pcoAllocBuffersFree() {
 
 			//-------------- allocate 2 buffers (0,1) and received the handle, mem ptr, events
 			for(int bufIdx = 0; bufIdx <PCO_BUFFER_NREVENTS ; bufIdx ++) {
-				sErr = m_cam->_PcoCheckError(PCO_FreeBuffer(m_handle, m_allocBuff.pcoAllocBufferNr[bufIdx]), error);
+				sErr = m_cam->_PcoCheckError(__LINE__, __FILE__, PCO_FreeBuffer(m_handle, m_allocBuff.pcoAllocBufferNr[bufIdx]), error);
 
 				if(error) {
     				DEB_TRACE() << sErr;
