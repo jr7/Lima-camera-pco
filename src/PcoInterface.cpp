@@ -46,7 +46,9 @@ Interface::Interface(Camera *cam) :
   m_cam(cam)
 {
   DEB_CONSTRUCTOR();
-  m_HwEventCtrlObj = new PcoHwEventCtrlObj(cam);
+  
+  cam->m_HwEventCtrlObj = m_HwEventCtrlObj = new PcoHwEventCtrlObj(cam);
+  
   m_RoiCtrlObj = new RoiCtrlObj(cam);
   m_det_info = new DetInfoCtrlObj(cam);
   m_buffer = new BufferCtrlObj(cam);

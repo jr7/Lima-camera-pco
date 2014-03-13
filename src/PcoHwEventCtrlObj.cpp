@@ -53,8 +53,14 @@ PcoHwEventCtrlObj::~PcoHwEventCtrlObj()
 //=========================================================================================================
 void PcoHwEventCtrlObj::registerEventCallback(EventCallback& cb)
 {
+
+
   DEB_MEMBER_FUNCT();
-  DEB_ALWAYS() << "--- FUNCTION ---";
+  DEB_ALWAYS() << " FUNCTION entry";
+
+  EventCallbackGen::registerEventCallback(cb);
+
+  DEB_ALWAYS() << " FUNCTION exit";
 }
 
 //=========================================================================================================
@@ -70,8 +76,9 @@ void PcoHwEventCtrlObj::unregisterEventCallback(EventCallback& cb)
 bool PcoHwEventCtrlObj::hasRegisteredCallback()
 {
   DEB_MEMBER_FUNCT();
-  DEB_ALWAYS() << "--- FUNCTION ---";
-		return true;
+  DEB_ALWAYS() << " FUNCTION entry";
+  return EventCallbackGen::hasRegisteredCallback();
+  DEB_ALWAYS() << " FUNCTION exit";
 }
 
 
@@ -80,6 +87,8 @@ bool PcoHwEventCtrlObj::hasRegisteredCallback()
 void PcoHwEventCtrlObj::reportEvent(Event *event)
 {	
   DEB_MEMBER_FUNCT();
-  DEB_ALWAYS() << "--- FUNCTION ---";
+  DEB_ALWAYS() << " FUNCTION entry";
+  EventCallbackGen::reportEvent(event);
+  DEB_ALWAYS() << " FUNCTION exit";
 }
 

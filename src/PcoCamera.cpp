@@ -148,10 +148,6 @@ char *xlatPcoCode2Str(int code, tblXlatCode2Str table, int &err) {
 
 
 
-void stcPcoData::traceAcqClean(){
-	void *ptr = &this->traceAcq;
-	memset(ptr, 0, sizeof(struct stcTraceAcq));
-}
 
 stcPcoData::stcPcoData(){
 
@@ -282,6 +278,7 @@ void Camera::_init(){
 
 	if(m_pcoData->wNumADC > 1) {
 		WORD wADCOperation;
+
 		error = PcoCheckError(__LINE__, __FILE__, PCO_GetADCOperation(m_handle, &wADCOperation));
 
 		if(wADCOperation != 1){
@@ -771,6 +768,7 @@ void _pco_acq_thread_dimax(void *argin) {
 
 	struct stcPcoData *m_pcoData = m_cam->_getPcoData();
 	m_pcoData->traceAcqClean();
+	
 	m_pcoData->traceAcq.fnId = fnId;
 	
 	char *msg;
@@ -795,7 +793,6 @@ void _pco_acq_thread_dimax(void *argin) {
 	bool nb_frames_fixed = false;
 	int nb_frames; 	m_sync->getNbFrames(nb_frames);
 	//m_pcoData->traceAcq.nrImgRequested = nb_frames;
-	m_pcoData->traceAcq.init();
 	m_pcoData->traceAcq.nrImgRequested0 = nb_frames;
 
 	m_sync->setAcqFrames(0);

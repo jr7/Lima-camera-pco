@@ -196,18 +196,12 @@ char *str_trim(char *s) {
 
 //=========================================================================================================
 //=========================================================================================================
-void stcPcoData::stcTraceAcq::init(){
-	nrImgRecorded = 
-	maxImgCount = 
-	nrImgRequested =
-	nrImgRequested0 =
-	nrImgAcquired = 
-	msTotal = msRecord = msRecordLoop = msXfer = msTout = 0;
-	msImgCoc =
-	sExposure = sDelay = 0;
-	endRecordTimestamp = endXferTimestamp = 0;
-	fnId = NULL;
+
+void stcPcoData::traceAcqClean(){
+	void *ptr = &this->traceAcq;
+	memset(ptr, 0, sizeof(struct stcTraceAcq));
 }
+
 
 char *Camera::talk(char *cmd){
 	static char buff[BUFF_INFO_SIZE +1];
@@ -540,6 +534,16 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		keys_desc[ikey++] = "DISABLED / debug tool";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 
+			if( (_stricmp(tok[1], "cb")==0)){
+				Event *ev = new Event(Hardware,Event::Error,Event::Camera,Event::Default, "test cb");
+				m_HwEventCtrlObj->reportEvent(ev);
+				ptr += sprintf_s(ptr, ptrMax - ptr, "%s> done\n", tok[1]);
+				return output;
+			}
+
+
+
+
 			if((tokNr == 2) &&  (_stricmp(tok[1], "time")==0)){
 				ptr += sprintf_s(ptr, ptrMax - ptr, "sleeping\n"); 
 				::Sleep(atoi(tok[2])*1000);
@@ -556,6 +560,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			}
 			return output;
 		}
+
 
 
 		key = keys[ikey] = "rollingShutter";     //----------------------------------------------------------------

@@ -33,7 +33,7 @@ namespace lima
   namespace Pco
   {
     class Camera;
-	class DLL_EXPORT  PcoHwEventCtrlObj : public lima::HwEventCtrlObj
+	class DLL_EXPORT  PcoHwEventCtrlObj : public HwEventCtrlObj
     {
       DEB_CLASS_NAMESPC(DebModCamera, "PcoHwEventCtrlObj","Pco");
 

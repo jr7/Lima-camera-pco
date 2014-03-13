@@ -29,6 +29,8 @@
 #include "Constants.h"
 #include "HwMaxImageSizeCallback.h"
 //#include "PcoBufferCtrlObj.h"
+#include "PcoHwEventCtrlObj.h"
+
 
 #define DISABLE_ACQ_ENBL_SIGNAL
 
@@ -189,7 +191,6 @@ struct stcPcoData {
 			time_t endRecordTimestamp;
 			time_t endXferTimestamp;
 			char *fnId;
-			void init();
 		} traceAcq;
 
 		DWORD dwPixelRate, dwPixelRateRequested;
@@ -307,6 +308,7 @@ namespace lima
 		void msgLog(char *s);
 
 	private:
+		PcoHwEventCtrlObj *m_HwEventCtrlObj;
 		SyncCtrlObj*	m_sync;
 
 		std::string m_log;
@@ -328,6 +330,7 @@ namespace lima
 
 		int		m_acq_frame_nb;
 		bool m_config;
+
 
         int PcoCheckError(int line, char *file, int err);
 
