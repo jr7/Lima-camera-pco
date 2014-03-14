@@ -38,18 +38,19 @@ namespace lima
       DEB_CLASS_NAMESPC(DebModCamera, "PcoHwEventCtrlObj","Pco");
 
     public:
-      PcoHwEventCtrlObj(Camera*);
-      virtual ~PcoHwEventCtrlObj();
+      PcoHwEventCtrlObj();
+      //PcoHwEventCtrlObj(Camera*);
+      //virtual ~PcoHwEventCtrlObj();
 
-	  void   registerEventCallback(EventCallback& cb);
-	  void unregisterEventCallback(EventCallback& cb);
-	  bool hasRegisteredCallback();
+	  //virtual void   registerEventCallback(EventCallback& cb);
+	  //virtual void unregisterEventCallback(EventCallback& cb);
+	  //virtual bool hasRegisteredCallback();
 
-	  void reportEvent(Event *event);
+	  //virtual void reportEvent(Event *event);
 
     private:
-      Camera* 			m_cam;
-      HANDLE& 		m_handle;
+      //Camera* 			m_cam;
+      //HANDLE& 		m_handle;
     };
 
   } // namespace Pco

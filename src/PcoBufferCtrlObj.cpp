@@ -60,7 +60,7 @@ BufferCtrlObj::BufferCtrlObj(Camera *cam) :
 	//SoftBufferCtrlObj::Sync &m_bufferSync = *getBufferSync(cond);
 	m_bufferSync = getBufferSync(cond);
 
-  m_requestStop = false;
+  _setRequestStop(stopNone);
 
   //----------------------------------------------- initialization buffers & creating events
   for(int i=0; i < PCO_BUFFER_NREVENTS; i++) {
@@ -105,7 +105,7 @@ void BufferCtrlObj::startAcq()
 	buffer_mgr.setStartTimestamp(Timestamp::now());
 
 	DEB_TRACE() << "=== TRACE";
-	m_requestStop = false;
+	_setRequestStop(stopNone);
 
 	DEB_TRACE() << "=== TRACE";
 	m_sync->setExposing(pcoAcqStart);
@@ -433,7 +433,7 @@ int BufferCtrlObj::_xferImag()
 
 _RETRY:
 
-	if(	m_requestStop) {return pcoAcqTransferStop;}
+	if(	_getRequestStop()) {return pcoAcqTransferStop;}
 
 	// --------------- look if one of buffer is READY and has the NEXT frame => proccess it
     // m_allocatedBufferAssignedFrameFirst[bufIdx] -> first frame in the buffer (we are using only 1 frame per buffer)
@@ -457,7 +457,7 @@ _RETRY:
 		if(m_cam->_getDebug(DBG_BUFF)) {DEB_ALWAYS() << "========================================FOUND " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);}
 
 		DWORD dwStatusDll, dwStatusDrv;
-		if(	m_requestStop) {return pcoAcqTransferStop;}
+		if(	_getRequestStop()) {return pcoAcqTransferStop;}
 
 		int errPco = PCO_GetBufferStatus(m_handle, sBufNr, &dwStatusDll, &dwStatusDrv);		
 		if((dwStatusDll != 0x80000000) || dwStatusDrv || errPco) {
@@ -491,7 +491,7 @@ _RETRY:
 		m_buffer_cb_mgr.newFrameReady(frame_info);
 
         //----- the image dwFrameIdx is already in the buffer -> callback!
-		if(m_requestStop) {return pcoAcqTransferStop;}
+		if(_getRequestStop()) {return pcoAcqTransferStop;}
         if(dwFrameFirst2assign <= dwRequestedFrames) {
 			if(error = _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx, live_mode)) {
 				return pcoAcqPcoError;
@@ -625,7 +625,7 @@ int BufferCtrlObj::_xferImagTest()
 	for(dwFrameIdx=1, bufIdx = 0; dwFrameIdx <= dwRequestedFrames ; ) {
 
 
-	if(	m_requestStop) {return pcoAcqTransferStop;}
+	if(	_getRequestStop()) {return pcoAcqTransferStop;}
 
 	// --------------- look if one of buffer is READY and has the NEXT frame => proccess it
     // m_allocatedBufferAssignedFrameFirst[bufIdx] -> first frame in the buffer (we are using only 1 frame per buffer)
@@ -660,7 +660,7 @@ int BufferCtrlObj::_xferImagTest()
 			if(m_cam->_getDebug(DBG_BUFF)) {DEB_ALWAYS() << "========================================FOUND " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);}
 
 			DWORD dwStatusDll, dwStatusDrv;
-			if(	m_requestStop) {return pcoAcqTransferStop;}
+			if(	_getRequestStop()) {return pcoAcqTransferStop;}
 
 			int errPco = PCO_GetBufferStatus(m_handle, sBufNr, &dwStatusDll, &dwStatusDrv);		
 			if((dwStatusDll != 0x80000000) || dwStatusDrv || errPco) {
@@ -682,7 +682,7 @@ int BufferCtrlObj::_xferImagTest()
 			m_buffer_cb_mgr.newFrameReady(frame_info); // callback to LIMA the new frame is ready
 
 			//----- the image dwFrameIdx is already in the buffer -> callback!
-			if(m_requestStop) {return pcoAcqTransferStop;}
+			if(_getRequestStop()) {return pcoAcqTransferStop;}
 			if(m_cam->_getDebug(DBG_BUFF)) {DEB_ALWAYS() << "===== " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);}
 		  }  
 		// ---------- end of the tranf img pco -> lima
@@ -952,7 +952,7 @@ int BufferCtrlObj::_xferImagMult()
 		}
 
 
-	if(	m_requestStop) {return pcoAcqTransferStop;}
+	if(	_getRequestStop()) {return pcoAcqTransferStop;}
 
 
 

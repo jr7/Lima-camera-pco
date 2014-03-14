@@ -778,7 +778,7 @@ void _pco_acq_thread_dimax(void *argin) {
 
 	long timeout, timeout0, msNow, msRec, msXfer, msAll;
 	int nb_acq_frames;
-	bool requestStop = false;
+	int requestStop = stopNone;
 
 	HANDLE m_handle = m_cam->getHandle();
 
@@ -978,7 +978,7 @@ void _pco_acq_thread_edge(void *argin) {
 	msElapsedTimeSet(tStart);
 	int error;
 	long msXfer;
-	bool requestStop = false;
+	int requestStop = stopNone;
 
 	HANDLE m_handle = m_cam->getHandle();
 
@@ -1018,7 +1018,7 @@ void _pco_acq_thread_dimax_live(void *argin) {
 	msElapsedTimeSet(tStart);
 	int error;
 	long msXfer;
-	bool requestStop = false;
+	int requestStop = stopNone;
 
 	HANDLE m_handle = m_cam->getHandle();
 

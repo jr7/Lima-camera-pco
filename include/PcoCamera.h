@@ -220,6 +220,10 @@ enum enumChange {
 	Invalid, Valid, Changed,
 };
 
+enum enumStop {
+	stopNone = 0, stopRequest, stopEnding,
+};
+
 enum enumPcoFamily {
 	Dimax       = 1<<0, 
 	Edge        = 1<<1, 

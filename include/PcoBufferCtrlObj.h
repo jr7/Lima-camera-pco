@@ -87,8 +87,8 @@ namespace lima
         int _xferImagMult();
 		void * BufferCtrlObj::_getLimaBuffer(int lima_buffer_nb, Sync::Status &status);
 		  
-		bool _getRequestStop() { return m_requestStop;}
-		void _setRequestStop(bool requestStop) { m_requestStop = requestStop;}
+		int _getRequestStop() { return m_requestStop;}
+		void _setRequestStop(int requestStop) { m_requestStop = requestStop;}
 		void _pcoAllocBuffersFree();
 		void _pcoAllocBuffersInfo(int &nr, DWORD &size);
 
@@ -107,7 +107,7 @@ namespace lima
 		HANDLE&      	m_handle;
 		int        	m_frame[2];
 		SyncCtrlObj* 	m_sync;
-		bool m_requestStop;
+		int m_requestStop;
 		int m_ImageBufferSize;
 
 	};

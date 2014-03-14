@@ -47,14 +47,15 @@ Interface::Interface(Camera *cam) :
 {
   DEB_CONSTRUCTOR();
   
-  cam->m_HwEventCtrlObj = m_HwEventCtrlObj = new PcoHwEventCtrlObj(cam);
+  //cam->m_HwEventCtrlObj = m_HwEventCtrlObj = new PcoHwEventCtrlObj(cam);
+  cam->m_HwEventCtrlObj = m_HwEventCtrlObj = new PcoHwEventCtrlObj();
   
   m_RoiCtrlObj = new RoiCtrlObj(cam);
   m_det_info = new DetInfoCtrlObj(cam);
   m_buffer = new BufferCtrlObj(cam);
-  m_sync = new SyncCtrlObj(cam, m_buffer);
-  cam->m_sync = m_sync;
-
+  
+  cam->m_sync = m_sync = new SyncCtrlObj(cam, m_buffer);
+   
 
   DEB_TRACE() << DEB_VAR2(cam, m_buffer);
 

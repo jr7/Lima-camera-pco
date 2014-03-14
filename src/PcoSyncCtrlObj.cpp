@@ -426,7 +426,7 @@ void SyncCtrlObj::startAcq()
 		if(m_buffer) {
 			m_buffer->startAcq();
 			m_started = true;
-			m_buffer->_setRequestStop(false);
+			m_buffer->_setRequestStop(stopNone);
 		}
       //else m_cam->startAcq();
     }
@@ -446,7 +446,7 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
   if(m_started)
     {
 		//if(m_buffer->_getRequestStop()) return;
-		m_buffer->_setRequestStop(true);
+		m_buffer->_setRequestStop(stopRequest);
 
 		m_cam->_pcoSet_RecordingState(0, error);
 		PCO_THROW_OR_TRACE(error, "Try to stop Acq") ;

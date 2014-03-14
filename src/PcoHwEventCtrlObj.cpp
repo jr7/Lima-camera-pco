@@ -36,6 +36,14 @@ char* _timestamp_pcohweventctrlobj() {return ID_TIMESTAMP ;}
 
 //=========================================================================================================
 //=========================================================================================================
+
+PcoHwEventCtrlObj::PcoHwEventCtrlObj()
+{
+	DEB_CONSTRUCTOR();
+}
+
+
+#if 0
 PcoHwEventCtrlObj::PcoHwEventCtrlObj(Camera *cam):
   m_cam(cam),
   m_handle(cam->getHandle())
@@ -92,3 +100,4 @@ void PcoHwEventCtrlObj::reportEvent(Event *event)
   DEB_ALWAYS() << " FUNCTION exit";
 }
 
+#endif
