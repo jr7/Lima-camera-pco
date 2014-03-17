@@ -71,6 +71,7 @@ struct stcXlatCode2Str {
 		char *str;
 };
 
+#define LEN_TRACEACQ_MSG 512
 
 #define PCO_MAXSEGMENTS 4
 
@@ -191,6 +192,7 @@ struct stcPcoData {
 			time_t endRecordTimestamp;
 			time_t endXferTimestamp;
 			char *fnId;
+			char msg[LEN_TRACEACQ_MSG+1];
 		} traceAcq;
 
 		DWORD dwPixelRate, dwPixelRateRequested;
@@ -214,6 +216,7 @@ struct stcPcoData {
 		
 		stcPcoData();
 		void traceAcqClean();
+		void traceMsg(char *s);
 };
 
 enum enumChange {
@@ -221,7 +224,7 @@ enum enumChange {
 };
 
 enum enumStop {
-	stopNone = 0, stopRequest, stopEnding,
+	stopNone = 0, stopRequest, stopRequestAgain, stopProcessing,
 };
 
 enum enumPcoFamily {
@@ -296,6 +299,7 @@ namespace lima
 
 		WORD pcoGetActiveRamSegment() {return m_pcoData->activeRamSegment;}
 
+		BufferCtrlObj* _getBufferCtrlObj() { return m_buffer;}
 		SyncCtrlObj*	_getSyncCtrlObj() { return m_sync;}
 		struct stcPcoData * _getPcoData() {return  m_pcoData; }
 		
@@ -314,6 +318,7 @@ namespace lima
 	private:
 		PcoHwEventCtrlObj *m_HwEventCtrlObj;
 		SyncCtrlObj*	m_sync;
+		BufferCtrlObj*  m_buffer;
 
 		std::string m_log;
         //char pcoErrorMsg[ERR_SIZE+1];

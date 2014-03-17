@@ -420,12 +420,12 @@ void SyncCtrlObj::startAcq()
   
   m_cam->msgLog("startAcq");
 
-  if(!m_started)
+  if(!getStarted())
     {
   
 		if(m_buffer) {
 			m_buffer->startAcq();
-			m_started = true;
+			setStarted(true);
 			m_buffer->_setRequestStop(stopNone);
 		}
       //else m_cam->startAcq();
@@ -437,25 +437,47 @@ void SyncCtrlObj::startAcq()
 void SyncCtrlObj::stopAcq(bool clearQueue)
 {
 	int error;
+	int _stopRequestIn, _stopRequestOut;
+	bool _started;
+
 
   DEB_MEMBER_FUNCT();
   DEF_FNID;
 
   m_cam->msgLog("stopAcq");
 
-  if(m_started)
-    {
-		//if(m_buffer->_getRequestStop()) return;
-		m_buffer->_setRequestStop(stopRequest);
+  _stopRequestIn = m_buffer->_getRequestStop();
 
-		m_cam->_pcoSet_RecordingState(0, error);
-		PCO_THROW_OR_TRACE(error, "Try to stop Acq") ;
+  if(_started = getStarted())
+    {
+		switch(_stopRequestIn) {
+			case stopNone:
+				m_buffer->_setRequestStop(stopRequest);
+
+				m_cam->_pcoSet_RecordingState(0, error);
+				PCO_THROW_OR_TRACE(error, "Try to stop Acq") ;
+				break;
+
+			case stopProcessing:
+				//m_buffer->_setRequestStop(stopRequest);
+				break;			
+
+			default:
+				break;
+
+		} // sw
+
 
     //  if(clearQueue) - ignored
     }
 
-	m_started = false;
 
+
+  _stopRequestOut = m_buffer->_getRequestStop();
+
+	//setStarted(false);
+
+  DEB_ALWAYS() << DEB_VAR3(_started, _stopRequestIn, _stopRequestOut);
 }
 
 
@@ -464,10 +486,11 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 void SyncCtrlObj::getStatus(HwInterface::StatusType& status)
 {
 	// DONE
+	bool _started = getStarted();
   DEB_MEMBER_FUNCT();
-DEB_TRACE() << DEB_VAR3(m_started, m_buffer, m_exposing);
+DEB_TRACE() << DEB_VAR3(_started, m_buffer, m_exposing);
  DEF_FNID;
-  if(m_started){
+  if(_started){
       if(m_buffer){
 
 		  switch(m_exposing) {

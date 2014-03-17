@@ -52,11 +52,9 @@ Interface::Interface(Camera *cam) :
   
   m_RoiCtrlObj = new RoiCtrlObj(cam);
   m_det_info = new DetInfoCtrlObj(cam);
-  m_buffer = new BufferCtrlObj(cam);
-  
+  cam->m_buffer = m_buffer = new BufferCtrlObj(cam);
   cam->m_sync = m_sync = new SyncCtrlObj(cam, m_buffer);
    
-
   DEB_TRACE() << DEB_VAR2(cam, m_buffer);
 
   if(m_buffer){
@@ -101,6 +99,7 @@ void Interface::reset(ResetLevel reset_level)
 	// DONE
   DEB_MEMBER_FUNCT();
   DEB_PARAM() << DEB_VAR1(reset_level);
+  DEB_ALWAYS() << DEB_VAR1(reset_level);
 
   m_sync->stopAcq();
   m_cam->reset();
@@ -134,7 +133,7 @@ void Interface::stopAcq()
 {
 	// DONE
   DEB_MEMBER_FUNCT();
-
+  DEB_ALWAYS() << "STOP";
   m_sync->stopAcq();
 }
 

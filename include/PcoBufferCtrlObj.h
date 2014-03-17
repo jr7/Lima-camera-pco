@@ -109,6 +109,7 @@ namespace lima
 		SyncCtrlObj* 	m_sync;
 		int m_requestStop;
 		int m_ImageBufferSize;
+		struct stcPcoData *m_pcoData;
 
 	};
   }

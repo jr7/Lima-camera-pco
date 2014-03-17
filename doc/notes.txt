@@ -8,6 +8,9 @@
 #----------------------------------------------------------------------------
 # LOGS / NOTES
 #----------------------------------------------------------------------------
+# 2013/03/17
+  - working with DIMAX to save in lima the recorded frames if an acqStop is received during
+    the record
 
 # 2013/03/13
   - include line & file in Pco check error

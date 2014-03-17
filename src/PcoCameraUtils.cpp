@@ -72,6 +72,7 @@ char *getTimestamp(timestampFmt fmtIdx, time_t xtime) {
 
   switch(fmtIdx) {
     case Iso: fmt = "%Y/%m/%d %H:%M:%S"; break;
+    case IsoHMS: fmt = "%H:%M:%S"; break;
     case FnDate: fmt = "%Y-%m-%d"; break;
 
     default:
@@ -202,6 +203,13 @@ void stcPcoData::traceAcqClean(){
 	memset(ptr, 0, sizeof(struct stcTraceAcq));
 }
 
+void stcPcoData::traceMsg(char *s){
+	char *ptr = traceAcq.msg;
+	char *dt = getTimestamp(IsoHMS);
+	int lg = strlen(ptr);
+	ptr += lg;
+	snprintf(ptr, LEN_TRACEACQ_MSG - lg,"%s> %s", dt, s);
+}
 
 char *Camera::talk(char *cmd){
 	static char buff[BUFF_INFO_SIZE +1];
@@ -525,6 +533,9 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				"* msExposure[%g] msDelay[%g]\n",
 				m_pcoData->traceAcq.sExposure * 1000.,
 				m_pcoData->traceAcq.sDelay * 1000.);
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, 
+				"%s\n", m_pcoData->traceAcq.msg);
 
 			return output;
 		}
