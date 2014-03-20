@@ -43,7 +43,10 @@
 #include "PcoSyncCtrlObj.h"
 #include "PcoBufferCtrlObj.h"
 #include "PcoCameraUtils.h"
+
+#ifdef WITH_GIT_VERSION
 #include "PcoGitVersion.h"
+#endif
 
 using namespace lima;
 using namespace lima::Pco;
@@ -67,10 +70,14 @@ char *_split_date(char *s);
 
 //=========================================================================================================
 char* _timestamp_pcocamera() {return ID_TIMESTAMP ;}
+
+#ifdef WITH_GIT_VERSION
 char * _timestamp_pcogitversion(){return PCO_GIT_VERSION ;};
 char * _timestamp_proclibgitversion(){return PROCLIB_GIT_VERSION ;};
 char * _timestamp_libconfiggitversion(){return LIBCONFIG_GIT_VERSION ;};
 char * _timestamp_limagitversion(){return LIMA_GIT_VERSION ;};
+#endif
+
 
 //=========================================================================================================
 
@@ -167,12 +174,13 @@ stcPcoData::stcPcoData(){
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcodetinfoctrlobj()));
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcocamerautils()));
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcoroictrlobj()));
+
+#ifdef WITH_GIT_VERSION
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcogitversion());
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_limagitversion());
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_proclibgitversion());
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_libconfiggitversion());
-	
-
+#endif
 
 	stcPcoGeneral.wSize = sizeof(stcPcoGeneral);
 	stcPcoGeneral.strCamType.wSize = sizeof(stcPcoGeneral.strCamType);

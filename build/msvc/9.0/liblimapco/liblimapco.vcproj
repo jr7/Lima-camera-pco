@@ -121,7 +121,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="&quot;$(LimaDir)camera\pco\include&quot;;&quot;$(LimaDir)hardware\include&quot;;&quot;$(LimaDir)common\include&quot;;&quot;$(LimaDir)third-party\Processlib\core\include\WindowSpecific&quot;;&quot;$(LimaDir)third-party\Processlib\core\include&quot;;&quot;$(LimaDir)camera\pco\sdkPco\include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBLIMAPCO_EXPORTS;LIMA_PROCESSCORE_DLL;LIMA_PROCESSCORE_BUILD;_WIN32_WINNT=0x0600"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBLIMAPCO_EXPORTS;LIMA_PROCESSCORE_DLL;LIMA_PROCESSCORE_BUILD;_WIN32_WINNT=0x0600;WITH_GIT_VERSION"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -319,10 +319,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\include\PcoDetInfoCtrlObj.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\include\PcoGitVersion.h"
 				>
 			</File>
 			<File
