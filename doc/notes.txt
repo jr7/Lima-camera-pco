@@ -1,1 +1,11 @@
 2014/05/18 - clean
+
+#===================================================
+# rh 2014/03/07 - e0b4707bd3b131a0c49eae0a4b47814ce2d41fa0
+
+Lima/common/src/MemUtils.cpp
+
+int lima::GetDefMaxNbBuffers(const FrameDim& frame_dim, double sys_mem_factor)
+
+	if (sys_mem_factor == 0)
+		sys_mem_factor = 0.8;   <----- changed to 0.7

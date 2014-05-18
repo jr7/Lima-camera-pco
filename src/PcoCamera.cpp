@@ -44,9 +44,6 @@
 #include "PcoBufferCtrlObj.h"
 #include "PcoCameraUtils.h"
 
-#ifdef WITH_GIT_VERSION
-#include "PcoGitVersion.h"
-#endif
 
 using namespace lima;
 using namespace lima::Pco;
@@ -72,6 +69,8 @@ char *_split_date(char *s);
 char* _timestamp_pcocamera() {return ID_TIMESTAMP ;}
 
 #ifdef WITH_GIT_VERSION
+#include "PcoGitVersion.h"
+
 char * _timestamp_pcogitversion(){return PCO_GIT_VERSION ;};
 char * _timestamp_proclibgitversion(){return PROCLIB_GIT_VERSION ;};
 char * _timestamp_libconfiggitversion(){return LIBCONFIG_GIT_VERSION ;};
