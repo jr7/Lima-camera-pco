@@ -945,6 +945,7 @@ void _pco_acq_thread_dimax(void *argin) {
 			"tout[(%ld) 0(%ld)] rec[%ld] xfer[%ld] all[%ld](ms)\n", 
 			fnId, __LINE__, _dwValidImageCnt, msPerFrame, msNow, timeout, timeout0, msRec, msXfer, msAll);
 
+	// included in 34a8fb6723594919f08cf66759fe5dbd6dc4287e only for dimax (to check for others)
 	m_sync->setStarted(false);
 
 	_endthread();
@@ -978,9 +979,12 @@ void _pco_shutter_thread_edge(void *argin) {
 	printf("=== %s %s> ENTRY\n", fnId, getTimestamp(Iso));
 
 	Camera* m_cam = (Camera *) argin;
+	SyncCtrlObj* m_sync = m_cam->_getSyncCtrlObj();
 	m_cam->_pco_set_shutter_rolling_edge(error);
 
 	printf("=== %s> EXIT\n", fnId);
+
+	m_sync->setStarted(false); // to test
 
 	_endthread();
 }
@@ -1025,6 +1029,10 @@ void _pco_acq_thread_edge(void *argin) {
 	m_pcoData->msAcqXfer = msXfer = msElapsedTime(tStart);
 	printf("=== %s> EXIT xfer[%ld] (ms) status[%s]\n", 
 			fnId, msXfer, sPcoAcqStatus[status]);
+
+	
+	m_sync->setStarted(false); // updated
+
 	_endthread();
 }
 
@@ -1072,6 +1080,9 @@ void _pco_acq_thread_dimax_live(void *argin) {
 	m_pcoData->msAcqXferTimestamp = getTimestamp();
 	printf("=== %s> EXIT xfer[%ld] (ms) status[%s]\n", 
 			fnId, msXfer, sPcoAcqStatus[status]);
+
+	m_sync->setStarted(false); // to test
+
 	_endthread();
 }
 
