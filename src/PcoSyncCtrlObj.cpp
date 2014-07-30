@@ -51,6 +51,7 @@ SyncCtrlObj::SyncCtrlObj(Camera *cam,BufferCtrlObj *buffer) :
   m_buffer(buffer),
   m_lat_time(0.), m_exp_time(0.),
   m_nb_frames(1),
+  m_nb_acq_frames(-1),
   m_exposing(pcoAcqIdle),
   m_started(false)
 {

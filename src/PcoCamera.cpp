@@ -590,7 +590,7 @@ void Camera::startAcq()
         wRoiY0 = (WORD)m_roi.y[0]; wRoiY1 = (WORD)m_roi.y[1];
 
 		if(_getDebug(DBG_ROI)) {
-			DEB_ALWAYS() << DEB_VAR5(m_RoiLima, wRoiX0, wRoiY0, wRoiX1, wRoiY1);
+			DEB_ALWAYS() << "PCO_SetROI> " << DEB_VAR5(m_RoiLima, wRoiX0, wRoiY0, wRoiX1, wRoiY1);
 		}
 
         error = PcoCheckError(__LINE__, __FILE__, PCO_SetROI(m_handle, wRoiX0, wRoiY0, wRoiX1, wRoiY1));
@@ -603,7 +603,7 @@ void Camera::startAcq()
     PCO_THROW_OR_TRACE(error, "PCO_GetROI") ;
 
 	if(_getDebug(DBG_ROI)) {
-		DEB_ALWAYS() << DEB_VAR4(wRoiX0, wRoiY0, wRoiX1, wRoiY1);
+		DEB_ALWAYS() <<  "PCO_GetROI> " << DEB_VAR4(wRoiX0, wRoiY0, wRoiX1, wRoiY1);
 	}
 
 
@@ -945,6 +945,7 @@ void _pco_acq_thread_dimax(void *argin) {
 			"tout[(%ld) 0(%ld)] rec[%ld] xfer[%ld] all[%ld](ms)\n", 
 			fnId, __LINE__, _dwValidImageCnt, msPerFrame, msNow, timeout, timeout0, msRec, msXfer, msAll);
 
+	// included in 34a8fb6723594919f08cf66759fe5dbd6dc4287e only for dimax (to check for others)
 	m_sync->setStarted(false);
 
 	_endthread();
@@ -978,9 +979,12 @@ void _pco_shutter_thread_edge(void *argin) {
 	printf("=== %s %s> ENTRY\n", fnId, getTimestamp(Iso));
 
 	Camera* m_cam = (Camera *) argin;
+	SyncCtrlObj* m_sync = m_cam->_getSyncCtrlObj();
 	m_cam->_pco_set_shutter_rolling_edge(error);
 
 	printf("=== %s> EXIT\n", fnId);
+
+	m_sync->setStarted(false); // to test
 
 	_endthread();
 }
@@ -1025,6 +1029,10 @@ void _pco_acq_thread_edge(void *argin) {
 	m_pcoData->msAcqXfer = msXfer = msElapsedTime(tStart);
 	printf("=== %s> EXIT xfer[%ld] (ms) status[%s]\n", 
 			fnId, msXfer, sPcoAcqStatus[status]);
+
+	
+	m_sync->setStarted(false); // updated
+
 	_endthread();
 }
 
@@ -1072,6 +1080,9 @@ void _pco_acq_thread_dimax_live(void *argin) {
 	m_pcoData->msAcqXferTimestamp = getTimestamp();
 	printf("=== %s> EXIT xfer[%ld] (ms) status[%s]\n", 
 			fnId, msXfer, sPcoAcqStatus[status]);
+
+	m_sync->setStarted(false); // to test
+
 	_endthread();
 }
 
@@ -1925,7 +1936,8 @@ bool Camera::_isValid_pixelRate(DWORD dwPixelRate){
 
 //=================================================================================================
 //=================================================================================================
-bool Camera::_isValid_Roi(const Roi &new_roi, Roi &fixed_roi){
+#if 0
+	bool Camera::_isValid_Roi(const Roi &new_roi, Roi &fixed_roi){
 		
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
@@ -1978,7 +1990,62 @@ bool Camera::_isValid_Roi(const Roi &new_roi, Roi &fixed_roi){
 	return !fixed ;
 
 }
+#endif
 
+/****************************************************************************************
+ Some sensors have a ROI stepping. See the camera description and check the parameters
+ wRoiHorStepsDESC and/or wRoiVertStepsDESC.
+
+ For dual ADC mode the horizontal ROI must be symmetrical. For a pco.dimax the horizontal and
+ vertical ROI must be symmetrical. For a pco.edge the vertical ROI must be symmetrical.
+****************************************************************************************/
+
+int Camera::_checkValidRoi(const Roi &new_roi){
+		
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+
+	int iInvalid;
+	int x0, x1, y0, y1;
+
+	int xMax = m_pcoData->stcPcoDescription.wMaxHorzResStdDESC;
+	int yMax = m_pcoData->stcPcoDescription.wMaxVertResStdDESC;
+	int xSteps = m_pcoData->stcPcoDescription.wRoiHorStepsDESC;
+	int ySteps = m_pcoData->stcPcoDescription.wRoiVertStepsDESC;
+
+	x0 = new_roi.getTopLeft().x+1;
+	x1 = new_roi.getBottomRight().x+1;
+	y0 = new_roi.getTopLeft().y+1;
+	y1 = new_roi.getBottomRight().y+1;
+
+	// lima roi [0,2047]
+	//  pco roi [1,2048]
+
+	iInvalid = 0;
+
+	if((x0 < 1) || (x1 > xMax) ||(x0 > x1)) iInvalid |= Xrange;
+	if( (((x0 - 1) % xSteps) != 0 ) ||
+			((x1 % xSteps) != 0 ) )  iInvalid |= Xsteps;
+	if((y0 < 1) ||(y1 > yMax) || (y0 > y1) )  iInvalid |= Yrange;
+	if( (((y0 - 1) % ySteps) != 0 ) || 
+			((y1 % ySteps) != 0 ) )  iInvalid |= Ysteps; 
+
+	bool bSymX = false, bSymY = false;
+	if(_isCameraType(Dimax)){ bSymX = bSymY = true; }
+	if(_isCameraType(Edge)) { bSymY = true; }
+	if(m_pcoData->wNowADC != 1) { bSymX = true; }
+
+	if((bSymY) && ((y0 - 1) != (yMax - y1)))  iInvalid |= Ysym;
+	if((bSymX) && ((x0 - 1) != (xMax - x1)))  iInvalid |= Xsym;
+
+	if(_getDebug(DBG_ROI)) {
+		DEB_ALWAYS()  << "REQUESTED roiX " << DEB_VAR4(x0, x1, xSteps, xMax)   << " roiY " 
+			<< DEB_VAR4(y0, y1, ySteps, yMax) << " " << DEB_VAR3(iInvalid, bSymX, bSymY);
+	}
+
+	return !iInvalid ;
+
+}
 
 //=================================================================================================
 //=================================================================================================
@@ -1991,7 +2058,7 @@ void Camera::_set_Roi(const Roi &new_roi, int &error){
 
 	Roi fixed_roi;
 
-	if(!_isValid_Roi(new_roi, fixed_roi)){
+	if(_checkValidRoi(new_roi)){
 		error = -1;
 		return;
 	}
@@ -2014,7 +2081,49 @@ void Camera::_set_Roi(const Roi &new_roi, int &error){
 	return ;
 }
 
+//=================================================================================================
+//=================================================================================================
+void Camera::_roi_lima2pco(const Roi &roiLima, stcRoi &roiPco){
+	
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+	
+	int x0, x1, y0, y1;
 
+    // pco roi [1,max] ---- lima Roi [0, max-1]
+
+	x0 = roiPco.x[0] = roiLima.getTopLeft().x+1;
+	x1 = roiPco.x[1] = roiLima.getBottomRight().x+1;
+	y0 = roiPco.y[0] = roiLima.getTopLeft().y+1;
+	y1 = roiPco.y[1] = roiLima.getBottomRight().y+1;
+	roiPco.changed = Changed;
+
+	if(_getDebug(DBG_ROI)) {
+		DEB_ALWAYS() << DEB_VAR1(roiLima) << " ---> " << DEB_VAR4(x0, x1, y0, y1);
+	}	
+}
+
+void Camera::_roi_pco2lima(const stcRoi &roiPco, Roi &roiLima){
+
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+	
+	int x0, x1, y0, y1;
+
+    // pco roi [1,max] ---- lima Roi [0, max-1]
+
+	x0 = roiPco.x[0];
+	x1 = roiPco.x[1];
+	y0 = roiPco.y[0];
+	y1 = roiPco.y[1];
+
+	roiLima.setTopLeft(Point(x0 - 1, y0 - 1));
+	roiLima.setSize(Size(x1 - x0 + 1, y1 - y0 + 1));
+
+	if(_getDebug(DBG_ROI)) {
+		DEB_ALWAYS() << DEB_VAR4(x0, x1, y0, y1) << " ---> " << DEB_VAR1(roiLima);
+	}	
+}
 
 //=================================================================================================
 //=================================================================================================
