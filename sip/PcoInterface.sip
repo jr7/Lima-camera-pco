@@ -8,7 +8,7 @@ namespace Pco
   
   public:
 
-    Interface(Pco::Camera*);
+    Interface(Pco::Camera* /KeepReference/);
     virtual ~Interface();
 
     virtual void	getCapList(std::vector<HwCap> &cap_list /Out/) const;
