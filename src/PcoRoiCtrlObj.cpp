@@ -65,6 +65,7 @@ void RoiCtrlObj::checkRoi(const Roi& set_roi, Roi& hw_roi)
 
 }
 
+#define LEN_ERROR_MSG 128
 void RoiCtrlObj::setRoi(const Roi& set_roi)
 {
     DEB_MEMBER_FUNCT();
@@ -86,8 +87,17 @@ void RoiCtrlObj::setRoi(const Roi& set_roi)
 		m_cam->_set_Roi(hw_roi, error);
 		if(error) {DEB_ALWAYS() << "m_cam->_set_Roi " << DEB_VAR2(hw_roi, error);}
 	} else {
-		DEB_ALWAYS() << "ERROR - invalid ROI " << DEB_VAR2(set_roi, iRoi_error);
-		throw LIMA_HW_EXC(InvalidValue, "Invalid ROI ") << DEB_VAR2(set_roi, iRoi_error);
+		static char msg[LEN_ERROR_MSG+1];
+		msg[0]=0;
+		if(iRoi_error & Xrange) strcat_s(msg,LEN_ERROR_MSG, "Xrange ");
+		if(iRoi_error & Xsteps) strcat_s(msg,LEN_ERROR_MSG, "Xsteps ");
+		if(iRoi_error & Xsym) strcat_s(msg,LEN_ERROR_MSG, "Xsym ");
+		if(iRoi_error & Yrange) strcat_s(msg,LEN_ERROR_MSG, "Yrange ");
+		if(iRoi_error & Ysteps) strcat_s(msg,LEN_ERROR_MSG, "Ysteps ");
+		if(iRoi_error & Ysym) strcat_s(msg,LEN_ERROR_MSG, "Ysym ");
+
+		DEB_ALWAYS() << "ERROR - invalid ROI " << DEB_VAR3(set_roi, iRoi_error, msg);
+		throw LIMA_HW_EXC(InvalidValue, "Invalid ROI ") << DEB_VAR3(set_roi, iRoi_error, msg);
 	}
 }
 

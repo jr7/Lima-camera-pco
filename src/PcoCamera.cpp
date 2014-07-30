@@ -2043,7 +2043,7 @@ int Camera::_checkValidRoi(const Roi &new_roi){
 			<< DEB_VAR4(y0, y1, ySteps, yMax) << " " << DEB_VAR3(iInvalid, bSymX, bSymY);
 	}
 
-	return !iInvalid ;
+	return iInvalid ;
 
 }
 
