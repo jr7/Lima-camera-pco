@@ -236,6 +236,17 @@ enum enumPcoFamily {
 	Pco4k       = 1<<5,
 };
 
+
+enum enumRoiError {
+	Xrange       = 1<<0, 
+	Yrange        = 1<<1, 
+	Xsteps      = 1<<2,
+	Ysteps		= 1<<3, 
+	Xsym        = 1<<4,
+	Ysym        = 1<<5,
+};
+
+
 enum enumPcoStorageMode {
 	Fifo = 1, RecSeq, RecRing,
 };
@@ -369,9 +380,11 @@ namespace lima
 
 		bool _isValid_pixelRate(DWORD dwPixelRate);
 		
-		bool _isValid_Roi(const Roi &new_roi, Roi &fixed_roi);
-		//bool _isValid_Roi(Roi &new_roi);
+		//bool _isValid_Roi(const Roi &new_roi, Roi &fixed_roi);
+		int _checkValidRoi(const Roi &new_roi);
 		void _set_Roi(const Roi &roi, int &error);
+		void _roi_lima2pco(const Roi &roiLima, stcRoi &roiPco);
+		void _roi_pco2lima(const stcRoi &roiPco, Roi &roiLima);
 		void _get_Roi(Roi &roi);
 		void _get_MaxRoi(Roi &roi);
 		void _get_RoiSize(Size& roi_size);

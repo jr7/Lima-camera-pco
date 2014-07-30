@@ -71,16 +71,24 @@ void RoiCtrlObj::setRoi(const Roi& set_roi)
 
 	Roi hw_roi;
 	int error = 0;
-	bool bOk = true;
+	int iRoi_error = 0;
 	
     if (set_roi.isEmpty()) {
 		m_cam->_get_MaxRoi(hw_roi);
 	} else {
-		bOk = m_cam->_isValid_Roi(set_roi, hw_roi);
+		hw_roi = set_roi;
+		iRoi_error = m_cam->_checkValidRoi(set_roi);
 	}
 
-	m_cam->_set_Roi(hw_roi, error);
-	if(m_cam->_getDebug(DBG_ROI)) {DEB_ALWAYS() << DEB_VAR4(set_roi, hw_roi, error, bOk);}
+	if(m_cam->_getDebug(DBG_ROI)) {DEB_ALWAYS() << DEB_VAR3(set_roi, hw_roi, iRoi_error);}
+
+	if(iRoi_error == 0){
+		m_cam->_set_Roi(hw_roi, error);
+		if(error) {DEB_ALWAYS() << "m_cam->_set_Roi " << DEB_VAR2(hw_roi, error);}
+	} else {
+		DEB_ALWAYS() << "ERROR - invalid ROI " << DEB_VAR2(set_roi, iRoi_error);
+		throw LIMA_HW_EXC(InvalidValue, "Invalid ROI ") << DEB_VAR2(set_roi, iRoi_error);
+	}
 }
 
 void RoiCtrlObj::getRoi(Roi& hw_roi)
@@ -88,6 +96,6 @@ void RoiCtrlObj::getRoi(Roi& hw_roi)
     DEB_MEMBER_FUNCT();
 
 	m_cam->_get_Roi(hw_roi);
-	if(m_cam->_getDebug(DBG_ROI)) {DEB_ALWAYS() << DEB_VAR1(hw_roi);}
+	if(m_cam->_getDebug(DBG_ROI)) {DEB_ALWAYS() << "m_cam->_get_Roi " << DEB_VAR1(hw_roi);}
 
 }
