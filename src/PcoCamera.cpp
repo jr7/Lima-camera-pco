@@ -2056,8 +2056,6 @@ void Camera::_set_Roi(const Roi &new_roi, int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 
-	Roi fixed_roi;
-
 	if(_checkValidRoi(new_roi)){
 		error = -1;
 		return;
@@ -2065,13 +2063,13 @@ void Camera::_set_Roi(const Roi &new_roi, int &error){
 
 	    // pco roi [1,max] ---- lima Roi [0, max-1]
 
-		m_roi.x[0] = fixed_roi.getTopLeft().x+1;
-		m_roi.x[1] = fixed_roi.getBottomRight().x+1;
-		m_roi.y[0] = fixed_roi.getTopLeft().y+1;
-		m_roi.y[1] = fixed_roi.getBottomRight().y+1;
+		m_roi.x[0] = new_roi.getTopLeft().x+1;
+		m_roi.x[1] = new_roi.getBottomRight().x+1;
+		m_roi.y[0] = new_roi.getTopLeft().y+1;
+		m_roi.y[1] = new_roi.getBottomRight().y+1;
 		m_roi.changed = Changed;
 
-		m_RoiLima = fixed_roi;
+		m_RoiLima = new_roi;
 
 	if(_getDebug(DBG_ROI)) {
 		DEB_ALWAYS() << DEB_VAR1(m_RoiLima);
