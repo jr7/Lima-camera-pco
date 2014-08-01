@@ -300,28 +300,26 @@ void Camera::_init(){
 	}
 
 		// -- Initialise size, bin, roi
-	m_pcoData->maxWidth = (unsigned int) m_pcoData->stcPcoDescription.wMaxHorzResStdDESC; // ds->ccd.size.xmax,
-	m_pcoData->maxHeight= (unsigned int) m_pcoData->stcPcoDescription.wMaxVertResStdDESC; // ds->ccd.size.ymax,
-	m_pcoData->bitsPerPix = (unsigned int) m_pcoData->stcPcoDescription.wDynResDESC; // ds->ccd.size.bits
-	m_pcoData->bytesPerPix = (m_pcoData->bitsPerPix <= 8)?1:2; // nr de bytes por pixel  12 bits -> 2 bytes
-
-
-	m_pcoData->maxwidth_step= (unsigned int) m_pcoData->stcPcoDescription.wRoiHorStepsDESC;   // ds->ccd.roi.xstep
-	m_pcoData->maxheight_step= (unsigned int) m_pcoData->stcPcoDescription.wRoiVertStepsDESC; // ds->ccd.roi.ystep,
+	unsigned int maxWidth, maxHeight,maxwidth_step, maxheight_step; 
+	getMaxWidthHeight(maxWidth, maxHeight);
+	getXYsteps(maxwidth_step, maxheight_step);
 
 
 	m_roi.x[0] = m_roi.y[0] = 1;
-	m_roi.x[1] = m_pcoData->maxWidth;
-	m_roi.y[1] = m_pcoData->maxHeight;
+	m_roi.x[1] = maxWidth;
+	m_roi.y[1] = maxHeight;
 	m_roi.changed = Changed;
 
 	_get_MaxRoi(m_RoiLima);
+	
+	WORD bitsPerPix;
+	getBitsPerPixel(bitsPerPix);
 
-	sprintf_s(msg, MSG_SIZE, "* CCD Size = X[%d] * Y[%d] (%d bits)\n", m_pcoData->maxWidth, m_pcoData->maxHeight, m_pcoData->bitsPerPix);
+	sprintf_s(msg, MSG_SIZE, "* CCD Size = X[%d] * Y[%d] (%d bits)\n", maxWidth, maxHeight, bitsPerPix);
 	DEB_TRACE() <<   msg;
 	m_log.append(msg);
 	
-	sprintf_s(msg, MSG_SIZE, "* ROI Steps = x:%d, y:%d\n", m_pcoData->maxwidth_step, m_pcoData->maxheight_step);
+	sprintf_s(msg, MSG_SIZE, "* ROI Steps = x:%d, y:%d\n", maxwidth_step, maxheight_step);
 	DEB_TRACE() <<   msg;
 	m_log.append(msg);
 
@@ -374,7 +372,10 @@ void  Camera::_init_dimax() {
 
 		DWORD ramSize;
 		WORD pageSize;
-		
+
+		WORD bitsPerPix;
+		getBitsPerPixel(bitsPerPix);
+
 		error = PcoCheckError(__LINE__, __FILE__, PCO_GetCameraRamSize(m_handle, &ramSize, &pageSize));
 		PCO_THROW_OR_TRACE(error, "PCO_GetCameraRamSize") ;
 
@@ -382,12 +383,12 @@ void  Camera::_init_dimax() {
 		m_pcoData->wPixPerPage = pageSize;    // nr of pixels of the page
 
 		sprintf_s(msg, MSG_SIZE, "* ramPages[%ld] pixPerPage[%d] bitsPerPix[%d]\n",  
-				m_pcoData->dwRamSize, m_pcoData->wPixPerPage, m_pcoData->bitsPerPix);
+				m_pcoData->dwRamSize, m_pcoData->wPixPerPage, bitsPerPix);
 		DEB_TRACE() <<   msg;
 		m_log.append(msg);
 		
 		double nrBytes = (double) m_pcoData->dwRamSize  * (double) m_pcoData->wPixPerPage * 
-			(double)m_pcoData->bitsPerPix / 9.; // 8 bits data + 1 bit CRC -> 9
+			(double)bitsPerPix / 9.; // 8 bits data + 1 bit CRC -> 9
 		
 		sprintf_s(msg, MSG_SIZE, "* camMemorySize [%lld B] [%g GB]\n",  
 				(long long int) nrBytes, nrBytes/GIGABYTE);
@@ -451,7 +452,12 @@ void  Camera::_init_dimax() {
 
 	{
 		int segmentPco, segmentArr;
-		DWORD pages_per_image = m_pcoData->maxWidth * m_pcoData->maxHeight / m_pcoData->wPixPerPage;
+		
+		unsigned int maxWidth, maxHeight; 
+		getMaxWidthHeight(maxWidth, maxHeight);
+
+		
+		DWORD pages_per_image = maxWidth * maxHeight / m_pcoData->wPixPerPage;
 
 		///------------------------------------------------------------------------TODO ?????
 		for(segmentArr=0; segmentArr < PCO_MAXSEGMENTS ; segmentArr++) {
@@ -1936,61 +1942,38 @@ bool Camera::_isValid_pixelRate(DWORD dwPixelRate){
 
 //=================================================================================================
 //=================================================================================================
-#if 0
-	bool Camera::_isValid_Roi(const Roi &new_roi, Roi &fixed_roi){
-		
+
+void Camera::getXYsteps(unsigned int &xSteps, unsigned int &ySteps){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
-
-	int diffx0, diffx1, diffy0, diffy1 ;
-	bool fixed;
-	int xFix0, xFix1, yFix0, yFix1;
-	int x0, x1, y0, y1;
-
-	int xMax = m_pcoData->stcPcoDescription.wMaxHorzResStdDESC;
-	int yMax = m_pcoData->stcPcoDescription.wMaxVertResStdDESC;
-	int xSteps = m_pcoData->stcPcoDescription.wRoiHorStepsDESC;
-	int ySteps = m_pcoData->stcPcoDescription.wRoiVertStepsDESC;
-
-	xFix0 = x0 = new_roi.getTopLeft().x+1;
-	xFix1 = x1 = new_roi.getBottomRight().x+1;
-	yFix0 = y0 = new_roi.getTopLeft().y+1;
-	yFix1 = y1 = new_roi.getBottomRight().y+1;
-
-	// pco roi [1,2048]
-
-	fixed = false;
-	if (xFix0 < 1) {xFix0 = 1; fixed = true;}
-	if (xFix1 > xMax) {xFix1 = xMax; fixed = true;}
-	if (xFix0 > xFix1) {xFix0 = 1; xFix1 = xMax; fixed = true;}
-
-	if ((diffx0 = ((xFix0 - 1) % xSteps)  ) != 0 ) {xFix0 -= diffx0; fixed = true;}
-	if ((diffx1 = ((xFix1) % xSteps)) != 0 ) {xFix1 += xSteps - diffx1; fixed = true;}
-
-	if (yFix0 < 1) {yFix0 = 1; fixed = true;}
-	if (yFix1 > yMax) {yFix1 = yMax; fixed = true;}
-	if (yFix0 > yFix1) {yFix0 = 1; yFix1 = yMax; fixed = true;}
-
-	if ((diffy0 = ((yFix0 - 1) % ySteps)) != 0 ) {yFix0 -= diffy0; fixed = true;}
-	if ((diffy1 = ((yFix1) % ySteps)) != 0 ) {yFix1 += ySteps - diffy1; fixed = true;;}
-
-
-	fixed_roi.setTopLeft(Point(xFix0-1, yFix0-1));
-	fixed_roi.setSize(Size(xFix1 -xFix0+1, yFix1-yFix0+1));
-
-	if(_getDebug(DBG_ROI)) {
-		DEB_ALWAYS()  << "REQUESTED roiX " << DEB_VAR4(x0, x1, xSteps, xMax)   << " roiY " 
-			<< DEB_VAR4(y0, y1, ySteps, yMax) ;
-		if(fixed) {
-			DEB_ALWAYS()  << "FIXED roiXY "  << DEB_VAR4(xFix0, xFix1, yFix0, yFix1)    << " DIFF " 
-				<< DEB_VAR4(diffx0, diffx1, diffy0, diffy1) ;
-		}
-	}
-
-	return !fixed ;
-
+	
+	xSteps = m_pcoData->stcPcoDescription.wRoiHorStepsDESC;
+	ySteps = m_pcoData->stcPcoDescription.wRoiVertStepsDESC;
 }
-#endif
+        
+void Camera::getMaxWidthHeight(unsigned int &xMax, unsigned int &yMax){
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+	xMax = m_pcoData->stcPcoDescription.wMaxHorzResStdDESC;
+	yMax = m_pcoData->stcPcoDescription.wMaxVertResStdDESC;
+}
+	
+void Camera::getMaxWidthHeight(DWORD &xMax, DWORD &yMax){
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+	xMax = m_pcoData->stcPcoDescription.wMaxHorzResStdDESC;
+	yMax = m_pcoData->stcPcoDescription.wMaxVertResStdDESC;
+}
+
+
+void Camera::getBytesPerPixel(unsigned int& pixbytes){
+	pixbytes = (m_pcoData->stcPcoDescription.wDynResDESC <= 8)?1:2;
+}
+
+void Camera::getBitsPerPixel(WORD& pixbits){
+	pixbits = m_pcoData->stcPcoDescription.wDynResDESC;
+}
+
 
 /****************************************************************************************
  Some sensors have a ROI stepping. See the camera description and check the parameters
@@ -2000,18 +1983,19 @@ bool Camera::_isValid_pixelRate(DWORD dwPixelRate){
  vertical ROI must be symmetrical. For a pco.edge the vertical ROI must be symmetrical.
 ****************************************************************************************/
 
+
+
 int Camera::_checkValidRoi(const Roi &new_roi){
 		
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 
 	int iInvalid;
-	int x0, x1, y0, y1;
+	unsigned int x0, x1, y0, y1;
 
-	int xMax = m_pcoData->stcPcoDescription.wMaxHorzResStdDESC;
-	int yMax = m_pcoData->stcPcoDescription.wMaxVertResStdDESC;
-	int xSteps = m_pcoData->stcPcoDescription.wRoiHorStepsDESC;
-	int ySteps = m_pcoData->stcPcoDescription.wRoiVertStepsDESC;
+	unsigned int xMax, yMax, xSteps, ySteps;
+	getMaxWidthHeight(xMax, yMax);
+	getXYsteps(xSteps, ySteps);
 
 	x0 = new_roi.getTopLeft().x+1;
 	x1 = new_roi.getBottomRight().x+1;
@@ -2144,8 +2128,12 @@ void Camera::_get_MaxRoi(Roi &roi){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 
+	unsigned int xMax, yMax;
+
+	getMaxWidthHeight(xMax, yMax);
+
 	roi.setTopLeft(Point(0, 0));
-	roi.setSize(Size(m_pcoData->maxWidth, m_pcoData->maxHeight));
+	roi.setSize(Size(xMax, yMax));
 }
 
 
@@ -2391,8 +2379,12 @@ void Camera::_get_XYsteps(Point &xy_steps){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 
-		xy_steps.x = m_pcoData->maxwidth_step;
-		xy_steps.y = m_pcoData->maxheight_step;
+		unsigned int xSteps, ySteps;
+
+		getXYsteps(xSteps, ySteps);
+
+		xy_steps.x = xSteps;
+		xy_steps.y = ySteps;
 }
 
 //=================================================================================================

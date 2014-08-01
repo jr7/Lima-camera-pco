@@ -170,11 +170,6 @@ struct stcPcoData {
 
         struct stcTemp temperature;
 
-		unsigned int bytesPerPix;     //unsigned int depth;
-		unsigned int bitsPerPix;     //unsigned int bits;
-		unsigned int maxWidth;		// unsigned int xmax;		/* Max size */
-		unsigned int maxHeight;        //unsigned int ymax;
-
 		WORD bMetaDataAllowed, wMetaDataMode, wMetaDataSize, wMetaDataVersion;
 		
 		long msAcqRec, msAcqXfer, msAcqTout, msAcqTnow, msAcqAll;
@@ -238,8 +233,8 @@ enum enumPcoFamily {
 
 
 enum enumRoiError {
-	Xrange       = 1<<0, 
-	Yrange        = 1<<1, 
+	Xrange      = 1<<0, 
+	Yrange      = 1<<1, 
 	Xsteps      = 1<<2,
 	Ysteps		= 1<<3, 
 	Xsym        = 1<<4,
@@ -291,10 +286,15 @@ namespace lima
 
 		HANDLE& getHandle() {return m_handle;}
 
-        void getMaxWidthHeight(DWORD& width,DWORD& height){width = m_pcoData->maxWidth, height = m_pcoData->maxHeight;}
+		void getMaxWidthHeight(DWORD &xMax, DWORD &yMax);
+		void getMaxWidthHeight(unsigned int &xMax, unsigned int &yMax);
+		
+		void getXYsteps(unsigned int &xSteps, unsigned int &ySteps);
+
         void getArmWidthHeight(WORD& width,WORD& height){width = m_pcoData->wXResActual, height = m_pcoData->wYResActual;}
-        void getBytesPerPixel(unsigned int& pixbytes){pixbytes = m_pcoData->bytesPerPix;}
-		void getBitsPerPixel(WORD& pixbits){pixbits = (WORD) m_pcoData->bitsPerPix;}
+
+		void getBytesPerPixel(unsigned int& pixbytes);
+		void getBitsPerPixel(WORD& pixbits);
 
 		int getNbAcquiredFrames() const {return m_acq_frame_nb;}
 
@@ -325,6 +325,8 @@ namespace lima
 		bool _isConfig(){return m_config; };
 		void _pco_set_shutter_rolling_edge(int &error);
 		void msgLog(char *s);
+		
+
 
 	private:
 		PcoHwEventCtrlObj *m_HwEventCtrlObj;

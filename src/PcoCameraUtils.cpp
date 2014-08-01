@@ -306,9 +306,16 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* bMetaDataAllowed=[%d] wMetaDataSize=[%d] wMetaDataVersion=[%d] \n",  
 				m_pcoData->bMetaDataAllowed, m_pcoData->wMetaDataSize,  m_pcoData->wMetaDataVersion);
 
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* maxWidth=[%d] maxHeight=[%d] \n",  m_pcoData->maxWidth,  m_pcoData->maxHeight);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* maxwidth_step=[%d] maxheight_step=[%d] \n",  m_pcoData->maxwidth_step,  m_pcoData->maxheight_step);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* bitsPerPix=[%d] bytesPerPix=[%d] \n",  m_pcoData->bitsPerPix,  m_pcoData->bytesPerPix);
+
+			unsigned int maxWidth, maxHeight,maxwidth_step, maxheight_step; 
+			getMaxWidthHeight(maxWidth, maxHeight);
+			getXYsteps(maxwidth_step, maxheight_step);
+			WORD bitsPerPix; getBitsPerPixel(bitsPerPix);
+			unsigned int bytesPerPix; getBytesPerPixel(bytesPerPix);
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* maxWidth=[%d] maxHeight=[%d] \n",  maxWidth,  maxHeight);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* maxwidth_step=[%d] maxheight_step=[%d] \n",  maxwidth_step,  maxheight_step);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* bitsPerPix=[%d] bytesPerPix=[%d] \n",  bitsPerPix,  bytesPerPix);
 			
 
 
@@ -329,8 +336,9 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* m_sync->getNbFrames=[%d frames]\n", iFrames);
 
             unsigned int pixbytes; getBytesPerPixel(pixbytes);
+			
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* pixBits[%d] pixBytes[%d]\n",  
-				m_pcoData->bitsPerPix,pixbytes);
+				bitsPerPix,pixbytes);
 
 			if(_isCameraType(Dimax | Pco2k)){
 				
@@ -430,10 +438,12 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		key = keys[ikey] = "allocatedBuffer";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "(R) TODO";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
-			int sizeBytes = m_pcoData->wXResActual * m_pcoData->wYResActual * m_pcoData->bytesPerPix;
+			unsigned int bytesPerPix; getBytesPerPixel(bytesPerPix);
+
+			int sizeBytes = m_pcoData->wXResActual * m_pcoData->wYResActual * bytesPerPix;
 			ptr += sprintf_s(ptr, ptrMax - ptr, "IMAGE info:\n"
 			                                    "    X=[%d] Y=[%d] bytesPerPix=[%d] size=[%d B]\n",  
-				m_pcoData->wXResActual,  m_pcoData->wYResActual, m_pcoData->bytesPerPix, sizeBytes);
+				m_pcoData->wXResActual,  m_pcoData->wYResActual, bytesPerPix, sizeBytes);
 			
 			ptr += sprintf_s(ptr, ptrMax - ptr, "PCO API allocated buffers:\n"
 												"    allocated=[%s] nrBuff=[%d] size=[%ld B][%g MB] imgPerBuff[%d]\n", 
