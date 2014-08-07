@@ -1550,7 +1550,8 @@ char *Camera::_pcoGet_Camera_Type(int &error){
 		strcpy_s(m_pcoData->iface, INTERFACE_TYPE_SIZE, ptr);
 		errTot |= error;
 
-		sprintf_s(m_pcoData->camera_name, CAMERA_NAME_SIZE, "%s %s", m_pcoData->model, m_pcoData->iface);
+		sprintf_s(m_pcoData->camera_name, CAMERA_NAME_SIZE, "%s %s (SN %d)", 
+			m_pcoData->model, m_pcoData->iface, m_pcoData->stcPcoCamType.dwSerialNumber);
 		DEB_ALWAYS() <<  DEB_VAR3(m_pcoData->model, m_pcoData->iface, m_pcoData->camera_name);
 
 		if(errTot) return m_pcoData->camera_name;

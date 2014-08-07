@@ -9,3 +9,73 @@ int lima::GetDefMaxNbBuffers(const FrameDim& frame_dim, double sys_mem_factor)
 
 	if (sys_mem_factor == 0)
 		sys_mem_factor = 0.8;   <----- changed to 0.7
+
+
+#===============================================================================
+# blissinstaller packages
+#===============================================================================
+(blissadm)
+bestia:/segfs/bliss/projects/LIMA/build/depot/win32_vc9/pco %           
+
+#===============================================================================
+#===============================================================================
+# file .../Lima/README_WINDOW
+
+# file .../notes/lima/README_WINDOW.txt
+
+#===============================================================================
+# Compilation of python Lima Modules for Windows
+#
+# use the special command prompt console to compile!!!
+# start -> Programs -> MS visual c++ 2008 Express Edition 
+#       -> visual studio tools -> VS 2008 Cmd Prompt
+#===============================================================================
+#------------------------------------------------------------------------
+# Setting environment for using Microsoft Visual Studio 2008 x86 tools.
+# C:\Program Files\Microsoft Visual Studio 9.0\VC>
+# C:\Program Files\Microsoft Visual Studio 9.0\VC>limabase   <--- to go to lima home
+# c:\Users\homsrego\git\pco\Lima>                            <---
+#------------------------------------------------------------------------
+
+  - first copy config.inc_default to config.inc
+        -- limabase
+
+  - configure config.inc
+      COMPILE_CORE=1
+      COMPILE_PCO=1
+
+  - go to third-party\Processlib\sip
+        -- limaproc
+        -- cd sip
+        R:\dserver\classes\ccd\pco_rh\Lima\third-party\Processlib\sip>
+    
+  - then run 
+        Lima\third-party\Processlib\sip>python configure.py
+
+  - then run (?)
+        Lima\third-party\Processlib\sip>nmake clean
+
+  - then run 
+        Lima\third-party\Processlib\sip>nmake
+
+  - then go back to Lima
+        -- limabase
+        R:\dserver\classes\ccd\pco_rh\Lima>
+        
+  - then run 
+        Lima>windowsSipCompilation.py --config
+
+  - then run 
+        Lima>windowsSipCompilation.py
+
+  - then run 
+        Lima>python windowsInstall.py
+        -- Lima>limacpins
+
+
+#===============================================================================
+# For Linux platform, It's manage by the master Makefile
+#===============================================================================
+  - got to the Lima root project
+  - then run make config
+  - then run make -C sip -j3
