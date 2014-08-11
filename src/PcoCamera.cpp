@@ -1984,64 +1984,97 @@ void Camera::getBitsPerPixel(WORD& pixbits){
  vertical ROI must be symmetrical. For a pco.edge the vertical ROI must be symmetrical.
 ****************************************************************************************/
 
-
-
-int Camera::_checkValidRoi(const Roi &new_roi){
+int Camera::_checkValidRoi(const Roi &roi_new, Roi &roi_fixed){
 		
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 
 	int iInvalid;
 	unsigned int x0, x1, y0, y1;
+	unsigned int x0org, x1org, y0org, y1org;
+	unsigned int diff0, diff1, tmp;
 
 	unsigned int xMax, yMax, xSteps, ySteps;
 	getMaxWidthHeight(xMax, yMax);
 	getXYsteps(xSteps, ySteps);
 
-	x0 = new_roi.getTopLeft().x+1;
-	x1 = new_roi.getBottomRight().x+1;
-	y0 = new_roi.getTopLeft().y+1;
-	y1 = new_roi.getBottomRight().y+1;
+	x0org = x0 = roi_new.getTopLeft().x+1;
+	x1org = x1 = roi_new.getBottomRight().x+1;
+	y0org = y0 = roi_new.getTopLeft().y+1;
+	y1org = y1 = roi_new.getBottomRight().y+1;
 
 	// lima roi [0,2047]
 	//  pco roi [1,2048]
 
 	iInvalid = 0;
 
-	if((x0 < 1) || (x1 > xMax) ||(x0 > x1)) iInvalid |= Xrange;
-	if( (((x0 - 1) % xSteps) != 0 ) ||
-			((x1 % xSteps) != 0 ) )  iInvalid |= Xsteps;
-	if((y0 < 1) ||(y1 > yMax) || (y0 > y1) )  iInvalid |= Yrange;
-	if( (((y0 - 1) % ySteps) != 0 ) || 
-			((y1 % ySteps) != 0 ) )  iInvalid |= Ysteps; 
+	if(x0 < 1) {x0 = 1 ; iInvalid |= Xrange;}
+	if(x1 > xMax) {x1 = xMax ; iInvalid |= Xrange;}
+	if(x0 > x1) { tmp = x0 ; x0 = x1 ; x1 = tmp;  iInvalid |= Xrange; }
+
+	if ( (diff0 = (x0 - 1) % xSteps) != 0 ) { x0 -= diff0; iInvalid |= Xsteps; }
+	if ( (diff1 = x1 % xSteps) != 0 ) { x1 += xSteps - diff1; iInvalid |= Xsteps; }
+
+	if(y0 < 1) {y0 = 1 ; iInvalid |= Yrange;}
+	if(y1 > yMax) {y1 = yMax ; iInvalid |= Yrange;}
+	if(y0 > y1) { tmp = y0 ; y0 = y1 ; y1 = tmp;  iInvalid |= Yrange; }
+
+	if ( (diff0 = (y0 - 1) % ySteps) != 0 ) { y0 -= diff0; iInvalid |= Ysteps; }
+	if ( (diff1 = y1 % ySteps) != 0 ) { y1 += ySteps - diff1; iInvalid |= Ysteps; }
+
 
 	bool bSymX = false, bSymY = false;
 	if(_isCameraType(Dimax)){ bSymX = bSymY = true; }
 	if(_isCameraType(Edge)) { bSymY = true; }
 	if(m_pcoData->wNowADC != 1) { bSymX = true; }
 
-	if((bSymY) && ((y0 - 1) != (yMax - y1)))  iInvalid |= Ysym;
-	if((bSymX) && ((x0 - 1) != (xMax - x1)))  iInvalid |= Xsym;
+	if(bSymY){
+		if( (diff0 = y0 - 1) != (diff1 = yMax - y1) ){
+			if(diff0 > diff1) 
+				y0 -= diff0 - diff1;
+			else
+				y1 += diff1 - diff0;
 
-	if(_getDebug(DBG_ROI)) {
-		DEB_ALWAYS()  << "REQUESTED roiX " << DEB_VAR4(x0, x1, xSteps, xMax)   << " roiY " 
-			<< DEB_VAR4(y0, y1, ySteps, yMax) << " " << DEB_VAR3(iInvalid, bSymX, bSymY);
+			iInvalid |= Ysym;
+		}
+	}
+
+	if(bSymX){
+		if( (diff0 = x0 - 1) != (diff1 = xMax - x1) ){
+			if(diff0 > diff1) 
+				x0 -= diff0 - diff1;
+			else
+				x1 += diff1 - diff0;
+
+			iInvalid |= Xsym;
+		}
+	}
+
+	roi_fixed.setTopLeft(Point(x0-1, y0-1));
+	roi_fixed.setSize(Size(x1 -x0+1, y1-y0+1));
+
+	if(_getDebug(DBG_ROI) || iInvalid) {
+		DEB_ALWAYS()  << "REQUESTED roiX " << DEB_VAR4(x0org, x1org, xSteps, xMax)   
+			<< " roiY " << DEB_VAR4(y0org, y1org, ySteps, yMax) << " " 
+			<< DEB_VAR3(iInvalid, bSymX, bSymY)
+			<< "FIXED roi " << DEB_VAR4(x0, x1, y0, y1);
 	}
 
 	return iInvalid ;
 
 }
 
+
 //=================================================================================================
 //=================================================================================================
 void Camera::_set_Roi(const Roi &new_roi, int &error){
 	
 	Size roi_size;
-
+	Roi fixed_roi;
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 
-	if(_checkValidRoi(new_roi)){
+	if(_checkValidRoi(new_roi, fixed_roi)){
 		error = -1;
 		return;
 	}

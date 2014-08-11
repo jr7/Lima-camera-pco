@@ -382,8 +382,8 @@ namespace lima
 
 		bool _isValid_pixelRate(DWORD dwPixelRate);
 		
-		//bool _isValid_Roi(const Roi &new_roi, Roi &fixed_roi);
-		int _checkValidRoi(const Roi &new_roi);
+		int _checkValidRoi(const Roi &new_roi, Roi &fixed_roi);
+
 		void _set_Roi(const Roi &roi, int &error);
 		void _roi_lima2pco(const Roi &roiLima, stcRoi &roiPco);
 		void _roi_pco2lima(const stcRoi &roiPco, Roi &roiLima);

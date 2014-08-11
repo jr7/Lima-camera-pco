@@ -55,13 +55,16 @@ RoiCtrlObj::~RoiCtrlObj()
 void RoiCtrlObj::checkRoi(const Roi& set_roi, Roi& hw_roi)
 {
     DEB_MEMBER_FUNCT();
+	int iInvalid;
+
+	iInvalid = m_cam->_checkValidRoi(set_roi, hw_roi);
 	
-    Point align; m_cam->_get_XYsteps(align);
-
-    hw_roi = set_roi;
-    hw_roi.alignCornersTo(align, Ceil);
-
-	if(m_cam->_getDebug(DBG_ROI)) {DEB_ALWAYS() << DEB_VAR3(align, set_roi, hw_roi);}
+    //Point align; m_cam->_get_XYsteps(align);
+    //hw_roi = set_roi;
+    //hw_roi.alignCornersTo(align, Ceil);
+	//if(m_cam->_getDebug(DBG_ROI)) {DEB_ALWAYS() << DEB_VAR3(align, set_roi, hw_roi);}
+	
+	if(m_cam->_getDebug(DBG_ROI)) {DEB_ALWAYS() << DEB_VAR3(iInvalid, set_roi, hw_roi);}
 
 }
 
@@ -70,7 +73,7 @@ void RoiCtrlObj::setRoi(const Roi& set_roi)
 {
     DEB_MEMBER_FUNCT();
 
-	Roi hw_roi;
+	Roi hw_roi, fixed_roi;
 	int error = 0;
 	int iRoi_error = 0;
 	
@@ -78,7 +81,7 @@ void RoiCtrlObj::setRoi(const Roi& set_roi)
 		m_cam->_get_MaxRoi(hw_roi);
 	} else {
 		hw_roi = set_roi;
-		iRoi_error = m_cam->_checkValidRoi(set_roi);
+		iRoi_error = m_cam->_checkValidRoi(set_roi, fixed_roi);
 	}
 
 	if(m_cam->_getDebug(DBG_ROI)) {DEB_ALWAYS() << DEB_VAR3(set_roi, hw_roi, iRoi_error);}
