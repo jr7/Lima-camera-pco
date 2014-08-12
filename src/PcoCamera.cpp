@@ -240,7 +240,7 @@ Camera::Camera(const char *camPar) :
     DEB_ALWAYS()  << DEB_VAR1(m_pcoData->version) << _checkLogFiles();
 
 	m_bin.changed = Invalid;
-	m_roi.changed = Invalid;
+	//m_roi.changed = Invalid;
 
 	_init();
 	m_config = FALSE;
@@ -305,10 +305,10 @@ void Camera::_init(){
 	getXYsteps(maxwidth_step, maxheight_step);
 
 
-	m_roi.x[0] = m_roi.y[0] = 1;
-	m_roi.x[1] = maxWidth;
-	m_roi.y[1] = maxHeight;
-	m_roi.changed = Changed;
+	//m_roi.x[0] = m_roi.y[0] = 1;
+	//m_roi.x[1] = maxWidth;
+	//m_roi.y[1] = maxHeight;
+	//m_roi.changed = Changed;
 
 	_get_MaxRoi(m_RoiLima);
 	
@@ -575,25 +575,13 @@ void Camera::startAcq()
     //------------------------------------------------- set roi if needed
     WORD wRoiX0, wRoiY0; // Roi upper left x y
     WORD wRoiX1, wRoiY1; // Roi lower right x y
+	unsigned int x0, x1, y0, y1;
 
     
-	if(m_roi.changed == Valid) m_roi.changed = Changed;    //+++++++++ TEST / FORCE WRITE ROI
-	m_roi.changed = Changed;
-	if (m_roi.changed == Changed) {
+		_get_Roi(x0, x1, y0, y1);
 
-		{
-			Point top_left = m_RoiLima.getTopLeft();
-			Point bot_right = m_RoiLima.getBottomRight();
-			Size size = m_RoiLima.getSize();
-
-			wRoiX0 = (WORD)top_left.x + 1;
-			wRoiY0 = (WORD)top_left.y + 1;
-			wRoiX1 = (WORD)bot_right.x + 1; 
-			wRoiY1 = (WORD)bot_right.y + 1;
-		}
-
-        wRoiX0 = (WORD)m_roi.x[0]; wRoiX1 = (WORD)m_roi.x[1];
-        wRoiY0 = (WORD)m_roi.y[0]; wRoiY1 = (WORD)m_roi.y[1];
+        wRoiX0 = (WORD) x0; wRoiX1 = (WORD) x1;
+        wRoiY0 = (WORD) y0; wRoiY1 = (WORD) y1;
 
 		if(_getDebug(DBG_ROI)) {
 			DEB_ALWAYS() << "PCO_SetROI> " << DEB_VAR5(m_RoiLima, wRoiX0, wRoiY0, wRoiX1, wRoiY1);
@@ -602,8 +590,6 @@ void Camera::startAcq()
         error = PcoCheckError(__LINE__, __FILE__, PCO_SetROI(m_handle, wRoiX0, wRoiY0, wRoiX1, wRoiY1));
         PCO_THROW_OR_TRACE(error, "PCO_SetROI") ;
 
-        m_roi.changed= Valid;
-    }
 
 	error = PcoCheckError(__LINE__, __FILE__, PCO_GetROI(m_handle, &wRoiX0, &wRoiY0, &wRoiX1, &wRoiY1));
     PCO_THROW_OR_TRACE(error, "PCO_GetROI") ;
@@ -1183,8 +1169,8 @@ unsigned long Camera::pcoGetFramesMax(int segmentPco){
 		xroisize = m_RoiLima.getSize().getWidth();
 		yroisize = m_RoiLima.getSize().getHeight();
 
-		xroisize = m_roi.x[1] - m_roi.x[0] + 1;
-		yroisize = m_roi.y[1] - m_roi.y[0] + 1;
+		//xroisize = m_roi.x[1] - m_roi.x[0] + 1;
+		//yroisize = m_roi.y[1] - m_roi.y[0] + 1;
 
 		pixPerFrame = (unsigned long long)xroisize * (unsigned long long)yroisize;
 
@@ -2081,11 +2067,6 @@ void Camera::_set_Roi(const Roi &new_roi, int &error){
 
 	    // pco roi [1,max] ---- lima Roi [0, max-1]
 
-		m_roi.x[0] = new_roi.getTopLeft().x+1;
-		m_roi.x[1] = new_roi.getBottomRight().x+1;
-		m_roi.y[0] = new_roi.getTopLeft().y+1;
-		m_roi.y[1] = new_roi.getBottomRight().y+1;
-		m_roi.changed = Changed;
 
 		m_RoiLima = new_roi;
 
@@ -2099,50 +2080,7 @@ void Camera::_set_Roi(const Roi &new_roi, int &error){
 
 //=================================================================================================
 //=================================================================================================
-void Camera::_roi_lima2pco(const Roi &roiLima, stcRoi &roiPco){
-	
-	DEB_MEMBER_FUNCT();
-	DEF_FNID;
-	
-	int x0, x1, y0, y1;
 
-    // pco roi [1,max] ---- lima Roi [0, max-1]
-
-	x0 = roiPco.x[0] = roiLima.getTopLeft().x+1;
-	x1 = roiPco.x[1] = roiLima.getBottomRight().x+1;
-	y0 = roiPco.y[0] = roiLima.getTopLeft().y+1;
-	y1 = roiPco.y[1] = roiLima.getBottomRight().y+1;
-	roiPco.changed = Changed;
-
-	if(_getDebug(DBG_ROI)) {
-		DEB_ALWAYS() << DEB_VAR1(roiLima) << " ---> " << DEB_VAR4(x0, x1, y0, y1);
-	}	
-}
-
-void Camera::_roi_pco2lima(const stcRoi &roiPco, Roi &roiLima){
-
-	DEB_MEMBER_FUNCT();
-	DEF_FNID;
-	
-	int x0, x1, y0, y1;
-
-    // pco roi [1,max] ---- lima Roi [0, max-1]
-
-	x0 = roiPco.x[0];
-	x1 = roiPco.x[1];
-	y0 = roiPco.y[0];
-	y1 = roiPco.y[1];
-
-	roiLima.setTopLeft(Point(x0 - 1, y0 - 1));
-	roiLima.setSize(Size(x1 - x0 + 1, y1 - y0 + 1));
-
-	if(_getDebug(DBG_ROI)) {
-		DEB_ALWAYS() << DEB_VAR4(x0, x1, y0, y1) << " ---> " << DEB_VAR1(roiLima);
-	}	
-}
-
-//=================================================================================================
-//=================================================================================================
 
 void Camera::_get_Roi(Roi &roi){
 		
@@ -2151,10 +2089,29 @@ void Camera::_get_Roi(Roi &roi){
 
 	roi = m_RoiLima;
 
-	roi.setTopLeft(Point(m_roi.x[0]-1, m_roi.y[0]-1));
-	roi.setSize(Size(m_roi.x[1]-m_roi.x[0]+1, m_roi.y[1]-m_roi.y[0]+1));
 
-	
+	if(_getDebug(DBG_ROI)) {
+		DEB_ALWAYS() << DEB_VAR1(m_RoiLima);
+	}	
+}
+
+void Camera::_get_Roi(unsigned int &x0, unsigned int &x1, unsigned int &y0, unsigned int &y1){
+		
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+
+	Point top_left = m_RoiLima.getTopLeft();
+	Point bot_right = m_RoiLima.getBottomRight();
+	Size size = m_RoiLima.getSize();
+
+	x0 = top_left.x + 1;
+	y0 = top_left.y + 1;
+	x1 = bot_right.x + 1; 
+	y1 = bot_right.y + 1;
+
+	if(_getDebug(DBG_ROI)) {
+		DEB_ALWAYS() << DEB_VAR5(m_RoiLima, x0, x1, y0, y1);
+	}	
 }
 
 void Camera::_get_MaxRoi(Roi &roi){
@@ -2175,16 +2132,8 @@ void Camera::_get_MaxRoi(Roi &roi){
 //=========================================================================================================
 void Camera::_get_RoiSize(Size& roi_size)
 {
-	int error, width, height;
 
 	roi_size = m_RoiLima.getSize();
-
-	width = m_roi.x[1] - m_roi.x[0] +1;
-	height = m_roi.y[1] - m_roi.y[0] +1;
-
-	roi_size = Size(int(width),int(height));
-
-	error = 0;
 }
 
 //=========================================================================================================
@@ -2198,16 +2147,36 @@ void Camera::_get_ImageType(ImageType& image_type)
 
 //=================================================================================================
 //=================================================================================================
+
+// 31/10/2013 PCO Support Team <support@pco.de>
+// Pixelsize is not implemented in the complete SW- and HW-stack.
+
 void Camera::_get_PixelSize(double& x_size,double &y_size)
 {  
-    // ---- TODO
-	// pixel size in micrometer (???)
 
-	if( _isCameraType(Pco4k)) {
-		x_size = y_size = 9.0;		
+	// pixel size in micrometer 
+
+	if( _isCameraType(Pco2k)) {
+		x_size = y_size = 7.4;	// um / BR_pco_2000_105.pdf	
 		return;
 	}
-  x_size = y_size = -1.;		// @todo don't know
+
+	if( _isCameraType(Pco4k)) {
+		x_size = y_size = 9.0;	// um / BR_pco_4000_105.pdf	
+		return;
+	}
+
+	if( _isCameraType(Edge)) {
+		x_size = y_size = 6.5;	// um / pco.edge User Manual V1.01, page 34	
+		return;
+	}
+
+	if( _isCameraType(Dimax)) {
+		x_size = y_size = 11;	// um / pco.dimax User’s Manual V1.01	
+		return;
+	}
+
+	x_size = y_size = -1.;		
 
 }
 

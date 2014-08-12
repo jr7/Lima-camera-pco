@@ -250,28 +250,24 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		}
 
 		if(*cmd == 0) {
-			ptr += sprintf_s(ptr, ptrMax - ptr,"**** %s [begin]\n", __FUNCTION__);
+			Roi limaRoi;
+			unsigned int x0,x1,y0,y1;
+			_get_Roi(x0, x1, y0, y1);
+			_get_Roi(limaRoi);
 
+			ptr += sprintf_s(ptr, ptrMax - ptr,"**** %s [begin]\n", __FUNCTION__);
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* --- PCO info ---\n");
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* timestamp[%s]\n", getTimestamp(Iso));
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* cam_name[%s]\n", m_pcoData->camera_name);
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* roi X(%d,%d) Y(%d,%d) size(%d,%d)\n",  
-					m_roi.x[0], m_roi.x[1],
-					m_roi.y[0], m_roi.y[1],
-					m_roi.x[1] - m_roi.x[0] + 1, m_roi.y[1] - m_roi.y[0] + 1);
-
-			{
-			Point top_left = m_RoiLima.getTopLeft();
-			Point bot_right = m_RoiLima.getBottomRight();
-			Size size = m_RoiLima.getSize();
+					x0, x1, y0, y1, x1-x0+1, y1-y0+1);
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* roiLima XY0(%d,%d) XY1(%d,%d) size(%d,%d)\n",  
-					top_left.x, top_left.y,
-					bot_right.x, bot_right.y,
-					size.getWidth(), size.getHeight());
-			}
+					limaRoi.getTopLeft().x, limaRoi.getTopLeft().y,
+					limaRoi.getBottomRight().x, limaRoi.getBottomRight().y,
+					limaRoi.getSize().getWidth(), limaRoi.getSize().getHeight());
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* cocRunTime[%g] (s) frameRate[%g] (fps)\n",  
 				m_pcoData->cocRunTime, m_pcoData->frameRate);
@@ -307,14 +303,14 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				m_pcoData->bMetaDataAllowed, m_pcoData->wMetaDataSize,  m_pcoData->wMetaDataVersion);
 
 
-			unsigned int maxWidth, maxHeight,maxwidth_step, maxheight_step; 
+			unsigned int maxWidth, maxHeight,Xstep, Ystep; 
 			getMaxWidthHeight(maxWidth, maxHeight);
-			getXYsteps(maxwidth_step, maxheight_step);
+			getXYsteps(Xstep, Ystep);
 			WORD bitsPerPix; getBitsPerPixel(bitsPerPix);
 			unsigned int bytesPerPix; getBytesPerPixel(bytesPerPix);
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* maxWidth=[%d] maxHeight=[%d] \n",  maxWidth,  maxHeight);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* maxwidth_step=[%d] maxheight_step=[%d] \n",  maxwidth_step,  maxheight_step);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* Xstep=[%d] Ystep=[%d] \n",  Xstep,  Ystep);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* bitsPerPix=[%d] bytesPerPix=[%d] \n",  bitsPerPix,  bytesPerPix);
 			
 
@@ -671,8 +667,12 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		key = keys[ikey] = "roi";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "TODO";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
-			int x0, x1, y0, y1, error;
+			unsigned int x0, x1, y0, y1;
+			int error;
 			Roi new_roi;
+
+			Roi limaRoi;
+			_get_Roi(limaRoi);
 
 			if((tokNr != 0) && (tokNr != 4)){
 					ptr += sprintf_s(ptr, ptrMax - ptr, "syntax ERROR - %s [x0 y0 x1 y1]", cmd);
@@ -680,16 +680,14 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			}
 				
 			if(tokNr == 4){
-				struct stcRoi roi;
-				x0 = roi.x[0]= atoi(tok[1]);
-				y0 = roi.y[0]= atoi(tok[2]);
-				x1 = roi.x[1]= atoi(tok[3]);
-				y1 = roi.y[1]= atoi(tok[4]);
+				x0 = atoi(tok[1]);
+				y0 = atoi(tok[2]);
+				x1 = atoi(tok[3]);
+				y1 = atoi(tok[4]);
 
 				new_roi.setTopLeft(Point(x0-1, y0-1));
 				new_roi.setSize(Size(x1-x0+1, y1-y0+1));
 
-				//_set_Roi(&roi, error);
 				_set_Roi(new_roi, error);
 
 				if(error){
@@ -699,12 +697,9 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				}
 			} 
 
+			_get_Roi(x0, x1, y0, y1);
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* roi X(%d,%d) Y(%d,%d) size(%d,%d)\n",  
-					m_roi.x[0], m_roi.x[1],
-					m_roi.y[0], m_roi.y[1],
-					m_roi.x[1] - m_roi.x[0] + 1, m_roi.y[1] - m_roi.y[0] + 1);
-
-
+					x0, x1, y0, y1, x1-x0+1, y1-y0+1);
 			{
 			Point top_left = m_RoiLima.getTopLeft();
 			Point bot_right = m_RoiLima.getBottomRight();

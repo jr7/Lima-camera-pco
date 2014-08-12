@@ -73,49 +73,24 @@ void RoiCtrlObj::setRoi(const Roi& set_roi)
 {
     DEB_MEMBER_FUNCT();
 
-	Roi hw_roi, fixed_roi;
+	Roi hw_roi;
 	int error = 0;
 	int iRoi_error = 0;
 	
     if (set_roi.isEmpty()) {
 		m_cam->_get_MaxRoi(hw_roi);
 	} else {
-		hw_roi = set_roi;
-		iRoi_error = m_cam->_checkValidRoi(set_roi, fixed_roi);
+		iRoi_error = m_cam->_checkValidRoi(set_roi, hw_roi);
 	}
 
 	if(m_cam->_getDebug(DBG_ROI)) {DEB_ALWAYS() << DEB_VAR3(set_roi, hw_roi, iRoi_error);}
 
-	if(iRoi_error == 0){
-		m_cam->_set_Roi(hw_roi, error);
-		if(error) {DEB_ALWAYS() << "m_cam->_set_Roi " << DEB_VAR2(hw_roi, error);}
-	} else {
-		static char msg[LEN_ERROR_MSG+1];
-		char *ptr = msg;
-		char *ptrMax = msg + LEN_ERROR_MSG;
-
-		unsigned int xMax, yMax, xSteps, ySteps;
-		m_cam->getMaxWidthHeight(xMax, yMax);
-		m_cam->getXYsteps(xSteps, ySteps);
-
-		ptr += sprintf_s(ptr, ptrMax - ptr, "ROI ERROR: ");
-		
-		if(iRoi_error & Xrange) 
-			ptr += sprintf_s(ptr, ptrMax - ptr, "[X invalid range (%d)]", xMax);
-		if(iRoi_error & Xsteps) 
-			ptr += sprintf_s(ptr, ptrMax - ptr, "[X must be multiple of %d]", xSteps);
-		if(iRoi_error & Xsym) 
-			ptr += sprintf_s(ptr, ptrMax - ptr, "[X must be symmetric]");
-		if(iRoi_error & Yrange) 
-			ptr += sprintf_s(ptr, ptrMax - ptr, "[Y invalid range (%d)]", yMax);
-		if(iRoi_error & Ysteps) 
-			ptr += sprintf_s(ptr, ptrMax - ptr, "[Y must be multiple of %d]", ySteps);
-		if(iRoi_error & Ysym) 
-			ptr += sprintf_s(ptr, ptrMax - ptr, "[Y must be symmetric]");
-
-		DEB_ALWAYS() << "ERROR - invalid ROI " << DEB_VAR3(set_roi, iRoi_error, msg);
-		throw LIMA_HW_EXC(InvalidValue, "Invalid ROI ") << DEB_VAR2(set_roi, msg);
+	if(iRoi_error){
+		DEB_ALWAYS() << "m_cam->_set_Roi FIXED: " << DEB_VAR2(set_roi, hw_roi);
 	}
+
+	m_cam->_set_Roi(hw_roi, error);
+	if(error) {DEB_ALWAYS() << "m_cam->_set_Roi " << DEB_VAR2(hw_roi, error);}
 }
 
 void RoiCtrlObj::getRoi(Roi& hw_roi)

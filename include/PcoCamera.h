@@ -246,13 +246,6 @@ enum enumPcoStorageMode {
 	Fifo = 1, RecSeq, RecRing,
 };
 
-struct stcRoi {
-	enumChange changed;	/* have values been changed ? */
-	unsigned int x[2];	/* ROI min/max in x dir.(note starts at 1)*/
-	unsigned int y[2];	/* ROI min/max in y dir.(note starts at 1)*/
-	unsigned int xstep;	/* ROI granularity in x dir */
-	unsigned int ystep;	/* ROI granularity in x dir */
-};
 
 
 struct stcBinning {
@@ -344,7 +337,6 @@ namespace lima
 		int m_pcoError;
 
         struct stcBinning m_bin;
-        struct stcRoi m_roi;
 		Roi m_RoiLima;
 		
 		//struct stcSize m_size;
@@ -385,9 +377,8 @@ namespace lima
 		int _checkValidRoi(const Roi &new_roi, Roi &fixed_roi);
 
 		void _set_Roi(const Roi &roi, int &error);
-		void _roi_lima2pco(const Roi &roiLima, stcRoi &roiPco);
-		void _roi_pco2lima(const stcRoi &roiPco, Roi &roiLima);
 		void _get_Roi(Roi &roi);
+		void _get_Roi(unsigned int &x0, unsigned int &x1, unsigned int &y0, unsigned int &y1);
 		void _get_MaxRoi(Roi &roi);
 		void _get_RoiSize(Size& roi_size);
 

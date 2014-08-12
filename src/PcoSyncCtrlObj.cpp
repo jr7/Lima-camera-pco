@@ -139,7 +139,7 @@ enum TrigMode {
 
 WORD SyncCtrlObj::xlatLimaTrigMode2PcoAcqMode()
 {
-	WORD ret;
+	WORD pcoAcqMode;
 
 	// DONE
   DEB_MEMBER_FUNCT();
@@ -166,16 +166,16 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoAcqMode()
 
     switch( m_trig_mode)	{
 	  case IntTrig: // 0 SOFT (spec)
-    	  ret= 0x0000;
+    	  pcoAcqMode= 0x0000;
 			break;
 
 		case ExtTrigMult:
 		//case IntTrigMult: // 1 START (spec)
       case ExtGate:  // 2 GATE (spec)
 #ifdef DISABLE_ACQ_ENBL_SIGNAL
-    	  ret= 0x0000;
+    	  pcoAcqMode= 0x0000;
 #else
-		  ret= 0x0001;
+		  pcoAcqMode= 0x0001;
 #endif
 		  break;
 
@@ -184,8 +184,8 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoAcqMode()
 
 	}
 
-	DEB_ALWAYS() << "returned values" << DEB_VAR2(ret, m_trig_mode);
-	return ret;
+	DEB_ALWAYS() << "pcoAcqMode (ACQ enable): " << DEB_VAR2(pcoAcqMode, m_trig_mode);
+	return pcoAcqMode;
 
 }
 
@@ -195,7 +195,7 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoAcqMode()
 WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(bool &ext_trig){
 	// DONE
 
-	WORD ret;
+	WORD pcoTrigMode;
 
 	DEB_MEMBER_FUNCT();
 
@@ -215,7 +215,7 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(bool &ext_trig){
 	    default: 
 		case IntTrig: 
 			ext_trig = false;
-			ret= 0x0000;  // 0 = SOFT (spec)
+			pcoTrigMode= 0x0000;  // 0 = SOFT (spec)
 			break;
 
 			// PCO = 0x0002
@@ -224,7 +224,7 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(bool &ext_trig){
 		//case IntTrigMult: return 0x0002;   // 1 = START (spec)
 		case ExtTrigMult: 
 			ext_trig = true;
-			ret= 0x0002;   // 1 = START (spec)
+			pcoTrigMode= 0x0002;   // 1 = START (spec)
 			break;
 
 			// PCO = 0x0003
@@ -235,16 +235,16 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(bool &ext_trig){
 			// time of the second image is given by the readout time of the first image.)
 		case ExtGate: 
 			ext_trig = true;
-			ret= 0x0003;  // 2 = GATE (spec)
+			pcoTrigMode= 0x0003;  // 2 = GATE (spec)
 			break;
 
 	
 	}
 
 
-	DEB_ALWAYS() << "returned values" << DEB_VAR2(ret, m_trig_mode);
+	DEB_ALWAYS() << "pcoTrigMode: " << DEB_VAR2(pcoTrigMode, m_trig_mode);
 
-	return ret;
+	return pcoTrigMode;
 }
 
 
