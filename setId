@@ -10,6 +10,7 @@
 #======================================================================
 
 FILE="./include/PcoGitVersion.h"
+LOG="./doc/VERSION.log"
 
 DT=`date +"%Y/%m/%d %H:%M:%S"`
 
@@ -26,5 +27,20 @@ echo "#define  LIBCONFIG_GIT_VERSION \"\$Id: LIBCONFIG ${LIBCONFIGREV} at [${DT}
 } > ${FILE}
 
 cat ${FILE}
+
+{
+echo
+echo
+date "+%Y/%m/%d %H:%M:%S =========================================="
+cat ${FILE}
+echo
+echo
+cat ${LOG}
+} > ${LOG}.bck.bck
+cp -f ${LOG} ${LOG}.bck
+mv -f ${LOG}.bck.bck ${LOG}
+
+
+
 
 

@@ -79,3 +79,14 @@ bestia:/segfs/bliss/projects/LIMA/build/depot/win32_vc9/pco %
   - got to the Lima root project
   - then run make config
   - then run make -C sip -j3
+
+#=========================================================================
+# script to extract the git hash id to PcoGitVersion.h
+#    run it MANUALLY!
+#=========================================================================
+
+homsrego@WID00LIMACE ~/git/pco/Lima/camera/pco ((pco-1.3.2))
+-rwxr-xr-x    1 homsrego Administ     1356 May 18 17:25 setId
+
+$ ./setId
+

@@ -88,7 +88,7 @@ namespace lima
 		void * BufferCtrlObj::_getLimaBuffer(int lima_buffer_nb, Sync::Status &status);
 		  
 		int _getRequestStop() { return m_requestStop;}
-		void _setRequestStop(int requestStop) { m_requestStop = requestStop;}
+		void _setRequestStop(int requestStop);
 		void _pcoAllocBuffersFree();
 		void _pcoAllocBuffersInfo(int &nr, DWORD &size);
 

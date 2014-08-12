@@ -337,7 +337,7 @@ namespace lima
 		int m_pcoError;
 
         struct stcBinning m_bin;
-		Roi m_RoiLima;
+		Roi m_RoiLima, m_RoiLimaRequested ;
 		
 		//struct stcSize m_size;
 
@@ -376,7 +376,7 @@ namespace lima
 		
 		int _checkValidRoi(const Roi &new_roi, Roi &fixed_roi);
 
-		void _set_Roi(const Roi &roi, int &error);
+		void _set_Roi(const Roi &roi, const Roi &roiRequested, int &error);
 		void _get_Roi(Roi &roi);
 		void _get_Roi(unsigned int &x0, unsigned int &x1, unsigned int &y0, unsigned int &y1);
 		void _get_MaxRoi(Roi &roi);

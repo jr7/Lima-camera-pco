@@ -83,13 +83,14 @@ void RoiCtrlObj::setRoi(const Roi& set_roi)
 		iRoi_error = m_cam->_checkValidRoi(set_roi, hw_roi);
 	}
 
+
 	if(m_cam->_getDebug(DBG_ROI)) {DEB_ALWAYS() << DEB_VAR3(set_roi, hw_roi, iRoi_error);}
 
 	if(iRoi_error){
 		DEB_ALWAYS() << "m_cam->_set_Roi FIXED: " << DEB_VAR2(set_roi, hw_roi);
 	}
 
-	m_cam->_set_Roi(hw_roi, error);
+	m_cam->_set_Roi(hw_roi, set_roi, error);
 	if(error) {DEB_ALWAYS() << "m_cam->_set_Roi " << DEB_VAR2(hw_roi, error);}
 }
 

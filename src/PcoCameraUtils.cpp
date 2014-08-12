@@ -324,6 +324,10 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				m_pcoData->stcPcoDescription.dwPixelRateDESC[0],m_pcoData->stcPcoDescription.dwPixelRateDESC[1],
 				m_pcoData->stcPcoDescription.dwPixelRateDESC[2],m_pcoData->stcPcoDescription.dwPixelRateDESC[3]);
 
+			double pixSizeX, pixSizeY;
+			_get_PixelSize(pixSizeX, pixSizeY);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* pixelSize (um) [%g,%g] \n",  pixSizeX, pixSizeY);
+
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* wLUT_Identifier[x%04x] wLUT_Parameter [x%04x]\n",
 				m_pcoData->wLUT_Identifier, m_pcoData->wLUT_Parameter);
 
@@ -474,6 +478,19 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				getTimestamp(Iso, m_pcoData->msAcqRecTimestamp));
 
 
+			return output;
+		}
+
+		key = keys[ikey] = "lastImgRecorded";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "last image recorded";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
+
+			if(!(_isCameraType(Dimax | Pco2k | Pco4k))) {
+				ptr += sprintf_s(ptr, ptrMax - ptr, "* ERROR - only for DIMAX / 2K / 4K");
+				return output;
+			}
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "%ld\n",	m_pcoData->traceAcq.maxImgCount);
 			return output;
 		}
 
@@ -665,51 +682,43 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 
 
 		key = keys[ikey] = "roi";     //----------------------------------------------------------------
-		keys_desc[ikey++] = "TODO";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "get actual (fixec) last ROI requested (unfixed) ROIs";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 			unsigned int x0, x1, y0, y1;
-			int error;
 			Roi new_roi;
 
 			Roi limaRoi;
 			_get_Roi(limaRoi);
 
-			if((tokNr != 0) && (tokNr != 4)){
-					ptr += sprintf_s(ptr, ptrMax - ptr, "syntax ERROR - %s [x0 y0 x1 y1]", cmd);
+			if((tokNr != 0) ){
+					ptr += sprintf_s(ptr, ptrMax - ptr, "syntax ERROR - %s ", cmd);
 					return output;
 			}
 				
-			if(tokNr == 4){
-				x0 = atoi(tok[1]);
-				y0 = atoi(tok[2]);
-				x1 = atoi(tok[3]);
-				y1 = atoi(tok[4]);
-
-				new_roi.setTopLeft(Point(x0-1, y0-1));
-				new_roi.setSize(Size(x1-x0+1, y1-y0+1));
-
-				_set_Roi(new_roi, error);
-
-				if(error){
-					ptr += sprintf_s(ptr, ptrMax - ptr, "ERROR invalid roi: x0[%d] y0[%d] x1[%d] y1[%d]",
-							x0, y0, x1, y1);
-					return output;
-				}
-			} 
 
 			_get_Roi(x0, x1, y0, y1);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* roi X(%d,%d) Y(%d,%d) size(%d,%d)\n",  
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* roi PCO X(%d,%d) Y(%d,%d) size(%d,%d)\n",  
 					x0, x1, y0, y1, x1-x0+1, y1-y0+1);
 			{
 			Point top_left = m_RoiLima.getTopLeft();
 			Point bot_right = m_RoiLima.getBottomRight();
 			Size size = m_RoiLima.getSize();
 
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* roiLima XY0(%d,%d) XY1(%d,%d) size(%d,%d)\n",  
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* roiLima PCO XY0(%d,%d) XY1(%d,%d) size(%d,%d)\n",  
+					top_left.x, top_left.y,
+					bot_right.x, bot_right.y,
+					size.getWidth(), size.getHeight());
+
+			top_left = m_RoiLimaRequested.getTopLeft();
+			bot_right = m_RoiLimaRequested.getBottomRight();
+			size = m_RoiLimaRequested.getSize();
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* roiLima REQUESTED XY0(%d,%d) XY1(%d,%d) size(%d,%d)\n",  
 					top_left.x, top_left.y,
 					bot_right.x, bot_right.y,
 					size.getWidth(), size.getHeight());
 			}
+
 
 
 			return output;

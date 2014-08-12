@@ -95,6 +95,19 @@ void BufferCtrlObj::prepareAcq()
 
 }
 
+void BufferCtrlObj::_setRequestStop(int requestStop) 
+{ 
+	DEB_MEMBER_FUNCT();
+
+	int m_requestStop0 = m_requestStop;
+	
+	
+	m_requestStop = requestStop;
+
+	DEB_ALWAYS() << "_setRequestStop: " << DEB_VAR3(m_requestStop0, m_requestStop, requestStop);
+
+}
+
 //=========================================================================================================
 //=========================================================================================================
 void BufferCtrlObj::startAcq()
@@ -854,7 +867,7 @@ int BufferCtrlObj::_xferImagMult()
 	dwRequestedFrames = (requested_nb_frames > 0) ? (DWORD) requested_nb_frames : dwRequestedFramesMax;
 
 
-	DEB_ALWAYS() << "\n" 
+	DEB_ALWAYS() << "\n" << "_xferImagMult():\"n" 
 		<< DEB_VAR2(_iPcoAllocatedBuffNr, _dwPcoAllocatedBuffSize) << "\n"  
 		<< DEB_VAR4(_wArmWidth, _wArmHeight, _uiBytesPerPixel, _wBitPerPixel) << "\n"  
 		<< DEB_VAR2( dwFramesPerBuffer, dwFrameSize) << "\n"

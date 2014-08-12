@@ -311,6 +311,7 @@ void Camera::_init(){
 	//m_roi.changed = Changed;
 
 	_get_MaxRoi(m_RoiLima);
+	_get_MaxRoi(m_RoiLimaRequested);
 	
 	WORD bitsPerPix;
 	getBitsPerPixel(bitsPerPix);
@@ -2053,7 +2054,7 @@ int Camera::_checkValidRoi(const Roi &roi_new, Roi &roi_fixed){
 
 //=================================================================================================
 //=================================================================================================
-void Camera::_set_Roi(const Roi &new_roi, int &error){
+void Camera::_set_Roi(const Roi &new_roi, const Roi &requested_roi, int &error){
 	
 	Size roi_size;
 	Roi fixed_roi;
@@ -2069,6 +2070,7 @@ void Camera::_set_Roi(const Roi &new_roi, int &error){
 
 
 		m_RoiLima = new_roi;
+		m_RoiLimaRequested = requested_roi;
 
 	if(_getDebug(DBG_ROI)) {
 		DEB_ALWAYS() << DEB_VAR1(m_RoiLima);

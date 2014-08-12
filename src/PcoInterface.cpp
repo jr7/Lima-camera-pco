@@ -133,7 +133,7 @@ void Interface::stopAcq()
 {
 	// DONE
   DEB_MEMBER_FUNCT();
-  DEB_ALWAYS() << "STOP";
+  DEB_ALWAYS() << "Interface::stopAcq: STOP";
   m_sync->stopAcq();
 }
 

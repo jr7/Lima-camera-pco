@@ -242,7 +242,7 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(bool &ext_trig){
 	}
 
 
-	DEB_ALWAYS() << "pcoTrigMode: " << DEB_VAR2(pcoTrigMode, m_trig_mode);
+	DEB_ALWAYS() << "pcoTrigMode: " << DEB_VAR3(pcoTrigMode, m_trig_mode, ext_trig);
 
 	return pcoTrigMode;
 }
