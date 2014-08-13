@@ -184,7 +184,7 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoAcqMode()
 
 	}
 
-	DEB_ALWAYS() << "pcoAcqMode (ACQ enable): " << DEB_VAR2(pcoAcqMode, m_trig_mode);
+	DEB_ALWAYS() << "\npcoAcqMode (ACQ enable): " << DEB_VAR2(pcoAcqMode, m_trig_mode);
 	return pcoAcqMode;
 
 }
@@ -242,7 +242,7 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(bool &ext_trig){
 	}
 
 
-	DEB_ALWAYS() << "pcoTrigMode: " << DEB_VAR3(pcoTrigMode, m_trig_mode, ext_trig);
+	DEB_ALWAYS() << "\npcoTrigMode: " << DEB_VAR3(pcoTrigMode, m_trig_mode, ext_trig);
 
 	return pcoTrigMode;
 }
@@ -438,7 +438,7 @@ void SyncCtrlObj::startAcq()
 void SyncCtrlObj::stopAcq(bool clearQueue)
 {
 	int error;
-	int _stopRequestIn, _stopRequestOut;
+	int _stopRequestIn, _stopRequestOut, _nrStop;
 	bool _started;
 
 
@@ -447,7 +447,7 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 
   m_cam->msgLog("stopAcq");
 
-  _stopRequestIn = m_buffer->_getRequestStop();
+  _stopRequestIn = m_buffer->_getRequestStop(_nrStop);
 
   if(_started = getStarted())
     {
@@ -459,9 +459,13 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 				PCO_THROW_OR_TRACE(error, "Try to stop Acq") ;
 				break;
 
-			case stopProcessing:
+			//case stopProcessing:
 				//m_buffer->_setRequestStop(stopRequest);
-				break;			
+				//break;			
+
+			case stopRequest:
+				m_buffer->_setRequestStop(stopRequest);
+				break;
 
 			default:
 				break;
@@ -474,11 +478,11 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 
 
 
-  _stopRequestOut = m_buffer->_getRequestStop();
+  _stopRequestOut = m_buffer->_getRequestStop(_nrStop);
 
 	//setStarted(false);
 
-  DEB_ALWAYS() << DEB_VAR3(_started, _stopRequestIn, _stopRequestOut);
+  DEB_ALWAYS() << "\n"<< DEB_VAR4(_started, _stopRequestIn, _stopRequestOut, _nrStop);
 }
 
 

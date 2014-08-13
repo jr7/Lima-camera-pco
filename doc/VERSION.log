@@ -1,5 +1,14 @@
 
 
+2014/08/12 18:41:46 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-08-12 17:53:13 +0200] head[759570f][759570f0683e3a529974bd21140b243d273c1e68] at [2014/08/12 18:41:46] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/12 18:41:46] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/08/12 18:41:46] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/08/12 18:41:46] $"
+
+
+
+
 2014/08/12 13:17:03 ==========================================
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-08-12 11:50:43 +0200] head[6e01263][6e0126326adaaa0f00cdc6bf620ebf3705ade66a] at [2014/08/12 13:17:02] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/12 13:17:02] $"
@@ -34,38 +43,3 @@ $ ./setId
 #define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/05/22 20:11:42] $"
 #define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/05/22 20:11:42] $"
 
-blissinstaler:
-Control/Tango/Server/LimaCCDs-pco/win32_vc9/1.5
-
-# 2014/03/12  =============================================
-  wid15dimax2 merge with limace
-     pco pco-1.3.1a - b8367b29953a43e718b017b8ed08930ca9e709a2
-     lima - 75038daab2305b1da2a2af1aeef7ced312d105e6
-     
-# 2014/03/10  =============================================
- lima tag pco-1.3.0 (limace)  
-   lima - tag pco-1.3.0 - 75038daab2305b1da2a2af1aeef7ced312d105e6
-   pco - branch pco-1.3.0 - a1a1cfdff4d7e113cefd53bd8353dd56157dd889
-
-   --- test references - not used
-   lima - core 1.3.2 - 56b4036c74ee0c6c78a1904b8ef7e1c697da934c
-   lima - core 1.3 - 75038daab2305b1da2a2af1aeef7ced312d105e6
-
-# 2014/03/07  =============================================
- update actual release to package with version / tag
-   lima - 5d95d2bdf27a987ec010bb88e7105a2f73a343fe
-
-
-#=========================================================================
-# script to extract the git hash id to PcoGitVersion.h
-#    run it MANUALLY!
-#=========================================================================
-
-homsrego@WID00LIMACE ~/git/pco/Lima/camera/pco ((pco-1.3.2))
--rwxr-xr-x    1 homsrego Administ     1356 May 18 17:25 setId
-
-$ ./setId
-#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-05-18 17:42:34 +0200] head[eb5c960][eb5c96053d06619b575323ebc915c109a68602c4] at [2014/05/18 18:08:38] $"
-#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-03-31 09:08:59 +0200] head[75d2def][75d2def73f0469c6c4a185381eb7b20509189bee] at [2014/05/18 18:08:38] $"
-#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/05/18 18:08:38] $"
-#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/05/18 18:08:38] $"

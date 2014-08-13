@@ -36,6 +36,8 @@
 
 #define BUFF_VERSION 2048
 
+#define MAX_NR_STOP 5
+
 //--------------------------------------- debug const for talk
 #define DBG_BUFF           0x00000001
 #define DBG_XFER2LIMA      0x00000002
@@ -219,7 +221,10 @@ enum enumChange {
 };
 
 enum enumStop {
-	stopNone = 0, stopRequest, stopRequestAgain, stopProcessing,
+	stopNone = 0, 
+	stopRequest, 
+	//stopRequestAgain, 
+	//stopProcessing,
 };
 
 enum enumPcoFamily {

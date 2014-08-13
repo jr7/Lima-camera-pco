@@ -766,6 +766,7 @@ void _pco_acq_thread_dimax(void *argin) {
 	printf("=== %s [%d]> %s ENTRY\n",  fnId, __LINE__,getTimestamp(Iso));
 
 	int error;
+	int _nrStop;
 	DWORD _dwValidImageCnt, _dwMaxImageCnt;
 
 	Camera* m_cam = (Camera *) argin;
@@ -848,12 +849,12 @@ void _pco_acq_thread_dimax(void *argin) {
 			break;
 		}
 	
-		if(requestStop = m_buffer->_getRequestStop()) {
+		if((requestStop = m_buffer->_getRequestStop(_nrStop))  == stopRequest) {
 			char msg[LEN_TRACEACQ_MSG+1];
-			m_buffer->_setRequestStop(stopProcessing);
+			//m_buffer->_setRequestStop(stopProcessing);
 			//m_sync->setExposing(pcoAcqStop);
 			
-			snprintf(msg,LEN_TRACEACQ_MSG, "=== %s> STOP REQ (recording). lastImgRec[%d]\n", fnId, _dwValidImageCnt);
+		snprintf(msg,LEN_TRACEACQ_MSG, "=== %s> STOP REQ (recording). lastImgRec[%d]\n", fnId, _dwValidImageCnt);
 			printf(msg);
 			m_pcoData->traceMsg(msg);
 			break;
@@ -909,7 +910,8 @@ void _pco_acq_thread_dimax(void *argin) {
 				status = (pcoAcqStatus) m_buffer->_xferImag();
 				if(nb_frames_fixed) status = pcoAcqError;
 			}else{
-				status = (pcoAcqStatus) m_buffer->_xferImagMult();
+				status = (pcoAcqStatus) m_buffer->_xferImag();
+				//status = (pcoAcqStatus) m_buffer->_xferImagMult();
 				//status = (pcoAcqStatus) m_buffer->_xferImagTest(); <---- DIMAX
 			}
 			m_sync->setExposing(status);
@@ -2041,7 +2043,7 @@ int Camera::_checkValidRoi(const Roi &roi_new, Roi &roi_fixed){
 	roi_fixed.setSize(Size(x1 -x0+1, y1-y0+1));
 
 	if(_getDebug(DBG_ROI) || iInvalid) {
-		DEB_ALWAYS()  << "REQUESTED roiX " << DEB_VAR4(x0org, x1org, xSteps, xMax)   
+		DEB_ALWAYS()  << "\nREQUESTED roiX " << DEB_VAR4(x0org, x1org, xSteps, xMax)   
 			<< " roiY " << DEB_VAR4(y0org, y1org, ySteps, yMax) << " " 
 			<< DEB_VAR3(iInvalid, bSymX, bSymY)
 			<< "FIXED roi " << DEB_VAR4(x0, x1, y0, y1);

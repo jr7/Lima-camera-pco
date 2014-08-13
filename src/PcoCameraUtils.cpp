@@ -490,7 +490,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				return output;
 			}
 
-			ptr += sprintf_s(ptr, ptrMax - ptr, "%ld\n",	m_pcoData->traceAcq.maxImgCount);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "%ld\n",	m_pcoData->traceAcq.nrImgRecorded);
 			return output;
 		}
 
