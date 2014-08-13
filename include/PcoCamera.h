@@ -52,6 +52,15 @@
 #define DBG_ROI            0x00001000
 //---------------------------------------
 
+//--------------------------------------- test cmd mode
+#define TESTCMDMODE_DIMAX_XFERMULTI		0x00000001   // _pco_acq_thread_dimax dimax: xferMulti or xfer
+#define TESTCMDMODE_2					0x00000002
+#define TESTCMDMODE_4					0x00000004
+#define TESTCMDMODE_8					0x00000008
+#define TESTCMDMODE_10					0x00000010
+//---------------------------------------
+
+
 #define KILOBYTE (1024LL)
 #define MEGABYTE (KILOBYTE * KILOBYTE)
 #define GIGABYTE (KILOBYTE * MEGABYTE)
@@ -136,6 +145,8 @@ struct stcPcoData {
 	WORD wNrPcoHWIOSignal0;
 	WORD wNrPcoHWIOSignal;
 	unsigned long long debugLevel;
+	unsigned long long testCmdMode;
+
 
 	DWORD dwPixelRateMax;
 

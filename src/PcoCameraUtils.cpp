@@ -520,11 +520,11 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 					bot_right.x, bot_right.y,
 					size.getWidth(), size.getHeight());
 
-			int imgSize = size.getWidth()* size.getHeight() * bytesPerPix;
-			int totSize = imgSize*m_pcoData->traceAcq.nrImgRequested;
+			long long imgSize = size.getWidth()* size.getHeight() * bytesPerPix;
+			long long totSize = imgSize * m_pcoData->traceAcq.nrImgRequested;
 			double mbTotSize =  totSize/(1024.*1024.);
 			double xferSpeed = mbTotSize / m_pcoData->traceAcq.msXfer * 1000.;
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* imgSize[%d B] totSize[%d B][%g MB] xferSpeed[%g MB/s]\n",  
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* imgSize[%lld B] totSize[%lld B][%g MB] xferSpeed[%g MB/s]\n",  
 					imgSize, totSize, mbTotSize, xferSpeed);
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, 
@@ -567,16 +567,28 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		key = keys[ikey] = "testCmd";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "DISABLED / debug tool";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
-            //--- test of callback
+
+
+			if((tokNr >= 1) &&  (_stricmp(tok[1], "mode")==0)){
+				ptr += sprintf_s(ptr, ptrMax - ptr, "testCmdMode [0x%llx]",  m_pcoData->testCmdMode);
+				if(tokNr >= 2){
+					int nr;
+					nr = sscanf_s(tok[2], "0x%llx", &m_pcoData->testCmdMode);
+					ptr += sprintf_s(ptr, ptrMax - ptr, "   %s>  ",  (nr == 1) ? "changed OK": "ERROR - NOT changed");
+					ptr += sprintf_s(ptr, ptrMax - ptr, "testCmdMode [0x%llx]",  m_pcoData->testCmdMode);
+				}
+				return output;
+			}
+			
+			
+			
+			//--- test of callback
 			if( (_stricmp(tok[1], "cb")==0)){
 				Event *ev = new Event(Hardware,Event::Error,Event::Camera,Event::Default, "test cb");
 				m_HwEventCtrlObj->reportEvent(ev);
 				ptr += sprintf_s(ptr, ptrMax - ptr, "%s> done\n", tok[1]);
 				return output;
 			}
-
-
-
 
 			if((tokNr == 2) &&  (_stricmp(tok[1], "time")==0)){
 				ptr += sprintf_s(ptr, ptrMax - ptr, "sleeping\n"); 

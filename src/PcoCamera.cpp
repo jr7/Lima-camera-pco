@@ -910,9 +910,13 @@ void _pco_acq_thread_dimax(void *argin) {
 				status = (pcoAcqStatus) m_buffer->_xferImag();
 				if(nb_frames_fixed) status = pcoAcqError;
 			}else{
-				status = (pcoAcqStatus) m_buffer->_xferImag();
-				//status = (pcoAcqStatus) m_buffer->_xferImagMult();
-				//status = (pcoAcqStatus) m_buffer->_xferImagTest(); <---- DIMAX
+				if(m_pcoData->testCmdMode & TESTCMDMODE_DIMAX_XFERMULTI) {
+					status = (pcoAcqStatus) m_buffer->_xferImagMult();
+					//status = (pcoAcqStatus) m_buffer->_xferImagTest(); <---- DIMAX
+				} else {
+					status = (pcoAcqStatus) m_buffer->_xferImag();
+				}
+
 			}
 			m_sync->setExposing(status);
 

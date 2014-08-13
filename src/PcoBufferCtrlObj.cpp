@@ -442,6 +442,8 @@ int BufferCtrlObj::_xferImag()
 	dwRequestedFrames = (requested_nb_frames > 0) ? (DWORD) requested_nb_frames : dwRequestedFramesMax;
 	dwFramesPerBuffer = m_cam->pcoGetFramesPerBuffer(); // for dimax = 1
 
+	DEB_ALWAYS() << "\n_xferImag():\n" 
+		;
 
 // --------------- prepare the first buffer 
 // ------- in PCO DIMAX only 1 image can be retreived
@@ -918,7 +920,7 @@ int BufferCtrlObj::_xferImagMult()
 	dwRequestedFrames = (requested_nb_frames > 0) ? (DWORD) requested_nb_frames : dwRequestedFramesMax;
 
 
-	DEB_ALWAYS() << "\n" << "_xferImagMult():\n" 
+	DEB_ALWAYS() << "\n_xferImagMult():\n" 
 		<< DEB_VAR2(_iPcoAllocatedBuffNr, _dwPcoAllocatedBuffSize) << "\n"  
 		<< DEB_VAR4(_wArmWidth, _wArmHeight, _uiBytesPerPixel, _wBitPerPixel) << "\n"  
 		<< DEB_VAR2( dwFramesPerBuffer, dwFrameSize) << "\n"

@@ -1,5 +1,70 @@
 
 
+2014/08/13 13:55:13 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-08-13 13:51:04 +0200] head[e691ea7][e691ea7c04828eb6160cc35ee5326b34ad2d9b49] at [2014/08/13 13:55:12] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/13 13:55:12] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/08/13 13:55:12] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/08/13 13:55:12] $"
+
+
+------------------------------------------------- wid15dimax2 
+------------------- (no saving)
+623.RHLIMA> limatake 1.0e-6 5000 ;
+
+623.RHLIMA> p tango_io("id15/pco/pcodimax1","talk", "traceAcq")
+* fnId[_pco_acq_thread_dimax] nrEvents[4]
+* roiLima xy0[0,0] xy1[2015,2015] size[2016,2016]
+* imgSize[8128512 B] totSize[40642560000 B][38759.8 MB] xferSpeed[263.201 MB/s] <------ xfer  / talk "testCmd mode 0x0"
+* nrImgRequested0[5000] nrImgRequested[5000] nrImgAcquired[5000] nrImgRecorded[5010] maxImgCount[6314]
+* msRecordLoop[3713] msRecord[3807] endRecord[2014/08/13 15:43:41]
+* msXfer[147263] endXfer[2014/08/13 15:46:08]
+* msImgCoc[0.782] fps[1.28e+003] msTout[5080] msTotal[151070]
+* msExposure[0.001] msDelay[0]
+
+638.RHLIMA> limatake 1.0e-6 5000 ;
+
+639.RHLIMA> p tango_io("id15/pco/pcodimax1","talk", "traceAcq")
+* fnId[_pco_acq_thread_dimax] nrEvents[4]
+* roiLima xy0[0,0] xy1[2015,2015] size[2016,2016]
+* imgSize[8128512 B] totSize[40642560000 B][38759.8 MB] xferSpeed[200.466 MB/s] <------ xferMulti  / talk "testCmd mode 0x1"
+* nrImgRequested0[5000] nrImgRequested[5000] nrImgAcquired[5000] nrImgRecorded[5026] maxImgCount[6314]
+* msRecordLoop[3713] msRecord[3822] endRecord[2014/08/13 17:04:34]
+* msXfer[193348] endXfer[2014/08/13 17:07:47]
+* msImgCoc[0.782] fps[1.28e+003] msTout[5080] msTotal[197170]
+* msExposure[0.001] msDelay[0]
+
+
+642.RHLIMA>                                    
+------------------- (saving 1 img/file)
+629.RHLIMA> limatake 1.0e-6 5000 ;
+
+630.RHLIMA> p tango_io("id15/pco/pcodimax1","talk", "traceAcq")
+* fnId[_pco_acq_thread_dimax] nrEvents[4]
+* roiLima xy0[0,0] xy1[2015,2015] size[2016,2016]
+* imgSize[8128512 B] totSize[40642560000 B][38759.8 MB] xferSpeed[197.411 MB/s] <------
+* nrImgRequested0[5000] nrImgRequested[5000] nrImgAcquired[5000] nrImgRecorded[5008] maxImgCount[6314]
+* msRecordLoop[3698] msRecord[3801] endRecord[2014/08/13 16:08:03]
+* msXfer[196340] endXfer[2014/08/13 16:11:19]
+* msImgCoc[0.782] fps[1.28e+003] msTout[5080] msTotal[200141]
+* msExposure[0.001] msDelay[0]
+
+
+------------------- (saving 1000 img/file)
+631.RHLIMA> limatake 1.0e-6 5000 ;
+LIMA[pco] > Saving in d:/rhtest/test_5100.edf [AUTO_FRAME-EDF]
+
+632.RHLIMA> p tango_io("id15/pco/pcodimax1","talk", "traceAcq")
+* fnId[_pco_acq_thread_dimax] nrEvents[4]
+* roiLima xy0[0,0] xy1[2015,2015] size[2016,2016]
+* imgSize[8128512 B] totSize[40642560000 B][38759.8 MB] xferSpeed[236.675 MB/s] <-----
+* nrImgRequested0[5000] nrImgRequested[5000] nrImgAcquired[5000] nrImgRecorded[5018] maxImgCount[6314]
+* msRecordLoop[3712] msRecord[3806] endRecord[2014/08/13 16:22:30]
+* msXfer[163768] endXfer[2014/08/13 16:25:14]
+* msImgCoc[0.782] fps[1.28e+003] msTout[5080] msTotal[167574]
+* msExposure[0.001] msDelay[0]
+
+
+
 2014/08/12 18:41:46 ==========================================
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-08-12 17:53:13 +0200] head[759570f][759570f0683e3a529974bd21140b243d273c1e68] at [2014/08/12 18:41:46] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/12 18:41:46] $"
