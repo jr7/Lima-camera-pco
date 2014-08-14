@@ -26,6 +26,8 @@
 #include "PcoBufferCtrlObj.h"
 #include "PcoSyncCtrlObj.h"
 #include "PcoCamera.h"
+#include <sys/timeb.h>
+#include <time.h>
 
 #define COMPILE_WAIT_CONDITION
 #undef COMPILEIT
@@ -401,7 +403,6 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, 
 	return 0;
 
 }
-
 //===================================================================================================================
 //===================================================================================================================
 int BufferCtrlObj::_xferImag()
@@ -419,7 +420,8 @@ int BufferCtrlObj::_xferImag()
 	int lima_buffer_nb;
 	bool live_mode;
 	int _nrStop;
-
+	char msg[RING_LOG_BUFFER_SIZE+1];
+	m_cam->m_tmpLog->flush(20);
 	int maxWaitTimeout = 10;
 
 	
@@ -445,6 +447,17 @@ int BufferCtrlObj::_xferImag()
 	DEB_ALWAYS() << "\n_xferImag():\n" 
 		;
 
+//----------------- traceAcq init
+	m_pcoData->traceAcqClean();
+	m_pcoData->traceAcq.fnId = fnId;
+
+	m_pcoData->traceAcq.msImgCoc = (m_cam->pcoGetCocRunTime() * 1000.);
+
+	struct __timeb64 tStart;
+	msElapsedTimeSet(tStart);
+	m_pcoData->traceAcq.nrImgRequested = dwRequestedFrames;
+
+
 // --------------- prepare the first buffer 
 // ------- in PCO DIMAX only 1 image can be retreived
 //         (dwFramesPerBuffer = 1) ====> (dwFrameLast2assign = dwFrameFirst2assign)
@@ -462,11 +475,11 @@ int BufferCtrlObj::_xferImag()
 			}
 	}
 
-	// Edge cam must be started just after assign buff to avoid lost of img
+ 	// Edge cam must be started just after assign buff to avoid lost of img
 	if(m_cam->_isCameraType(Edge)) {
 			m_cam->_pcoSet_RecordingState(1, error);
 	}
-  
+    
 	// --------------- loop - process the N frames
 	dwFrameIdx = 1;
 
@@ -482,10 +495,14 @@ _RETRY:
 
     for(bufIdx = 0; bufIdx < PCO_BUFFER_NREVENTS; bufIdx++) {
       if((m_allocBuff.bufferAssignedFrameFirst[bufIdx] == dwFrameIdx) && m_allocBuff.bufferReady[bufIdx]) {
-		  // lima frame nr is from 0 .... N-1        
-		  lima_buffer_nb = dwFrameIdx -1; // this frame was already readout to the buffer
+			// lima frame nr is from 0 .... N-1        
+			lima_buffer_nb = dwFrameIdx -1; // this frame was already readout to the buffer
+          
+			sprintf_s(msg, RING_LOG_BUFFER_SIZE, "... BUFFER[%d] lima[%d] frame[%d]", bufIdx, lima_buffer_nb, dwFrameIdx);
+			m_cam->m_tmpLog->add(msg);	
+			m_pcoData->traceAcq.nrImgAcquired = dwFrameIdx;
 
-		 if(m_cam->_getDebug(DBG_BUFF)) {	DEB_ALWAYS() << "========================================FOUND " << DEB_VAR3(lima_buffer_nb, dwFrameIdx, bufIdx); }
+			if(m_cam->_getDebug(DBG_BUFF)) {	DEB_ALWAYS() << "========================================FOUND " << DEB_VAR3(lima_buffer_nb, dwFrameIdx, bufIdx); }
 
 
 #ifdef USING_PCO_ALLOCATED_BUFFERS
@@ -561,23 +578,28 @@ _RETRY:
     switch (dwEvent) { 
         case WAIT_OBJECT_0 + 0: 
 			m_allocBuff.bufferReady[0] = 1; 
+			m_cam->m_tmpLog->add("... WAITOBJ 0");
 			DEB_TRACE() << "========================================WAITOBJ 0  FOUND";
 			goto _RETRY;
         case WAIT_OBJECT_0 + 1: 
 			m_allocBuff.bufferReady[1] = 1; 
+			m_cam->m_tmpLog->add("... WAITOBJ 1");
 			DEB_TRACE() << "========================================WAITOBJ 1  FOUND";
 			goto _RETRY;
         case WAIT_OBJECT_0 + 2: 
 			m_allocBuff.bufferReady[2] = 1;
+			m_cam->m_tmpLog->add("... WAITOBJ 2");
 			DEB_TRACE() << "========================================WAITOBJ 2  FOUND";
 			goto _RETRY;
         case WAIT_OBJECT_0 + 3: 
 			m_allocBuff.bufferReady[3] = 1; 
+			m_cam->m_tmpLog->add("... WAITOBJ 3");
 			DEB_TRACE() << "========================================WAITOBJ 3  FOUND";
 			goto _RETRY;
 
         case WAIT_TIMEOUT: 
 			maxWaitTimeout--;
+			m_cam->m_tmpLog->dumpPrint(0);
 			printf("=== %s> WAITOBJ ERROR - TIMEOUT [%d]\n", fnId, maxWaitTimeout);
 			if(maxWaitTimeout > 0 ) goto _RETRY;
 			return pcoAcqWaitTimeout;
@@ -594,10 +616,19 @@ _WHILE_CONTINUE:
 
   // if(m_cam->_isCameraType(Edge)) {m_sync->setAcqFrames(dwFrameIdx-1);}
 
+  	m_cam->m_tmpLog->dumpPrint(true);  // true first .... last
+	
+	m_pcoData->traceAcq.msXfer = msElapsedTime(tStart);
+	m_pcoData->traceAcq.endXferTimestamp = getTimestamp();
+
 	return pcoAcqTransferEnd;
 
 _EXIT_STOP:
 	DEB_ALWAYS() << "\nSTOP REQUESTED " << DEB_VAR3(_nrStop, dwFrameIdx, dwRequestedFrames);
+
+	m_pcoData->traceAcq.msXfer = msElapsedTime(tStart);
+	m_pcoData->traceAcq.endXferTimestamp = getTimestamp();
+
 	return pcoAcqTransferStop;
 
 }
@@ -949,6 +980,7 @@ int BufferCtrlObj::_xferImagMult()
 	if(m_cam->_getDebug(DBG_XFERMULT)){
 		DEB_ALWAYS() << DEB_VAR3(dwRequestedFrames,_dwValidImageCnt, _dwMaxImageCnt);
 	}	
+
 
 	while(dwFrameIdx <= dwRequestedFrames) {
 		bufIdx++; if(bufIdx >= _iPcoAllocatedBuffNr) bufIdx = 0;

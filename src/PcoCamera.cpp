@@ -229,8 +229,11 @@ Camera::Camera(const char *camPar) :
 	DebParams::checkInit();
 
 	m_msgLog = new ringLog(100) ;
+	m_tmpLog = new ringLog(300) ;
 	if(m_msgLog == NULL)
 		throw LIMA_HW_EXC(Error, "m_msgLog > creation error");
+	if(m_tmpLog == NULL)
+		throw LIMA_HW_EXC(Error, "m_tmpLog > creation error");
 
 
 	m_pcoData =new stcPcoData();
@@ -907,7 +910,8 @@ void _pco_acq_thread_dimax(void *argin) {
 			pcoAcqStatus status;
 
 			if(m_cam->_isCameraType(Pco2k | Pco4k)){
-				status = (pcoAcqStatus) m_buffer->_xferImag();
+				status = (pcoAcqStatus) m_buffer->_xferImagMult();
+				//status = (pcoAcqStatus) m_buffer->_xferImag();
 				if(nb_frames_fixed) status = pcoAcqError;
 			}else{
 				if(m_pcoData->testCmdMode & TESTCMDMODE_DIMAX_XFERMULTI) {
@@ -1016,6 +1020,8 @@ void _pco_acq_thread_edge(void *argin) {
 	m_sync->setAcqFrames(0);
 
 	pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImag();
+	//pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImagMult();
+
 	m_sync->setExposing(status);
 	m_sync->stopAcq();
 	char *msg = m_cam->_pcoSet_RecordingState(0, error);
@@ -2422,3 +2428,42 @@ void Camera::msgLog(char *s) {
 
 
 
+//=================================================================================================
+//=================================================================================================
+	//-------------------------------------------------------------------------------------------------
+	// PCO_SetADCOperation
+    // Set analog-digital-converter (ADC) operation for reading the image sensor data. Pixel data can be
+    // read out using one ADC (better linearity) or in parallel using two ADCs (faster). This option is
+    // only available for some camera models. If the user sets 2ADCs he must center and adapt the ROI
+    // to symmetrical values, e.g. pco.1600: x1,y1,x2,y2=701,1,900,500 (100,1,200,500 is not possible).
+    //
+	// DIMAX -> 1 adc
+	//-------------------------------------------------------------------------------------------------
+void Camera::_pco_getADC(int &adc_working, int &adc_max)
+{
+	int error;
+	WORD wADCOperation;
+
+	adc_max = m_pcoData->stcPcoDescription.wNumADCsDESC; // nr of ADC in the system
+
+	error = PcoCheckError(__LINE__, __FILE__, PCO_GetADCOperation(m_handle, &wADCOperation));
+	
+	adc_working = wADCOperation;
+	m_pcoData->wNowADC= wADCOperation;
+}
+
+void Camera::_pco_setADC(int adc_new, int &adc_working)
+{
+	int error, adc_max;
+	WORD wADCOperation;
+
+	_pco_getADC(adc_working, adc_max);
+
+	if((adc_new >=1) && (adc_new <= adc_max) && (adc_new != (int) wADCOperation) ){
+		error = PcoCheckError(__LINE__, __FILE__, PCO_SetADCOperation(m_handle, (WORD) adc_new));
+		error = PcoCheckError(__LINE__, __FILE__, PCO_GetADCOperation(m_handle, &wADCOperation));
+	}
+
+	adc_working = wADCOperation;
+	m_pcoData->wNowADC= wADCOperation;
+}

@@ -1,5 +1,34 @@
 
 
+2014/08/14 19:05:17 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-08-13 17:45:09 +0200] head[f01ad1f][f01ad1f9f36714855a5e8a6c9221866ad00e2f6c] at [2014/08/14 19:05:16] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/14 19:05:16] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/08/14 19:05:16] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/08/14 19:05:16] $"
+
+
+
+
+2014/08/14 12:44:59 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-08-13 17:45:09 +0200] head[f01ad1f][f01ad1f9f36714855a5e8a6c9221866ad00e2f6c] at [2014/08/14 12:44:58] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/14 12:44:58] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/08/14 12:44:58] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/08/14 12:44:58] $"
+
+253.HRTOMO> limatake 1.0e-5 100
+
+254.HRTOMO> p tango_io("id19/limapco/pco4k", "talk", "traceacq")
+* fnId[_pco_acq_thread_dimax] nrEvents[4]
+* roiLima xy0[0,0] xy1[4007,2671] size[4008,2672]
+* imgSize[21418752 B] totSize[2141875200 B][2042.65 MB] xferSpeed[14.7073 MB/s]
+* nrImgRequested0[100] nrImgRequested[100] nrImgAcquired[100] nrImgRecorded[102] maxImgCount[250]
+* msRecordLoop[38142] msRecord[39874] endRecord[2014/08/14 13:34:48]
+* msXfer[138887] endXfer[2014/08/14 13:37:07]
+* msImgCoc[375] fps[2.67] msTout[48723] msTotal[178761]   <----- 2.67 fps 1 ADC (linearity) 2 ADC (faster)
+* msExposure[0.01] msDelay[0]
+
+
+
 2014/08/13 13:55:13 ==========================================
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-08-13 13:51:04 +0200] head[e691ea7][e691ea7c04828eb6160cc35ee5326b34ad2d9b49] at [2014/08/13 13:55:12] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/13 13:55:12] $"

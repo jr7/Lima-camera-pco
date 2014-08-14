@@ -89,6 +89,12 @@ struct stcXlatCode2Str {
 #define LEN_DUMP 128
 char DLL_EXPORT *_hex_dump_bytes(void *obj, size_t lenObj, char *buff, size_t lenBuff);
 
+long msElapsedTime(struct __timeb64 &t0);
+void msElapsedTimeSet(struct __timeb64 &t0);
+	
+enum timestampFmt {Iso=1, IsoHMS, FnFull, FnDate};
+char *getTimestamp(timestampFmt fmtIdx, time_t xtime = 0) ;
+time_t getTimestamp();
 
 struct stcFrame {
 	BOOL	changed;
@@ -101,12 +107,12 @@ struct stcFrame {
 
 
 };
-
+#define RING_LOG_BUFFER_SIZE 64
 class ringLog {
-        enum { bufferSize = 32 };
+        //enum { bufferSize = 64 };
         struct data{        
                 time_t timestamp;
-                char str[bufferSize];
+                char str[RING_LOG_BUFFER_SIZE+1];
         };
         
    public:
@@ -115,10 +121,12 @@ class ringLog {
         int add(char *s);
         int size() {return m_size;};
         void dumpPrint(bool direction);
+		void flush(int capacity);
 		int dump(char *s, int lgMax, bool direction);
 
 private:
         int m_capacity;
+        int m_capacity_max;
         int m_size;
         int m_head;
         struct data *buffer;
@@ -410,6 +418,9 @@ namespace lima
 		unsigned long long _getDebug(unsigned long long mask);
 
 		ringLog *m_msgLog;
+		ringLog *m_tmpLog;
+		void _pco_getADC(int &adc_working, int &adc_max);
+		void _pco_setADC(int adc_new, int &adc_working);
 
     };
   }

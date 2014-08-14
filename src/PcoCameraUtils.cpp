@@ -496,10 +496,10 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 
 
 		key = keys[ikey] = "traceAcq";     //----------------------------------------------------------------
-		keys_desc[ikey++] = "(R) for DIMAX only / trace details";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) trace details (not all records are filled!)";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 
-			if(!(_isCameraType(Dimax | Pco2k | Pco4k))) {
+			if(0 && !(_isCameraType(Dimax | Pco2k | Pco4k))) {
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* ERROR - only for DIMAX / 2K");
 				return output;
 			}
@@ -768,6 +768,27 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				_PRINT_DBG( DBG_STATUS ) ;
 				_PRINT_DBG( DBG_ROI ) ;
 			}
+
+			return output;
+		}
+
+
+
+		key = keys[ikey] = "ADC";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(RW) ADC working ADC [<new value>]";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
+			int adc_new, adc_working, adc_max;
+
+			_pco_getADC(adc_working, adc_max);
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "working[%d] max[%d]\n", adc_working, adc_max);
+
+			if((tokNr >= 1)){
+				adc_new = atoi(tok[1]);
+				_pco_setADC(adc_new, adc_working);
+				ptr += sprintf_s(ptr, ptrMax - ptr, "working[%d] requested[%d]\n", adc_working, adc_new);
+			}
+			
 
 			return output;
 		}
@@ -1178,7 +1199,13 @@ void print_hex_dump_buff(void *ptr_buff, size_t len) {
 
 ringLog::ringLog(int size) {
         buffer = new struct data [size];
-        m_capacity = size;
+        m_capacity = m_capacity_max = size;
+        m_size = 0;
+        m_head = 0;
+}
+void ringLog::flush(int capacity) {
+		if((capacity > 0) &&(capacity <= m_capacity_max))
+			m_capacity = capacity;
         m_size = 0;
         m_head = 0;
 }
@@ -1203,7 +1230,7 @@ int ringLog::add(char *s) {
         }
         
         ptr->timestamp = getTimestamp();
-        strncpy_s(ptr->str, s,bufferSize);
+        strncpy_s(ptr->str, s,RING_LOG_BUFFER_SIZE);
         return m_size;
 
 }
@@ -1244,7 +1271,7 @@ int ringLog::dump(char *s, int lgMax, bool direction) {
         time_t ltime;
         struct tm today;
         char *fmt = "%Y/%m/%d %H:%M:%S";
-		int linMax = 25 + bufferSize;
+		int linMax = 25 + RING_LOG_BUFFER_SIZE;
         int i;
 		char *ptrOut;
         errno_t err;
