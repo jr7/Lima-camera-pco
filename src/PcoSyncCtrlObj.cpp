@@ -139,10 +139,10 @@ enum TrigMode {
 
 WORD SyncCtrlObj::xlatLimaTrigMode2PcoAcqMode()
 {
-	WORD pcoAcqMode;
+	DEB_MEMBER_FUNCT();
+    DEF_FNID;
 
-	// DONE
-  DEB_MEMBER_FUNCT();
+	WORD pcoAcqMode;
 
 
 	if(!checkTrigMode(m_trig_mode)){
@@ -184,7 +184,7 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoAcqMode()
 
 	}
 
-	DEB_ALWAYS() << "\npcoAcqMode (ACQ enable): " << DEB_VAR2(pcoAcqMode, m_trig_mode);
+	DEB_ALWAYS() << fnId << ": " << DEB_VAR2(pcoAcqMode, m_trig_mode);
 	return pcoAcqMode;
 
 }
@@ -193,11 +193,10 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoAcqMode()
 //=========================================================================================================
 
 WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(bool &ext_trig){
-	// DONE
+	DEB_MEMBER_FUNCT();
+    DEF_FNID;
 
 	WORD pcoTrigMode;
-
-	DEB_MEMBER_FUNCT();
 
 	if(!checkTrigMode(m_trig_mode)){
 		throw LIMA_HW_EXC(NotSupported,"Trigger type not supported");
@@ -242,7 +241,7 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(bool &ext_trig){
 	}
 
 
-	DEB_ALWAYS() << "\npcoTrigMode: " << DEB_VAR3(pcoTrigMode, m_trig_mode, ext_trig);
+	DEB_ALWAYS() << fnId <<": " << DEB_VAR3(pcoTrigMode, m_trig_mode, ext_trig);
 
 	return pcoTrigMode;
 }
@@ -482,7 +481,7 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 
 	//setStarted(false);
 
-  DEB_ALWAYS() << "\n"<< DEB_VAR4(_started, _stopRequestIn, _stopRequestOut, _nrStop);
+  DEB_ALWAYS() << fnId << ": " << DEB_VAR4(_started, _stopRequestIn, _stopRequestOut, _nrStop);
 }
 
 

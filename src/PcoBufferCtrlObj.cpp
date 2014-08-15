@@ -107,6 +107,8 @@ int BufferCtrlObj::_getRequestStop(int &nrStop)
 void BufferCtrlObj::_setRequestStop(int requestStop) 
 { 
 	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+
 
 	int m_requestStop0 = m_requestStop;
 	
@@ -132,7 +134,7 @@ void BufferCtrlObj::_setRequestStop(int requestStop)
 
 
 
-	DEB_ALWAYS() << "_setRequestStop: " << DEB_VAR3(m_requestStop0, m_requestStop, requestStop);
+	DEB_ALWAYS() <<  fnId << ": "  << DEB_VAR3(m_requestStop0, m_requestStop, requestStop);
 
 }
 
@@ -421,8 +423,8 @@ int BufferCtrlObj::_xferImag()
 	bool live_mode;
 	int _nrStop;
 	char msg[RING_LOG_BUFFER_SIZE+1];
-	m_cam->m_tmpLog->flush(20);
-	int maxWaitTimeout = 10;
+	m_cam->m_tmpLog->flush(-1);
+	int maxWaitTimeout = 3;
 
 	
 // --------------- get the requested nr of images 
@@ -448,9 +450,8 @@ int BufferCtrlObj::_xferImag()
 		;
 
 //----------------- traceAcq init
-	m_pcoData->traceAcqClean();
-	m_pcoData->traceAcq.fnId = fnId;
 
+	m_pcoData->traceAcq.fnIdXfer = fnId;
 	m_pcoData->traceAcq.msImgCoc = (m_cam->pcoGetCocRunTime() * 1000.);
 
 	struct __timeb64 tStart;
@@ -469,6 +470,12 @@ int BufferCtrlObj::_xferImag()
 						// --------------- if needed prepare the next buffer 
 		if(dwFrameFirst2assign > dwRequestedFrames) break;
 			bufIdx = i;
+			
+			if(m_cam->_getDebug(DBG_WAITOBJ)){
+				sprintf_s(msg, RING_LOG_BUFFER_SIZE, "... ASSIGN BUFFER[%d] frame[%d]", bufIdx, dwFrameFirst2assign);
+				m_cam->m_tmpLog->add(msg);
+			}
+
 			if(error = _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx,live_mode)) {
 				DEB_TRACE() << "ERROR _assignImage2Buffer";
 					return pcoAcqPcoError;
@@ -498,8 +505,10 @@ _RETRY:
 			// lima frame nr is from 0 .... N-1        
 			lima_buffer_nb = dwFrameIdx -1; // this frame was already readout to the buffer
           
-			sprintf_s(msg, RING_LOG_BUFFER_SIZE, "... BUFFER[%d] lima[%d] frame[%d]", bufIdx, lima_buffer_nb, dwFrameIdx);
-			m_cam->m_tmpLog->add(msg);	
+			if(m_cam->_getDebug(DBG_WAITOBJ)){
+				sprintf_s(msg, RING_LOG_BUFFER_SIZE, "... BUFFER[%d] lima[%d] frame[%d]", bufIdx, lima_buffer_nb, dwFrameIdx);
+				m_cam->m_tmpLog->add(msg);
+			}
 			m_pcoData->traceAcq.nrImgAcquired = dwFrameIdx;
 
 			if(m_cam->_getDebug(DBG_BUFF)) {	DEB_ALWAYS() << "========================================FOUND " << DEB_VAR3(lima_buffer_nb, dwFrameIdx, bufIdx); }
@@ -552,6 +561,10 @@ _RETRY:
         //----- the image dwFrameIdx is already in the buffer -> callback!
 		if((_getRequestStop(_nrStop) == stopRequest) && (_nrStop > MAX_NR_STOP)) {goto _EXIT_STOP;}
 		if(dwFrameFirst2assign <= dwRequestedFrames) {
+			if(m_cam->_getDebug(DBG_WAITOBJ)){
+				sprintf_s(msg, RING_LOG_BUFFER_SIZE, "... ASSIGN BUFFER[%d] frame[%d]", bufIdx, dwFrameFirst2assign);
+				m_cam->m_tmpLog->add(msg);
+			}
 			if(error = _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx, live_mode)) {
 				return pcoAcqPcoError;
 			}
@@ -559,8 +572,9 @@ _RETRY:
 		if(m_cam->_getDebug(DBG_BUFF)) {DEB_ALWAYS() << "===== " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);}
         goto _WHILE_CONTINUE;
       }
-    } // for
+    } // for(bufIdx = 0; bufIdx < PCO_BUFFER_NREVENTS; bufIdx++)
 
+_RETRY_WAIT:
 // --------------- check if there is some buffer ready
 		dwEvent = WaitForMultipleObjects( 
 			PCO_BUFFER_NREVENTS,           // number of objects in array
@@ -570,7 +584,7 @@ _RETRY:
 
     // The return value indicates which event is signaled
 
-#if PCO_BUFFER_NREVENTS != 4
+#if PCO_BUFFER_NREVENTS != 2
   #pragma message ("============================================== ABORT - wrong nr of WAIT_OBJECT ")
     DUMMY_FOR_ABORT = 5;
 #endif
@@ -578,30 +592,26 @@ _RETRY:
     switch (dwEvent) { 
         case WAIT_OBJECT_0 + 0: 
 			m_allocBuff.bufferReady[0] = 1; 
-			m_cam->m_tmpLog->add("... WAITOBJ 0");
-			DEB_TRACE() << "========================================WAITOBJ 0  FOUND";
+			if(m_cam->_getDebug(DBG_WAITOBJ)){m_cam->m_tmpLog->add("... WAITOBJ 0");}
 			goto _RETRY;
         case WAIT_OBJECT_0 + 1: 
 			m_allocBuff.bufferReady[1] = 1; 
-			m_cam->m_tmpLog->add("... WAITOBJ 1");
-			DEB_TRACE() << "========================================WAITOBJ 1  FOUND";
+			if(m_cam->_getDebug(DBG_WAITOBJ)){m_cam->m_tmpLog->add("... WAITOBJ 1");}
 			goto _RETRY;
         case WAIT_OBJECT_0 + 2: 
 			m_allocBuff.bufferReady[2] = 1;
-			m_cam->m_tmpLog->add("... WAITOBJ 2");
-			DEB_TRACE() << "========================================WAITOBJ 2  FOUND";
+			if(m_cam->_getDebug(DBG_WAITOBJ)){m_cam->m_tmpLog->add("... WAITOBJ 2");}
 			goto _RETRY;
         case WAIT_OBJECT_0 + 3: 
 			m_allocBuff.bufferReady[3] = 1; 
-			m_cam->m_tmpLog->add("... WAITOBJ 3");
-			DEB_TRACE() << "========================================WAITOBJ 3  FOUND";
+			if(m_cam->_getDebug(DBG_WAITOBJ)){m_cam->m_tmpLog->add("... WAITOBJ 3");}
 			goto _RETRY;
 
         case WAIT_TIMEOUT: 
 			maxWaitTimeout--;
-			m_cam->m_tmpLog->dumpPrint(0);
+			if(m_cam->_getDebug(DBG_WAITOBJ)){m_cam->m_tmpLog->dumpPrint(true);}
 			printf("=== %s> WAITOBJ ERROR - TIMEOUT [%d]\n", fnId, maxWaitTimeout);
-			if(maxWaitTimeout > 0 ) goto _RETRY;
+			if(maxWaitTimeout > 0 ) goto _RETRY_WAIT;
 			return pcoAcqWaitTimeout;
 
         default: 
@@ -616,7 +626,7 @@ _WHILE_CONTINUE:
 
   // if(m_cam->_isCameraType(Edge)) {m_sync->setAcqFrames(dwFrameIdx-1);}
 
-  	m_cam->m_tmpLog->dumpPrint(true);  // true first .... last
+  if(m_cam->_getDebug(DBG_WAITOBJ)){m_cam->m_tmpLog->dumpPrint(true);}  // true first .... last
 	
 	m_pcoData->traceAcq.msXfer = msElapsedTime(tStart);
 	m_pcoData->traceAcq.endXferTimestamp = getTimestamp();
@@ -632,172 +642,6 @@ _EXIT_STOP:
 	return pcoAcqTransferStop;
 
 }
-
-//===================================================================================================================
-//===================================================================================================================
-int BufferCtrlObj::_xferImagTest()
-{
-	DEB_MEMBER_FUNCT();
-	DEF_FNID;
-	
-
-
-	DWORD dwFrameIdx;
-	DWORD dwFrameFirst2assign, dwFrameLast2assign;
-	DWORD dwEvent;
-	long long nr =0;
-	long long bytesWritten = 0;
-	int bufIdx;
-	int error;
-	int lima_buffer_nb;
-	bool live_mode;
-	int _nrStop;
-
-
-	
-// --------------- get the requested nr of images 
-	int requested_nb_frames;
-	DWORD dwFramesPerBuffer, dwRequestedFrames;
-	DWORD dwRequestedFramesMax =DWORD_MAX;
-
-// --------------- live video -> nr frames = 0 / idx lima buffers 32b (0...ffff)
-	m_sync->getNbFrames(requested_nb_frames);
-	
-	if(requested_nb_frames > 0){
-		dwRequestedFrames = (DWORD) requested_nb_frames;
-		live_mode =false;
-	} else {
-		dwRequestedFrames = dwRequestedFramesMax;
-		live_mode = true;
-	}
-		
-	dwRequestedFrames = (requested_nb_frames > 0) ? (DWORD) requested_nb_frames : dwRequestedFramesMax;
-	dwFramesPerBuffer = m_cam->pcoGetFramesPerBuffer(); // for dimax = 1
-
-
-// --------------- prepare the first buffer 
-// ------- in PCO DIMAX only 1 image can be retreived
-//         (dwFramesPerBuffer = 1) ====> (dwFrameLast2assign = dwFrameFirst2assign)
-	dwFrameFirst2assign = 1;
-	dwFrameLast2assign = dwFrameFirst2assign + dwFramesPerBuffer - 1;		// dwFrameLast2assign = dwFrameFirst2assign = 1
-	if(dwFrameLast2assign > dwRequestedFrames) dwFrameLast2assign = dwRequestedFrames;
-
-
-	// prepare the first PCO_BUFFER_NREVENTS img -> buff
-	for(int i = 0; i < PCO_BUFFER_NREVENTS; i++) {
-						// --------------- if needed prepare the next buffer 
-		if(dwFrameFirst2assign > dwRequestedFrames) break;
-			bufIdx = i;
-			if(error = _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx,live_mode)) {
-				DEB_ALWAYS() << "ERROR _assignImage2Buffer" << DEB_VAR5(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx,live_mode);
-					return pcoAcqPcoError;
-			}
-	}
-
-	// Edge cam must be started just after assign buff to avoid lost of img
-	if(m_cam->_isCameraType(Edge)) {
-			m_cam->_pcoSet_RecordingState(1, error);
-	}
-  
-	// --------------- loop - process the N frames
-	for(dwFrameIdx=1, bufIdx = 0; dwFrameIdx <= dwRequestedFrames ; ) {
-
-
-	if(_getRequestStop(_nrStop) == stopRequest) {return pcoAcqTransferStop;}
-
-	// --------------- look if one of buffer is READY and has the NEXT frame => proccess it
-    // m_allocatedBufferAssignedFrameFirst[bufIdx] -> first frame in the buffer (we are using only 1 frame per buffer)
-    // m_allocatedBufferReady[bufIdx] -> is already filled by sdk (ready)
-
-		HANDLE &eventHandle = m_allocBuff.bufferAllocEvent[bufIdx];
-		dwEvent=WaitForSingleObject(eventHandle,EVENT_WAIT_TMOUT_MS);
-		if(m_cam->_getDebug(DBG_BUFF)) {
-			void *eventPtr = &eventHandle;		
-			DEB_ALWAYS() << DEB_VAR4(dwFrameIdx,bufIdx,dwEvent, eventPtr);
-		}
-
-		if(dwEvent==WAIT_OBJECT_0)
-		{
-			ResetEvent(eventHandle);
-
-		//------ transfer the new img in the pco buff to lima buffer
-		{
-			  // lima frame nr is from 0 .... N-1        
-			  lima_buffer_nb = dwFrameIdx -1; // this frame was already readout to the buffer
-
-			 if(m_cam->_getDebug(DBG_BUFF)) {	DEB_ALWAYS() << "========================================FOUND " << DEB_VAR3(lima_buffer_nb, dwFrameIdx, bufIdx); }
-
-#ifdef USING_PCO_ALLOCATED_BUFFERS
-			// we are using the PCO allocated buffer, so this buffer must be copied to the lima buffer
-			void * ptrDest = (void *)m_allocBuff.limaAllocBufferPtr[bufIdx];	// ptr to the LIMA buff
-			void *ptrSrc = (void *) m_allocBuff.pcoAllocBufferPtr[bufIdx];		// ptr to the PCO allocated buff
-			size_t sizeLima = m_allocBuff.dwLimaAllocBufferSize[bufIdx];		// size of the Lima buffer
-			size_t size = m_allocBuff.dwPcoAllocBufferSize[bufIdx];				// size of the PCO buffer
-			SHORT sBufNr = 	m_allocBuff.pcoAllocBufferNr[bufIdx];				// PCO allocated buffer number (for sdk)
-
-			if(m_cam->_getDebug(DBG_BUFF)) {DEB_ALWAYS() << "========================================FOUND " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);}
-
-			DWORD dwStatusDll, dwStatusDrv;
-			if(_getRequestStop(_nrStop) == stopRequest) {return pcoAcqTransferStop;}
-
-			int errPco = PCO_GetBufferStatus(m_handle, sBufNr, &dwStatusDll, &dwStatusDrv);		
-			if((dwStatusDll != 0x80000000) || dwStatusDrv || errPco) {
-				printf("=== %s> got frame[%d / %d] bufIdx[%d] size[%ld] dest[%08lx] src[%08lx] \n"
-					"dwStatusDll[%08lx] dwStatusDrv[%08lx] errPco[%08lx] err[%s]\n", fnId, 
-					dwFrameIdx, dwRequestedFrames, bufIdx,
-					size, ((DWORD) ptrDest), ((DWORD) ptrSrc),
-					dwStatusDll, dwStatusDrv, errPco,
-					m_cam->_PcoCheckError(__LINE__, __FILE__, dwStatusDrv, error));
-			}
-
-			if(m_cam->_getDebug(DBG_BUFF)) {DEB_ALWAYS() << "===== " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);}
-			memcpy(ptrDest, ptrSrc, size);
-			if(m_cam->_getDebug(DBG_XFER2LIMA)) {DEB_ALWAYS() << "===== after xfer pco buffer to lima " << DEB_VAR6(ptrDest, ptrSrc, size, sizeLima, sBufNr, dwFrameIdx);}
-#endif
-
-			HwFrameInfoType frame_info;
-			frame_info.acq_frame_nb = lima_buffer_nb;
-			m_buffer_cb_mgr.newFrameReady(frame_info); // callback to LIMA the new frame is ready
-
-			//----- the image dwFrameIdx is already in the buffer -> callback!
-			if(_getRequestStop(_nrStop) == stopRequest) {return pcoAcqTransferStop;}
-			if(m_cam->_getDebug(DBG_BUFF)) {DEB_ALWAYS() << "===== " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);}
-		  }  
-		// ---------- end of the tranf img pco -> lima
-
-			if(dwFrameFirst2assign <= dwRequestedFrames) {
-				if(error = _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx, live_mode)) {
-					return pcoAcqPcoError;
-				}
-			}
-			bufIdx++; if(bufIdx >=PCO_BUFFER_NREVENTS) bufIdx = 0;  
-
-			m_sync->setAcqFrames(dwFrameIdx);
-			dwFrameIdx++;	// next frame
-		} else  {     // IF WAIT_OBJECT_0
-			DEB_ALWAYS() << "WAITOBJ ERROR " << DEB_VAR4(dwFrameIdx, bufIdx, dwRequestedFrames, dwEvent);
-			return pcoAcqWaitTimeout;
-		}     	// IF WAIT_OBJECT_0
-     
-  } // for(frameIdx ...
-
-  // if(m_cam->_isCameraType(Edge)) {m_sync->setAcqFrames(dwFrameIdx-1);}
-
-	return pcoAcqTransferEnd;
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -896,6 +740,9 @@ int BufferCtrlObj::_xferImagMult()
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 	
+
+	m_pcoData->traceAcq.fnIdXfer = fnId;
+
 
 	DWORD dwFrameIdx;
 	long long nr =0;

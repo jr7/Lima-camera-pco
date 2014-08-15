@@ -43,12 +43,15 @@
 #define DBG_XFER2LIMA      0x00000002
 #define DBG_LIMABUFF       0x00000004
 #define DBG_EXP            0x00000008
+
 #define DBG_XFERMULT       0x00000010
 #define DBG_XFERMULT1      0x00000020
 #define DBG_ASSIGN_BUFF    0x00000040
 #define DBG_STATUS		   0x00000080
 
 #define DBG_DUMMY_IMG      0x00000100
+#define DBG_WAITOBJ		   0x00000200
+
 #define DBG_ROI            0x00001000
 //---------------------------------------
 
@@ -76,13 +79,14 @@
 
 #define PCO_CL_BAUDRATE_115K2	115200
 
-#define PCO_BUFFER_NREVENTS 4
+#define PCO_BUFFER_NREVENTS 2
 struct stcXlatCode2Str {
 		int code;
 		char *str;
 };
 
 #define LEN_TRACEACQ_MSG 512
+#define LEN_ERROR_MSG			(512-1)
 
 #define PCO_MAXSEGMENTS 4
 
@@ -208,6 +212,7 @@ struct stcPcoData {
 			time_t endRecordTimestamp;
 			time_t endXferTimestamp;
 			char *fnId;
+			char *fnIdXfer;
 			char msg[LEN_TRACEACQ_MSG+1];
 		} traceAcq;
 
@@ -419,8 +424,8 @@ namespace lima
 
 		ringLog *m_msgLog;
 		ringLog *m_tmpLog;
-		void _pco_getADC(int &adc_working, int &adc_max);
-		void _pco_setADC(int adc_new, int &adc_working);
+		int _pco_getADC(int &adc_working, int &adc_max);
+		int _pco_setADC(int adc_new, int &adc_working);
 
     };
   }

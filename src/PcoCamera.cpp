@@ -768,6 +768,8 @@ void _pco_acq_thread_dimax(void *argin) {
 	DEF_FNID;
 	printf("=== %s [%d]> %s ENTRY\n",  fnId, __LINE__,getTimestamp(Iso));
 
+	static char msgErr[LEN_ERROR_MSG+1];
+
 	int error;
 	int _nrStop;
 	DWORD _dwValidImageCnt, _dwMaxImageCnt;
@@ -835,8 +837,12 @@ void _pco_acq_thread_dimax(void *argin) {
 	
 		if( ((DWORD) nb_frames > _dwMaxImageCnt) ){
 			nb_frames_fixed = true;
-			printf("=== %s [%d]> ERROR INVALID NR FRAMES fixed nb_frames[%d] _dwMaxImageCnt[%d]\n", 
+			
+			sprintf_s(msgErr,LEN_ERROR_MSG, 
+				"=== %s [%d]> ERROR INVALID NR FRAMES fixed nb_frames[%d] _dwMaxImageCnt[%d]", 
 				fnId, __LINE__, nb_frames, _dwMaxImageCnt);
+			printf("%s\n", msgErr);
+
 			m_sync->setExposing(pcoAcqError);
 			break;
 		}
@@ -910,18 +916,21 @@ void _pco_acq_thread_dimax(void *argin) {
 			pcoAcqStatus status;
 
 			if(m_cam->_isCameraType(Pco2k | Pco4k)){
-				status = (pcoAcqStatus) m_buffer->_xferImagMult();
-				//status = (pcoAcqStatus) m_buffer->_xferImag();
-				if(nb_frames_fixed) status = pcoAcqError;
+				if(m_pcoData->testCmdMode & TESTCMDMODE_DIMAX_XFERMULTI) {
+					status = (pcoAcqStatus) m_buffer->_xferImag();
+				} else {
+					status = (pcoAcqStatus) m_buffer->_xferImagMult();  //  <------------- default NO waitobj
+				}
 			}else{
 				if(m_pcoData->testCmdMode & TESTCMDMODE_DIMAX_XFERMULTI) {
 					status = (pcoAcqStatus) m_buffer->_xferImagMult();
-					//status = (pcoAcqStatus) m_buffer->_xferImagTest(); <---- DIMAX
 				} else {
-					status = (pcoAcqStatus) m_buffer->_xferImag();
+					status = (pcoAcqStatus) m_buffer->_xferImag(); //  <------------- default YES waitobj
 				}
 
 			}
+			
+			if(nb_frames_fixed) status = pcoAcqError;
 			m_sync->setExposing(status);
 
 		}
@@ -1019,6 +1028,7 @@ void _pco_acq_thread_edge(void *argin) {
 
 	m_sync->setAcqFrames(0);
 
+
 	pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImag();
 	//pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImagMult();
 
@@ -1030,6 +1040,8 @@ void _pco_acq_thread_edge(void *argin) {
 		//throw LIMA_HW_EXC(Error, "_pcoSet_RecordingState");
 	}
 
+	m_pcoData->traceAcqClean();
+	m_pcoData->traceAcq.fnId = fnId;
 
 	m_pcoData->msAcqXfer = msXfer = msElapsedTime(tStart);
 	printf("=== %s> EXIT xfer[%ld] (ms) status[%s]\n", 
@@ -1105,6 +1117,8 @@ void Camera::reset()
 //=========================================================================================================
 int Camera::PcoCheckError(int line, char *file, int err) {
 	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+
 
 	static char lastErrorMsg[500];
 	char *msg;
@@ -1121,10 +1135,11 @@ int Camera::PcoCheckError(int line, char *file, int err) {
 		sprintf_s(msg+lg,ERR_SIZE - lg, " [%s][%d]", file, line);
 
 		if(err & PCO_ERROR_IS_WARNING) {
-			DEB_WARNING() << "--- WARNING - IGNORED --- " << DEB_VAR1(m_pcoData->pcoErrorMsg);
+			DEB_WARNING() << fnId << ": --- WARNING - IGNORED --- " << DEB_VAR1(m_pcoData->pcoErrorMsg);
+			//DEB_ALWAYS() << fnId << ": --- WARNING - IGNORED --- " << DEB_VAR1(m_pcoData->pcoErrorMsg);
 			return 0;
 		}
-		DEB_ALWAYS() << DEB_VAR1(msg);
+		DEB_ALWAYS() << fnId << ": " << DEB_VAR1(msg);
 		return (err);
 	}
 	return (err);
@@ -1706,7 +1721,7 @@ char * Camera::_pcoSet_RecordingState(int state, int &error){
 		PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 	}
 
-	DEB_ALWAYS() <<  DEB_VAR4(error, state, wRecState_actual, wRecState_new);
+	DEB_ALWAYS() << fnId << ": " DEB_VAR4(error, state, wRecState_actual, wRecState_new);
 	return fnId;
 
 }
@@ -2025,7 +2040,10 @@ int Camera::_checkValidRoi(const Roi &roi_new, Roi &roi_fixed){
 	bool bSymX = false, bSymY = false;
 	if(_isCameraType(Dimax)){ bSymX = bSymY = true; }
 	if(_isCameraType(Edge)) { bSymY = true; }
-	if(m_pcoData->wNowADC != 1) { bSymX = true; }
+
+	int adc_working, adc_max;
+	_pco_getADC(adc_working, adc_max);
+	if(adc_working != 1) { bSymX = true; }
 
 	if(bSymY){
 		if( (diff0 = y0 - 1) != (diff1 = yMax - y1) ){
@@ -2439,31 +2457,43 @@ void Camera::msgLog(char *s) {
     //
 	// DIMAX -> 1 adc
 	//-------------------------------------------------------------------------------------------------
-void Camera::_pco_getADC(int &adc_working, int &adc_max)
+int Camera::_pco_getADC(int &adc_working, int &adc_max)
 {
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+
 	int error;
 	WORD wADCOperation;
 
 	adc_max = m_pcoData->stcPcoDescription.wNumADCsDESC; // nr of ADC in the system
 
 	error = PcoCheckError(__LINE__, __FILE__, PCO_GetADCOperation(m_handle, &wADCOperation));
-	
+	if(error)
+		wADCOperation = (WORD) 1;
+
 	adc_working = wADCOperation;
 	m_pcoData->wNowADC= wADCOperation;
+
+	return error;
 }
 
-void Camera::_pco_setADC(int adc_new, int &adc_working)
+int Camera::_pco_setADC(int adc_new, int &adc_working)
 {
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+
 	int error, adc_max;
-	WORD wADCOperation;
 
-	_pco_getADC(adc_working, adc_max);
+	error = _pco_getADC(adc_working, adc_max);
 
-	if((adc_new >=1) && (adc_new <= adc_max) && (adc_new != (int) wADCOperation) ){
+	DEB_ALWAYS() << fnId << ": " DEB_VAR2(adc_max, adc_working);
+
+	if(error) return error;
+
+	if((adc_new >=1) && (adc_new <= adc_max) && (adc_new != adc_working) ){
 		error = PcoCheckError(__LINE__, __FILE__, PCO_SetADCOperation(m_handle, (WORD) adc_new));
-		error = PcoCheckError(__LINE__, __FILE__, PCO_GetADCOperation(m_handle, &wADCOperation));
+		_pco_getADC(adc_working, adc_max);
 	}
-
-	adc_working = wADCOperation;
-	m_pcoData->wNowADC= wADCOperation;
+	m_pcoData->wNowADC = adc_working;
+	return error;
 }

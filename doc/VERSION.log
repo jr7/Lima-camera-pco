@@ -1,5 +1,28 @@
 
 
+2014/08/14 19:12:39 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-08-14 19:10:21 +0200] head[c34801d][c34801d70d429de1e167b45bdd1d548e64c55087] at [2014/08/14 19:12:39] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/14 19:12:39] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/08/14 19:12:39] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/08/14 19:12:39] $"
+
+
+319.HRTOMO> limatake 1.0e-5 500
+
+320.HRTOMO> p tango_io("id19/limapco/edge", "talk", "traceacq")
+* fnId[lima::Pco::BufferCtrlObj::_xferImag] nrEvents[4]
+* roiLima xy0[0,0] xy1[2559,2159] size[2560,2160]
+* imgSize[11059200 B] totSize[5529600000 B][5273.44 MB] xferSpeed[176.151 MB/s]
+* nrImgRequested0[0] nrImgRequested[500] nrImgAcquired[500] nrImgRecorded[0] maxImgCount[0]
+* msRecordLoop[0] msRecord[0] endRecord[2014/08/14 19:29:53]
+* msXfer[29937] endXfer[2014/08/14 19:29:48]
+* msImgCoc[59.6] fps[16.8] msTout[0] msTotal[0]
+* msExposure[0] msDelay[0]
+
+
+321.HRTOMO>         
+
+
 2014/08/14 19:05:17 ==========================================
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-08-13 17:45:09 +0200] head[f01ad1f][f01ad1f9f36714855a5e8a6c9221866ad00e2f6c] at [2014/08/14 19:05:16] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/14 19:05:16] $"

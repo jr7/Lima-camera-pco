@@ -504,11 +504,12 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				return output;
 			}
 
-
 			ptr += sprintf_s(ptr, ptrMax - ptr, 
-				"* fnId[%s] nrEvents[%d]\n",
+				"* fnId[%s] nrEvents[%d]\n"
+				"* fnIdXfer[%s]\n",
 				m_pcoData->traceAcq.fnId,
-				PCO_BUFFER_NREVENTS);
+				PCO_BUFFER_NREVENTS,
+				m_pcoData->traceAcq.fnIdXfer);
 
 			Point top_left = m_RoiLima.getTopLeft();
 			Point bot_right = m_RoiLima.getBottomRight();
@@ -765,7 +766,8 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				_PRINT_DBG( DBG_XFERMULT ) ;
 				_PRINT_DBG( DBG_XFERMULT1 ) ;
 				_PRINT_DBG( DBG_ASSIGN_BUFF ) ;
-				_PRINT_DBG( DBG_STATUS ) ;
+				_PRINT_DBG( DBG_DUMMY_IMG ) ;
+				_PRINT_DBG( DBG_WAITOBJ ) ;
 				_PRINT_DBG( DBG_ROI ) ;
 			}
 
@@ -777,16 +779,20 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		key = keys[ikey] = "ADC";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "(RW) ADC working ADC [<new value>]";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
+			int error;
+			char *valid;
 			int adc_new, adc_working, adc_max;
 
-			_pco_getADC(adc_working, adc_max);
-
-			ptr += sprintf_s(ptr, ptrMax - ptr, "working[%d] max[%d]\n", adc_working, adc_max);
+			error = _pco_getADC(adc_working, adc_max);
+			valid = error ? "NO" : "YES";
+			ptr += sprintf_s(ptr, ptrMax - ptr, "working[%d] max[%d] config[%s]\n", adc_working, adc_max, valid);
+			
+			if(error) return output;
 
 			if((tokNr >= 1)){
 				adc_new = atoi(tok[1]);
-				_pco_setADC(adc_new, adc_working);
-				ptr += sprintf_s(ptr, ptrMax - ptr, "working[%d] requested[%d]\n", adc_working, adc_new);
+				error = _pco_setADC(adc_new, adc_working);
+				ptr += sprintf_s(ptr, ptrMax - ptr, "working[%d] requested[%d] error[0x%x]\n", adc_working, adc_new, error);
 			}
 			
 

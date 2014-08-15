@@ -68,7 +68,6 @@ void RoiCtrlObj::checkRoi(const Roi& set_roi, Roi& hw_roi)
 
 }
 
-#define LEN_ERROR_MSG (512 - 1)
 void RoiCtrlObj::setRoi(const Roi& set_roi)
 {
     DEB_MEMBER_FUNCT();

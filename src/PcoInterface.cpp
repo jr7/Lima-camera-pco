@@ -96,10 +96,10 @@ void Interface::getCapList(CapList &cap_list) const
 //=========================================================================================================
 void Interface::reset(ResetLevel reset_level)
 {
-	// DONE
   DEB_MEMBER_FUNCT();
-  DEB_PARAM() << DEB_VAR1(reset_level);
-  DEB_ALWAYS() << DEB_VAR1(reset_level);
+  DEF_FNID;
+
+  DEB_ALWAYS() << fnId << ": " DEB_VAR1(reset_level);
 
   m_sync->stopAcq();
   m_cam->reset();
@@ -133,7 +133,9 @@ void Interface::stopAcq()
 {
 	// DONE
   DEB_MEMBER_FUNCT();
-  DEB_ALWAYS() << "\nInterface::stopAcq: STOP";
+  DEF_FNID;
+
+  DEB_ALWAYS() << fnId << ": STOP";
   m_sync->stopAcq();
 }
 
