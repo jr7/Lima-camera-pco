@@ -436,7 +436,7 @@ void SyncCtrlObj::startAcq()
 //=========================================================================================================
 void SyncCtrlObj::stopAcq(bool clearQueue)
 {
-	int error;
+	//int error;
 	int _stopRequestIn, _stopRequestOut, _nrStop;
 	bool _started;
 
@@ -454,8 +454,8 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 			case stopNone:
 				m_buffer->_setRequestStop(stopRequest);
 
-				m_cam->_pcoSet_RecordingState(0, error);
-				PCO_THROW_OR_TRACE(error, "Try to stop Acq") ;
+				//m_cam->_pcoSet_RecordingState(0, error);
+				//PCO_THROW_OR_TRACE(error, "Try to stop Acq") ;
 				break;
 
 			//case stopProcessing:

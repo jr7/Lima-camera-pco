@@ -484,13 +484,13 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		key = keys[ikey] = "lastImgRecorded";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "last image recorded";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
+			DWORD lastImgRecorded = m_pcoData->traceAcq.nrImgRecorded;
 
 			if(!(_isCameraType(Dimax | Pco2k | Pco4k))) {
-				ptr += sprintf_s(ptr, ptrMax - ptr, "* ERROR - only for DIMAX / 2K / 4K");
-				return output;
+				lastImgRecorded = 0;
 			}
 
-			ptr += sprintf_s(ptr, ptrMax - ptr, "%ld\n",	m_pcoData->traceAcq.nrImgRecorded);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "%ld\n", lastImgRecorded);
 			return output;
 		}
 

@@ -36,7 +36,7 @@
 
 #define BUFF_VERSION 2048
 
-#define MAX_NR_STOP 5
+#define MAX_NR_STOP 0
 
 //--------------------------------------- debug const for talk
 #define DBG_BUFF           0x00000001
@@ -272,7 +272,7 @@ enum enumRoiError {
 
 
 enum enumPcoStorageMode {
-	Fifo = 1, RecSeq, RecRing,
+	Fifo = 1, RecSeq, RecRing, RecInvalid
 };
 
 
@@ -383,6 +383,7 @@ namespace lima
 
 		char *_pcoSet_Trig_Acq_Mode(int &error);
 		char *_pcoSet_Storage_subRecord_Mode(enumPcoStorageMode, int &error);
+		int _pcoGet_Storage_subRecord_Mode();
 		char *_pcoSet_Exposure_Delay_Time(int &error, int ph);
 		char *_pcoSet_Cameralink_GigE_Parameters(int &error);
 		char *_pcoGet_Camera_Type(int &error);
