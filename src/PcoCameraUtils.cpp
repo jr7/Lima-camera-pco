@@ -498,6 +498,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		key = keys[ikey] = "traceAcq";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "(R) trace details (not all records are filled!)";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
+			time_t _timet;
 
 			if(0 && !(_isCameraType(Dimax | Pco2k | Pco4k))) {
 				ptr += sprintf_s(ptr, ptrMax - ptr, "* ERROR - only for DIMAX / 2K");
@@ -536,11 +537,12 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				m_pcoData->traceAcq.nrImgRecorded,
 				m_pcoData->traceAcq.maxImgCount);
 
+			_timet = m_pcoData->traceAcq.endRecordTimestamp;
 			ptr += sprintf_s(ptr, ptrMax - ptr, 
 				"* msRecordLoop[%ld] msRecord[%ld] endRecord[%s]\n",
 				m_pcoData->traceAcq.msRecordLoop,
 				m_pcoData->traceAcq.msRecord,
-				getTimestamp(Iso, m_pcoData->traceAcq.endRecordTimestamp));
+				_timet ? getTimestamp(Iso, _timet) : "");
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, 
 				"* msXfer[%ld] endXfer[%s]\n",
