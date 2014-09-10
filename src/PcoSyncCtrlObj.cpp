@@ -391,6 +391,8 @@ void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 	DEF_FNID;
 	// DONE
 
+	
+
 	m_pcoData->step_exp_time = (m_pcoData->stcPcoDescription.dwMinExposureStepDESC) * 1e-9 ;	//step exposure time in ns
 	
 	m_pcoData->min_exp_time = (m_pcoData->stcPcoDescription.dwMinExposureDESC) * 1e-9 ;	//Minimum exposure time in ns

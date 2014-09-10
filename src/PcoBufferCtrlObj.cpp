@@ -298,7 +298,7 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast,
 
  	myBufferLen = m_ImageBufferSize = dwLen;
 
-
+	DEB_ALWAYS() << "_assignImage2Buffer: " << DEB_VAR3(myBufferLen, m_ImageBufferSize, dwLen);
 	FrameDim dim;
 	getFrameDim(dim);
 	int dimSize = dim.getMemSize();
@@ -324,6 +324,8 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast,
 	}
 
 	m_allocBuff.limaAllocBufferPtr[bufIdx] = (WORD *) myBuffer; 
+
+	DEB_ALWAYS() << "_assignImage2Buffer: " << DEB_VAR1(myBufferLen);
 	m_allocBuff.dwLimaAllocBufferSize[bufIdx] = myBufferLen; 
 
 
@@ -524,6 +526,18 @@ _RETRY:
 		void *ptrSrc = (void *) m_allocBuff.pcoAllocBufferPtr[bufIdx];
 		size_t sizeLima = m_allocBuff.dwLimaAllocBufferSize[bufIdx];
 		size_t size = m_allocBuff.dwPcoAllocBufferSize[bufIdx];
+
+		WORD wArmWidth, wArmHeight;
+		unsigned int bytesPerPixel;
+
+		m_cam->getArmWidthHeight(wArmWidth, wArmHeight);
+		m_cam->getBytesPerPixel(bytesPerPixel);
+   
+		DWORD dwLen = wArmWidth * wArmHeight * bytesPerPixel;
+
+		DEB_ALWAYS() << "xferImag: " << DEB_VAR6(size, sizeLima, dwLen, wArmWidth, wArmHeight, bytesPerPixel);
+
+		size = sizeLima;
 		SHORT sBufNr = 	m_allocBuff.pcoAllocBufferNr[bufIdx];
 
 		if(m_cam->_getDebug(DBG_BUFF)) {DEB_ALWAYS() << "========================================FOUND " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);}
@@ -549,6 +563,8 @@ _RETRY:
 			memset(ptrDest, val, size);
 			DEB_ALWAYS() << "===== dummy image!!! " << DEB_VAR1(val);
 		} else {
+		    DEB_ALWAYS() << "xferImag: " << DEB_VAR6(size, sizeLima, dwLen, wArmWidth, wArmHeight, bytesPerPixel);
+			DEB_ALWAYS() << "xferImag - memcpy " << DEB_VAR3(ptrDest, ptrSrc, size);
 			memcpy(ptrDest, ptrSrc, size);
 		}		
 		

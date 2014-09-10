@@ -38,6 +38,7 @@
 #include <time.h>
 
 #include "Exceptions.h"
+#include "HwSyncCtrlObj.h"
 
 #include "PcoCamera.h"
 #include "PcoSyncCtrlObj.h"
@@ -244,6 +245,10 @@ Camera::Camera(const char *camPar) :
 //=========================================================================================================
 void Camera::_init(){
 	DEB_CONSTRUCTOR();
+	DEF_FNID;
+
+	DEB_ALWAYS() << fnId << " [entry]";
+
 	char msg[MSG_SIZE + 1];
 	int error=0;
 	char *errMsg;
@@ -326,7 +331,7 @@ void Camera::_init(){
 
   DEB_TRACE() << m_log;
   DEB_TRACE() << "END OF CAMERA";
-  DEB_ALWAYS() << "END of init";
+	DEB_ALWAYS() << fnId << " [exit]";
 
 }
 
@@ -1164,7 +1169,7 @@ void _pco_acq_thread_ringBuffer(void *argin) {
 void Camera::reset()
 {
   DEB_MEMBER_FUNCT();
-  //@todo maybe something to do!
+  _init();
 }
 
 
@@ -1671,12 +1676,19 @@ char *Camera::_pcoGet_Camera_Type(int &error){
 	msg = "PCO_GetCameraDescription";
 	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 
+	// callback to update in lima the valid_ranges from the last stcPcoDescription read
+	if(m_sync) {
+		HwSyncCtrlObj::ValidRangesType valid_ranges;
+		m_sync->getValidRanges(valid_ranges);		// from stcPcoDescription
+		m_sync->validRangesChanged(valid_ranges);	// callback
+		DEB_ALWAYS() << fnId << ": callback - new valid_ranges: " << DEB_VAR1(valid_ranges);
+	}
+	
 	m_pcoData->dwPixelRateMax = 0;
 	for(int i=0; i<4; i++) {
 		if(m_pcoData->dwPixelRateMax < m_pcoData->stcPcoDescription.dwPixelRateDESC[i])
 					m_pcoData->dwPixelRateMax = m_pcoData->stcPcoDescription.dwPixelRateDESC[i];
 	}	
-	
 
 	m_pcoData->bMetaDataAllowed = !!(m_pcoData->stcPcoDescription.dwGeneralCapsDESC1 & GENERALCAPS1_METADATA) ;
 
@@ -1801,7 +1813,7 @@ char * Camera::_pcoSet_RecordingState(int state, int &error){
 		PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 	}
 
-	DEB_ALWAYS() << fnId << ": " DEB_VAR4(error, state, wRecState_actual, wRecState_new);
+	DEB_ALWAYS() << fnId << ": " << DEB_VAR4(error, state, wRecState_actual, wRecState_new);
 	return fnId;
 
 }
