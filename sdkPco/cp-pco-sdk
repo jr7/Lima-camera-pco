@@ -5,9 +5,11 @@
 
 FROM=/segfs/bliss/projects/LIMA/package/WIN32/PCO/SDK/pco.sdk_116/pco.sdk.116
 
-TO=/segfs/dserver/classes/ccd/pco_rh/Lima/camera/pco/sdkPco
+#TO=/segfs/dserver/classes/ccd/pco_rh/Lima/camera/pco/sdkPco
+TO=/tmp_14_days/rhoms1/sdkPco
 
 
+#--------------------------------------------------------
 cpfile() {
   echo
   echo "------------- $1"
@@ -21,6 +23,7 @@ cpfile() {
 
 }
 
+#--------------------------------------------------------
 cpdir() {
   echo
   echo "------------- $1"
@@ -32,8 +35,19 @@ cpdir() {
 
 }
 
+#--------------------------------------------------------
+mkdir -p ${TO}/bin
+mkdir -p ${TO}/lib
+mkdir -p ${TO}/include
+mkdir -p ${TO}/bin64
+mkdir -p ${TO}/lib64
+
 cpfile bin/SC2_Cam.dll
 cpfile bin/sc2_cl_me4.dll
 cpfile lib/SC2_Cam.lib
+
+cpfile bin64/SC2_Cam.dll
+cpfile bin64/sc2_cl_me4.dll
+cpfile lib64/SC2_Cam.lib
 
 cpdir include
