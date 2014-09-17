@@ -140,9 +140,9 @@ char *_xlat_date(char *s1, char *s2, char *s3) {
 	char *ptrMax = buff + LEN_BUFF_DATE;
 
 	ptr += sprintf_s(ptr, ptrMax - ptr, "$Id: comp[");
-	ptr += __xlat_date(s1, *ptr, ptrMax - ptr);
+	ptr += __xlat_date(s1, *ptr, (int) (ptrMax - ptr));
 	ptr += sprintf_s(ptr, ptrMax - ptr, "] file[");
-	ptr += __xlat_date(s2, *ptr, ptrMax - ptr);
+	ptr += __xlat_date(s2, *ptr, (int) (ptrMax - ptr));
 	ptr += sprintf_s(ptr, ptrMax - ptr, "] [%s] $", s3);
 	return buff;
 	
@@ -206,7 +206,7 @@ void stcPcoData::traceAcqClean(){
 void stcPcoData::traceMsg(char *s){
 	char *ptr = traceAcq.msg;
 	char *dt = getTimestamp(IsoHMS);
-	int lg = strlen(ptr);
+	size_t lg = strlen(ptr);
 	ptr += lg;
 	snprintf(ptr, LEN_TRACEACQ_MSG - lg,"%s> %s", dt, s);
 }
@@ -913,7 +913,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		keys_desc[ikey++] = "(R) log of last cmds executed ";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 
-			ptr += m_msgLog->dump(ptr, ptrMax - ptr, 1);
+			ptr += m_msgLog->dump(ptr, (int)(ptrMax - ptr), 1);
 			
 			return output;
 		}
@@ -1135,16 +1135,16 @@ const char *hex_dump_line(void *buff, size_t len, size_t *nr, WORD *offset) {
 	*nr = (len < BYTES_PER_LINE) ? len : BYTES_PER_LINE;
 
 	s = word_to_hex(s, *offset);
-	*offset += *nr;
+	*offset += (WORD) *nr;
 	*s = ':';
 	s = line_buff + OFFSET_COL_HEX1;
 
 	if(*nr <= BYTES_PER_LINE / 2) {
-		nr1 = *nr;
+		nr1 = (int) *nr;
 		nr2 = -1;
 	} else {
 		nr1 = BYTES_PER_LINE / 2;
-		nr2 = *nr - nr1;
+		nr2 = ((int) *nr) - nr1;
 	}
 
 	for(i = 0; i < nr1; i++) {
@@ -1295,7 +1295,7 @@ int ringLog::dump(char *s, int lgMax, bool direction) {
 
 				err = localtime_s( &today, &ltime );
 
-                lg += strftime(s + lg, lgMax - lg, fmt, &today);
+                lg += (int) strftime(s + lg, lgMax - lg, fmt, &today);
                 lg += sprintf_s(s + lg, lgMax - lg, "> %s\n", ptr->str);
         }
         
