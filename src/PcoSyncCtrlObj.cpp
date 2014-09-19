@@ -512,6 +512,10 @@ DEB_TRACE() << DEB_VAR3(_started, m_buffer, m_exposing);
 			  status.det = DetExposure;
 			  break;
 
+			case pcoAcqStop: 
+			case pcoAcqTransferStop: 
+			case pcoAcqIdle: 
+			case pcoAcqTransferEnd: 
 			case pcoAcqRecordEnd:  
 			case pcoAcqTransferStart: 
 			  status.acq = AcqRunning;
@@ -525,16 +529,6 @@ DEB_TRACE() << DEB_VAR3(_started, m_buffer, m_exposing);
 			case pcoAcqPcoError:
 			  status.acq = AcqFault;
 			  status.det = DetFault;
-			  break;
-
-
-			case pcoAcqStop: 
-			case pcoAcqTransferStop: 
-			case pcoAcqIdle: 
-			case pcoAcqTransferEnd: 
-			  status.acq = AcqRunning;
-		      //status.acq = AcqReady;
-			  status.det = DetIdle;
 			  break;
 
 
