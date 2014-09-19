@@ -420,9 +420,13 @@ void SyncCtrlObj::startAcq()
 {
   DEB_MEMBER_FUNCT();
   
+  bool _started = getStarted();
+
   m_cam->msgLog("startAcq");
 
-  if(!getStarted())
+  DEB_ALWAYS() << ": SyncCtrlObj::startAcq() " << DEB_VAR1(_started);
+
+  if(!_started)
     {
   
 		if(m_buffer) {
@@ -447,6 +451,7 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
   DEF_FNID;
 
   m_cam->msgLog("stopAcq");
+  DEB_ALWAYS() << ": SyncCtrlObj::stopAcq()";
 
   _stopRequestIn = m_buffer->_getRequestStop(_nrStop);
 
@@ -527,7 +532,8 @@ DEB_TRACE() << DEB_VAR3(_started, m_buffer, m_exposing);
 			case pcoAcqTransferStop: 
 			case pcoAcqIdle: 
 			case pcoAcqTransferEnd: 
-		      status.acq = AcqReady;
+			  status.acq = AcqRunning;
+		      //status.acq = AcqReady;
 			  status.det = DetIdle;
 			  break;
 
