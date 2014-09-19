@@ -1190,7 +1190,7 @@ int Camera::PcoCheckError(int line, char *file, int err) {
 
 	static char lastErrorMsg[500];
 	char *msg;
-	int lg;
+	size_t lg;
 
 	if (err != 0) {
 		DWORD dwErr = err;
@@ -1219,7 +1219,7 @@ int Camera::PcoCheckError(int line, char *file, int err) {
 char* Camera::_PcoCheckError(int line, char *file, int err, int &error) {
 	static char lastErrorMsg[ERR_SIZE];
 	char *msg;
-	int lg;
+	size_t lg;
 
 	error = m_pcoData->pcoError = err;
 	msg = m_pcoData->pcoErrorMsg;
