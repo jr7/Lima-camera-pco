@@ -379,6 +379,25 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			return output;
 		}
 
+
+		key = keys[ikey] = "timingInfo";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) timing information (exp, trig delay, ...)";
+		if(_stricmp(cmd, key) == 0){
+			double frameTime, expTime, sysDelay, sysJitter, trigDelay;
+
+			_pco_GetImageTiming(frameTime, expTime, sysDelay, sysJitter, trigDelay );
+
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "frameTime %g  ",  frameTime);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "expTime %g  ",  expTime);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "sysDelay %g  ",  sysDelay);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "sysJitter %g  ",  sysJitter);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "trigDelay %g  ",  trigDelay);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "\n");
+
+			return output;
+		}
+
 		key = keys[ikey] = "cocRunTime";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "(R) Camera Operation Code runtime covers the delay, exposure and readout time";
 		if(_stricmp(cmd, key) == 0){
@@ -494,6 +513,15 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			return output;
 		}
 
+		key = keys[ikey] = "lastImgAcquired";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "last image acquired";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
+			DWORD lastImgAcquired = m_pcoData->traceAcq.nrImgAcquired;
+
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "%ld\n", lastImgAcquired);
+			return output;
+		}
 
 		key = keys[ikey] = "traceAcq";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "(R) trace details (not all records are filled!)";     //----------------------------------------------------------------
