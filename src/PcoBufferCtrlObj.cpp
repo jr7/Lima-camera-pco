@@ -29,6 +29,7 @@
 #include <sys/timeb.h>
 #include <time.h>
 
+#undef DEBUG_XFER_IMAG
 #define COMPILE_WAIT_CONDITION
 #undef COMPILEIT
 #define USING_PCO_ALLOCATED_BUFFERS
@@ -488,19 +489,16 @@ int BufferCtrlObj::_xferImag()
 			}
 	}
 
- 	// Edge cam must be started just after assign buff to avoid lost of img
-	if(m_cam->_isCameraType(Edge)) {
-			m_cam->_pcoSet_RecordingState(1, error);
-	}
-    
-	
 	WORD wArmWidth, wArmHeight;
 	unsigned int bytesPerPixel;
 	m_cam->getArmWidthHeight(wArmWidth, wArmHeight);
 	m_cam->getBytesPerPixel(bytesPerPixel);
 	DWORD dwLen = wArmWidth * wArmHeight * bytesPerPixel;
 
-	
+ 	// Edge cam must be started just after assign buff to avoid lost of img
+	if(m_cam->_isCameraType(Edge)) {
+			m_cam->_pcoSet_RecordingState(1, error);
+	}
 
 
 	// --------------- loop - process the N frames
@@ -522,16 +520,19 @@ _RETRY:
 			// lima frame nr is from 0 .... N-1        
 			lima_buffer_nb = dwFrameIdx -1; // this frame was already readout to the buffer
           
+#ifdef DEBUG_XFER_IMAG
 			if(m_cam->_getDebug(DBG_WAITOBJ)){
 				sprintf_s(msg, RING_LOG_BUFFER_SIZE, "... BUFFER[%d] lima[%d] frame[%d]", bufIdx, lima_buffer_nb, dwFrameIdx);
 				m_cam->m_tmpLog->add(msg);
 			}
+#endif
 			m_pcoData->traceAcq.nrImgAcquired = dwFrameIdx;
 
+#ifdef DEBUG_XFER_IMAG
 			if(m_cam->_getDebug(DBG_BUFF)) {	
 				DEB_ALWAYS() << "========================================FOUND " << DEB_VAR3(lima_buffer_nb, dwFrameIdx, bufIdx); 
 			}
-
+#endif
 
 #ifdef USING_PCO_ALLOCATED_BUFFERS
 		// we are using the PCO allocated buffer, so this buffer must be copied to the lima buffer
@@ -540,16 +541,20 @@ _RETRY:
 		size_t sizeLima = m_allocBuff.dwLimaAllocBufferSize[bufIdx];
 		size_t size = m_allocBuff.dwPcoAllocBufferSize[bufIdx];
 
+#ifdef DEBUG_XFER_IMAG
 		if(m_cam->_getDebug(DBG_XFER2LIMA)) {
 			DEB_ALWAYS() << "xferImag: " << DEB_VAR6(size, sizeLima, dwLen, wArmWidth, wArmHeight, bytesPerPixel);
 		}
+#endif
 
 		size = sizeLima;
 		SHORT sBufNr = 	m_allocBuff.pcoAllocBufferNr[bufIdx];
 
+#ifdef DEBUG_XFER_IMAG
 		if(m_cam->_getDebug(DBG_BUFF)) {
 			DEB_ALWAYS() << "========================================FOUND " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);
 		}
+#endif
 
 		DWORD dwStatusDll, dwStatusDrv;
 		if((_getRequestStop(_nrStop) == stopRequest) && (_nrStop > MAX_NR_STOP)) {goto _EXIT_STOP;}
@@ -564,26 +569,33 @@ _RETRY:
 				m_cam->_PcoCheckError(__LINE__, __FILE__, dwStatusDrv, error));
 		}
 		
+#ifdef DEBUG_XFER_IMAG
 		if(m_cam->_getDebug(DBG_BUFF)) {
 			DEB_ALWAYS() << "===== " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);
 		}
-		
+#endif
+
 		if(m_cam->_getDebug(DBG_DUMMY_IMG)){
 			int val = dwFrameIdx & 0xf;
 			memset(ptrDest, val, size);
 			DEB_ALWAYS() << "===== dummy image!!! " << DEB_VAR1(val);
 		} else {
+
+#ifdef DEBUG_XFER_IMAG
 			if(m_cam->_getDebug(DBG_XFER_IMG)) {
 				DEB_ALWAYS() << "xferImag: " << DEB_VAR6(size, sizeLima, dwLen, wArmWidth, wArmHeight, bytesPerPixel);
 				DEB_ALWAYS() << "xferImag - memcpy " << DEB_VAR3(ptrDest, ptrSrc, size);
 			}
+#endif
 			memcpy(ptrDest, ptrSrc, size);
 		}		
 		
 		
+#ifdef DEBUG_XFER_IMAG
 		if(m_cam->_getDebug(DBG_XFER2LIMA)) {
 			DEB_ALWAYS() << "===== after xfer pco buffer to lima " << DEB_VAR6(ptrDest, ptrSrc, size, sizeLima, sBufNr, dwFrameIdx);
 		}
+#endif
 
 #endif
 
@@ -595,18 +607,24 @@ _RETRY:
         //----- the image dwFrameIdx is already in the buffer -> callback!
 		if((_getRequestStop(_nrStop) == stopRequest) && (_nrStop > MAX_NR_STOP)) {goto _EXIT_STOP;}
 		if(dwFrameFirst2assign <= dwRequestedFrames) {
+
+#ifdef DEBUG_XFER_IMAG
 			if(m_cam->_getDebug(DBG_WAITOBJ)){
 				sprintf_s(msg, RING_LOG_BUFFER_SIZE, "... ASSIGN BUFFER[%d] frame[%d]", bufIdx, dwFrameFirst2assign);
 				m_cam->m_tmpLog->add(msg);
 			}
+#endif
 			if(error = _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx, live_mode)) {
 				return pcoAcqPcoError;
 			}
         }
+
+#ifdef DEBUG_XFER_IMAG
 		if(m_cam->_getDebug(DBG_BUFF)) {
 			DEB_ALWAYS() << "===== " << DEB_VAR5(ptrDest, ptrSrc, size, sizeLima, sBufNr);
 		}
-        goto _WHILE_CONTINUE;
+#endif
+		goto _WHILE_CONTINUE;
       }
     } // for(bufIdx = 0; bufIdx < PCO_BUFFER_NREVENTS; bufIdx++)
 
