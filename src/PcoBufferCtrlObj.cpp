@@ -563,8 +563,10 @@ _RETRY:
 			memset(ptrDest, val, size);
 			DEB_ALWAYS() << "===== dummy image!!! " << DEB_VAR1(val);
 		} else {
-		    DEB_ALWAYS() << "xferImag: " << DEB_VAR6(size, sizeLima, dwLen, wArmWidth, wArmHeight, bytesPerPixel);
-			DEB_ALWAYS() << "xferImag - memcpy " << DEB_VAR3(ptrDest, ptrSrc, size);
+			if(m_cam->_getDebug(DBG_XFER_IMG)) {
+				DEB_ALWAYS() << "xferImag: " << DEB_VAR6(size, sizeLima, dwLen, wArmWidth, wArmHeight, bytesPerPixel);
+				DEB_ALWAYS() << "xferImag - memcpy " << DEB_VAR3(ptrDest, ptrSrc, size);
+			}
 			memcpy(ptrDest, ptrSrc, size);
 		}		
 		
@@ -604,7 +606,7 @@ _RETRY_WAIT:
 
     // The return value indicates which event is signaled
 
-#if PCO_BUFFER_NREVENTS != 2
+#if PCO_BUFFER_NREVENTS != 4
   #pragma message ("============================================== ABORT - wrong nr of WAIT_OBJECT ")
     DUMMY_FOR_ABORT = 5;
 #endif

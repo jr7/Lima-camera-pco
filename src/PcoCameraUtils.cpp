@@ -770,6 +770,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				_PRINT_DBG( DBG_ASSIGN_BUFF ) ;
 				_PRINT_DBG( DBG_DUMMY_IMG ) ;
 				_PRINT_DBG( DBG_WAITOBJ ) ;
+				_PRINT_DBG( DBG_XFER_IMG ) ;
 				_PRINT_DBG( DBG_ROI ) ;
 			}
 

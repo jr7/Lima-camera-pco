@@ -51,6 +51,7 @@
 
 #define DBG_DUMMY_IMG      0x00000100
 #define DBG_WAITOBJ		   0x00000200
+#define DBG_XFER_IMG       0x00000400
 
 #define DBG_ROI            0x00001000
 //---------------------------------------
@@ -79,7 +80,7 @@
 
 #define PCO_CL_BAUDRATE_115K2	115200
 
-#define PCO_BUFFER_NREVENTS 2
+#define PCO_BUFFER_NREVENTS 4
 struct stcXlatCode2Str {
 		int code;
 		char *str;
