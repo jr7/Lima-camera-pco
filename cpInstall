@@ -1,0 +1,18 @@
+#!/bin/sh
+
+
+REMDIR="/segfs/bliss/projects/LIMA/build/depot/win32_vc9/pco"
+REMHOST="blissadm@bestia"
+LOCDIR="/c/blissadm/git/Lima/install"
+TMPDIR="/t/rhoms1"
+
+DT=`date +"%Y-%m-%d_%H%M%S"`
+INSTALL="install-${DT}"
+
+scp -r ${LOCDIR}/ ${REMHOST}:${REMDIR}/${INSTALL}
+
+cp -r ${LOCDIR}/ ${TMPDIR}/${INSTALL}
+
+
+
+
