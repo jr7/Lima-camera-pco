@@ -211,7 +211,8 @@ Camera::Camera(const char *camPar) :
 	m_cam_connected(false),
 	m_acq_frame_nb(1),
 	m_sync(NULL),
-	m_buffer(NULL)
+	m_buffer(NULL),
+	m_handle(NULL)
 {
 	DEF_FNID;
 
@@ -259,9 +260,16 @@ void Camera::_init(){
 	sprintf_s(msg, MSG_SIZE, "*** Pco log %s\n", getTimestamp(Iso));
 	m_log.append(msg);
 
-		// --- Open Camera
+
+		// --- Open Camera - close before if it is open
+	if(m_handle) {
+		error = PcoCheckError(__LINE__, __FILE__, PCO_CloseCamera(m_handle));
+		PCO_THROW_OR_TRACE(error, "_init(): PCO_CloseCamera - closing opened cam") ;
+		m_handle = NULL;
+	}
+
 	error = PcoCheckError(__LINE__, __FILE__, PCO_OpenCamera(&m_handle, 0));
-	PCO_THROW_OR_TRACE(error, "PCO_OpenCamera") ;
+	PCO_THROW_OR_TRACE(error, "_init(): PCO_OpenCamera") ;
 
 	errMsg = _pcoGet_Camera_Type(error);
 	PCO_THROW_OR_TRACE(error, errMsg) ;
@@ -1169,7 +1177,7 @@ void _pco_acq_thread_ringBuffer(void *argin) {
 void Camera::reset()
 {
   DEB_MEMBER_FUNCT();
-  _init();
+  //_init();
 }
 
 
