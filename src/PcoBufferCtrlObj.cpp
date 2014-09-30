@@ -299,7 +299,10 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast,
 
  	myBufferLen = m_ImageBufferSize = dwLen;
 
+#ifdef DEBUG_XFER_IMAG
 	DEB_ALWAYS() << "_assignImage2Buffer: " << DEB_VAR3(myBufferLen, m_ImageBufferSize, dwLen);
+#endif
+
 	FrameDim dim;
 	getFrameDim(dim);
 	int dimSize = dim.getMemSize();
@@ -326,7 +329,9 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast,
 
 	m_allocBuff.limaAllocBufferPtr[bufIdx] = (WORD *) myBuffer; 
 
+#ifdef DEBUG_XFER_IMAG
 	DEB_ALWAYS() << "_assignImage2Buffer: " << DEB_VAR1(myBufferLen);
+#endif
 	m_allocBuff.dwLimaAllocBufferSize[bufIdx] = myBufferLen; 
 
 

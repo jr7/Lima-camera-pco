@@ -594,7 +594,7 @@ void Camera::startAcq()
 		PCO_THROW_OR_TRACE(error, msg) ;
 	}
 
-	if(_isCameraType(Pco2k | Pco2k)) {
+	if(_isCameraType(Pco4k | Pco2k)) {
 			// live video requested frames = 0
 		enumPcoStorageMode mode = Fifo;
 		DEB_ALWAYS() << "PCO2K / 4K: " << DEB_VAR1(mode);
