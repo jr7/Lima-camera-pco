@@ -263,6 +263,7 @@ void Camera::_init(){
 
 		// --- Open Camera - close before if it is open
 	if(m_handle) {
+		DEB_ALWAYS() << fnId << " closing opened camera ....";
 		error = PcoCheckError(__LINE__, __FILE__, PCO_CloseCamera(m_handle));
 		PCO_THROW_OR_TRACE(error, "_init(): PCO_CloseCamera - closing opened cam") ;
 		m_handle = NULL;
@@ -2383,7 +2384,7 @@ bool Camera::_isCameraType(int tp){
 
 //=================================================================================================
 //=================================================================================================
-void Camera::_pco_GetPixelRate(DWORD &pixRate, int &error){
+void Camera::_pco_GetPixelRate(DWORD &pixRate, DWORD &pixRateNext, int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 #if 0
@@ -2398,6 +2399,9 @@ void Camera::_pco_GetPixelRate(DWORD &pixRate, int &error){
 	    PCO_THROW_OR_TRACE(error, "PCO_GetPixelRate") ;
 
 		pixRate = m_pcoData->dwPixelRate;
+
+		pixRateNext = ((m_pcoData->dwPixelRateRequested != 0) && (pixRate != m_pcoData->dwPixelRateRequested)) ?
+			m_pcoData->dwPixelRateRequested : pixRate;
 }
 
 

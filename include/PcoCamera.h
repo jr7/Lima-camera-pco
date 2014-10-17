@@ -389,7 +389,7 @@ namespace lima
 		char *_pcoSet_Cameralink_GigE_Parameters(int &error);
 		char *_pcoGet_Camera_Type(int &error);
 		char *_pcoGet_TemperatureInfo(int &error);
-		void _pco_GetPixelRate(DWORD &pixRate, int &error);
+		void _pco_GetPixelRate(DWORD &pixRate, DWORD &pixRateNext, int &error);
 		void _presetPixelRate(DWORD &pixRate, int &error);
 
 		//char *_pco_SetCameraSetup(DWORD dwSetup, int &error);

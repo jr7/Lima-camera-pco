@@ -647,7 +647,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		key = keys[ikey] = "pixelRate";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "(RW) pixelrate (Hz) for reading images from the image sensor";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
-			DWORD pixRate; int error;
+			DWORD pixRate, pixRateNext; int error;
 
 			if(_isCameraType(Dimax) ) tokNr = 0;
 			
@@ -657,8 +657,8 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			}
 			
 			if(tokNr == 0) {
-				_pco_GetPixelRate(pixRate, error);
-				ptr += sprintf_s(ptr, ptrMax - ptr, "%ld", m_pcoData->dwPixelRate);
+				_pco_GetPixelRate(pixRate, pixRateNext, error);
+				ptr += sprintf_s(ptr, ptrMax - ptr, "%ld", pixRateNext);
 				return output;
 			}
 
@@ -677,10 +677,10 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		key = keys[ikey] = "pixelRateInfo";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "(R) pixelrate (Hz) for reading images from the image sensor (actual & valid values)";
 		if(_stricmp(cmd, key) == 0){
-			DWORD dwPixRate; int error, i;
+			DWORD dwPixRate, dwPixRateNext ; int error, i;
 
-		    _pco_GetPixelRate(dwPixRate, error);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "actualRate(Hz):  %ld  validRates:", dwPixRate);
+		    _pco_GetPixelRate(dwPixRate, dwPixRateNext, error);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "actualRate(Hz):  %ld  (requested &ld)  validRates:", dwPixRate, dwPixRateNext);
 
 			for(i=0; i<4; i++) {
 				dwPixRate = m_pcoData->stcPcoDescription.dwPixelRateDESC[i];
