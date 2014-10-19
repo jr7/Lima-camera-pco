@@ -254,7 +254,7 @@ void Camera::_init(){
 	int error=0;
 	char *errMsg;
 
-	m_config = FALSE;
+	
 
 	m_log.clear();
 	sprintf_s(msg, MSG_SIZE, "*** Pco log %s\n", getTimestamp(Iso));
@@ -263,7 +263,7 @@ void Camera::_init(){
 
 		// --- Open Camera - close before if it is open
 	if(m_handle) {
-		DEB_ALWAYS() << fnId << " closing opened camera ....";
+		DEB_ALWAYS() << fnId << " [closing opened camera]";
 		error = PcoCheckError(__LINE__, __FILE__, PCO_CloseCamera(m_handle));
 		PCO_THROW_OR_TRACE(error, "_init(): PCO_CloseCamera - closing opened cam") ;
 		m_handle = NULL;
@@ -275,6 +275,7 @@ void Camera::_init(){
 	errMsg = _pcoGet_Camera_Type(error);
 	PCO_THROW_OR_TRACE(error, errMsg) ;
 
+	DEB_ALWAYS() << fnId << " [camera opened] " << DEB_VAR1(m_handle);
 
 	// -- Initialise ADC
 	//-------------------------------------------------------------------------------------------------
@@ -1960,6 +1961,8 @@ void Camera::_pco_set_shutter_rolling_edge(int &error){
 		return ;
 	}
 
+	DEB_ALWAYS() << fnId << " [entry - edge] ";
+
 	m_config = TRUE;
 
 
@@ -1986,7 +1989,11 @@ void Camera::_pco_set_shutter_rolling_edge(int &error){
 	msg = "PCO_GetCameraSetup";
 	PCO_PRINT_ERR(error, msg); 	if(error) return;
 
-	if(m_dwSetup[0] == _dwSetup) { m_config = FALSE;return;}
+	if(m_dwSetup[0] == _dwSetup) { 
+		DEB_ALWAYS() << fnId << " [exit - no change] ";
+		m_config = FALSE;
+		return;
+	}
 
 	m_dwSetup[0] = _dwSetup;
 
@@ -1994,24 +2001,33 @@ void Camera::_pco_set_shutter_rolling_edge(int &error){
 	msg = "PCO_SetTimeouts";
 	PCO_PRINT_ERR(error, msg); 	if(error) return;
 
+	msg = "[PCO_SetCameraSetup]";
+	DEB_ALWAYS() << fnId << " " << msg;
     error = PcoCheckError(__LINE__, __FILE__, PCO_SetCameraSetup(m_handle, m_wType, &m_dwSetup[0], m_wLen));
-	msg = "PCO_SetCameraSetup";
 	PCO_PRINT_ERR(error, msg); 	if(error) return;
 
+	msg = "[PCO_RebootCamera]";
+	DEB_ALWAYS() << fnId << " " << msg;
     error = PcoCheckError(__LINE__, __FILE__, PCO_RebootCamera(m_handle));
-	msg = "PCO_RebootCamera";
 	PCO_PRINT_ERR(error, msg); 	if(error) return;
 
 	//m_sync->_getBufferCtrlObj()->_pcoAllocBuffersFree();
 	m_buffer->_pcoAllocBuffersFree();
 
+	msg = "[PCO_CloseCamera]";
+	DEB_ALWAYS() << fnId << " " << msg;
     error = PcoCheckError(__LINE__, __FILE__, PCO_CloseCamera(m_handle));
-	msg = "PCO_CloseCamera";
 	PCO_PRINT_ERR(error, msg); 	if(error) return;
+	m_handle = NULL;
 
-	::Sleep(PCO_EDGE_SLEEP_SHUTTER_MS);
+	DWORD ms = PCO_EDGE_SLEEP_SHUTTER_MS;
+	sprintf_s(msg, MSG_SIZE, "[Sleep %d ms]", ms);
+	DEB_ALWAYS() << fnId << " " << msg;
+	::Sleep(ms);
 
 	_init();
+
+	DEB_ALWAYS() << fnId << " [exit] ";
 
 	m_config = FALSE;
 	return;
