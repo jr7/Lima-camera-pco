@@ -1949,6 +1949,7 @@ void Camera::_pco_set_shutter_rolling_edge(int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 	char *msg;
+	char msgBuff[MSG_SIZE+1];
 
 	DWORD _dwSetup;
 	DWORD m_dwSetup[10];
@@ -1995,6 +1996,11 @@ void Camera::_pco_set_shutter_rolling_edge(int &error){
 		return;
 	}
 
+	msg = msgBuff;
+	sprintf_s(msg, MSG_SIZE, "[Change ROLLING SHUTTER from [%d] to [%d]]", 
+		m_dwSetup[0]==PCO_EDGE_SETUP_ROLLING_SHUTTER, _dwSetup==PCO_EDGE_SETUP_ROLLING_SHUTTER);
+	DEB_ALWAYS() << fnId << " " << msg;
+
 	m_dwSetup[0] = _dwSetup;
 
     error = PcoCheckError(__LINE__, __FILE__, PCO_SetTimeouts(m_handle, &ts[0], sizeof(ts)));
@@ -2017,9 +2023,11 @@ void Camera::_pco_set_shutter_rolling_edge(int &error){
 	msg = "[PCO_CloseCamera]";
 	DEB_ALWAYS() << fnId << " " << msg;
     error = PcoCheckError(__LINE__, __FILE__, PCO_CloseCamera(m_handle));
+	DEB_ALWAYS() << fnId << " " << msg << " " << DEB_VAR1(error); 
 	PCO_PRINT_ERR(error, msg); 	if(error) return;
 	m_handle = NULL;
-
+	
+	msg = msgBuff;
 	DWORD ms = PCO_EDGE_SLEEP_SHUTTER_MS;
 	sprintf_s(msg, MSG_SIZE, "[Sleep %d ms]", ms);
 	DEB_ALWAYS() << fnId << " " << msg;

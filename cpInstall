@@ -13,6 +13,12 @@ scp -r ${LOCDIR}/ ${REMHOST}:${REMDIR}/${INSTALL}
 
 cp -r ${LOCDIR}/ ${TMPDIR}/${INSTALL}
 
+echo
+echo "copied install directory [${LOCDIR}/]" to:
+echo "--->  ${REMHOST}:${REMDIR}/${INSTALL}"
+echo "--->  ${TMPDIR}/${INSTALL}"
+
+
 
 
 
