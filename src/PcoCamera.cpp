@@ -2023,7 +2023,6 @@ void Camera::_pco_set_shutter_rolling_edge(int &error){
 	msg = "[PCO_CloseCamera]";
 	DEB_ALWAYS() << fnId << " " << msg;
     error = PcoCheckError(__LINE__, __FILE__, PCO_CloseCamera(m_handle));
-	DEB_ALWAYS() << fnId << " " << msg << " " << DEB_VAR1(error); 
 	PCO_PRINT_ERR(error, msg); 	if(error) return;
 	m_handle = NULL;
 	
