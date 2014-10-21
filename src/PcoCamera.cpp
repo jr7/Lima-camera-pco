@@ -1193,7 +1193,7 @@ int Camera::PcoCheckError(int line, char *file, int err) {
 
 	static char lastErrorMsg[500];
 	char *msg;
-	int lg;
+	size_t lg;
 
 	if (err != 0) {
 		DWORD dwErr = err;
@@ -1222,7 +1222,7 @@ int Camera::PcoCheckError(int line, char *file, int err) {
 char* Camera::_PcoCheckError(int line, char *file, int err, int &error) {
 	static char lastErrorMsg[ERR_SIZE];
 	char *msg;
-	int lg;
+	size_t lg;
 
 	error = m_pcoData->pcoError = err;
 	msg = m_pcoData->pcoErrorMsg;
@@ -1433,6 +1433,23 @@ void _pco_time2dwbase(double exp_time, DWORD &dwExp, WORD &wBase) {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //=================================================================================================
 //=================================================================================================
 char* Camera::_pcoSet_Exposure_Delay_Time(int &error, int ph){
@@ -1486,6 +1503,50 @@ char* Camera::_pcoSet_Exposure_Delay_Time(int &error, int ph){
 	return fnId;
 }
 
+
+//=================================================================================================
+//=================================================================================================
+
+/******************************************************************************************
+typedef struct
+{
+  DWORD  FrameTime_ns;                 // Frametime replaces COC_Runtime
+  DWORD  FrameTime_s;   
+
+  DWORD  ExposureTime_ns;
+  DWORD  ExposureTime_s;               // 5
+
+  DWORD  TriggerSystemDelay_ns;        // System internal min. trigger delay
+
+  DWORD  TriggerSystemJitter_ns;       // Max. possible trigger jitter -0/+ ... ns
+
+  DWORD  TriggerDelay_ns;              // Resulting trigger delay = system delay
+  DWORD  TriggerDelay_s;               // + delay of SetDelayExposureTime ... // 9
+
+} PCO_ImageTiming;
+******************************************************************************************/
+
+
+int Camera::_pco_GetImageTiming(double &frameTime, double &expTime, double &sysDelay, double &sysJitter, double &trigDelay ){
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+
+	int error;
+
+	PCO_ImageTiming pstrImageTiming;
+
+	error = PcoCheckError(__LINE__, __FILE__, PCO_GetImageTiming(m_handle, &pstrImageTiming));
+
+	frameTime = (pstrImageTiming.FrameTime_ns * NANO) + pstrImageTiming.FrameTime_s ;
+	expTime = (pstrImageTiming.ExposureTime_ns * NANO) + pstrImageTiming.ExposureTime_s ;
+	sysDelay = (pstrImageTiming.TriggerSystemDelay_ns * NANO) ;
+	sysJitter = (pstrImageTiming.TriggerSystemJitter_ns * NANO) ;
+	trigDelay = (pstrImageTiming.TriggerDelay_ns * NANO) + pstrImageTiming.TriggerDelay_s ;
+
+
+
+	return error;
+}
 //=================================================================================================
 //=================================================================================================
 char *Camera::_pcoSet_Cameralink_GigE_Parameters(int &error){
@@ -1890,7 +1951,7 @@ char *Camera::_get_coc_runtime(int &error){
 	char *msg = "PCO_GetCOCRuntime";
 	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 
-    m_pcoData->cocRunTime = runTime = ((double) dwTime_ns * 1.0E-9) + (double) dwTime_s;
+    m_pcoData->cocRunTime = runTime = ((double) dwTime_ns * NANO) + (double) dwTime_s;
     m_pcoData->frameRate = (dwTime_ns | dwTime_s) ? 1.0 / runTime : 0.0;
 
     DEB_TRACE() << DEB_VAR2(m_pcoData->frameRate, m_pcoData->cocRunTime);
