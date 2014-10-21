@@ -38,6 +38,10 @@
 
 #define MAX_NR_STOP 0
 
+#define NANO (1.0E-9)
+#define MICRO (1.0E-6)
+#define MILI (1.0E-3)
+
 //--------------------------------------- debug const for talk
 #define DBG_BUFF           0x00000001
 #define DBG_XFER2LIMA      0x00000002
@@ -428,6 +432,7 @@ namespace lima
 		ringLog *m_tmpLog;
 		int _pco_getADC(int &adc_working, int &adc_max);
 		int _pco_setADC(int adc_new, int &adc_working);
+		int _pco_GetImageTiming(double &frameTime, double &expTime, double &sysDelay, double &sysJitter, double &trigDelay );
 
     };
   }

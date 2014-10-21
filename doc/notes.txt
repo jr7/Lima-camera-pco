@@ -3,6 +3,13 @@
 # LOGS / NOTES
 #===================================================
 #===================================================
+
+#===================================================
+# 2014/09/19
+  - when tested without cam python error in fglib5.dll (not found) 
+  -- included in cameralink RuntimeSetup_v5.1.4_IA32.exe 
+  -- installed ok
+
 #===================================================
 # 2014/08/13
   - cleaned test modules xferMulti, ...

@@ -136,6 +136,35 @@ _assignImage2Buffer: myBufferLen=11059200, m_ImageBufferSize=11059200, dwLen=110
 
 
 
+2014/09/19 18:17:13 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-09-19 18:16:11 +0200] head[897d618][897d618fed9f0cd32fffae6fd84b712a47df2097] at [2014/09/19 18:17:11] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/09/19 18:17:11] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/09/19 18:17:11] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/09/19 18:17:11] $"
+
+
+
+
+2014/09/19 14:40:31 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-09-19 14:38:45 +0200] head[3f676e9][3f676e96a87f894fc425e7f9a8b5452b9ad8b52a] at [2014/09/19 14:40:30] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/09/19 14:40:30] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/09/19 14:40:30] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/09/19 14:40:30] $"
+
+
+- 2014/09/19 
+   _init() -> close already opened cam
+
+2014/09/10 10:14:22 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-09-10 10:12:41 +0200] head[3dbc862][3dbc86265e25926cb5c672a1e3f883f920b22619] at [2014/09/10 10:14:21] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/09/10 10:14:21] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/09/10 10:14:21] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/09/10 10:14:21] $"
+
+- included the callback of valid range in _init() / required during the change rolling/global shutter in edge
+
+
+
 2014/08/29 14:22:31 ========================================== complete for bm05
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-08-29 14:20:07 +0200] head[42bb21f][42bb21fdd44230398daa7108683c3cc897887556] at [2014/08/29 14:22:30] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/29 14:22:30] $"

@@ -120,7 +120,9 @@ void Interface::prepareAcq()
 void Interface::startAcq()
 {
   DEB_MEMBER_FUNCT();
-	// DONE
+  DEF_FNID;
+
+  DEB_ALWAYS() << ": Interface::startAcq()";
 
   if(m_buffer)
     m_buffer->getBuffer().setStartTimestamp(Timestamp::now());
@@ -135,7 +137,7 @@ void Interface::stopAcq()
   DEB_MEMBER_FUNCT();
   DEF_FNID;
 
-  DEB_ALWAYS() << fnId << ": STOP";
+  DEB_ALWAYS() << ": Interface::stopAcq()";
   m_sync->stopAcq();
 }
 
