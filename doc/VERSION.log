@@ -1,5 +1,15 @@
 
 
+2014/10/24 12:09:33 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-10-24 12:08:24 +0200] head[19e67b8][19e67b8c49a4b4a70c2b1a1506b38afa381e4423] at [2014/10/24 12:09:32] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/10/24 12:09:32] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/10/24 12:09:32] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/10/24 12:09:32] $"
+
+- some minor and merge last edge tested. 
+to be tested to make a package 1.303
+
+
 2014/10/20 10:33:16 ==========================================
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-10-20 10:31:13 +0200] head[9f16f26][9f16f2601896b382e554a0038e916c52f1d65a25] at [2014/10/20 10:33:15] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/10/20 10:33:15] $"
