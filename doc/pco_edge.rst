@@ -94,3 +94,18 @@ With the PC described in :ref:`pco-esrf-pc`
 the speed of the CameraLink is about
 **570 MB/s** (66% of the theoretic max of 860 MB/s). 
 
+
+PCO EDGE - shutter mode (global/rolling)
+````````````````````````````````````````
+
+.. code-block:: sh
+
+ cam.talk("rollingShutter 0")   <--- set shutter mode to GLOBAL
+ 
+ cam.talk("rollingShutter 1")   <--- set shutter mode to ROLLING
+ 
+After the change of the shutter mode, the cam is rebooted and requires about 10s to
+became ready, meanwhile the acq status is AcqConfig.
+
+The validRanges (exposure and latency time) are updated after the mode change.
+

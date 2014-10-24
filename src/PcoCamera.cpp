@@ -2016,8 +2016,10 @@ void Camera::_pco_set_shutter_rolling_edge(int &error){
 	DWORD m_dwSetup[10];
 	WORD m_wLen = 10;
 	WORD m_wType;
-	int ts[3] = { 2000, 3000, 250}; // command, image, channel timeout
 
+	// PCO recommended timing values
+	int ts[3] = {2000, 3000, 250}; // command, image, channel timeout
+	DWORD sleepMs = 10000;  // sleep time after reboot
 
 	if(!_isCameraType(Edge)) {
 		return ;
@@ -2026,7 +2028,6 @@ void Camera::_pco_set_shutter_rolling_edge(int &error){
 	DEB_ALWAYS() << fnId << " [entry - edge] ";
 
 	m_config = TRUE;
-
 
 	// DWORD m_dwSetup[10];
 	// WORD m_wLen = 10;
@@ -2088,10 +2089,9 @@ void Camera::_pco_set_shutter_rolling_edge(int &error){
 	m_handle = NULL;
 	
 	msg = msgBuff;
-	DWORD ms = PCO_EDGE_SLEEP_SHUTTER_MS;
-	sprintf_s(msg, MSG_SIZE, "[Sleep %d ms]", ms);
+	sprintf_s(msg, MSG_SIZE, "[Sleep %d ms]", sleepMs);
 	DEB_ALWAYS() << fnId << " " << msg;
-	::Sleep(ms);
+	::Sleep(sleepMs);
 
 	_init();
 
