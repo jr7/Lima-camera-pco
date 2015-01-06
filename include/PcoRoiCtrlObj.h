@@ -25,8 +25,8 @@
 #define PCOROICTRLOBJ_H
 
 #include "Pco.h"
-#include "HwRoiCtrlObj.h"
-#include "Debug.h"
+#include "lima/HwRoiCtrlObj.h"
+#include "lima/Debug.h"
 
 namespace lima
 {

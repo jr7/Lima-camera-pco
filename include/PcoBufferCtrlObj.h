@@ -27,7 +27,7 @@
 #include "Pco.h"
 #include "PcoCamera.h"
 
-#include "HwBufferMgr.h"
+#include "lima/HwBufferMgr.h"
 
 #define PCO_MAX_NR_ALLOCATED_BUFFERS 8
 

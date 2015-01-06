@@ -25,9 +25,9 @@
 #define PCOCAMERA_H
 #include "Pco.h"
 #include "Pco_errt.h"
-#include "Debug.h"
-#include "Constants.h"
-#include "HwMaxImageSizeCallback.h"
+#include "lima/Debug.h"
+#include "lima/Constants.h"
+#include "lima/HwMaxImageSizeCallback.h"
 //#include "PcoBufferCtrlObj.h"
 #include "PcoHwEventCtrlObj.h"
 

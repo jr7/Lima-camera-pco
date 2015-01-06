@@ -25,7 +25,7 @@
 #define PCOCAMERAUTILS_H
 
 #include <time.h>
-#include "Compatibility.h"
+#include "processlib/Compatibility.h"
 
 char *_checkLogFiles() ;
 

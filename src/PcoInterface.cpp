@@ -21,7 +21,7 @@
  along with this program; if not, see <http://www.gnu.org/licenses/>.
 ###########################################################################
 **************************************************************************/
-#include "Exceptions.h"
+#include "lima/Exceptions.h"
 
 #include "PcoInterface.h"
 #include "PcoCamera.h"

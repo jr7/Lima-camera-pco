@@ -25,8 +25,8 @@
 #define PCOHWEVENTCTRLOBJ_H
 
 #include "Pco.h"
-#include "HwEventCtrlObj.h"
-#include "Debug.h"
+#include "lima/HwEventCtrlObj.h"
+#include "lima/Debug.h"
 
 namespace lima
 {

@@ -3,7 +3,7 @@ namespace Pco
   class Camera
   {
 %TypeHeaderCode
-#include <HwInterface.h>
+#include "lima/HwInterface.h"
 #include <PcoCamera.h>
 %End
   public:

@@ -26,10 +26,10 @@
 
 
 
-#include "LimaCompatibility.h"
+#include "lima/LimaCompatibility.h"
 
-#include "Debug.h"
-#include "HwInterface.h"
+#include "lima/Debug.h"
+#include "lima/HwInterface.h"
 #include "PcoCamera.h"
 
 

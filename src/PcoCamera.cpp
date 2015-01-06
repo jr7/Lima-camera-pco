@@ -37,8 +37,8 @@
 #include <sys/timeb.h>
 #include <time.h>
 
-#include "Exceptions.h"
-#include "HwSyncCtrlObj.h"
+#include "lima/Exceptions.h"
+#include "lima/HwSyncCtrlObj.h"
 
 #include "PcoCamera.h"
 #include "PcoSyncCtrlObj.h"

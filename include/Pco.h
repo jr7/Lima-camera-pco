@@ -33,7 +33,7 @@
 #endif
 
 
-#include "Compatibility.h"
+#include "processlib/Compatibility.h"
 #include "PCO_Structures.h"
 #include "PCO_ConvStructures.h"
 #include "Pco_ConvDlgExport.h"

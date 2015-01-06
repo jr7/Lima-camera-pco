@@ -22,7 +22,7 @@
 ###########################################################################
 **************************************************************************/
 #include <sstream>
-#include "Exceptions.h"
+#include "lima/Exceptions.h"
 #include "Pco.h"
 #include "PcoCamera.h"
 #include "PcoSyncCtrlObj.h"

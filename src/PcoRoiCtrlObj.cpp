@@ -25,7 +25,7 @@
 //#include <cstdlib>
 //#include <WinDef.h>
 //#include <WinNt.h>
-#include "Exceptions.h"
+#include "lima/Exceptions.h"
 #include "PcoCamera.h"
 #include "PcoRoiCtrlObj.h"
 

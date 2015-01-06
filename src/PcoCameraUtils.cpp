@@ -29,9 +29,9 @@
 #include <sys/timeb.h>
 #include <time.h>
 
-#include "HwSyncCtrlObj.h"
+#include "lima/HwSyncCtrlObj.h"
 
-#include "Exceptions.h"
+#include "lima/Exceptions.h"
 
 #include "PcoCameraUtils.h"
 #include "PcoCamera.h"

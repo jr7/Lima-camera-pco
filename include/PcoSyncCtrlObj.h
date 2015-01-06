@@ -26,8 +26,8 @@
 
 #include "Pco.h"
 
-#include "HwSyncCtrlObj.h"
-#include "HwInterface.h"
+#include "lima/HwSyncCtrlObj.h"
+#include "lima/HwInterface.h"
 
 enum pcoAcqStatus {
 	pcoAcqIdle = 0, 

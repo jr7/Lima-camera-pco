@@ -22,7 +22,7 @@
 ###########################################################################
 **************************************************************************/
 
-#include "Exceptions.h"
+#include "lima/Exceptions.h"
 #include "PcoBufferCtrlObj.h"
 #include "PcoSyncCtrlObj.h"
 #include "PcoCamera.h"
