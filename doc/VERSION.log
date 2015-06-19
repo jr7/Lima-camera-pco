@@ -1,5 +1,29 @@
 
 
+2015/06/19 18:04:32 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-06-19 17:33:56 +0200] head[a00054d][a00054db0fd3500db53e7cdd482463a97f662b67] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/19 18:04:31] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/06/19 18:04:31] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-01 18:48:32 +0200] head[4d2617a][4d2617af3b25b5033fe0ce807d36ef34f28f8681] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/19 18:04:31] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/19 18:04:31] $"
+
+5.RHPCO> p tango_io("id06/pco/pcodimax1", "talk","timestamp")
+$Id: comp[2015/06/19 18:07:17] file[2015/06/19 17:46:56] [..\..\..\..\src\PcoCamera.cpp] $
+$Id: comp[2015/06/01 16:55:20] file[2015/06/01 14:04:58] [..\..\..\..\src\PcoSyncCtrlObj.cpp] $
+$Id: comp[2015/06/01 16:55:27] file[2015/06/01 14:04:58] [..\..\..\..\src\PcoInterface.cpp] $
+$Id: comp[2015/06/01 16:55:40] file[2015/06/01 14:04:58] [..\..\..\..\src\PcoBufferCtrlObj.cpp] $
+$Id: comp[2015/06/01 16:55:32] file[2015/06/01 14:04:58] [..\..\..\..\src\PcoDetInfoCtrlObj.cpp] $
+$Id: comp[2015/06/19 18:02:40] file[2015/06/19 17:46:56] [..\..\..\..\src\PcoCameraUtils.cpp] $
+$Id: comp[2015/06/01 16:55:25] file[2015/06/01 14:04:58] [..\..\..\..\src\PcoRoiCtrlObj.cpp] $
+$Id:       PCO rev[2015-06-19 17:33:56 +0200] head[a00054d][a00054db0fd3500db53e7cdd482463a97f662b67] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/19 18:04:31] $
+$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/06/19 18:04:31] $
+$Id:   PROCLIB rev[2015-06-01 18:48:32 +0200] head[4d2617a][4d2617af3b25b5033fe0ce807d36ef34f28f8681] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/19 18:04:31] $
+$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/19 18:04:31] $
+    timestamp: 2015/06/19 18:07:49
+computer name: WID15DIMAX2
+    user name: OPID15
+
+
+
 2015/06/19 15:24:16 ==========================================
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2015-01-06 16:15:29 +0100] head[e76f6d2][e76f6d27f15cd78ae52e9351d119011351637756] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/19 15:24:15] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/06/19 15:24:15] $"
