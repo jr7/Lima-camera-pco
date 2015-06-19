@@ -80,6 +80,8 @@ char * _timestamp_libconfiggitversion(){return LIBCONFIG_GIT_VERSION ;};
 char * _timestamp_limagitversion(){return LIMA_GIT_VERSION ;};
 #endif
 
+char * _getComputerName(char *infoBuff, DWORD  bufCharCount);
+char * _getUserName(char *infoBuff, DWORD  bufCharCount);
 
 //=========================================================================================================
 
@@ -155,10 +157,12 @@ char *xlatPcoCode2Str(int code, tblXlatCode2Str table, int &err) {
 //=========================================================================================================
 //=========================================================================================================
 
+#define BUFFER_LEN 256
 stcPcoData::stcPcoData(){
 
 	char *ptr, *ptrMax;
 	int i;
+	char buff[BUFFER_LEN];
 
 	memset(this, 0, sizeof(struct stcPcoData));
 
@@ -180,6 +184,10 @@ stcPcoData::stcPcoData(){
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_proclibgitversion());
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_libconfiggitversion());
 #endif
+
+	ptr += sprintf_s(ptr, ptrMax - ptr, "    timestamp: %s\n", getTimestamp(Iso));
+	ptr += sprintf_s(ptr, ptrMax - ptr, "computer name: %s\n", _getComputerName(buff, BUFFER_LEN));
+	ptr += sprintf_s(ptr, ptrMax - ptr, "    user name: %s\n", _getUserName(buff, BUFFER_LEN));
 
 	stcPcoGeneral.wSize = sizeof(stcPcoGeneral);
 	stcPcoGeneral.strCamType.wSize = sizeof(stcPcoGeneral.strCamType);

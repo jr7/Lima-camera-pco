@@ -21,6 +21,11 @@
  along with this program; if not, see <http://www.gnu.org/licenses/>.
 ###########################################################################
 **************************************************************************/
+
+#include <windows.h>
+#include <tchar.h>
+#include <stdio.h>
+
 #include <cstdlib>
 #include <process.h>
 
@@ -708,7 +713,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			DWORD dwPixRate, dwPixRateNext ; int error, i;
 
 		    _pco_GetPixelRate(dwPixRate, dwPixRateNext, error);
-			ptr += sprintf_s(ptr, ptrMax - ptr, "actualRate(Hz):  %ld  (requested &ld)  validRates:", dwPixRate, dwPixRateNext);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "actualRate(Hz):  %ld  (requested %ld)  validRates:", dwPixRate, dwPixRateNext);
 
 			for(i=0; i<4; i++) {
 				dwPixRate = m_pcoData->stcPcoDescription.dwPixelRateDESC[i];
@@ -1386,4 +1391,28 @@ char *_checkLogFiles() {
 	}
 	return found ? logOn : logOff;	
 };
-	
+
+//====================================================================
+//====================================================================
+
+#define INFO_BUFFER_SIZE 1024
+void printError( TCHAR* msg );
+
+char * _getComputerName(char *infoBuff, DWORD  bufCharCount  )
+{
+
+  // Get and display the name of the computer. 
+  if( !GetComputerName( infoBuff, &bufCharCount ) )
+	  sprintf_s(infoBuff, bufCharCount, "ERROR: GetComputerName" ); 
+
+  return infoBuff ;
+}
+
+char * _getUserName(char *infoBuff, DWORD  bufCharCount  )
+{
+ 
+  // Get and display the user name. 
+  if( !GetUserName( infoBuff, &bufCharCount ) )
+	  sprintf_s(infoBuff, bufCharCount, "ERROR: GetUserName" ); 
+  return infoBuff ;
+}

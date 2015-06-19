@@ -1,5 +1,67 @@
 
 
+2015/06/19 15:24:16 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-01-06 16:15:29 +0100] head[e76f6d2][e76f6d27f15cd78ae52e9351d119011351637756] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/19 15:24:15] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/06/19 15:24:15] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-01 18:48:32 +0200] head[4d2617a][4d2617af3b25b5033fe0ce807d36ef34f28f8681] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/19 15:24:15] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/19 15:24:15] $"
+
+
+c:\blissadm\lima\pco\install>python LimaCCDs.py pcodimax1 -ORBendPoint giop:tcp:160.103.26.70:
+Failed to import EventChannelFactory notifd/factory/wid15dimax2.esrf.fr from the Tango database
+[2015/06/19 17:30:57.766544] lima::Pco::Camera::Camera (..\..\..\..\src\PcoCamera.cpp:244): m_pcoData->version=
+$Id: comp[2015/06/19 17:28:34] file[2015/06/03 15:00:11] [..\..\..\..\src\PcoCamera.cpp] $
+$Id: comp[2015/06/01 16:55:20] file[2015/06/01 14:04:58] [..\..\..\..\src\PcoSyncCtrlObj.cpp] $
+$Id: comp[2015/06/01 16:55:27] file[2015/06/01 14:04:58] [..\..\..\..\src\PcoInterface.cpp] $
+$Id: comp[2015/06/01 16:55:40] file[2015/06/01 14:04:58] [..\..\..\..\src\PcoBufferCtrlObj.cpp] $
+$Id: comp[2015/06/01 16:55:32] file[2015/06/01 14:04:58] [..\..\..\..\src\PcoDetInfoCtrlObj.cpp] $
+$Id: comp[2015/06/03 14:40:03] file[2015/06/03 14:40:02] [..\..\..\..\src\PcoCameraUtils.cpp] $
+$Id: comp[2015/06/01 16:55:25] file[2015/06/01 14:04:58] [..\..\..\..\src\PcoRoiCtrlObj.cpp] $
+$Id:       PCO rev[2015-01-06 16:15:29 +0100] head[e76f6d2][e76f6d27f15cd78ae52e9351d119011351637756] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/19 15:24:15] $
+$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/06/19 15:24:15] $
+$Id:   PROCLIB rev[2015-06-01 18:48:32 +0200] head[4d2617a][4d2617af3b25b5033fe0ce807d36ef34f28f8681] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/19 15:24:15] $
+$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/19 15:24:15] $
+    timestamp: 2015/06/19 17:30:57
+computer name: WID15DIMAX2
+    user name: OPID15
+
+
+
+2015/06/01 16:56:27 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-01-06 16:15:29 +0100] head[e76f6d2][e76f6d27f15cd78ae52e9351d119011351637756] at [2015/06/01 16:56:27] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-05-28 10:48:45 +0200] head[b32e69d][b32e69d6be2c0b01a709eca9b61904e46315ad31] at [2015/06/01 16:56:27] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-01-15 15:08:16 +0100] head[70f9a88][70f9a88b7f90b49fb37a686c594538158b7d4ab7] at [2015/06/01 16:56:27] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2015/06/01 16:56:27] $"
+
+- checkout lima core 1.4
+
+
+wid15dimax2
+c:\blissadm\lima\pco\install>python LimaCCDs.py pcodimax1 -ORBendPoint giop:tcp:160.103.26.70:
+[2015/06/03 11:25:58.231133] lima::Pco::Camera::Camera (..\..\..\..\src\PcoCamera.cpp:236): m_pcoData->version=
+$Id: comp[2015/06/01 16:56:49] file[2015/06/01 14:04:58] [..\..\..\..\src\PcoCamera.cpp] $
+$Id: comp[2015/06/01 16:55:20] file[2015/06/01 14:04:58] [..\..\..\..\src\PcoSyncCtrlObj.cpp] $
+$Id: comp[2015/06/01 16:55:27] file[2015/06/01 14:04:58] [..\..\..\..\src\PcoInterface.cpp] $
+$Id: comp[2015/06/01 16:55:40] file[2015/06/01 14:04:58] [..\..\..\..\src\PcoBufferCtrlObj.cpp] $
+$Id: comp[2015/06/01 16:55:32] file[2015/06/01 14:04:58] [..\..\..\..\src\PcoDetInfoCtrlObj.cpp] $
+$Id: comp[2015/06/01 16:55:34] file[2015/06/01 14:04:58] [..\..\..\..\src\PcoCameraUtils.cpp] $
+$Id: comp[2015/06/01 16:55:25] file[2015/06/01 14:04:58] [..\..\..\..\src\PcoRoiCtrlObj.cpp] $
+$Id:       PCO rev[2015-01-06 16:15:29 +0100] head[e76f6d2][e76f6d27f15cd78ae52e9351d119011351637756] at [2015/06/01 16:56:27] $
+$Id:      LIMA rev[2015-05-28 10:48:45 +0200] head[b32e69d][b32e69d6be2c0b01a709eca9b61904e46315ad31] at [2015/06/01 16:56:27] $
+$Id:   PROCLIB rev[2015-01-15 15:08:16 +0100] head[70f9a88][70f9a88b7f90b49fb37a686c594538158b7d4ab7] at [2015/06/01 16:56:27] $
+$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2015/06/01 16:56:27] $
+
+
+2015/06/01 15:38:00 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-01-06 16:15:29 +0100] head[e76f6d2][e76f6d27f15cd78ae52e9351d119011351637756] at [2015/06/01 15:37:58] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-05-28 10:41:46 +0200] head[6fd4667][6fd466741df93a4d49ece558283614d6ab32e547] at [2015/06/01 15:37:58] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-01-15 15:08:16 +0100] head[70f9a88][70f9a88b7f90b49fb37a686c594538158b7d4ab7] at [2015/06/01 15:37:58] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2015/06/01 15:37:58] $"
+
+- compiling for lima 1.4
+
+
+
 2014/10/24 12:09:33 ==========================================
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-10-24 12:08:24 +0200] head[19e67b8][19e67b8c49a4b4a70c2b1a1506b38afa381e4423] at [2014/10/24 12:09:32] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/10/24 12:09:32] $"

@@ -158,10 +158,10 @@ Control/Tango/Server/LimaCCDs-pco/win32_vc9/1.5
         R:\dserver\classes\ccd\pco_rh\Lima>
         
   - then run 
-        Lima>windowsSipCompilation.py --config
+        Lima>python windowsSipCompilation.py --config
 
   - then run 
-        Lima>windowsSipCompilation.py
+        Lima>python windowsSipCompilation.py
 
   - then run 
         Lima>python windowsInstall.py
@@ -195,3 +195,39 @@ $ ./setId
 #----------------------------------------------------------------------------
 
 
+#===============================================================================
+# git / config
+#===============================================================================
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+	hideDotFiles = dotGitOnly
+[remote "origin"]
+	url = git@github.com:esrf-bliss/Lima.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "master"]
+	remote = origin
+	merge = refs/heads/master
+[submodule "third-party/Processlib"]
+	url = git@github.com:esrf-bliss/Processlib.git
+[submodule "third-party/Sps"]
+	url = git@github.com:esrf-bliss/Sps.git
+[submodule "third-party/libconfig"]
+	url = git@github.com:esrf-bliss/libconfig.git
+[submodule "documentation"]
+	url = git@github.com:esrf-bliss/Lima-documentation
+[submodule "applications/spec"]
+	url = git@github.com:esrf-bliss/Lima-spec
+[submodule "applications/tango"]
+	url = git@github.com:esrf-bliss/Lima-tango
+[submodule "camera/pco"]
+	url = git@github.com:esrf-bliss/Lima-camera-pco
+[submodule "documentation"]
+	url = git@github.com:esrf-bliss/Lima-documentation
+[branch "core-1.4"]
+	remote = origin
+	merge = refs/heads/core-1.4

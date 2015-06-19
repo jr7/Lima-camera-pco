@@ -14,10 +14,10 @@ LOG="./doc/VERSION.log"
 
 DT=`date +"%Y/%m/%d %H:%M:%S"`
 
-PCOREV=`git log -n 1 --date=iso --format=format:"rev[%ad] head[%h][%H]" HEAD || echo "ERROR"`
-LIMAREV=`cd ../.. ; git log -n 1 --date=iso --format=format:"rev[%ad] head[%h][%H]" HEAD || echo "ERROR"`
-PROCLIBREV=`cd ../../third-party/Processlib ; git log -n 1 --date=iso --format=format:"rev[%ad] head[%h][%H]" HEAD || echo "ERROR"`
-LIBCONFIGREV=`cd ../../third-party/libconfig ; git log -n 1 --date=iso --format=format:"rev[%ad] head[%h][%H]" HEAD || echo "ERROR"`
+PCOREV=`git log -n 1 --date=iso --format=format:"rev[%ad] head[%h][%H] ref[%d]" HEAD || echo "ERROR"`
+LIMAREV=`cd ../.. ; git log -n 1 --date=iso --format=format:"rev[%ad] head[%h][%H] ref[%d]" HEAD || echo "ERROR"`
+PROCLIBREV=`cd ../../third-party/Processlib ; git log -n 1 --date=iso --format=format:"rev[%ad] head[%h][%H] ref[%d]" HEAD || echo "ERROR"`
+LIBCONFIGREV=`cd ../../third-party/libconfig ; git log -n 1 --date=iso --format=format:"rev[%ad] head[%h][%H] ref[%d]" HEAD || echo "ERROR"`
 
 {
 echo "#define        PCO_GIT_VERSION \"\$Id:       PCO ${PCOREV} at [${DT}] \$\"" 
