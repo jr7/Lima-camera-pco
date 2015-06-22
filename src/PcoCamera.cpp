@@ -73,11 +73,21 @@ char* _timestamp_pcocamera() {return ID_TIMESTAMP ;}
 
 #ifdef WITH_GIT_VERSION
 #include "PcoGitVersion.h"
-
-char * _timestamp_pcogitversion(){return PCO_GIT_VERSION ;};
-char * _timestamp_proclibgitversion(){return PROCLIB_GIT_VERSION ;};
-char * _timestamp_libconfiggitversion(){return LIBCONFIG_GIT_VERSION ;};
-char * _timestamp_limagitversion(){return LIMA_GIT_VERSION ;};
+char * _timestamp_gitversion(char *buffVersion, int len)
+{
+	sprintf_s(buffVersion, len, "%s\n%s\n%s\n%s\n%s\n", 
+				 PCO_GIT_VERSION,
+				 PROCLIB_GIT_VERSION,
+				 LIBCONFIG_GIT_VERSION,
+				 LIMA_GIT_VERSION,
+				 TANGO_GIT_VERSION);
+	return buffVersion;
+}
+//char * _timestamp_pcogitversion(){return PCO_GIT_VERSION ;};
+//char * _timestamp_proclibgitversion(){return PROCLIB_GIT_VERSION ;};
+//char * _timestamp_libconfiggitversion(){return LIBCONFIG_GIT_VERSION ;};
+//#char * _timestamp_limagitversion(){return LIMA_GIT_VERSION ;};
+//char * _timestamp_tangogitversion(){return TANGO_GIT_VERSION ;};
 #endif
 
 char * _getComputerName(char *infoBuff, DWORD  bufCharCount);
@@ -158,11 +168,13 @@ char *xlatPcoCode2Str(int code, tblXlatCode2Str table, int &err) {
 //=========================================================================================================
 
 #define BUFFER_LEN 256
+#define BUFFVERSION_LEN 2048
 stcPcoData::stcPcoData(){
 
 	char *ptr, *ptrMax;
 	int i;
-	char buff[BUFFER_LEN];
+	char buff[BUFFER_LEN+1];
+	char buffVersion[BUFFVERSION_LEN+1];
 
 	memset(this, 0, sizeof(struct stcPcoData));
 
@@ -179,10 +191,12 @@ stcPcoData::stcPcoData(){
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcoroictrlobj()));
 
 #ifdef WITH_GIT_VERSION
-	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcogitversion());
-	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_limagitversion());
-	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_proclibgitversion());
-	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_libconfiggitversion());
+	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_gitversion(buffVersion, BUFFVERSION_LEN));
+
+//ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcogitversion());
+//ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_limagitversion());
+//ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_proclibgitversion());
+//ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_libconfiggitversion());
 #endif
 
 	ptr += sprintf_s(ptr, ptrMax - ptr, "    timestamp: %s\n", getTimestamp(Iso));

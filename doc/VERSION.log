@@ -1,5 +1,25 @@
 
 
+2015/06/22 09:30:18 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-06-19 18:12:12 +0200] head[da9943d][da9943d51b85cba60091407c9ef3d3647baed9a6] ref[ (HEAD, tag: pco-1.4.1, origin/master, origin/HEAD, master)] at [2015/06/22 09:30:17] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/06/22 09:30:17] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-01 18:48:32 +0200] head[4d2617a][4d2617af3b25b5033fe0ce807d36ef34f28f8681] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 09:30:17] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 09:30:17] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-06-03 11:42:48 +0200] head[676128c][676128c2d558d441907949b54736e6f80485d280] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 09:30:17] $"
+
+# included tango ID
+# version to test in ID21
+
+
+2015/06/22 09:27:32 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-06-19 18:12:12 +0200] head[da9943d][da9943d51b85cba60091407c9ef3d3647baed9a6] ref[ (HEAD, tag: pco-1.4.1, origin/master, origin/HEAD, master)] at [2015/06/22 09:27:31] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/06/22 09:27:31] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-01 18:48:32 +0200] head[4d2617a][4d2617af3b25b5033fe0ce807d36ef34f28f8681] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 09:27:31] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 09:27:31] $"
+
+
+
+
 2015/06/19 18:04:32 ==========================================
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2015-06-19 17:33:56 +0200] head[a00054d][a00054db0fd3500db53e7cdd482463a97f662b67] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/19 18:04:31] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/06/19 18:04:31] $"
