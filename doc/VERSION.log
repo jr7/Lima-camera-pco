@@ -1,4 +1,28 @@
 
+2015/06/22 12:43:35 ==========================================
+scp: copied local directory to segfs and /tmp_14_days:
+from: [/c/blissadm/git/pco/Lima/install/]
+  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-06-22_124324]
+  to: [/t/rhoms1/install-2015-06-22_124324]
+
+
+2015/06/22 12:40:38 ==========================================
+scp: copied local directory to segfs and /tmp_14_days:
+from: [/c/blissadm/git/pco/Lima/install/]
+  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-06-22_124028]
+  to: [/t/rhoms1/install-2015-06-22_124028]
+
+
+
+2015/06/22 10:10:35 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-06-22 10:09:43 +0200] head[7b2ef1a][7b2ef1a3a161858a69bfd544a39a7c63cb18c99b] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:10:34] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/06/22 10:10:34] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-01 18:48:32 +0200] head[4d2617a][4d2617af3b25b5033fe0ce807d36ef34f28f8681] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:10:34] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:10:34] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-06-03 11:42:48 +0200] head[676128c][676128c2d558d441907949b54736e6f80485d280] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:10:34] $"
+
+
+
 
 2015/06/22 10:04:15 ==========================================
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2015-06-22 10:02:31 +0200] head[e61c76d][e61c76d7a7624d96a2523f25a775f31d5fb298a3] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:04:14] $"

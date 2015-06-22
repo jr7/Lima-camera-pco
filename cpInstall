@@ -1,22 +1,37 @@
 #!/bin/sh
 
 
-REMDIR="/segfs/bliss/projects/LIMA/build/depot/win32_vc9/pco"
+REMDIR="/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco"
 REMHOST="blissadm@bestia"
-LOCDIR="/c/blissadm/git/Lima/install"
+LOCDIR="/c/blissadm/git/pco/Lima/install"
 TMPDIR="/t/rhoms1"
+LOG="./doc/VERSION.log"
 
 DT=`date +"%Y-%m-%d_%H%M%S"`
 INSTALL="install-${DT}"
+
 
 scp -r ${LOCDIR}/ ${REMHOST}:${REMDIR}/${INSTALL}
 
 cp -r ${LOCDIR}/ ${TMPDIR}/${INSTALL}
 
+
+{
 echo
-echo "copied install directory [${LOCDIR}/]" to:
-echo "--->  ${REMHOST}:${REMDIR}/${INSTALL}"
-echo "--->  ${TMPDIR}/${INSTALL}"
+date "+%Y/%m/%d %H:%M:%S =========================================="
+echo "scp: copied local directory to segfs and /tmp_14_days:"
+echo "from: [${LOCDIR}/]" 
+echo "  to: [${REMHOST}:${REMDIR}/${INSTALL}]"
+echo "  to: [${TMPDIR}/${INSTALL}]"
+echo
+} > ${LOG}.bck.bck
+
+cat ${LOG}.bck.bck
+
+cat ${LOG} >> ${LOG}.bck.bck
+
+cp -f ${LOG} ${LOG}.bck
+mv -f ${LOG}.bck.bck ${LOG}
 
 
 
