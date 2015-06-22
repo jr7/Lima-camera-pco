@@ -83,11 +83,6 @@ char * _timestamp_gitversion(char *buffVersion, int len)
 				 TANGO_GIT_VERSION);
 	return buffVersion;
 }
-//char * _timestamp_pcogitversion(){return PCO_GIT_VERSION ;};
-//char * _timestamp_proclibgitversion(){return PROCLIB_GIT_VERSION ;};
-//char * _timestamp_libconfiggitversion(){return LIBCONFIG_GIT_VERSION ;};
-//#char * _timestamp_limagitversion(){return LIMA_GIT_VERSION ;};
-//char * _timestamp_tangogitversion(){return TANGO_GIT_VERSION ;};
 #endif
 
 char * _getComputerName(char *infoBuff, DWORD  bufCharCount);
@@ -192,11 +187,6 @@ stcPcoData::stcPcoData(){
 
 #ifdef WITH_GIT_VERSION
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_gitversion(buffVersion, BUFFVERSION_LEN));
-
-//ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_pcogitversion());
-//ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_limagitversion());
-//ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_proclibgitversion());
-//ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_libconfiggitversion());
 #endif
 
 	ptr += sprintf_s(ptr, ptrMax - ptr, "    timestamp: %s\n", getTimestamp(Iso));
