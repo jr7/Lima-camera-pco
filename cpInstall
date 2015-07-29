@@ -10,6 +10,7 @@ LOG="./doc/VERSION.log"
 DT=`date +"%Y-%m-%d_%H%M%S"`
 INSTALL="install-${DT}"
 
+echo ${INSTALL} > ${LOCDIR}/INSTALL_VERSION.txt
 
 scp -r ${LOCDIR}/ ${REMHOST}:${REMDIR}/${INSTALL}
 

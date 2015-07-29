@@ -570,6 +570,24 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				m_pcoData->traceAcq.nrImgRecorded,
 				m_pcoData->traceAcq.maxImgCount);
 
+			ptr += sprintf_s(ptr, ptrMax - ptr, 
+				"* msStartAcqStart[%ld]  msStartAcqEnd[%ld]\n",
+				m_pcoData->traceAcq.msStartAcqStart, m_pcoData->traceAcq.msStartAcqEnd);
+			
+			for(int _i = 0; _i < LEN_TRACEACQ_TRHEAD; _i++){
+				long diff;
+				diff = (_i == 0) ? 0 : m_pcoData->traceAcq.msThread[_i] - m_pcoData->traceAcq.msThread[_i-1];
+				ptr += sprintf_s(ptr, ptrMax - ptr, 
+					"* ... msThread[%d][%ld]  diff[%ld]\n", _i, m_pcoData->traceAcq.msThread[_i], diff);
+			}
+
+			for(int _i = 0; _i < LEN_TRACEACQ_TRHEAD; _i++){
+				long long diff;
+				diff = (_i == 0) ? 0 : m_pcoData->traceAcq.usThread[_i] - m_pcoData->traceAcq.usThread[_i-1];
+				ptr += sprintf_s(ptr, ptrMax - ptr, 
+					"* ... usThread[%d][%5.3f]  diff[%5.3f]\n", _i, m_pcoData->traceAcq.usThread[_i]/1000., diff/1000.);
+			}
+
 			_timet = m_pcoData->traceAcq.endRecordTimestamp;
 			ptr += sprintf_s(ptr, ptrMax - ptr, 
 				"* msRecordLoop[%ld] msRecord[%ld] endRecord[%s]\n",
@@ -609,8 +627,16 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				ptr += sprintf_s(ptr, ptrMax - ptr, "testCmdMode [0x%llx]",  m_pcoData->testCmdMode);
 				if(tokNr >= 2){
 					int nr;
-					nr = sscanf_s(tok[2], "0x%llx", &m_pcoData->testCmdMode);
-					ptr += sprintf_s(ptr, ptrMax - ptr, "   %s>  ",  (nr == 1) ? "changed OK": "ERROR - NOT changed");
+					unsigned long long _testCmdMode;
+
+					nr = sscanf_s(tok[2], "0x%llx", &_testCmdMode);
+					
+					if(nr == 1) {
+						m_pcoData->testCmdMode = _testCmdMode;
+						ptr += sprintf_s(ptr, ptrMax - ptr, "   changed OK>  ");
+					} else {
+						ptr += sprintf_s(ptr, ptrMax - ptr, "   ERROR - NOT changed>  ");
+					}
 					ptr += sprintf_s(ptr, ptrMax - ptr, "testCmdMode [0x%llx]",  m_pcoData->testCmdMode);
 				}
 				return output;
@@ -626,11 +652,33 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				return output;
 			}
 
+			//--- test of sleep
 			if((tokNr == 2) &&  (_stricmp(tok[1], "time")==0)){
-				ptr += sprintf_s(ptr, ptrMax - ptr, "sleeping\n"); 
+				long long us, ms;
+
+				LARGE_INTEGER usStart;
+				struct __timeb64 tStart;
+
+				ptr += sprintf_s(ptr, ptrMax - ptr, "sleeping ...\n"); 
+
+				msElapsedTimeSet(tStart);
+				usElapsedTimeSet(usStart);
+
 				::Sleep(atoi(tok[2])*1000);
-				ptr += sprintf_s(ptr, ptrMax - ptr, "sleeping\n"); 
+
+
+				ms = msElapsedTime(tStart);
+				us = usElapsedTime(usStart);
+
+				ptr += sprintf_s(ptr, ptrMax - ptr, "ms[%lld]\n", ms); 
+				ptr += sprintf_s(ptr, ptrMax - ptr, "us[%lld] [%5.3f]\n", us, us/1000.);
+
+				return output;
 			}
+
+
+
+
 
 			if(tokNr == 0) {
 				ptr += sprintf_s(ptr, ptrMax - ptr, "tokNr [%d] cmd [%s] No parameters", tokNr, cmd); 

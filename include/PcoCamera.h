@@ -66,6 +66,8 @@
 #define TESTCMDMODE_4					0x00000004
 #define TESTCMDMODE_8					0x00000008
 #define TESTCMDMODE_10					0x00000010
+#define TESTCMDMODE_PCO2K_XFER_WAITOBJ		0x00000020   // _pco_acq_thread_dimax dimax: xferMulti or xfer
+
 //---------------------------------------
 
 
@@ -99,7 +101,11 @@ char DLL_EXPORT *_hex_dump_bytes(void *obj, size_t lenObj, char *buff, size_t le
 
 long msElapsedTime(struct __timeb64 &t0);
 void msElapsedTimeSet(struct __timeb64 &t0);
-	
+
+void usElapsedTimeSet(LARGE_INTEGER &tick0) ;
+long long usElapsedTime(LARGE_INTEGER &tick0) ;
+
+
 enum timestampFmt {Iso=1, IsoHMS, FnFull, FnDate};
 char *getTimestamp(timestampFmt fmtIdx, time_t xtime = 0) ;
 time_t getTimestamp();
@@ -147,6 +153,7 @@ struct stcTemp {
 };
 
 
+#define LEN_TRACEACQ_TRHEAD 8
 #define SIZEARR_stcPcoHWIOSignal 10
 struct stcPcoData {
 	PCO_General stcPcoGeneral;
@@ -211,6 +218,13 @@ struct stcPcoData {
 			int nrImgRequested0;
 			int nrImgAcquired;
 			long msTotal, msRecord, msRecordLoop, msXfer, msTout;
+			long msStartAcqStart, msStartAcqEnd;
+			
+			//long msThreadBeforeXfer, msThreadAfterXfer, msThreadEnd;
+			long msThread[LEN_TRACEACQ_TRHEAD];
+			long msReserved[15-LEN_TRACEACQ_TRHEAD];
+			
+			long long usThread[LEN_TRACEACQ_TRHEAD];
 			double msImgCoc;
 			double sExposure, sDelay;
 			time_t endRecordTimestamp;

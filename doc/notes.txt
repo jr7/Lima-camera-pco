@@ -5,6 +5,12 @@
 #===================================================
 
 #===================================================
+# 2015/06/22
+  - changed the repository for lima/win
+    /segfs/bliss/projects/LIMA/build/depot_win
+    /segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco
+
+#===================================================
 # 2014/09/19
   - when tested without cam python error in fglib5.dll (not found) 
   -- included in cameralink RuntimeSetup_v5.1.4_IA32.exe 
@@ -107,10 +113,15 @@ $ ./setId
 # blissinstaller packages
 #===============================================================================
 (blissadm)
-bestia:/segfs/bliss/projects/LIMA/build/depot/win32_vc9/pco %           
+NOT VALID - bestia:/segfs/bliss/projects/LIMA/build/depot/win32_vc9/pco %           
 
 blissinstaler:
 Control/Tango/Server/LimaCCDs-pco/win32_vc9/1.5
+
+On 22/06/2015 16:49
+> /segfs/bliss/projects/LIMA/build/depot_win
+> /segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco
+
 
 #===============================================================================
 #===============================================================================
