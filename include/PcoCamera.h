@@ -104,6 +104,7 @@ void msElapsedTimeSet(struct __timeb64 &t0);
 
 void usElapsedTimeSet(LARGE_INTEGER &tick0) ;
 long long usElapsedTime(LARGE_INTEGER &tick0) ;
+double usElapsedTimeTicsPerSec() ;
 
 
 enum timestampFmt {Iso=1, IsoHMS, FnFull, FnDate};
@@ -221,10 +222,10 @@ struct stcPcoData {
 			
 #define LEN_TRACEACQ_TRHEAD 11
 			//long msThreadBeforeXfer, msThreadAfterXfer, msThreadEnd;
-			long msThread[LEN_TRACEACQ_TRHEAD];
+			//long msThread[LEN_TRACEACQ_TRHEAD];
 			long msReserved[15-LEN_TRACEACQ_TRHEAD];
 			
-			long long usThread[LEN_TRACEACQ_TRHEAD];
+			long long usTicks[LEN_TRACEACQ_TRHEAD];
 			double msImgCoc;
 			double sExposure, sDelay;
 			time_t endRecordTimestamp;

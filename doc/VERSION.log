@@ -1,4 +1,25 @@
 
+2015/07/30 11:22:22 ==========================================
+scp: copied local directory to segfs and /tmp_14_days:
+from: [/c/blissadm/git/pco/Lima/install/]
+  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-30_112216]
+  to: [/t/rhoms1/install-2015-07-30_112216]
+
+
+2015/07/30 11:12:10 ==========================================
+scp: copied local directory to segfs and /tmp_14_days:
+from: [/c/blissadm/git/pco/Lima/install/]
+  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-30_111202]
+  to: [/t/rhoms1/install-2015-07-30_111202]
+
+
+2015/07/30 10:59:36 ==========================================
+scp: copied local directory to segfs and /tmp_14_days:
+from: [/c/blissadm/git/pco/Lima/install/]
+  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-30_105929]
+  to: [/t/rhoms1/install-2015-07-30_105929]
+
+
 
 2015/07/30 10:10:49 ==========================================
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2015-07-29 17:33:39 +0200] head[b09431c][b09431cb7b3d00efdac210bb9810fc9c8ae854bd] ref[ (HEAD, github/master, github/HEAD, master, develop)] at [2015/07/30 10:10:48] $"

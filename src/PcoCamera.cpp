@@ -687,8 +687,6 @@ void Camera::startAcq()
 			_dwPixelRate = m_pcoData->dwPixelRate;
 			DEB_ALWAYS() << "PIXEL rate SET (old/new): "  << DEB_VAR2(_dwPixelRateOld, _dwPixelRate) ;
 
-			//error = PcoCheckError(__LINE__, __FILE__, PCO_ArmCamera(m_handle));
-		    //PCO_THROW_OR_TRACE(error, "PCO_ArmCamera") ;
 		}
 		m_pcoData->dwPixelRateRequested = 0;
 	}
@@ -714,14 +712,9 @@ void Camera::startAcq()
 			_dwPixelRate = m_pcoData->dwPixelRate;
 			DEB_ALWAYS() << "PIXEL rate SET (old/new): "  << DEB_VAR2(_dwPixelRateOld, _dwPixelRate) ;
 
-			//error = PcoCheckError(__LINE__, __FILE__, PCO_ArmCamera(m_handle));
-		    //PCO_THROW_OR_TRACE(error, "PCO_ArmCamera") ;
 		}
 	}
 
-	//DEB_ALWAYS() << "ARM the camera / PCO_ArmCamera";
-    //error = PcoCheckError(__LINE__, __FILE__, PCO_ArmCamera(m_handle)); 
-	//PCO_THROW_OR_TRACE(error, "PCO_ArmCamera") ;
 		
 
     //--------------------------- PREPARE / getSizes, pixelRate, clXferParam, LUT, setImgParam, Arm
@@ -779,7 +772,6 @@ void Camera::startAcq()
 	}
 
 	if(_isCameraType(Dimax)){
-	//if(_isCameraType(Dimax | Pco2k | Pco4k)){
 		_pcoSet_RecordingState(1, error);
 		if(iRequestedFrames > 0 ) {
 			_beginthread( _pco_acq_thread_dimax, 0, (void*) this);
@@ -824,13 +816,22 @@ long long usElapsedTime(LARGE_INTEGER &tick0) {
 	QueryPerformanceFrequency(&ticksPerSecond); 
 	QueryPerformanceCounter(&tick);
 
-	long long ticsPerUSecond = ((long long)ticksPerSecond.QuadPart)/1000000LL;
-	uS = tick.QuadPart/ticsPerUSecond;
-	uS0 = tick0.QuadPart/ticsPerUSecond;
+	double ticsPerUSecond = ticksPerSecond.QuadPart/1.0e6;
+	uS = (long long) (tick.QuadPart/ticsPerUSecond);
+	uS0 = (long long) (tick0.QuadPart/ticsPerUSecond);
 
 	return uS - uS0;
 
 }
+
+double usElapsedTimeTicsPerSec() {
+	LARGE_INTEGER ticksPerSecond;
+
+	QueryPerformanceFrequency(&ticksPerSecond); 
+	return (double) ticksPerSecond.QuadPart;
+
+}
+
 //==========================================================================================================
 //==========================================================================================================
 
@@ -1222,8 +1223,7 @@ void _pco_acq_thread_ringBuffer(void *argin) {
 
 
 
-	m_pcoData->traceAcq.msThread[0] = msElapsedTime(tStart);
-	m_pcoData->traceAcq.usThread[0] = usElapsedTime(usStart);
+	m_pcoData->traceAcq.usTicks[0] = usElapsedTime(usStart);
 	
 	if(m_pcoData->testCmdMode & TESTCMDMODE_PCO2K_XFER_WAITOBJ) {
 		status = (pcoAcqStatus) m_buffer->_xferImag();      //  <------------- uses WAITOBJ
@@ -1231,24 +1231,18 @@ void _pco_acq_thread_ringBuffer(void *argin) {
 		status = (pcoAcqStatus) m_buffer->_xferImagMult();  //  <------------- USES PCO_GetImageEx (NO waitobj)   0x20
 	}
 
-	m_pcoData->traceAcq.msThread[1] = msElapsedTime(tStart);
-	m_pcoData->traceAcq.usThread[1] = usElapsedTime(usStart);
+	m_pcoData->traceAcq.usTicks[1] = usElapsedTime(usStart);
 
-	//status = (pcoAcqStatus) m_buffer->_xferImag();
-	//status = (pcoAcqStatus) m_buffer->_xferImagMult();   working one
 	
 	m_sync->setExposing(status);
 
-	m_pcoData->traceAcq.msThread[2] = msElapsedTime(tStart);
-	m_pcoData->traceAcq.usThread[2] = usElapsedTime(usStart);
+	m_pcoData->traceAcq.usTicks[2] = usElapsedTime(usStart);
 	m_sync->stopAcq();
 
-	m_pcoData->traceAcq.msThread[3] = msElapsedTime(tStart);
-	m_pcoData->traceAcq.usThread[3] = usElapsedTime(usStart);
+	m_pcoData->traceAcq.usTicks[3] = usElapsedTime(usStart);
 
 	char *msg = m_cam->_pcoSet_RecordingState(0, error);
-	m_pcoData->traceAcq.msThread[4] = msElapsedTime(tStart);
-	m_pcoData->traceAcq.usThread[4] = usElapsedTime(usStart);
+	m_pcoData->traceAcq.usTicks[4] = usElapsedTime(usStart);
 	if(error) {
 		printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, msg);
 		//throw LIMA_HW_EXC(Error, "_pcoSet_RecordingState");
@@ -1270,8 +1264,7 @@ void _pco_acq_thread_ringBuffer(void *argin) {
 
 	m_sync->setStarted(false); // to test
 
-	m_pcoData->traceAcq.msThread[5] = msElapsedTime(tStart);
-	m_pcoData->traceAcq.usThread[5] = usElapsedTime(usStart);
+	m_pcoData->traceAcq.usTicks[5] = usElapsedTime(usStart);
 
 	_endthread();
 }
@@ -1533,23 +1526,6 @@ void _pco_time2dwbase(double exp_time, DWORD &dwExp, WORD &wBase) {
 
 	return;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 //=================================================================================================
@@ -1962,28 +1938,38 @@ char *Camera::_pcoGet_TemperatureInfo(int &error){
 
 //=================================================================================================
 //=================================================================================================
+
+/**************************************************************************************************
+	If a set recording status = [stop] command is sent and the current status is already
+	[stop]’ped, nothing will happen (only warning, error message). 
+	
+	If the camera is in
+	[run]’ing state, it will last some time (system delay + last image readout), until the
+	camera is stopped. The system delay depends on the PC and the image readout
+	depends on the image size transferred. The SetRecordingState = [stop] checks for a
+	stable stop state by calling GetRecordingState.  --- 165 ms 
+	
+	Please call PCO_CancelImages to remove pending buffers from the driver.   --- 1.5 s
+**************************************************************************************************/
+
 char * Camera::_pcoSet_RecordingState(int state, int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 	char *msg;
 	LARGE_INTEGER usStart;
-	struct __timeb64 tStart;
 
 
 	WORD wRecState_new, wRecState_actual;
 
 	wRecState_new = state ? 0x0001 : 0x0000 ; // 0x0001 => START acquisition
 
-	msElapsedTimeSet(tStart);
 	usElapsedTimeSet(usStart);
 
 	error = PcoCheckError(__LINE__, __FILE__, PCO_GetRecordingState(m_handle, &wRecState_actual));
 	msg = "PCO_GetRecordingState";
 	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 
-	m_pcoData->traceAcq.msThread[8] = msElapsedTime(tStart);
-	m_pcoData->traceAcq.usThread[8] = usElapsedTime(usStart);
-	msElapsedTimeSet(tStart);
+	m_pcoData->traceAcq.usTicks[8] = usElapsedTime(usStart);
 	usElapsedTimeSet(usStart);
 
 	//if(wRecState_new == wRecState_actual) {error = 0; return fnId; }
@@ -1992,9 +1978,7 @@ char * Camera::_pcoSet_RecordingState(int state, int &error){
 	msg = "PCO_SetRecordingState";
 	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 
-	m_pcoData->traceAcq.msThread[9] = msElapsedTime(tStart);
-	m_pcoData->traceAcq.usThread[9] = usElapsedTime(usStart);
-	msElapsedTimeSet(tStart);
+	m_pcoData->traceAcq.usTicks[9] = usElapsedTime(usStart);
 	usElapsedTimeSet(usStart);
 
 	if(wRecState_new == 0) {
@@ -2003,9 +1987,7 @@ char * Camera::_pcoSet_RecordingState(int state, int &error){
 		PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 	}
 
-	m_pcoData->traceAcq.msThread[10] = msElapsedTime(tStart);
-	m_pcoData->traceAcq.usThread[10] = usElapsedTime(usStart);
-	msElapsedTimeSet(tStart);
+	m_pcoData->traceAcq.usTicks[10] = usElapsedTime(usStart);
 	usElapsedTimeSet(usStart);
 
 	DEB_ALWAYS() << fnId << ": " << DEB_VAR4(error, state, wRecState_actual, wRecState_new);

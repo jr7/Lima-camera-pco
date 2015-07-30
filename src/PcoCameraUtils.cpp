@@ -574,18 +574,12 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 				"* msStartAcqStart[%ld]  msStartAcqEnd[%ld]\n",
 				m_pcoData->traceAcq.msStartAcqStart, m_pcoData->traceAcq.msStartAcqEnd);
 			
-			for(int _i = 0; _i < LEN_TRACEACQ_TRHEAD; _i++){
-				long diff;
-				diff = (_i == 0) ? 0 : m_pcoData->traceAcq.msThread[_i] - m_pcoData->traceAcq.msThread[_i-1];
-				ptr += sprintf_s(ptr, ptrMax - ptr, 
-					"* ... msThread[%d][%ld]  diff[%ld]\n", _i, m_pcoData->traceAcq.msThread[_i], diff);
-			}
 
 			for(int _i = 0; _i < LEN_TRACEACQ_TRHEAD; _i++){
 				long long diff;
-				diff = (_i == 0) ? 0 : m_pcoData->traceAcq.usThread[_i] - m_pcoData->traceAcq.usThread[_i-1];
+				diff = (_i == 0) ? 0 : m_pcoData->traceAcq.usTicks[_i] - m_pcoData->traceAcq.usTicks[_i-1];
 				ptr += sprintf_s(ptr, ptrMax - ptr, 
-					"* ... usThread[%d][%5.3f]  diff[%5.3f]\n", _i, m_pcoData->traceAcq.usThread[_i]/1000., diff/1000.);
+					"* ... (ms) usTicks[%d][%5.3f]  diff[%5.3f]\n", _i, m_pcoData->traceAcq.usTicks[_i]/1000., diff/1000.);
 			}
 
 			_timet = m_pcoData->traceAcq.endRecordTimestamp;
@@ -654,24 +648,20 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 
 			//--- test of sleep
 			if((tokNr == 2) &&  (_stricmp(tok[1], "time")==0)){
-				long long us, ms;
+				long long us;
 
 				LARGE_INTEGER usStart;
-				struct __timeb64 tStart;
 
 				ptr += sprintf_s(ptr, ptrMax - ptr, "sleeping ...\n"); 
 
-				msElapsedTimeSet(tStart);
 				usElapsedTimeSet(usStart);
 
 				::Sleep(atoi(tok[2])*1000);
 
 
-				ms = msElapsedTime(tStart);
 				us = usElapsedTime(usStart);
-
-				ptr += sprintf_s(ptr, ptrMax - ptr, "ms[%lld]\n", ms); 
-				ptr += sprintf_s(ptr, ptrMax - ptr, "us[%lld] [%5.3f]\n", us, us/1000.);
+				double ticksPerSec = usElapsedTimeTicsPerSec();
+				ptr += sprintf_s(ptr, ptrMax - ptr, "us[%lld] ms[%5.3f] tics/us[%g]\n", us, us/1000., ticksPerSec/1.0e6);
 
 				return output;
 			}

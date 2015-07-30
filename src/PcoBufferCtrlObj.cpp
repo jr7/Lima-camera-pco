@@ -899,9 +899,6 @@ int BufferCtrlObj::_xferImagMult()
 	m_pcoData->traceAcq.nrImgRequested = dwRequestedFrames;
 
 
-	msElapsedTimeSet(tStart);
-	usElapsedTimeSet(usStart);
-
 	while(dwFrameIdx <= dwRequestedFrames) {
 		bufIdx++; if(bufIdx >= _iPcoAllocatedBuffNr) bufIdx = 0;
 		sBufNr = m_allocBuff.pcoAllocBufferNr[bufIdx];
@@ -917,16 +914,13 @@ int BufferCtrlObj::_xferImagMult()
 			DEB_ALWAYS() << DEB_VAR5( dwFrameIdx, dwFrameIdxFirst, dwFrameIdxLast, dwFramesPerBuffer,  dwRequestedFrames);
 		}
 
-		msElapsedTimeSet(tStart);
 		usElapsedTimeSet(usStart);
 
 		sErr =  m_cam->_PcoCheckError(__LINE__, __FILE__, PCO_GetImageEx(m_handle, \
 			wSegment, dwFrameIdxFirst, dwFrameIdxLast, \
 			sBufNr, _wArmWidth, _wArmHeight, _wBitPerPixel), error);
 		
-		m_pcoData->traceAcq.msThread[6] += msElapsedTime(tStart);
-		m_pcoData->traceAcq.usThread[6] += usElapsedTime(usStart);
-		msElapsedTimeSet(tStart);
+		m_pcoData->traceAcq.usTicks[6] += usElapsedTime(usStart);
 		usElapsedTimeSet(usStart);
 
 		if(error) {
@@ -971,8 +965,7 @@ int BufferCtrlObj::_xferImagMult()
 		m_sync->setAcqFrames(dwFrameIdx);
 		dwFrameIdx++;
 
-		m_pcoData->traceAcq.msThread[7] += msElapsedTime(tStart);
-		m_pcoData->traceAcq.usThread[7] += usElapsedTime(usStart);
+		m_pcoData->traceAcq.usTicks[7] += usElapsedTime(usStart);
 
 	} // while(frameIdx ...
 
