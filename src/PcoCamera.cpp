@@ -1966,15 +1966,25 @@ char * Camera::_pcoSet_RecordingState(int state, int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 	char *msg;
+	LARGE_INTEGER usStart;
+	struct __timeb64 tStart;
 
 
 	WORD wRecState_new, wRecState_actual;
 
 	wRecState_new = state ? 0x0001 : 0x0000 ; // 0x0001 => START acquisition
 
+	msElapsedTimeSet(tStart);
+	usElapsedTimeSet(usStart);
+
 	error = PcoCheckError(__LINE__, __FILE__, PCO_GetRecordingState(m_handle, &wRecState_actual));
 	msg = "PCO_GetRecordingState";
 	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
+
+	m_pcoData->traceAcq.msThread[8] = msElapsedTime(tStart);
+	m_pcoData->traceAcq.usThread[8] = usElapsedTime(usStart);
+	msElapsedTimeSet(tStart);
+	usElapsedTimeSet(usStart);
 
 	//if(wRecState_new == wRecState_actual) {error = 0; return fnId; }
 
@@ -1982,11 +1992,21 @@ char * Camera::_pcoSet_RecordingState(int state, int &error){
 	msg = "PCO_SetRecordingState";
 	PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 
+	m_pcoData->traceAcq.msThread[9] = msElapsedTime(tStart);
+	m_pcoData->traceAcq.usThread[9] = usElapsedTime(usStart);
+	msElapsedTimeSet(tStart);
+	usElapsedTimeSet(usStart);
+
 	if(wRecState_new == 0) {
 		error = PcoCheckError(__LINE__, __FILE__, PCO_CancelImages(m_handle));
 		msg = "PCO_CancelImages";
 		PCO_PRINT_ERR(error, msg); 	if(error) return msg;
 	}
+
+	m_pcoData->traceAcq.msThread[10] = msElapsedTime(tStart);
+	m_pcoData->traceAcq.usThread[10] = usElapsedTime(usStart);
+	msElapsedTimeSet(tStart);
+	usElapsedTimeSet(usStart);
 
 	DEB_ALWAYS() << fnId << ": " << DEB_VAR4(error, state, wRecState_actual, wRecState_new);
 	return fnId;

@@ -153,7 +153,6 @@ struct stcTemp {
 };
 
 
-#define LEN_TRACEACQ_TRHEAD 8
 #define SIZEARR_stcPcoHWIOSignal 10
 struct stcPcoData {
 	PCO_General stcPcoGeneral;
@@ -220,6 +219,7 @@ struct stcPcoData {
 			long msTotal, msRecord, msRecordLoop, msXfer, msTout;
 			long msStartAcqStart, msStartAcqEnd;
 			
+#define LEN_TRACEACQ_TRHEAD 11
 			//long msThreadBeforeXfer, msThreadAfterXfer, msThreadEnd;
 			long msThread[LEN_TRACEACQ_TRHEAD];
 			long msReserved[15-LEN_TRACEACQ_TRHEAD];
