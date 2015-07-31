@@ -153,6 +153,10 @@ struct stcTemp {
 	short wSetpoint;
 };
 
+struct stcLongLongStr {
+	long long value;
+	char *desc;
+};
 
 #define SIZEARR_stcPcoHWIOSignal 10
 struct stcPcoData {
@@ -225,7 +229,7 @@ struct stcPcoData {
 			//long msThread[LEN_TRACEACQ_TRHEAD];
 			long msReserved[15-LEN_TRACEACQ_TRHEAD];
 			
-			long long usTicks[LEN_TRACEACQ_TRHEAD];
+			struct stcLongLongStr usTicks[LEN_TRACEACQ_TRHEAD];
 			double msImgCoc;
 			double sExposure, sDelay;
 			time_t endRecordTimestamp;

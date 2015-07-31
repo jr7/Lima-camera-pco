@@ -576,10 +576,10 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			
 
 			for(int _i = 0; _i < LEN_TRACEACQ_TRHEAD; _i++){
-				long long diff;
-				diff = (_i == 0) ? 0 : m_pcoData->traceAcq.usTicks[_i] - m_pcoData->traceAcq.usTicks[_i-1];
 				ptr += sprintf_s(ptr, ptrMax - ptr, 
-					"* ... (ms) usTicks[%d][%5.3f]  diff[%5.3f]\n", _i, m_pcoData->traceAcq.usTicks[_i]/1000., diff/1000.);
+					"* ... usTicks[%d][%5.3f] (ms)   (%s)\n", 
+					_i, m_pcoData->traceAcq.usTicks[_i].value/1000.,
+					m_pcoData->traceAcq.usTicks[_i].desc);
 			}
 
 			_timet = m_pcoData->traceAcq.endRecordTimestamp;

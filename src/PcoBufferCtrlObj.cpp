@@ -898,6 +898,8 @@ int BufferCtrlObj::_xferImagMult()
 
 	m_pcoData->traceAcq.nrImgRequested = dwRequestedFrames;
 
+	m_pcoData->traceAcq.usTicks[6].desc = "PCO_GetImageEx total execTime";
+	m_pcoData->traceAcq.usTicks[7].desc = "xfer to lima / total execTime";
 
 	while(dwFrameIdx <= dwRequestedFrames) {
 		bufIdx++; if(bufIdx >= _iPcoAllocatedBuffNr) bufIdx = 0;
@@ -920,7 +922,7 @@ int BufferCtrlObj::_xferImagMult()
 			wSegment, dwFrameIdxFirst, dwFrameIdxLast, \
 			sBufNr, _wArmWidth, _wArmHeight, _wBitPerPixel), error);
 		
-		m_pcoData->traceAcq.usTicks[6] += usElapsedTime(usStart);
+		m_pcoData->traceAcq.usTicks[6].value += usElapsedTime(usStart);
 		usElapsedTimeSet(usStart);
 
 		if(error) {
@@ -965,7 +967,7 @@ int BufferCtrlObj::_xferImagMult()
 		m_sync->setAcqFrames(dwFrameIdx);
 		dwFrameIdx++;
 
-		m_pcoData->traceAcq.usTicks[7] += usElapsedTime(usStart);
+		m_pcoData->traceAcq.usTicks[7].value += usElapsedTime(usStart);
 
 	} // while(frameIdx ...
 

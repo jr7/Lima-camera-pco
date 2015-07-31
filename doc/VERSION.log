@@ -1,4 +1,18 @@
 
+2015/07/31 09:41:29 ==========================================
+scp: copied local directory to segfs and /tmp_14_days:
+from: [/c/blissadm/git/pco/Lima/install/]
+  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-31_094120]
+  to: [/t/rhoms1/install-2015-07-31_094120]
+
+
+2015/07/31 09:21:29 ==========================================
+scp: copied local directory to segfs and /tmp_14_days:
+from: [/c/blissadm/git/pco/Lima/install/]
+  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-31_092121]
+  to: [/t/rhoms1/install-2015-07-31_092121]
+
+
 2015/07/30 11:22:22 ==========================================
 scp: copied local directory to segfs and /tmp_14_days:
 from: [/c/blissadm/git/pco/Lima/install/]
