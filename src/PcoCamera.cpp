@@ -1998,9 +1998,17 @@ char * Camera::_pcoSet_RecordingState(int state, int &error){
 	usElapsedTimeSet(usStart);
 
 	if(wRecState_new == 0) {
-		error = PcoCheckError(__LINE__, __FILE__, PCO_CancelImages(m_handle));
-		msg = "PCO_CancelImages";
+		int count;
+
+		error = PcoCheckError(__LINE__, __FILE__, PCO_GetPendingBuffer(m_handle, &count));
+		msg = "PCO_GetPendingBuffer";
 		PCO_PRINT_ERR(error, msg); 	if(error) return msg;
+
+		if(count) {
+			error = PcoCheckError(__LINE__, __FILE__, PCO_CancelImages(m_handle));
+			msg = "PCO_CancelImages";
+			PCO_PRINT_ERR(error, msg); 	if(error) return msg;
+		}
 	}
 
 	m_pcoData->traceAcq.usTicks[10].value = usElapsedTime(usStart);

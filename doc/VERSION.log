@@ -1,4 +1,22 @@
 
+
+2015/08/04 17:28:01 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-07-31 13:12:30 +0200] head[a9fe182][a9fe1826cf21fc4d96fa6cb84c624203bc4c1563] ref[ (HEAD, github/develop, develop)] at [2015/08/04 17:27:59] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, core-1.4)] at [2015/08/04 17:27:59] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-01 18:48:32 +0200] head[4d2617a][4d2617af3b25b5033fe0ce807d36ef34f28f8681] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/08/04 17:27:59] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/08/04 17:27:59] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-06-03 11:42:48 +0200] head[676128c][676128c2d558d441907949b54736e6f80485d280] ref[ (HEAD, master)] at [2015/08/04 17:27:59] $"
+
+# stop recording: check PCO_GetPendingBuffer to know if PCO_CancelImages is required - dead time reduction (1.5 sec) 
+
+
+2015/08/04 17:21:09 ==========================================
+scp: copied local directory to segfs and /tmp_14_days:
+from: [/c/blissadm/git/pco/Lima/install/]
+  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-08-04_172059]
+  to: [/t/rhoms1/install-2015-08-04_172059]
+
+
 2015/07/31 09:41:29 ==========================================
 scp: copied local directory to segfs and /tmp_14_days:
 from: [/c/blissadm/git/pco/Lima/install/]
