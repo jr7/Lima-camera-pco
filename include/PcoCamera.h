@@ -370,6 +370,8 @@ namespace lima
 		bool _isConfig(){return m_config; };
 		void _pco_set_shutter_rolling_edge(int &error);
 		void msgLog(char *s);
+		bool _getIsArmed() {return m_isArmed; };
+		void _setIsArmed(bool isArmed){m_isArmed = isArmed;};
 		
 
 
@@ -385,6 +387,8 @@ namespace lima
 
         HANDLE	m_handle;				/* handle of opened camera */
         bool m_cam_connected;
+
+		Cond m_cond;
 	
 		int m_pcoError;
 
@@ -397,6 +401,7 @@ namespace lima
 		int		m_acq_frame_nb;
 		bool m_config;
 
+		bool m_isArmed;
 
         int PcoCheckError(int line, char *file, int err);
 
@@ -422,6 +427,7 @@ namespace lima
 		void _init_edge();
 		void _init_dimax();
 		char *_prepare_cameralink_interface(int &error);
+		char *_prepare_pixel_rate(int &error);
 		char *_get_coc_runtime(int &error);
 		char *_set_metadata_mode(WORD wMetaDataMode, int &error);
 

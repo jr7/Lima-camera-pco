@@ -52,7 +52,9 @@ Interface::Interface(Camera *cam) :
   
   m_RoiCtrlObj = new RoiCtrlObj(cam);
   m_det_info = new DetInfoCtrlObj(cam);
+
   cam->m_buffer = m_buffer = new BufferCtrlObj(cam);
+  
   cam->m_sync = m_sync = new SyncCtrlObj(cam, m_buffer);
    
   DEB_TRACE() << DEB_VAR2(cam, m_buffer);

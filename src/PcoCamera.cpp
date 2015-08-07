@@ -568,43 +568,59 @@ void Camera::startAcq()
     m_sync->getNbFrames(iRequestedFrames);
 
     //------------------------------------------------- set binning if needed
-    WORD wBinHorz, wBinVert;
+    WORD wBinHorz, wBinVert, wBinHorzNow, wBinVertNow;
     if (m_bin.changed == Changed) {
 		wBinHorz = (WORD)m_bin.x;
 		wBinVert = (WORD)m_bin.y;
-        error = PcoCheckError(__LINE__, __FILE__, PCO_SetBinning(m_handle, wBinHorz, wBinVert));
-        PCO_THROW_OR_TRACE(error, "PCO_SetBinning") ;
-        m_bin.changed= Valid;
+
+		error = PcoCheckError(__LINE__, __FILE__, PCO_GetBinning(m_handle, &wBinHorzNow, &wBinVertNow));
+		PCO_THROW_OR_TRACE(error, "PCO_GetBinning") ;
+		
+		if((wBinHorz != wBinHorzNow) || (wBinVert != wBinVertNow)) {
+			error = PcoCheckError(__LINE__, __FILE__, PCO_SetBinning(m_handle, wBinHorz, wBinVert));
+			PCO_THROW_OR_TRACE(error, "PCO_SetBinning") ;
+			_setIsArmed(false);
+
+			error = PcoCheckError(__LINE__, __FILE__, PCO_GetBinning(m_handle, &wBinHorzNow, &wBinVertNow));
+			PCO_THROW_OR_TRACE(error, "PCO_GetBinning") ;
+		}
+		m_bin.changed= Valid;
+		DEB_TRACE() << DEB_VAR4(wBinHorz, wBinVert, wBinHorzNow, wBinVertNow);
     }
 
-    error = PcoCheckError(__LINE__, __FILE__, PCO_GetBinning(m_handle, &wBinHorz, &wBinVert));
-    PCO_THROW_OR_TRACE(error, "PCO_GetBinning") ;
-	DEB_TRACE() << DEB_VAR2(wBinHorz, wBinVert);
 
     //------------------------------------------------- set roi if needed
-    WORD wRoiX0, wRoiY0; // Roi upper left x y
-    WORD wRoiX1, wRoiY1; // Roi lower right x y
+    WORD wRoiX0, wRoiY0, wRoiX0Now, wRoiY0Now; // Roi upper left x y
+    WORD wRoiX1, wRoiY1, wRoiX1Now, wRoiY1Now; // Roi lower right x y
 	unsigned int x0, x1, y0, y1;
 
-    
-		_get_Roi(x0, x1, y0, y1);
+	_get_Roi(x0, x1, y0, y1);
+    wRoiX0 = (WORD) x0; wRoiX1 = (WORD) x1;
+    wRoiY0 = (WORD) y0; wRoiY1 = (WORD) y1;
 
-        wRoiX0 = (WORD) x0; wRoiX1 = (WORD) x1;
-        wRoiY0 = (WORD) y0; wRoiY1 = (WORD) y1;
-
-		if(_getDebug(DBG_ROI)) {
-			DEB_ALWAYS() << "PCO_SetROI> " << DEB_VAR5(m_RoiLima, wRoiX0, wRoiY0, wRoiX1, wRoiY1);
-		}
-
-        error = PcoCheckError(__LINE__, __FILE__, PCO_SetROI(m_handle, wRoiX0, wRoiY0, wRoiX1, wRoiY1));
-        PCO_THROW_OR_TRACE(error, "PCO_SetROI") ;
-
-
-	error = PcoCheckError(__LINE__, __FILE__, PCO_GetROI(m_handle, &wRoiX0, &wRoiY0, &wRoiX1, &wRoiY1));
+	error = PcoCheckError(__LINE__, __FILE__, PCO_GetROI(m_handle, &wRoiX0Now, &wRoiY0Now, &wRoiX1Now, &wRoiY1Now));
     PCO_THROW_OR_TRACE(error, "PCO_GetROI") ;
 
 	if(_getDebug(DBG_ROI)) {
-		DEB_ALWAYS() <<  "PCO_GetROI> " << DEB_VAR4(wRoiX0, wRoiY0, wRoiX1, wRoiY1);
+			DEB_ALWAYS() << "PCO_SetROI> " << DEB_VAR5(m_RoiLima, wRoiX0, wRoiY0, wRoiX1, wRoiY1);
+		}
+
+
+	if((wRoiX0Now != wRoiX0) ||	(wRoiX1Now != wRoiX1) || (wRoiY0Now != wRoiY0) || (wRoiY0Now != wRoiY0)) {
+		
+		DEB_ALWAYS() << "PCO_SetROI> " << DEB_VAR5(m_RoiLima, wRoiX0, wRoiY0, wRoiX1, wRoiY1);
+
+		error = PcoCheckError(__LINE__, __FILE__, PCO_SetROI(m_handle, wRoiX0, wRoiY0, wRoiX1, wRoiY1));
+        PCO_THROW_OR_TRACE(error, "PCO_SetROI") ;
+
+		error = PcoCheckError(__LINE__, __FILE__, PCO_GetROI(m_handle, &wRoiX0Now, &wRoiY0Now, &wRoiX1Now, &wRoiY1Now));
+		PCO_THROW_OR_TRACE(error, "PCO_GetROI") ;
+
+		_setIsArmed(false);
+	}
+
+	if(_getDebug(DBG_ROI)) {
+		DEB_ALWAYS() <<  "PCO_GetROI> " << DEB_VAR4(wRoiX0Now, wRoiY0Now, wRoiX1Now, wRoiY1Now);
 	}
 
 
@@ -632,7 +648,7 @@ void Camera::startAcq()
 		PCO_THROW_OR_TRACE(error, msg) ;
 	}
 //----------------------------------- set exposure time & delay time
-	msg = _pcoSet_Exposure_Delay_Time(error,0);
+	msg = _pcoSet_Exposure_Delay_Time(error,0);   // initial set of delay (phase = 0)
 	PCO_THROW_OR_TRACE(error, msg) ;
 
 
@@ -660,79 +676,28 @@ void Camera::startAcq()
 
 	// ------------------------------------------------- arm camera
 
-	// moved to the end. need to check if GET pixelrate can be made before any arm ????
     // when the pixel rate is changed ARM MUST be done after it!!!!
-
-	//error = PcoCheckError(__LINE__, __FILE__, PCO_ArmCamera(m_handle)); 
-	//PCO_THROW_OR_TRACE(error, "PCO_ArmCamera") ;
-
-	if(_isCameraType(Edge)) {
-		DWORD _dwPixelRate, _dwPixelRateOld, _dwPixelRateReq;
-
-		error = PcoCheckError(__LINE__, __FILE__, PCO_GetPixelRate(m_handle, &m_pcoData->dwPixelRate));
-	    PCO_THROW_OR_TRACE(error, "PCO_GetPixelRate") ;
-
-		_dwPixelRateOld = m_pcoData->dwPixelRate;
-		_dwPixelRateReq = m_pcoData->dwPixelRateRequested;
-		DEB_ALWAYS() << "PIXEL rate (actual/req): " << DEB_VAR2(_dwPixelRateOld, _dwPixelRateReq) ;
-
-		if(_isValid_pixelRate(_dwPixelRateReq) && (_dwPixelRateOld != _dwPixelRateReq)) {
-
-			error = PcoCheckError(__LINE__, __FILE__, PCO_SetPixelRate(m_handle, _dwPixelRateReq));
-		    PCO_THROW_OR_TRACE(error, "PCO_SetPixelRate") ;
-
-			error = PcoCheckError(__LINE__, __FILE__, PCO_GetPixelRate(m_handle, &m_pcoData->dwPixelRate));
-		    PCO_THROW_OR_TRACE(error, "PCO_GetPixelRate") ;
-
-			_dwPixelRate = m_pcoData->dwPixelRate;
-			DEB_ALWAYS() << "PIXEL rate SET (old/new): "  << DEB_VAR2(_dwPixelRateOld, _dwPixelRate) ;
-
-		}
-		m_pcoData->dwPixelRateRequested = 0;
-	}
-
-	if(_isCameraType(Pco2k | Pco4k)) {
-		DWORD _dwPixelRate, _dwPixelRateOld, _dwPixelRateMax;
-
-		error = PcoCheckError(__LINE__, __FILE__, PCO_GetPixelRate(m_handle, &m_pcoData->dwPixelRate));
-	    PCO_THROW_OR_TRACE(error, "PCO_GetPixelRate") ;
-
-		_dwPixelRateOld = m_pcoData->dwPixelRate;
-		_dwPixelRateMax = m_pcoData->dwPixelRateMax;
-		DEB_ALWAYS() << "PIXEL rate (actual/max): " << DEB_VAR2(_dwPixelRateOld, _dwPixelRateMax) ;
-
-		if(_dwPixelRateMax > _dwPixelRateOld) {
-
-			error = PcoCheckError(__LINE__, __FILE__, PCO_SetPixelRate(m_handle, _dwPixelRateMax));
-		    PCO_THROW_OR_TRACE(error, "PCO_SetPixelRate") ;
-
-			error = PcoCheckError(__LINE__, __FILE__, PCO_GetPixelRate(m_handle, &m_pcoData->dwPixelRate));
-		    PCO_THROW_OR_TRACE(error, "PCO_GetPixelRate") ;
-			
-			_dwPixelRate = m_pcoData->dwPixelRate;
-			DEB_ALWAYS() << "PIXEL rate SET (old/new): "  << DEB_VAR2(_dwPixelRateOld, _dwPixelRate) ;
-
-		}
-	}
-
+	msg = _prepare_pixel_rate(error); PCO_THROW_OR_TRACE(error, msg) ;
 		
-
     //--------------------------- PREPARE / getSizes, pixelRate, clXferParam, LUT, setImgParam, Arm
 
 	error = PcoCheckError(__LINE__, __FILE__, PCO_GetSizes(m_handle, &m_pcoData->wXResActual, &m_pcoData->wYResActual, &m_pcoData->wXResMax, &m_pcoData->wYResMax));
     PCO_THROW_OR_TRACE(error, "PCO_GetSizes") ;
 
-	//m_sync->_getBufferCtrlObj()->_pcoAllocBuffers();
 	m_buffer->_pcoAllocBuffers();
 
 	msg = _prepare_cameralink_interface(error); PCO_THROW_OR_TRACE(error, msg) ;
 
-	msg = _pcoSet_Exposure_Delay_Time(error,1); PCO_THROW_OR_TRACE(error, msg) ;
+	msg = _pcoSet_Exposure_Delay_Time(error,1);     // fix the delay if it is required (phase = 1) 
+	PCO_THROW_OR_TRACE(error, msg) ;
 
-	DEB_ALWAYS() << "ARM the camera / PCO_ArmCamera";
-    error = PcoCheckError(__LINE__, __FILE__, PCO_ArmCamera(m_handle)); 
-	PCO_THROW_OR_TRACE(error, "PCO_ArmCamera") ;
-
+	if(!_getIsArmed()) {
+		DEB_ALWAYS() << "ARM the camera / PCO_ArmCamera";
+		error = PcoCheckError(__LINE__, __FILE__, PCO_ArmCamera(m_handle)); 
+		PCO_THROW_OR_TRACE(error, "PCO_ArmCamera") ;
+	} else {
+		DEB_ALWAYS() << "BYPASSED - ARM the camera / PCO_ArmCamera";
+	}
 
 	//====================================== get the coc runtime 
     //---- only valid if it was used PCO_SetDelayExposureTime
@@ -750,7 +715,6 @@ void Camera::startAcq()
         }
     } 
 	
-
 	//------------------------------------------------- start acquisition
 
 	m_pcoData->traceAcq.msStartAcqStart = msElapsedTime(tStart);
@@ -930,8 +894,8 @@ void _pco_acq_thread_dimax(void *argin) {
 			break;
 		}
 	
-		if((requestStop = m_buffer->_getRequestStop(_nrStop))  == stopRequest) {
-			m_buffer->_setRequestStop(stopNone);
+		if((requestStop = m_sync->_getRequestStop(_nrStop))  == stopRequest) {
+			m_sync->_setRequestStop(stopNone);
 		
 			char msg[LEN_TRACEACQ_MSG+1];
 				//m_buffer->_setRequestStop(stopProcessing);
@@ -1245,7 +1209,7 @@ void _pco_acq_thread_ringBuffer(void *argin) {
 	m_pcoData->traceAcq.usTicks[2].desc = "sync->setExposing(status) execTime";
 	usElapsedTimeSet(usStart);
 
-	m_sync->stopAcq();
+	//m_sync->stopAcq();
 
 	m_pcoData->traceAcq.usTicks[3].value = usElapsedTime(usStart);
 	m_pcoData->traceAcq.usTicks[3].desc = "sync->stopAcq execTime";
@@ -1275,10 +1239,11 @@ void _pco_acq_thread_ringBuffer(void *argin) {
 	printf("=== %s> EXIT xfer[%ld] (ms) status[%s]\n", 
 			fnId, msXfer, sPcoAcqStatus[status]);
 
-	m_sync->setStarted(false); // to test
 
 	m_pcoData->traceAcq.usTicks[5].desc = "up to _endtrhead execTime";
 	m_pcoData->traceAcq.usTicks[5].value = usElapsedTime(usStart);
+
+	m_sync->setStarted(false); // to test
 
 	_endthread();
 }
@@ -1687,7 +1652,7 @@ char *Camera::_pcoSet_Cameralink_GigE_Parameters(int &error){
 char *Camera::_prepare_cameralink_interface(int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
-	bool bDoArm = FALSE;
+//	bool bDoArm = FALSE;
 	struct stcPcoData _pcoData;
 	char msg[ERRMSG_SIZE + 1];
 
@@ -1752,7 +1717,7 @@ char *Camera::_prepare_cameralink_interface(int &error){
 				_pcoData.clTransferParam.Transmit, m_pcoData->clTransferParam.Transmit);
 		} else msg[0]=0;
 		PCO_THROW_OR_TRACE(error, msg) ;
-		bDoArm = TRUE;
+		_setIsArmed(false);
 	}
 
 	if(_isCameraType(Edge)) {
@@ -1762,7 +1727,7 @@ char *Camera::_prepare_cameralink_interface(int &error){
 	    PCO_THROW_OR_TRACE(error, "PCO_GetActiveLookupTable") ;
 
 		if(_wLUT_Identifier != m_pcoData->wLUT_Identifier) {
-			bDoArm = TRUE;
+			_setIsArmed(false);
 			error = PcoCheckError(__LINE__, __FILE__, 
 				PCO_SetActiveLookupTable(m_handle, &m_pcoData->wLUT_Identifier, &m_pcoData->wLUT_Parameter));
 				PCO_THROW_OR_TRACE(error, "PCO_SetActiveLookupTable") ;
@@ -1773,14 +1738,14 @@ char *Camera::_prepare_cameralink_interface(int &error){
 		}
 	}
 
-	if(bDoArm) {
+//	if(bDoArm) {
 		//error = PcoCheckError(__LINE__, __FILE__, PCO_ArmCamera(m_handle));
 		//PCO_THROW_OR_TRACE(error, "PCO_ArmCamera") ;
-	}
+//	}
+
 
 	error = PcoCheckError(__LINE__, __FILE__, PCO_CamLinkSetImageParameters(m_handle, m_pcoData->wXResActual, m_pcoData->wYResActual));
     PCO_THROW_OR_TRACE(error, "PCO_CamLinkSetImageParameters") ;
-
 
 	return fnId;
 }
@@ -2802,6 +2767,9 @@ int Camera::_pco_getADC(int &adc_working, int &adc_max)
 	return error;
 }
 
+//=================================================================================================
+//=================================================================================================
+
 int Camera::_pco_setADC(int adc_new, int &adc_working)
 {
 	DEB_MEMBER_FUNCT();
@@ -2822,3 +2790,70 @@ int Camera::_pco_setADC(int adc_new, int &adc_working)
 	m_pcoData->wNowADC = adc_working;
 	return error;
 }
+
+
+//=================================================================================================
+//=================================================================================================
+char *Camera::_prepare_pixel_rate(int &error){
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+	error = 0;
+
+	if(_isCameraType(Edge)) {
+		DWORD _dwPixelRate, _dwPixelRateOld, _dwPixelRateReq;
+
+		error = PcoCheckError(__LINE__, __FILE__, PCO_GetPixelRate(m_handle, &m_pcoData->dwPixelRate));
+	    PCO_THROW_OR_TRACE(error, "PCO_GetPixelRate") ;
+
+		_dwPixelRateOld = m_pcoData->dwPixelRate;
+		_dwPixelRateReq = m_pcoData->dwPixelRateRequested;
+		DEB_ALWAYS() << "PIXEL rate (actual/req): " << DEB_VAR2(_dwPixelRateOld, _dwPixelRateReq) ;
+
+		if(_isValid_pixelRate(_dwPixelRateReq) && (_dwPixelRateOld != _dwPixelRateReq)) {
+
+			error = PcoCheckError(__LINE__, __FILE__, PCO_SetPixelRate(m_handle, _dwPixelRateReq));
+		    PCO_THROW_OR_TRACE(error, "PCO_SetPixelRate") ;
+
+			error = PcoCheckError(__LINE__, __FILE__, PCO_GetPixelRate(m_handle, &m_pcoData->dwPixelRate));
+		    PCO_THROW_OR_TRACE(error, "PCO_GetPixelRate") ;
+
+			_dwPixelRate = m_pcoData->dwPixelRate;
+			DEB_ALWAYS() << "PIXEL rate SET (old/new): "  << DEB_VAR2(_dwPixelRateOld, _dwPixelRate) ;
+
+			_setIsArmed(false);
+
+		}
+		m_pcoData->dwPixelRateRequested = 0;
+		return fnId;
+	}
+
+	if(_isCameraType(Pco2k | Pco4k)) {
+		DWORD _dwPixelRate, _dwPixelRateOld, _dwPixelRateMax;
+
+		error = PcoCheckError(__LINE__, __FILE__, PCO_GetPixelRate(m_handle, &m_pcoData->dwPixelRate));
+	    PCO_THROW_OR_TRACE(error, "PCO_GetPixelRate") ;
+
+		_dwPixelRateOld = m_pcoData->dwPixelRate;
+		_dwPixelRateMax = m_pcoData->dwPixelRateMax;
+		DEB_ALWAYS() << "PIXEL rate (actual/max): " << DEB_VAR2(_dwPixelRateOld, _dwPixelRateMax) ;
+
+		if(_dwPixelRateMax > _dwPixelRateOld) {
+
+			error = PcoCheckError(__LINE__, __FILE__, PCO_SetPixelRate(m_handle, _dwPixelRateMax));
+		    PCO_THROW_OR_TRACE(error, "PCO_SetPixelRate") ;
+
+			error = PcoCheckError(__LINE__, __FILE__, PCO_GetPixelRate(m_handle, &m_pcoData->dwPixelRate));
+		    PCO_THROW_OR_TRACE(error, "PCO_GetPixelRate") ;
+			
+			_dwPixelRate = m_pcoData->dwPixelRate;
+			DEB_ALWAYS() << "PIXEL rate SET (old/new): "  << DEB_VAR2(_dwPixelRateOld, _dwPixelRate) ;
+
+			_setIsArmed(false);
+
+		}
+		return fnId;
+	}
+return fnId;
+}
+//=================================================================================================
+//=================================================================================================

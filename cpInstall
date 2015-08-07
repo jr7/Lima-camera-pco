@@ -9,6 +9,7 @@ LOG="./doc/VERSION.log"
 
 DT=`date +"%Y-%m-%d_%H%M%S"`
 INSTALL="install-${DT}"
+INSTALLBETA="install-beta"
 
 echo ${INSTALL} > ${LOCDIR}/INSTALL_VERSION.txt
 
@@ -16,6 +17,7 @@ scp -r ${LOCDIR}/ ${REMHOST}:${REMDIR}/${INSTALL}
 
 cp -r ${LOCDIR}/ ${TMPDIR}/${INSTALL}
 
+cp -r ${LOCDIR}/ ${TMPDIR}/${INSTALLBETA}
 
 {
 echo
@@ -24,6 +26,7 @@ echo "scp: copied local directory to segfs and /tmp_14_days:"
 echo "from: [${LOCDIR}/]" 
 echo "  to: [${REMHOST}:${REMDIR}/${INSTALL}]"
 echo "  to: [${TMPDIR}/${INSTALL}]"
+echo "  to: [${TMPDIR}/${INSTALLBETA}]"
 echo
 } > ${LOG}.bck.bck
 

@@ -64,8 +64,6 @@ BufferCtrlObj::BufferCtrlObj(Camera *cam) :
 	//SoftBufferCtrlObj::Sync &m_bufferSync = *getBufferSync(cond);
 	m_bufferSync = getBufferSync(cond);
 
-  _setRequestStop(stopNone);
-
   //----------------------------------------------- initialization buffers & creating events
   for(int i=0; i < PCO_BUFFER_NREVENTS; i++) {
 		m_allocBuff.pcoAllocBufferNr[i] = -1;
@@ -98,47 +96,6 @@ void BufferCtrlObj::prepareAcq()
 
 }
 
-int BufferCtrlObj::_getRequestStop(int &nrStop)
-{ 
-	nrStop = m_requestStopRetry;
-	return m_requestStop;
-}
-
-
-void BufferCtrlObj::_setRequestStop(int requestStop) 
-{ 
-	DEB_MEMBER_FUNCT();
-	DEF_FNID;
-
-
-	int m_requestStop0 = m_requestStop;
-	
-	
-	switch(requestStop) {
-			case stopNone:
-				m_requestStopRetry = 0;
-				m_requestStop = requestStop;
-				break;
-
-			case stopRequest:
-				m_requestStopRetry++;
-				m_requestStop = requestStop;
-				break;
-
-			//case stopProcessing:
-				//m_buffer->_setRequestStop(stopRequest);
-				//break;			
-
-	}
-
-
-
-
-
-	DEB_ALWAYS() <<  fnId << ": "  << DEB_VAR3(m_requestStop0, m_requestStop, requestStop);
-
-}
-
 //=========================================================================================================
 //=========================================================================================================
 void BufferCtrlObj::startAcq()
@@ -148,18 +105,6 @@ void BufferCtrlObj::startAcq()
 
 	StdBufferCbMgr& buffer_mgr = m_buffer_cb_mgr;
 	buffer_mgr.setStartTimestamp(Timestamp::now());
-
-	DEB_TRACE() << "=== TRACE";
-	_setRequestStop(stopNone);
-
-	DEB_TRACE() << "=== TRACE";
-	m_sync->setExposing(pcoAcqStart);
-
-	m_cam->getCameraName(name);
-	DEB_TRACE() << "=== TRACE" << name;
-	m_cam->startAcq();
-	DEB_TRACE() << "=== TRACE";
-
 }
 
 
@@ -514,7 +459,7 @@ int BufferCtrlObj::_xferImag()
 
 _RETRY:
 
-	if((_getRequestStop(_nrStop) == stopRequest) && (_nrStop > MAX_NR_STOP)) {goto _EXIT_STOP;}
+	if((m_sync->_getRequestStop(_nrStop) == stopRequest) && (_nrStop > MAX_NR_STOP)) {goto _EXIT_STOP;}
 
 	// --------------- look if one of buffer is READY and has the NEXT frame => proccess it
     // m_allocatedBufferAssignedFrameFirst[bufIdx] -> first frame in the buffer (we are using only 1 frame per buffer)
@@ -562,7 +507,7 @@ _RETRY:
 #endif
 
 		DWORD dwStatusDll, dwStatusDrv;
-		if((_getRequestStop(_nrStop) == stopRequest) && (_nrStop > MAX_NR_STOP)) {goto _EXIT_STOP;}
+		if((m_sync->_getRequestStop(_nrStop) == stopRequest) && (_nrStop > MAX_NR_STOP)) {goto _EXIT_STOP;}
 
 		int errPco = PCO_GetBufferStatus(m_handle, sBufNr, &dwStatusDll, &dwStatusDrv);		
 		if((dwStatusDll != 0x80000000) || dwStatusDrv || errPco) {
@@ -610,7 +555,7 @@ _RETRY:
 		m_buffer_cb_mgr.newFrameReady(frame_info);
 
         //----- the image dwFrameIdx is already in the buffer -> callback!
-		if((_getRequestStop(_nrStop) == stopRequest) && (_nrStop > MAX_NR_STOP)) {goto _EXIT_STOP;}
+		if((m_sync->_getRequestStop(_nrStop) == stopRequest) && (_nrStop > MAX_NR_STOP)) {goto _EXIT_STOP;}
 		if(dwFrameFirst2assign <= dwRequestedFrames) {
 
 #ifdef DEBUG_XFER_IMAG
@@ -868,7 +813,7 @@ int BufferCtrlObj::_xferImagMult()
 	dwRequestedFrames = (requested_nb_frames > 0) ? (DWORD) requested_nb_frames : dwRequestedFramesMax;
 
 
-	DEB_ALWAYS() << "\n_xferImagMult():\n" 
+	DEB_ALWAYS() << "\n_xferImagMult() [entry]:\n" 
 		<< DEB_VAR2(_iPcoAllocatedBuffNr, _dwPcoAllocatedBuffSize) << "\n"  
 		<< DEB_VAR4(_wArmWidth, _wArmHeight, _uiBytesPerPixel, _wBitPerPixel) << "\n"  
 		<< DEB_VAR2( dwFramesPerBuffer, dwFrameSize) << "\n"
@@ -955,7 +900,7 @@ int BufferCtrlObj::_xferImagMult()
 
 		m_pcoData->traceAcq.nrImgAcquired = dwFrameIdx;
 
-		if((_stopReq = _getRequestStop(_nrStop)) == stopRequest) {
+		if((_stopReq = m_sync->_getRequestStop(_nrStop)) == stopRequest) {
 			if(_nrStop > MAX_NR_STOP) {
 				char msg[LEN_TRACEACQ_MSG+1];
 				snprintf(msg,"%s> STOP REQ (saving), framesReq[%d] frameReady[%d]\n", fnId, requested_nb_frames, _newFrameReady);
@@ -982,7 +927,7 @@ int BufferCtrlObj::_xferImagMult()
 			_retStatus = pcoAcqTransferEnd;
 	}
 			
-	DEB_ALWAYS() << DEB_VAR3(_retStatus, _stopReq, _newFrameReady);  
+	DEB_ALWAYS() << "[exit]" << DEB_VAR3(_retStatus, _stopReq, _newFrameReady);  
 
 
 	return _retStatus;
