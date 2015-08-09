@@ -50,8 +50,6 @@ static char *timebaseUnits[] = {"ns", "us", "ms"};
 
 #define BUFF_INFO_SIZE 5000
 
-//#define PRINTLINES { for(int i = 0; i<50;i++) printf("=====  %s [%d]/[%d]\n", __FILE__, __LINE__,i); }
-#define PRINTLINES
 
 void print_hex_dump_buff(void *ptr_buff, size_t len);
 int __xlat_date(char *s1, char &ptrTo, int lenTo) ;

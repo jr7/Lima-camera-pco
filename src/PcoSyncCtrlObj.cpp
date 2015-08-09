@@ -451,14 +451,9 @@ void SyncCtrlObj::setStarted(bool started) {
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 
-	DEB_ALWAYS() << fnId << "[entry0]" << ": " << DEB_VAR2(m_started, started);
-	//AutoMutex aLock(m_cond.mutex());
 	
-	DEB_ALWAYS() << fnId << "[entry1]" << ": " << DEB_VAR2(m_started, started);
-
 	m_started = started;
 	m_cond.broadcast();
-	//aLock.unlock();
 
 	DEB_ALWAYS() << fnId << "[exit]" << ": " << DEB_VAR2(m_started, started);
 }
@@ -471,8 +466,6 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 	DEF_FNID;
 
 
-	DEB_ALWAYS() << fnId << " [entry]" ;
-
 	int _stopRequestIn, _stopRequestOut, _nrStop;
 	bool _started;
 	bool resWait;
@@ -483,11 +476,9 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 
 	_stopRequestIn = _getRequestStop(_nrStop);
 
-	_started = getStarted();
-	while(_started) {
+	while(_started = getStarted()) {
 		_setRequestStop(stopRequest);
         resWait = m_cond.wait(5.);
-	 	_started = getStarted();
 	}
 	m_cond.mutex().unlock();
 
@@ -565,8 +556,6 @@ void SyncCtrlObj::_setRequestStop(int requestStop)
 
 	int m_requestStop0 = m_requestStop;
 
-	
-	
 	switch(requestStop) {
 			case stopNone:
 				m_requestStopRetry = 0;
@@ -579,7 +568,7 @@ void SyncCtrlObj::_setRequestStop(int requestStop)
 				break;
 
 	}
-	DEB_ALWAYS() <<  fnId << " [exit]: "  << DEB_VAR4(m_requestStop0, m_requestStop, m_requestStopRetry, requestStop);
+	//DEB_ALWAYS() <<  fnId << " [exit]: "  << DEB_VAR4(m_requestStop0, m_requestStop, m_requestStopRetry, requestStop);
 
 }
 //=========================================================================================================

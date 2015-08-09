@@ -115,4 +115,7 @@ typedef int tPvErr;
 
 #define DEF_FNID 	static char *fnId =__FUNCTION__;
 
+#define PRINTLINES { for(int i = 0; i<50;i++) printf("=====  %s [%d]/[%d]\n", __FILE__, __LINE__,i); }
+
+
 #endif

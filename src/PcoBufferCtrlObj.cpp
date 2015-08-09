@@ -40,8 +40,6 @@
 			throw LIMA_HW_EXC(e, x); \
 } 
 
-//#define PRINTBLK { for(int i = 0; i<50;i++) printf("======================================================= line[%d]/[%d]\n", __LINE__,i); }
-#define PRINTBLK
 
 using namespace lima;
 using namespace lima::Pco;
@@ -317,7 +315,6 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast,
 	if(m_cam->_getDebug(DBG_ASSIGN_BUFF)) 
 	{
 		DEB_ALWAYS() << "PCO_AddBufferEx -> " << DEB_VAR6(dwFrame, iPcoBufIdx, bufIdx,wArmWidth, wArmHeight, wBitPerPixel);
-		PRINTBLK;
 	}
 
 
@@ -326,9 +323,7 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast,
 				wArmWidth, wArmHeight, wBitPerPixel), error) ;
 	if(m_cam->_getDebug(DBG_ASSIGN_BUFF)) 
 	{
-		PRINTBLK;
 		DEB_ALWAYS() << "PCO_AddBufferEx -> " << DEB_VAR6(error, dwFrame, iPcoBufIdx, bufIdx,wArmWidth, wArmHeight);
-		PRINTBLK;
 	}
 
 	if(error) {
@@ -354,9 +349,7 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast,
 	if(dwFrameLast > dwRequestedFrames) dwFrameLast = dwRequestedFrames;
 
 	if(m_cam->_getDebug(DBG_ASSIGN_BUFF)) {
-		PRINTBLK;
 		DEB_ALWAYS() << "exit -> " << DEB_VAR4(dwFrameFirst, dwFrameLast, dwRequestedFrames, bufIdx);
-		PRINTBLK;
 	}
 
 	return 0;

@@ -695,6 +695,7 @@ void Camera::startAcq()
 		DEB_ALWAYS() << "ARM the camera / PCO_ArmCamera";
 		error = PcoCheckError(__LINE__, __FILE__, PCO_ArmCamera(m_handle)); 
 		PCO_THROW_OR_TRACE(error, "PCO_ArmCamera") ;
+		_setIsArmed(true); 
 	} else {
 		DEB_ALWAYS() << "BYPASSED - ARM the camera / PCO_ArmCamera";
 	}
@@ -1728,6 +1729,7 @@ char *Camera::_prepare_cameralink_interface(int &error){
 
 		if(_wLUT_Identifier != m_pcoData->wLUT_Identifier) {
 			_setIsArmed(false);
+
 			error = PcoCheckError(__LINE__, __FILE__, 
 				PCO_SetActiveLookupTable(m_handle, &m_pcoData->wLUT_Identifier, &m_pcoData->wLUT_Parameter));
 				PCO_THROW_OR_TRACE(error, "PCO_SetActiveLookupTable") ;
@@ -1961,6 +1963,8 @@ char * Camera::_pcoSet_RecordingState(int state, int &error){
 	m_pcoData->traceAcq.usTicks[9].value = usElapsedTime(usStart);
 	m_pcoData->traceAcq.usTicks[9].desc = "PCO_SetRecordingState execTime";
 	usElapsedTimeSet(usStart);
+
+	_setIsArmed(false);
 
 	if(wRecState_new == 0) {
 		int count;
@@ -2821,7 +2825,6 @@ char *Camera::_prepare_pixel_rate(int &error){
 			DEB_ALWAYS() << "PIXEL rate SET (old/new): "  << DEB_VAR2(_dwPixelRateOld, _dwPixelRate) ;
 
 			_setIsArmed(false);
-
 		}
 		m_pcoData->dwPixelRateRequested = 0;
 		return fnId;
@@ -2849,7 +2852,6 @@ char *Camera::_prepare_pixel_rate(int &error){
 			DEB_ALWAYS() << "PIXEL rate SET (old/new): "  << DEB_VAR2(_dwPixelRateOld, _dwPixelRate) ;
 
 			_setIsArmed(false);
-
 		}
 		return fnId;
 	}
