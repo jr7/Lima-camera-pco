@@ -144,39 +144,38 @@ On 22/06/2015 16:49
 #------------------------------------------------------------------------
 
   - first copy config.inc_default to config.inc
-        -- limabase
+        limabase
+        Lima>
 
   - configure config.inc
       COMPILE_CORE=1
       COMPILE_PCO=1
 
   - go to third-party\Processlib\sip
-        -- limaproc
-        -- cd sip
-        R:\dserver\classes\ccd\pco_rh\Lima\third-party\Processlib\sip>
+        limaproc
+        cd sip
+        Lima\third-party\Processlib\sip>
     
   - then run 
-        Lima\third-party\Processlib\sip>python configure.py
+        Lima\third-party\Processlib\sip>
 
-  - then run (?)
-        Lima\third-party\Processlib\sip>nmake clean
-
-  - then run 
-        Lima\third-party\Processlib\sip>nmake
+        python configure.py
+        nmake clean
+        nmake
 
   - then go back to Lima
-        -- limabase
-        R:\dserver\classes\ccd\pco_rh\Lima>
+        Lima\third-party\Processlib\sip>
+        limabase
+        Lima>
         
   - then run 
-        Lima>python windowsSipCompilation.py --config
+        python windowsSipCompilation.py --config
 
-  - then run 
-        Lima>python windowsSipCompilation.py
+        python windowsSipCompilation.py
 
-  - then run 
-        Lima>python windowsInstall.py
-        -- Lima>limacpins
+        python windowsInstall.py
+
+        limacpins
 
 
 #===============================================================================

@@ -3,7 +3,8 @@
 
 REMDIR="/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco"
 REMHOST="blissadm@bestia"
-LOCDIR="/c/blissadm/git/pco/Lima/install"
+#LOCDIR="/c/blissadm/git/pco/Lima/install"
+LOCDIR="../../install"
 TMPDIR="/t/rhoms1"
 LOG="./doc/VERSION.log"
 

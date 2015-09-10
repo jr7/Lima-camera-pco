@@ -1452,3 +1452,16 @@ char * _getUserName(char *infoBuff, DWORD  bufCharCount  )
 	  sprintf_s(infoBuff, bufCharCount, "ERROR: GetUserName" ); 
   return infoBuff ;
 }
+
+
+#define x64					"x64"
+#define Release_Win7_Sync	"Release_Win7_Sync"
+#define Release	"Release"
+
+char * _getVSconfiguration(char *infoBuff, DWORD  bufCharCount  )
+{
+	sprintf_s(infoBuff, bufCharCount, "platform[%s] configuration[%s]",  
+		VS_PLATFORM,
+		VS_CONFIGURATION); 
+  return infoBuff ;
+}

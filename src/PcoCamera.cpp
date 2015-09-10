@@ -74,6 +74,7 @@ char *_split_date(char *s);
 //=========================================================================================================
 char* _timestamp_pcocamera() {return ID_TIMESTAMP ;}
 
+
 #ifdef WITH_GIT_VERSION
 #include "PcoGitVersion.h"
 char * _timestamp_gitversion(char *buffVersion, int len)
@@ -83,13 +84,15 @@ char * _timestamp_gitversion(char *buffVersion, int len)
 				 PROCLIB_GIT_VERSION,
 				 LIBCONFIG_GIT_VERSION,
 				 LIMA_GIT_VERSION,
-				 TANGO_GIT_VERSION);
+				 TANGO_GIT_VERSION
+				 );
 	return buffVersion;
 }
 #endif
 
 char * _getComputerName(char *infoBuff, DWORD  bufCharCount);
 char * _getUserName(char *infoBuff, DWORD  bufCharCount);
+char * _getVSconfiguration(char *infoBuff, DWORD  bufCharCount);
 
 //=========================================================================================================
 
@@ -192,9 +195,10 @@ stcPcoData::stcPcoData(){
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _timestamp_gitversion(buffVersion, BUFFVERSION_LEN));
 #endif
 
-	ptr += sprintf_s(ptr, ptrMax - ptr, "    timestamp: %s\n", getTimestamp(Iso));
-	ptr += sprintf_s(ptr, ptrMax - ptr, "computer name: %s\n", _getComputerName(buff, BUFFER_LEN));
-	ptr += sprintf_s(ptr, ptrMax - ptr, "    user name: %s\n", _getUserName(buff, BUFFER_LEN));
+	ptr += sprintf_s(ptr, ptrMax - ptr, "       timestamp: %s\n", getTimestamp(Iso));
+	ptr += sprintf_s(ptr, ptrMax - ptr, "   computer name: %s\n", _getComputerName(buff, BUFFER_LEN));
+	ptr += sprintf_s(ptr, ptrMax - ptr, "       user name: %s\n", _getUserName(buff, BUFFER_LEN));
+	ptr += sprintf_s(ptr, ptrMax - ptr, "VS configuration: %s\n", _getVSconfiguration(buff, BUFFER_LEN));
 
 	stcPcoGeneral.wSize = sizeof(stcPcoGeneral);
 	stcPcoGeneral.strCamType.wSize = sizeof(stcPcoGeneral.strCamType);
