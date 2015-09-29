@@ -450,6 +450,7 @@ void SyncCtrlObj::setStarted(bool started) {
 
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
+	AutoMutex lock(m_cond.mutex());
 
 	
 	m_started = started;
@@ -470,7 +471,7 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 	bool _started;
 	bool resWait;
 
-	m_cond.mutex().lock();
+	AutoMutex lock(m_cond.mutex());
 
 	m_cam->msgLog("stopAcq");
 
@@ -480,8 +481,7 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 		_setRequestStop(stopRequest);
         resWait = m_cond.wait(5.);
 	}
-	m_cond.mutex().unlock();
-
+	lock.unlock();
 	_stopRequestOut = _getRequestStop(_nrStop);
 
 	DEB_ALWAYS() << fnId << " [exit]" << ": " << DEB_VAR5(_started, _stopRequestIn, _stopRequestOut, _nrStop, resWait);

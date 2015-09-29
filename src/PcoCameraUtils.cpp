@@ -198,6 +198,16 @@ char *str_trim(char *s) {
 	return str_trim_left(str_trim_right(s));
 }
 
+char *str_toupper(char *s) {
+	char *ptr = s;
+	while(*ptr) { 
+		*ptr = toupper(*ptr);
+		ptr++;
+	}
+	return s;
+}
+
+
 //=========================================================================================================
 //=========================================================================================================
 
@@ -888,6 +898,8 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			ptr += sprintf_s(ptr, ptrMax - ptr, "* dwHWVersion[%lx]  dwFWVersion[%lx] <- not used\n", 
 				m_pcoData->stcPcoCamType.dwHWVersion, 
 				m_pcoData->stcPcoCamType.dwFWVersion);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* GigE IP [%d.%d.%d.%d]\n", 
+				m_pcoData->ipField[0], m_pcoData->ipField[1], m_pcoData->ipField[2], m_pcoData->ipField[3]);
 			
 			int nrDev, iDev;
 
@@ -1464,4 +1476,13 @@ char * _getVSconfiguration(char *infoBuff, DWORD  bufCharCount  )
 		VS_PLATFORM,
 		VS_CONFIGURATION); 
   return infoBuff ;
+}
+//====================================================================
+//====================================================================
+
+void Camera::_traceMsg(char *msg)
+{
+	DEB_MEMBER_FUNCT();
+	DEB_ALWAYS() << "\n>>>  " << msg ;		
+
 }

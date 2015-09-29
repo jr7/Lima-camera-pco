@@ -206,6 +206,24 @@ $ ./setId
 
 
 #===============================================================================
+# debug flags
+#===============================================================================
+0x31 -> dateTime function fileLine
+0x30 -> function fileLine
+
+enum DebFormat {
+	DebFmtDateTime		= 1 << 0,
+	DebFmtThread		= 1 << 1,
+	DebFmtModule		= 1 << 2,
+	DebFmtObj		= 1 << 3,
+	DebFmtFunct		= 1 << 4,	
+	DebFmtFileLine		= 1 << 5,
+	DebFmtType		= 1 << 6,
+	DebFmtIndent		= 1 << 7,
+	DebFmtColor		= 1 << 8,
+};
+
+#===============================================================================
 # git / config
 #===============================================================================
 [core]

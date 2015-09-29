@@ -641,6 +641,26 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="tango"
+			>
+			<File
+				RelativePath="..\..\..\..\..\..\applications\tango\camera\Pco.py"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\..\..\applications\tango\camera\Pco_VERSION"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="spec"
+			>
+			<File
+				RelativePath="..\..\..\..\..\..\applications\spec\limapco.mac"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
