@@ -372,7 +372,7 @@ namespace lima
 		SyncCtrlObj*	_getSyncCtrlObj() { return m_sync;}
 		struct stcPcoData * _getPcoData() {return  m_pcoData; }
 		
-		char* _PcoCheckError(int line, char *file, int err, int&error) ;
+		char* _PcoCheckError(int line, char *file, int err, int&error, char *fn = "***") ;
 		int pcoGetError() {return m_pcoData->pcoError;}
 
 		char *_pcoSet_RecordingState(int state, int &error);
@@ -417,19 +417,19 @@ namespace lima
 
 		bool m_isArmed;
 
-        int PcoCheckError(int line, char *file, int err);
+        int PcoCheckError(int line, char *file, int err, char *fn = "***");
 
 		void _allocBuffer();
 
         char *_talk(char *cmd, char *output, int lg);
 
-		char *_pcoSet_Trig_Acq_Mode(int &error);
-		char *_pcoSet_Storage_subRecord_Mode(enumPcoStorageMode, int &error);
-		int _pcoGet_Storage_subRecord_Mode();
-		char *_pcoSet_Exposure_Delay_Time(int &error, int ph);
-		char *_pcoSet_Cameralink_GigE_Parameters(int &error);
-		char *_pcoGet_Camera_Type(int &error);
-		char *_pcoGet_TemperatureInfo(int &error);
+		char *_pco_SetTriggerMode_SetAcquireMode(int &error);
+		char *_pco_SetStorageMode_SetRecorderSubmode(enumPcoStorageMode, int &error);
+		int _pco_GetStorageMode_GetRecorderSubmode();
+		char *_pco_SetDelayExposureTime(int &error, int ph);
+		char *_pco_SetCamLinkSetImageParameters(int &error);
+		char *_pco_GetCameraType(int &error);
+		char *_pco_GetTemperatureInfo(int &error);
 		void _pco_GetPixelRate(DWORD &pixRate, DWORD &pixRateNext, int &error);
 		void _presetPixelRate(DWORD &pixRate, int &error);
 
@@ -440,10 +440,10 @@ namespace lima
 		void _init();
 		void _init_edge();
 		void _init_dimax();
-		char *_prepare_cameralink_interface(int &error);
-		char *_prepare_pixel_rate(int &error);
-		char *_get_coc_runtime(int &error);
-		char *_set_metadata_mode(WORD wMetaDataMode, int &error);
+		char *_pco_SetTransferParameter_SetActiveLookupTable(int &error);
+		char *_pco_SetPixelRate(int &error);
+		char *_pco_GetCOCRuntime(int &error);
+		char *_pco_SetMetaDataMode(WORD wMetaDataMode, int &error);
 
 		bool _isValid_pixelRate(DWORD dwPixelRate);
 		
@@ -468,8 +468,8 @@ namespace lima
 
 		ringLog *m_msgLog;
 		ringLog *m_tmpLog;
-		int _pco_getADC(int &adc_working, int &adc_max);
-		int _pco_setADC(int adc_new, int &adc_working);
+		int _pco_GetADCOperation(int &adc_working, int &adc_max);
+		int _pco_SetADCOperation(int adc_new, int &adc_working);
 		int _pco_GetImageTiming(double &frameTime, double &expTime, double &sysDelay, double &sysJitter, double &trigDelay );
 
     };

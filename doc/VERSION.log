@@ -1,21 +1,39 @@
+
+2015/09/29 12:12:21 ==========================================
+pushed - 65637c477990d630f67fba385f2fe2f745089671
+    - beta test
+    - restore 2nd arm pass / to check options
+    - fix GigE for 2000/4000 - tested with usb/GigE
+    - added some att (spec / tango)
+    - included ip conf (GigE)
+    - included initial properties (PCO -> params)
+    - other debug/minor changes
+
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-09-29 11:56:41 +0200] head[65637c4][65637c477990d630f67fba385f2fe2f745089671] ref[ (HEAD, origin/develop, develop)] at [2015/09/29 12:12:20] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-09-25 13:19:22 +0200] head[753502f][753502fa269791d412013ded76ebb81bfdee4bd0] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/09/29 12:12:20] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/09/29 12:12:20] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/09/29 12:12:20] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-09-25 13:04:32 +0200] head[043fbb3][043fbb3c61f832c05327fe3e247041b28796445e] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/09/29 12:12:20] $"
+
+
 2015/09/29 14:41:15 ==========================================
-#--- restore 2nd arm pass / to check options
-#--- fix GigE for 2000/4000 - tested with usb/GigE
-#--- added some att (spec / tango)
+- restore 2nd arm pass / to check options
+- fix GigE for 2000/4000 - tested with usb/GigE
+- added some att (spec / tango)
 
 2015/09/24 14:41:15 ==========================================
-#--- included ip conf (GigE)
+- included ip conf (GigE)
 
 2015/09/12 14:58:25 ==========================================
-#--- included initial properties (PCO -> params)
+- included initial properties (PCO -> params)
 
 2015/09/10 17:33:42 ==========================================
-#---  tests with 64 bits
-#---  fixed proyect lima pco to RELEASE
-#---  working in release x64
-#---  x64 - temp save
-#---  project release x64
-#---  minor changes
+- tests with 64 bits
+- fixed proyect lima pco to RELEASE
+- working in release x64
+- x64 - temp save
+- project release x64
+- minor changes
     
 2015/09/02 19:17:42 ==========================================
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2015-08-09 19:03:16 +0200] head[bae0d67][bae0d67fa7c04daa9baa41c39b7be37434492427] ref[ (HEAD, origin/develop, develop)] at [2015/09/02 19:17:42] $"
@@ -25,14 +43,14 @@
 #define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-08-19 13:00:10 +0200] head[22dfd71][22dfd714cc0343dd4407c4a879e36231c6c3d778] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/09/02 19:17:42] $"
 
 2015/09/01 12:55:33 ==========================================
-#---  tests with 64 bits
+- tests with 64 bits
 
 2015/08/09 17:57:22 ==========================================
-#---  stop recording -> modified to be sync / alert from Seb 
-#---  since the beginning it was async (?)
+- stop recording -> modified to be sync / alert from Seb 
+- since the beginning it was async (?)
 
 2015/08/04 17:28:01 ==========================================
-#---  stop recording: check PCO_GetPendingBuffer to know if PCO_CancelImages is required - dead time reduction (1.5 sec) 
+- stop recording: check PCO_GetPendingBuffer to know if PCO_CancelImages is required - dead time reduction (1.5 sec) 
 
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2015-07-31 13:12:30 +0200] head[a9fe182][a9fe1826cf21fc4d96fa6cb84c624203bc4c1563] ref[ (HEAD, github/develop, develop)] at [2015/08/04 17:27:59] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, core-1.4)] at [2015/08/04 17:27:59] $"
@@ -40,16 +58,10 @@
 #define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/08/04 17:27:59] $"
 #define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-06-03 11:42:48 +0200] head[676128c][676128c2d558d441907949b54736e6f80485d280] ref[ (HEAD, master)] at [2015/08/04 17:27:59] $"
 
-2015/06/22 10:10:35 ==========================================
-#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-06-22 10:09:43 +0200] head[7b2ef1a][7b2ef1a3a161858a69bfd544a39a7c63cb18c99b] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:10:34] $"
-#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/06/22 10:10:34] $"
-#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-01 18:48:32 +0200] head[4d2617a][4d2617af3b25b5033fe0ce807d36ef34f28f8681] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:10:34] $"
-#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:10:34] $"
-#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-06-03 11:42:48 +0200] head[676128c][676128c2d558d441907949b54736e6f80485d280] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:10:34] $"
 
 2015/06/22 10:04:15 ==========================================
-#---  included tango ID
-#---  version to test in ID21
+- included tango ID
+- version to test in ID21
 
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2015-06-22 10:02:31 +0200] head[e61c76d][e61c76d7a7624d96a2523f25a775f31d5fb298a3] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:04:14] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/06/22 10:04:14] $"
@@ -110,7 +122,7 @@ computer name: WID15DIMAX2
 
 
 2015/06/01 16:56:27 ==========================================
-#--- checkout lima core 1.4
+- checkout lima core 1.4
 
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2015-01-06 16:15:29 +0100] head[e76f6d2][e76f6d27f15cd78ae52e9351d119011351637756] at [2015/06/01 16:56:27] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-05-28 10:48:45 +0200] head[b32e69d][b32e69d6be2c0b01a709eca9b61904e46315ad31] at [2015/06/01 16:56:27] $"
@@ -133,7 +145,7 @@ $Id:   PROCLIB rev[2015-01-15 15:08:16 +0100] head[70f9a88][70f9a88b7f90b49fb37a
 $Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2015/06/01 16:56:27] $
 
 2015/06/01 15:38:00 ==========================================
-#--- compiling for lima 1.4
+- compiling for lima 1.4
 
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2015-01-06 16:15:29 +0100] head[e76f6d2][e76f6d27f15cd78ae52e9351d119011351637756] at [2015/06/01 15:37:58] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-05-28 10:41:46 +0200] head[6fd4667][6fd466741df93a4d49ece558283614d6ab32e547] at [2015/06/01 15:37:58] $"
@@ -141,8 +153,8 @@ $Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d6625
 #define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2015/06/01 15:37:58] $"
 
 2014/10/24 12:09:33 ==========================================
-#--- some minor and merge last edge tested. 
-#--- to be tested to make a package 1.303
+- some minor and merge last edge tested. 
+- to be tested to make a package 1.303
 
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-10-24 12:08:24 +0200] head[19e67b8][19e67b8c49a4b4a70c2b1a1506b38afa381e4423] at [2014/10/24 12:09:32] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/10/24 12:09:32] $"
@@ -150,7 +162,7 @@ $Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d6625
 #define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/10/24 12:09:32] $"
 
 2014/10/20 10:33:16 ==========================================
-#--- edge: fixed bug during rolling shutter change (crashed in invalid ptr)
+- edge: fixed bug during rolling shutter change (crashed in invalid ptr)
 
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-10-20 10:31:13 +0200] head[9f16f26][9f16f2601896b382e554a0038e916c52f1d65a25] at [2014/10/20 10:33:15] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/10/20 10:33:15] $"
@@ -159,7 +171,7 @@ $Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d6625
 
 
 2014/10/17 12:38:58 ==========================================
-#-- pixelRate -> talk -> return the requested value used in the next ARM
+- pixelRate -> talk -> return the requested value used in the next ARM
 
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-10-17 12:37:35 +0200] head[76632f4][76632f49763658bf085e2cdc45b10ed55d0b1a51] at [2014/10/17 12:38:57] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/10/17 12:38:57] $"
@@ -246,27 +258,8 @@ _assignImage2Buffer: myBufferLen=11059200, m_ImageBufferSize=11059200, dwLen=110
 
 
 
-
-2014/09/25 18:01:45 ==========================================
-#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-09-25 17:33:01 +0200] head[ec6a31a][ec6a31a524171ed2335583ac65e6f4cdc2ae3c57] at [2014/09/25 18:01:43] $"
-#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/09/25 18:01:43] $"
-#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/09/25 18:01:43] $"
-#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/09/25 18:01:43] $"
-
-
-
-
-2014/09/25 17:33:35 ==========================================
-#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-09-25 17:33:01 +0200] head[ec6a31a][ec6a31a524171ed2335583ac65e6f4cdc2ae3c57] at [2014/09/25 17:33:34] $"
-#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/09/25 17:33:34] $"
-#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/09/25 17:33:34] $"
-#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/09/25 17:33:34] $"
-
-
-
-
 2014/09/25 14:23:39 ==========================================
-#--- fix edge speed /test
+- fix edge speed /test
 
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-09-25 14:11:30 +0200] head[200997b][200997b06e735f6bf6dc54a86c7725fb405082fd] at [2014/09/25 14:23:38] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/09/25 14:23:38] $"
@@ -276,7 +269,7 @@ _assignImage2Buffer: myBufferLen=11059200, m_ImageBufferSize=11059200, dwLen=110
 
 
 2014/09/19 14:40:31 ==========================================
-#---   _init() -> close already opened cam
+-  _init() -> close already opened cam
 
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-09-19 14:38:45 +0200] head[3f676e9][3f676e96a87f894fc425e7f9a8b5452b9ad8b52a] at [2014/09/19 14:40:30] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/09/19 14:40:30] $"
@@ -286,7 +279,7 @@ _assignImage2Buffer: myBufferLen=11059200, m_ImageBufferSize=11059200, dwLen=110
 
 
 2014/09/10 10:14:22 ==========================================
-#--- included the callback of valid range in _init() / required during the change rolling/global shutter in edge
+- included the callback of valid range in _init() / required during the change rolling/global shutter in edge
 
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-09-10 10:12:41 +0200] head[3dbc862][3dbc86265e25926cb5c672a1e3f883f920b22619] at [2014/09/10 10:14:21] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/09/10 10:14:21] $"
@@ -295,7 +288,7 @@ _assignImage2Buffer: myBufferLen=11059200, m_ImageBufferSize=11059200, dwLen=110
 
 
 2014/08/29 14:22:31 ========================================== 
-#--- complete for bm05
+- complete for bm05
 
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-08-29 14:20:07 +0200] head[42bb21f][42bb21fdd44230398daa7108683c3cc897887556] at [2014/08/29 14:22:30] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/29 14:22:30] $"
@@ -424,11 +417,6 @@ LIMA[pco] > Saving in d:/rhtest/test_5100.edf [AUTO_FRAME-EDF]
 #define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/08/12 18:41:46] $"
 #define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/08/12 18:41:46] $"
 
-2014/08/12 13:17:03 ==========================================
-#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-08-12 11:50:43 +0200] head[6e01263][6e0126326adaaa0f00cdc6bf620ebf3705ade66a] at [2014/08/12 13:17:02] $"
-#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/12 13:17:02] $"
-#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/08/12 13:17:02] $"
-#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/08/12 13:17:02] $"
 
 # 2014/08/12  =============================================
 OPID15@WID15DIMAX2 /c/blissadm/git/Lima/camera/pco (master)

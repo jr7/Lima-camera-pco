@@ -236,6 +236,7 @@ char *Camera::talk(char *cmd){
 char *Camera::_talk(char *_cmd, char *output, int lg){
 	DEB_MEMBER_FUNCT();
 		char cmdBuff[BUFF_INFO_SIZE +1];
+		char cmdBuffAux[BUFF_INFO_SIZE +1];
 		char *cmd, *key, *keys[NRCMDS], *keys_desc[NRCMDS];
 		int ikey = 0;
 		char *tok[NRTOK];
@@ -251,6 +252,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		
 		strncpy_s(cmdBuff, BUFF_INFO_SIZE, _cmd, BUFF_INFO_SIZE);
 		cmd = str_trim(cmdBuff);
+		strncpy_s(cmdBuffAux, BUFF_INFO_SIZE, cmd, BUFF_INFO_SIZE);
 
 		if(*cmd){
 			char *tokContext;
@@ -645,6 +647,23 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			}
 			
 			
+			//--- test of close
+			if( (_stricmp(tok[1], "cb")==0)){
+				int error;
+				char *msg;
+
+				m_cam_connected = false;
+
+				//m_sync->_getBufferCtrlObj()->_pcoAllocBuffersFree();
+				m_buffer->_pcoAllocBuffersFree();
+				PCO_FN1(error, msg,PCO_CloseCamera, m_handle);
+				PCO_PRINT_ERR(error, msg); 
+				m_handle = NULL;
+
+				ptr += sprintf_s(ptr, ptrMax - ptr, "%s> closed cam\n", tok[1]);
+				return output;
+			}
+
 			
 			//--- test of callback
 			if( (_stricmp(tok[1], "cb")==0)){
@@ -865,7 +884,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			char *valid;
 			int adc_new, adc_working, adc_max;
 
-			error = _pco_getADC(adc_working, adc_max);
+			error = _pco_GetADCOperation(adc_working, adc_max);
 			valid = error ? "NO" : "YES";
 			ptr += sprintf_s(ptr, ptrMax - ptr, "working[%d] max[%d] config[%s]\n", adc_working, adc_max, valid);
 			
@@ -873,7 +892,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 
 			if((tokNr >= 1)){
 				adc_new = atoi(tok[1]);
-				error = _pco_setADC(adc_new, adc_working);
+				error = _pco_SetADCOperation(adc_new, adc_working);
 				ptr += sprintf_s(ptr, ptrMax - ptr, "working[%d] requested[%d] error[0x%x]\n", adc_working, adc_new, error);
 			}
 			
@@ -995,8 +1014,17 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		keys_desc[ikey++] = "(R) log of last cmds executed ";     //----------------------------------------------------------------
 		if(_stricmp(cmd, key) == 0){
 
-			ptr += m_msgLog->dump(ptr, (int)(ptrMax - ptr), 1);
-			
+			ptr += m_msgLog->dump(ptr, (int)(ptrMax - ptr), 0);
+			m_msgLog->dumpPrint(true);			
+			return output;
+		}
+
+
+		key = keys[ikey] = "msgLogFlush";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "flush log of last cmds executed ";     //----------------------------------------------------------------
+		if(_stricmp(cmd, key) == 0){
+			m_msgLog->flush(-1);			
+			ptr += sprintf_s(ptr, ptrMax - ptr, "flushed ...");
 			return output;
 		}
 
@@ -1100,6 +1128,30 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			return output;
 		}
 
+
+		key = keys[ikey] = "dumpData";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(R) hex dump of the stcPcoData";     
+		if(_stricmp(cmd, key) == 0){
+
+			print_hex_dump_buff(m_pcoData, sizeof(stcPcoData));
+			ptr += sprintf_s(ptr, ptrMax - ptr, "dumped\n");
+			
+			return output;
+		}
+
+
+		key = keys[ikey] = "comment";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(W) print timestamp & comment in the screen";     
+		if(_stricmp(cmd, key) == 0){
+			char *comment = str_trim(cmdBuffAux + strlen(cmd));
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, 
+				"\n=================================================\n--- %s [%s]\n",
+				getTimestamp(Iso), comment);
+
+			DEB_ALWAYS() << output ;
+			return output;
+		}
 
 		key = keys[ikey] = "?";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "(R) this help / list of the talk cmds";     //----------------------------------------------------------------

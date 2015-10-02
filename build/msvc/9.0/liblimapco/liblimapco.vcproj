@@ -428,6 +428,7 @@
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)..\..\..\..\include&quot;;&quot;$(ProjectDir)..\..\..\..\..\..\common\include&quot;;&quot;$(ProjectDir)..\..\..\..\..\..\hardware\include&quot;;&quot;$(ProjectDir)..\..\..\..\..\..\third-party\Processlib\core\include\WindowSpecific&quot;;&quot;$(ProjectDir)..\..\..\..\..\..\third-party\Processlib\core\include&quot;;&quot;$(ProjectDir)..\..\..\..\sdkPco\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBLIMAPCO_EXPORTS;LIMA_PROCESSCORE_DLL;VS_PLATFORM=$(PlatformName);VS_CONFIGURATION=$(ConfigurationName);LIMA_PROCESSCORE_BUILD;WITH_GIT_VERSION"
+				GeneratePreprocessedFile="0"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -637,6 +638,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\setId"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\doc\VERSION.log"
 				>
 			</File>
@@ -644,6 +649,10 @@
 		<Filter
 			Name="tango"
 			>
+			<File
+				RelativePath="..\..\..\..\..\..\applications\tango\LimaCCDs.py"
+				>
+			</File>
 			<File
 				RelativePath="..\..\..\..\..\..\applications\tango\camera\Pco.py"
 				>
