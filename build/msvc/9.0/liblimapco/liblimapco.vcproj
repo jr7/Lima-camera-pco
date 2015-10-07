@@ -638,7 +638,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\setId"
+				RelativePath="..\..\..\..\sdkPco\SDK_MD5.txt"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\doc\test.py"
 				>
 			</File>
 			<File
@@ -667,6 +671,18 @@
 			>
 			<File
 				RelativePath="..\..\..\..\..\..\applications\spec\limapco.mac"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="scripts"
+			>
+			<File
+				RelativePath="..\..\..\..\sdkPco\cp-pco-sdk"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\setId"
 				>
 			</File>
 		</Filter>

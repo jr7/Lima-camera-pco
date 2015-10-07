@@ -78,7 +78,6 @@ namespace lima
       SyncCtrlObj* 	m_sync;
       RoiCtrlObj*       m_RoiCtrlObj;
       PcoHwEventCtrlObj*       m_HwEventCtrlObj;
-      static RoiCtrlObj*       m_RoiCtrlObjXXX;
     };
 
   } // namespace Pco

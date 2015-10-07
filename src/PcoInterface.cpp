@@ -68,16 +68,15 @@ Interface::Interface(Camera *cam) :
 //=========================================================================================================
 //=========================================================================================================
   
-  RoiCtrlObj *Interface::m_RoiCtrlObjXXX = NULL;
-  Interface::~Interface()
+Interface::~Interface()
 {
-	// DONE
 	DEB_DESTRUCTOR();
-  delete m_HwEventCtrlObj;
-  delete m_RoiCtrlObj;
-  delete m_buffer;
-  delete m_det_info;
-  delete m_sync;
+	DEB_ALWAYS() << "DESTRUCTOR ...................." ;
+	delete m_HwEventCtrlObj;
+	delete m_RoiCtrlObj;
+	delete m_buffer;
+	delete m_det_info;
+	delete m_sync;
 }
 
 //=========================================================================================================
@@ -98,10 +97,13 @@ void Interface::reset(ResetLevel reset_level)
   DEB_MEMBER_FUNCT();
   DEF_FNID;
 
-  DEB_ALWAYS() << fnId << ": " DEB_VAR1(reset_level);
+  int intLevel = reset_level;
+
+  DEB_ALWAYS() << fnId << ": " DEB_VAR2(reset_level, intLevel);
 
   m_sync->stopAcq();
-  m_cam->reset();
+  m_cam->reset(intLevel);
+
 }
 
 //=========================================================================================================

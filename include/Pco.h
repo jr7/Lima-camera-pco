@@ -117,6 +117,7 @@ typedef int tPvErr;
 
 #define PRINTLINES { for(int i = 0; i<50;i++) printf("=====  %s [%d]/[%d]\n", __FILE__, __LINE__,i); }
 
+#define PCO_FN0(er,mg, fn) {mg = #fn; er = PcoCheckError(__LINE__, __FILE__, fn ( ), #fn ); }
 #define PCO_FN1(er,mg, fn, x1) {mg = #fn; er = PcoCheckError(__LINE__, __FILE__, fn ( (x1) ), #fn ); }
 #define PCO_FN2(er,mg, fn, x1, x2) {mg = #fn; er = PcoCheckError(__LINE__, __FILE__, fn ( (x1),(x2) ), #fn ) ; }
 #define PCO_FN3(er,mg, fn, x1, x2, x3) {mg = #fn; er = PcoCheckError(__LINE__, __FILE__, fn ( (x1),(x2),(x3) ), #fn ) ; }

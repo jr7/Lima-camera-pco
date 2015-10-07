@@ -1146,8 +1146,11 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			char *comment = str_trim(cmdBuffAux + strlen(cmd));
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, 
-				"\n=================================================\n--- %s [%s]\n",
-				getTimestamp(Iso), comment);
+				"\n"
+				"=================================================\n"
+				"--- %s [%s]\n"
+				"=================================================\n"
+				, getTimestamp(Iso), comment);
 
 			DEB_ALWAYS() << output ;
 			return output;

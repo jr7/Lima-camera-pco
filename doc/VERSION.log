@@ -1,3 +1,24 @@
+2015/10/07 12:50:00 ==========================================
+pushed tango - 228b06a7b194c5a23a4fe4411ceceb5123340a92
+    included close_interface()
+     called by delete_device (LimaCCDs.py)
+     requiered to close properly the camera / sdk
+     because the cam and interface destructors are NOT called on ctrl-C (?)
+
+2015/10/02 17:55:00 ==========================================
+pushed - 938cce80898f5c489609362c6b8e6e9650c04c79
+    - beta test / temp save
+    - use rois in LUT to use only one arm call
+    - minor changes, trace of sdk calls, fmt, ...
+
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-10-02 17:50:22 +0200] head[938cce8][938cce80898f5c489609362c6b8e6e9650c04c79] ref[ (HEAD, develop)] at [2015/10/02 17:55:00] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-09-25 13:19:22 +0200] head[753502f][753502fa269791d412013ded76ebb81bfdee4bd0] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/10/02 17:55:00] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/10/02 17:55:00] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/10/02 17:55:00] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-09-25 13:04:32 +0200] head[043fbb3][043fbb3c61f832c05327fe3e247041b28796445e] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/10/02 17:55:00] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/10/02 17:55:00] $"
+
+
 
 2015/09/29 12:12:21 ==========================================
 pushed - 65637c477990d630f67fba385f2fe2f745089671

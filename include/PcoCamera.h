@@ -28,10 +28,12 @@
 #include "lima/Debug.h"
 #include "lima/Constants.h"
 #include "lima/HwMaxImageSizeCallback.h"
+#include "lima/HwInterface.h"
+
 //#include "PcoBufferCtrlObj.h"
 #include "PcoHwEventCtrlObj.h"
 
-
+#define RESET_CLOSE_INTERFACE	100
 #define DISABLE_ACQ_ENBL_SIGNAL
 
 #define BUFF_VERSION 2048
@@ -339,7 +341,7 @@ namespace lima
         ~Camera();
 
         void 	startAcq();
-        void	reset();
+		void	reset(int reset_level);
 
 		HANDLE& getHandle() {return m_handle;}
 

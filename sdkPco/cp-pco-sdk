@@ -8,6 +8,8 @@ FROM=/segfs/bliss/projects/LIMA/package/WIN32/PCO/SDK/pco.sdk_116/pco.sdk.116
 #TO=/segfs/dserver/classes/ccd/pco_rh/Lima/camera/pco/sdkPco
 TO=/tmp_14_days/rhoms1/sdkPco
 
+MD5FILE="${TO}/SDK_MD5.txt"
+TIMESTAMP_ISO=`date '+%Y/%m/%d %H:%M:%S'`
 
 #--------------------------------------------------------
 cpfile() {
@@ -51,3 +53,18 @@ cpfile bin64/sc2_cl_me4.dll
 cpfile lib64/SC2_Cam.lib
 
 cpdir include
+
+cd $TO
+
+{
+echo "===========  ${TIMESTAMP_ISO}"
+echo "copied from: ${FROM}"
+echo "         to: ${TO}"
+echo
+find ./ -iname "*.h" | xargs md5sum
+echo
+find ./ -iname "*.dll" | xargs md5sum
+echo
+find ./ -iname "*.lib" | xargs md5sum
+echo
+} > $MD5FILE
