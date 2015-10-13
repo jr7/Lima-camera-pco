@@ -35,7 +35,7 @@
 
 #include "processlib/Compatibility.h"
 #include "PCO_Structures.h"
-#include "PCO_ConvStructures.h"
+#include "Pco_ConvStructures.h"
 #include "Pco_ConvDlgExport.h"
 #include "sc2_SDKStructures.h"
 #include "sc2_common.h"
@@ -67,6 +67,10 @@ typedef int tPvErr;
 	printf("========*** LIMA_HW_EXC %s\n", x ); \
 			throw LIMA_HW_EXC(e, x); \
 } 
+
+
+typedef struct __timeb64 TIME_USEC;
+#define  TIME_UTICKS LARGE_INTEGER 
 
 
 

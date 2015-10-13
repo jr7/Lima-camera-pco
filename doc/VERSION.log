@@ -1,3 +1,19 @@
+2015/10/07 18:15:17 ==========================================
+pushed pco - f0132cc][f0132cc7cf045cfa40c4d2376608c5fca17bb875
+    - Camera::reset(int)
+        modified to close complete the cam when the ds receive ctrl-C
+        tango calls close_interface() but does not destroy the objs
+        close_interface() calls reset
+    - minor changes in proj, docs, scripts, ...
+
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-10-07 18:06:51 +0200] head[f0132cc][f0132cc7cf045cfa40c4d2376608c5fca17bb875] ref[ (HEAD, develop)] at [2015/10/07 18:15:17] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-09-25 13:19:22 +0200] head[753502f][753502fa269791d412013ded76ebb81bfdee4bd0] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/10/07 18:15:17] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/10/07 18:15:17] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/10/07 18:15:17] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-07 12:55:37 +0200] head[3b74e68][3b74e68a265668d43f977ca8af0ba9608ef91274] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/10/07 18:15:17] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/10/07 18:15:17] $"
+
+
 2015/10/07 12:50:00 ==========================================
 pushed tango - 228b06a7b194c5a23a4fe4411ceceb5123340a92
     included close_interface()
@@ -17,8 +33,6 @@ pushed - 938cce80898f5c489609362c6b8e6e9650c04c79
 #define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/10/02 17:55:00] $"
 #define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-09-25 13:04:32 +0200] head[043fbb3][043fbb3c61f832c05327fe3e247041b28796445e] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/10/02 17:55:00] $"
 #define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/10/02 17:55:00] $"
-
-
 
 2015/09/29 12:12:21 ==========================================
 pushed - 65637c477990d630f67fba385f2fe2f745089671

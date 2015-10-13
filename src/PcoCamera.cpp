@@ -676,7 +676,7 @@ void Camera::startAcq()
 
 	m_pcoData->traceAcqClean();
 
-	struct __timeb64 tStart;
+	TIME_USEC tStart;
 	msElapsedTimeSet(tStart);
 
 //=====================================================================
@@ -884,27 +884,27 @@ void Camera::startAcq()
 //==========================================================================================================
 //==========================================================================================================
 
-long msElapsedTime(struct __timeb64 &t0) {
-	struct __timeb64 tNow;
+long msElapsedTime(TIME_USEC &t0) {
+	TIME_USEC tNow;
 	_ftime64_s(&tNow);
 
 	return (long)((tNow.time - t0.time)*1000) + (tNow.millitm - t0.millitm);
 }
 
-void msElapsedTimeSet(struct __timeb64 &t0) {
+void msElapsedTimeSet(TIME_USEC &t0) {
 	_ftime64_s(&t0);
 }
 
 
-void usElapsedTimeSet(LARGE_INTEGER &tick0) {
+void usElapsedTimeSet(TIME_UTICKS &tick0) {
 
 	QueryPerformanceCounter(&tick0);
 
 }
 
-long long usElapsedTime(LARGE_INTEGER &tick0) {
-	LARGE_INTEGER ticksPerSecond;
-	LARGE_INTEGER tick;   // A point in time
+long long usElapsedTime(TIME_UTICKS &tick0) {
+	TIME_UTICKS ticksPerSecond;
+	TIME_UTICKS tick;   // A point in time
 	long long uS, uS0;
 
 	QueryPerformanceFrequency(&ticksPerSecond); 
@@ -919,7 +919,7 @@ long long usElapsedTime(LARGE_INTEGER &tick0) {
 }
 
 double usElapsedTimeTicsPerSec() {
-	LARGE_INTEGER ticksPerSecond;
+	TIME_UTICKS ticksPerSecond;
 
 	QueryPerformanceFrequency(&ticksPerSecond); 
 	return (double) ticksPerSecond.QuadPart;
@@ -949,7 +949,7 @@ void _pco_acq_thread_dimax(void *argin) {
 	m_pcoData->traceAcq.fnId = fnId;
 
 	char *msg;
-	struct __timeb64 tStart, tStart0;
+	TIME_USEC tStart, tStart0;
 	msElapsedTimeSet(tStart);
 	tStart0 = tStart;
 
@@ -1190,7 +1190,7 @@ void _pco_acq_thread_edge(void *argin) {
 
 	struct stcPcoData *m_pcoData = m_cam->_getPcoData();
 
-	struct __timeb64 tStart;
+	TIME_USEC tStart;
 	msElapsedTimeSet(tStart);
 	int error;
 	long msXfer;
@@ -1240,7 +1240,7 @@ void _pco_acq_thread_dimax_live(void *argin) {
 
 	struct stcPcoData *m_pcoData = m_cam->_getPcoData();
 
-	struct __timeb64 tStart;
+	TIME_USEC tStart;
 	msElapsedTimeSet(tStart);
 	int error;
 	long msXfer;
@@ -1290,10 +1290,10 @@ void _pco_acq_thread_ringBuffer(void *argin) {
 
 	struct stcPcoData *m_pcoData = m_cam->_getPcoData();
 
-	struct __timeb64 tStart;
+	TIME_USEC tStart;
 	msElapsedTimeSet(tStart);
 
-	LARGE_INTEGER usStart;
+	TIME_UTICKS usStart;
 	usElapsedTimeSet(usStart);
 
 	int error;
@@ -1469,7 +1469,8 @@ char* Camera::_PcoCheckError(int line, char *file, int err, int &error, char *fn
 
 	if (err != 0) {
 		PCO_GetErrorText(err, lastErrorMsg, ERR_SIZE-14);
-		strncpy_s(msg, ERR_SIZE, lastErrorMsg, _TRUNCATE); 
+		//strncpy_s(msg, ERR_SIZE, lastErrorMsg, _TRUNCATE); 
+		strcpy_s(msg, ERR_SIZE, lastErrorMsg); 
 
 		lg = strlen(msg);
 		sprintf_s(msg+lg,ERR_SIZE - lg, " [%s][%d]", file, line);
@@ -2108,7 +2109,7 @@ char * Camera::_pcoSet_RecordingState(int state, int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 	char *msg;
-	LARGE_INTEGER usStart;
+	TIME_UTICKS usStart;
 
 
 	WORD wRecState_new, wRecState_actual;

@@ -404,7 +404,10 @@ int BufferCtrlObj::_xferImag()
 	m_pcoData->traceAcq.fnIdXfer = fnId;
 	m_pcoData->traceAcq.msImgCoc = (m_cam->pcoGetCocRunTime() * 1000.);
 
-	struct __timeb64 tStart;
+	
+	
+	//struct __timeb64 tStart;
+	TIME_USEC tStart;
 	msElapsedTimeSet(tStart);
 	m_pcoData->traceAcq.nrImgRequested = dwRequestedFrames;
 
@@ -770,10 +773,10 @@ int BufferCtrlObj::_xferImagMult()
 	int _retStatus, _stopReq, _nrStop;
     int _newFrameReady = -1;
 
-	struct __timeb64 tStart;
+	TIME_USEC tStart;
 	msElapsedTimeSet(tStart);
 
-	LARGE_INTEGER usStart;
+	TIME_UTICKS usStart;
 	usElapsedTimeSet(usStart);
 
 
@@ -914,7 +917,7 @@ int BufferCtrlObj::_xferImagMult()
 		if((_stopReq = m_sync->_getRequestStop(_nrStop)) == stopRequest) {
 			if(_nrStop > MAX_NR_STOP) {
 				char msg[LEN_TRACEACQ_MSG+1];
-				snprintf(msg,"%s> STOP REQ (saving), framesReq[%d] frameReady[%d]\n", fnId, requested_nb_frames, _newFrameReady);
+				sprintf_s(msg,LEN_TRACEACQ_MSG,"%s> STOP REQ (saving), framesReq[%d] frameReady[%d]\n", fnId, requested_nb_frames, _newFrameReady);
 				m_pcoData->traceMsg(msg);
 				break;
 			}

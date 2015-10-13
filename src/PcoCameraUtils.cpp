@@ -151,23 +151,41 @@ char *_xlat_date(char *s1, char *s2, char *s3) {
 	
 }
 
-char *_split_date(char *s) {
+char *_split_date(char *_s) {
 	static char s1[LEN_BUFF_DATE+1];
 	static char s2[LEN_BUFF_DATE+1];
 	static char s3[LEN_BUFF_DATE+1];
+	char s[3*LEN_BUFF_DATE+1];
 	char *ptr1, *ptr2;
+	strcpy_s(s, 3*LEN_BUFF_DATE, _s);
+	*s1 = *s2 = *s3 = 0;
 
 	ptr1 = strchr(s,'[');
-	ptr2 = strchr(ptr1,']');
-	strncpy_s(s1, LEN_BUFF_DATE, ptr1+1, ptr2-ptr1-1);
+	if(ptr1) {
+		ptr2 = strchr(ptr1,']');
+		if(ptr2) {
+			*ptr2 = 0;
+			strcpy_s(s1, LEN_BUFF_DATE, ptr1+1);
+		}
+	}
 
-	ptr1 = strchr(ptr2,'[');
-	ptr2 = strchr(ptr1,']');
-	strncpy_s(s2, LEN_BUFF_DATE, ptr1+1, ptr2-ptr1-1);
+	ptr1 = strchr(ptr2+1,'[');
+	if(ptr1) {
+		ptr2 = strchr(ptr1,']');
+		if(ptr2) {
+			*ptr2 = 0;
+			strcpy_s(s2, LEN_BUFF_DATE, ptr1+1);
+		}
+	}
 
-	ptr1 = strchr(ptr2,'[');
-	ptr2 = strchr(ptr1,']');
-	strncpy_s(s3, LEN_BUFF_DATE, ptr1+1, ptr2-ptr1-1);
+	ptr1 = strchr(ptr2+1,'[');
+	if(ptr1) {
+		ptr2 = strchr(ptr1,']');
+		if(ptr2) {
+			*ptr2 = 0;
+			strcpy_s(s3, LEN_BUFF_DATE, ptr1+1);
+		}
+	}
 
 	return _xlat_date(s1, s2, s3);
 }
@@ -250,9 +268,9 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 
 		int width = +20;
 		
-		strncpy_s(cmdBuff, BUFF_INFO_SIZE, _cmd, BUFF_INFO_SIZE);
+		strcpy_s(cmdBuff, BUFF_INFO_SIZE, _cmd);
 		cmd = str_trim(cmdBuff);
-		strncpy_s(cmdBuffAux, BUFF_INFO_SIZE, cmd, BUFF_INFO_SIZE);
+		strcpy_s(cmdBuffAux, BUFF_INFO_SIZE, cmd);
 
 		if(*cmd){
 			char *tokContext;
@@ -677,7 +695,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			if((tokNr == 2) &&  (_stricmp(tok[1], "time")==0)){
 				long long us;
 
-				LARGE_INTEGER usStart;
+				TIME_UTICKS usStart;
 
 				ptr += sprintf_s(ptr, ptrMax - ptr, "sleeping ...\n"); 
 
@@ -1375,7 +1393,7 @@ int ringLog::add(char *s) {
         }
         
         ptr->timestamp = getTimestamp();
-        strncpy_s(ptr->str, s,RING_LOG_BUFFER_SIZE);
+        strcpy_s(ptr->str,RING_LOG_BUFFER_SIZE, s);
         return m_size;
 
 }
@@ -1499,7 +1517,6 @@ char *_checkLogFiles() {
 //====================================================================
 
 #define INFO_BUFFER_SIZE 1024
-void printError( TCHAR* msg );
 
 char * _getComputerName(char *infoBuff, DWORD  bufCharCount  )
 {

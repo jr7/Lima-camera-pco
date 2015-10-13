@@ -102,11 +102,11 @@ struct stcXlatCode2Str {
 #define LEN_DUMP 128
 char DLL_EXPORT *_hex_dump_bytes(void *obj, size_t lenObj, char *buff, size_t lenBuff);
 
-long msElapsedTime(struct __timeb64 &t0);
-void msElapsedTimeSet(struct __timeb64 &t0);
+long msElapsedTime(TIME_USEC &t0);
+void msElapsedTimeSet(TIME_USEC &t0);
 
-void usElapsedTimeSet(LARGE_INTEGER &tick0) ;
-long long usElapsedTime(LARGE_INTEGER &tick0) ;
+void usElapsedTimeSet(TIME_UTICKS &tick0) ;
+long long usElapsedTime(TIME_UTICKS &tick0) ;
 double usElapsedTimeTicsPerSec() ;
 
 
