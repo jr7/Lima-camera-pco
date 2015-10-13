@@ -59,7 +59,7 @@
 using namespace lima;
 using namespace lima::Pco;
 
-static char *timebaseUnits[] = {"ns", "us", "ms"};
+const char *timebaseUnits[] = {"ns", "us", "ms"};
 
 //char *_checkLogFiles();
 void _pco_acq_thread_dimax(void *argin);
@@ -87,7 +87,7 @@ char *str_toupper(char *s);
 
 
 //=========================================================================================================
-char* _timestamp_pcocamera() {return ID_TIMESTAMP ;}
+const char* _timestamp_pcocamera() {return ID_TIMESTAMP ;}
 
 
 #ifdef WITH_GIT_VERSION
@@ -114,9 +114,9 @@ char * _getVSconfiguration(char *infoBuff, DWORD  bufCharCount);
 
 //=========================================================================================================
 //=========================================================================================================
-char *xlatCode2Str(int code, struct stcXlatCode2Str *stc) {
+const char *xlatCode2Str(int code, struct stcXlatCode2Str *stc) {
 
-	char *type;
+	const char *type;
 
 	while( (type = stc->str) != NULL) {
 		if(stc->code == code) return type;
@@ -132,7 +132,7 @@ char *xlatCode2Str(int code, struct stcXlatCode2Str *stc) {
 
 enum tblXlatCode2Str {ModelType, InterfaceType};
 
-char *xlatPcoCode2Str(int code, tblXlatCode2Str table, int &err) {
+const char *xlatPcoCode2Str(int code, tblXlatCode2Str table, int &err) {
 	struct stcXlatCode2Str modelType[] = {
 		{CAMERATYPE_PCO1200HS, "PCO 1200 HS"},
 		{CAMERATYPE_PCO1300, "PCO 1300"},
@@ -157,7 +157,7 @@ char *xlatPcoCode2Str(int code, tblXlatCode2Str table, int &err) {
 	};
 
   struct stcXlatCode2Str *stc;
-	char *ptr;
+	const char *ptr;
 	static char buff[BUFF_XLAT_SIZE+1];
 
   switch(table) {
@@ -243,7 +243,7 @@ stcPcoData::stcPcoData(){
 //=========================================================================================================
 //=========================================================================================================
 bool Camera::paramsGet(const char *key, char *&value) {
-	DEF_FNID;
+	//DEF_FNID;
 	DEB_CONSTRUCTOR();
 	bool ret;
 
@@ -256,7 +256,7 @@ bool Camera::paramsGet(const char *key, char *&value) {
 		}
 	}
 	ret = false;
-	value = ""; 
+	value = (char *) ""; 
 	DEB_ALWAYS() << DEB_VAR3(key, ret, value);
 	return ret;
 
@@ -265,7 +265,7 @@ bool Camera::paramsGet(const char *key, char *&value) {
 //=========================================================================================================
 void Camera::paramsInit(const char *str) 
 {
-	DEF_FNID;
+	//DEF_FNID;
 	DEB_CONSTRUCTOR();
 
 	int i;
@@ -296,7 +296,7 @@ void Camera::paramsInit(const char *str)
 		str_toupper(key);	
 		m_pcoData->params.ptrKey[i] = key = str_trim(key);	
 		value = str_trim(value);	
-		if(value == NULL) value = "";
+		if(value == NULL) value = (char *) "";
 		m_pcoData->params.ptrValue[i] = value;	
 		
 		found = false;
@@ -332,10 +332,10 @@ Camera::Camera(const char *params) :
 	m_buffer(NULL),
 	m_handle(NULL)
 {
-	DEF_FNID;
+	//DEF_FNID;
 	DEB_CONSTRUCTOR();
 
-	int error=0;
+	//int error=0;
 	m_config = TRUE;
 	DebParams::checkInit();
 
@@ -354,8 +354,9 @@ Camera::Camera(const char *params) :
 	// properties: params 
 	paramsInit(params);
 
-	char *value, *key;
-	bool ret;
+	char *value;
+	const char  *key;
+	__attribute__((unused)) bool ret;
 
 	/***
 	key = "test";
@@ -388,7 +389,7 @@ void Camera::_init(){
 	char msg[MSG_SIZE + 1];
 	int error=0;
 	const char *errMsg;
-	const char *pcoFn;
+	__attribute__((unused)) const char *pcoFn;
 
 	_armRequired(true);
 
@@ -399,8 +400,8 @@ void Camera::_init(){
 
 		// --- Open Camera - close before if it is open
 	if(m_handle) {
-		char *pcoFn;
-		DEB_ALWAYS() << fnId << " [closing opened camera]";
+		__attribute__((unused)) const char *pcoFn;
+		DEB_ALWAYS() << (char *) fnId << " [closing opened camera]";
 		PCO_FN1(error, pcoFn,PCO_CloseCamera, m_handle);
 		PCO_THROW_OR_TRACE(error, "_init(): PCO_CloseCamera - closing opened cam") ;
 		m_handle = NULL;
@@ -511,7 +512,7 @@ void  Camera::_init_dimax() {
 
 	DEB_CONSTRUCTOR();
 	char msg[MSG_SIZE + 1];
-	char *pcoFn;
+	const char *pcoFn;
 
 	int error=0;
 	DWORD _dwValidImageCnt, _dwMaxImageCnt;
@@ -602,7 +603,7 @@ void  Camera::_init_dimax() {
 	DEB_TRACE() <<  "end block 1 / get initial seg Size - images";
 
 	{
-		int segmentPco, segmentArr;
+		__attribute__((unused)) int segmentPco, segmentArr;
 		
 		unsigned int maxWidth, maxHeight; 
 		getMaxWidthHeight(maxWidth, maxHeight);
@@ -692,7 +693,7 @@ void Camera::startAcq()
 //=====================================================================
 	DEF_FNID;
     WORD state;
-    HANDLE hEvent= NULL;
+    //HANDLE hEvent= NULL;
 
 	DEB_ALWAYS() << fnId << " [ENTRY]" ;
 
@@ -900,7 +901,7 @@ long msElapsedTime(TIME_USEC &t0) {
 
 
 #ifdef __linux__
-    long msDiff;
+    long seconds, useconds;
     gettimeofday(&tNow, NULL);
 
     seconds  = tNow.tv_sec  - t0.tv_sec;
@@ -938,9 +939,8 @@ void usElapsedTimeSet(TIME_UTICKS &tick0) {
 }
 
 long long usElapsedTime(TIME_UTICKS &tick0) {
-	TIME_UTICKS ticksPerSecond;
 	TIME_UTICKS tick;   // A point in time
-	long long uS, uS0, usDiff;
+	long long usDiff;
 
 #ifdef __linux__
     clock_gettime(CLOCK_REALTIME, &tick); 
@@ -949,6 +949,8 @@ long long usElapsedTime(TIME_UTICKS &tick0) {
             (tick.tv_nsec - tick0.tv_nsec) / 1000. );
 
 #else
+	TIME_UTICKS ticksPerSecond;
+	long long uS, uS0;
 	QueryPerformanceFrequency(&ticksPerSecond); 
 	QueryPerformanceCounter(&tick);
 
@@ -963,14 +965,17 @@ long long usElapsedTime(TIME_UTICKS &tick0) {
 }
 
 double usElapsedTimeTicsPerSec() {
-	TIME_UTICKS ticksPerSecond;
+    double ticks = 0;
 #ifdef __linux__
+	TIME_UTICKS tick;   // A point in time
     clock_gettime(CLOCK_REALTIME, &tick); 
 
 #else
+	TIME_UTICKS ticksPerSecond;
 	QueryPerformanceFrequency(&ticksPerSecond); 
-	return (double) ticksPerSecond.QuadPart;
+    ticks = (double) ticksPerSecond.QuadPart;
 #endif
+	return ticks;
 
 }
 
@@ -1054,7 +1059,7 @@ void _pco_acq_thread_dimax(void *argin) {
 			nb_frames_fixed = true;
 			
 			sprintf_s(msgErr,LEN_ERROR_MSG, 
-				"=== %s [%d]> ERROR INVALID NR FRAMES fixed nb_frames[%d] _dwMaxImageCnt[%d]", 
+				"=== %s [%d]> ERROR INVALID NR FRAMES fixed nb_frames[%d] _dwMaxImageCnt[%lu]", 
 				fnId, __LINE__, nb_frames, _dwMaxImageCnt);
 			printf("%s\n", msgErr);
 
@@ -1080,7 +1085,7 @@ void _pco_acq_thread_dimax(void *argin) {
 				//m_buffer->_setRequestStop(stopProcessing);
 				//m_sync->setExposing(pcoAcqStop);
 				
-			snprintf(msg,LEN_TRACEACQ_MSG, "=== %s> STOP REQ (recording). lastImgRec[%d]\n", fnId, _dwValidImageCnt);
+			snprintf(msg,LEN_TRACEACQ_MSG, "=== %s> STOP REQ (recording). lastImgRec[%lu]\n", fnId, _dwValidImageCnt);
 				printf(msg);
 				m_pcoData->traceMsg(msg);
 				break;
@@ -1174,7 +1179,7 @@ void _pco_acq_thread_dimax(void *argin) {
 	m_pcoData->traceAcq.endXferTimestamp = m_pcoData->msAcqXferTimestamp = getTimestamp();
 
 
-	printf("=== %s [%d]> EXIT imgRecorded[%d] coc[%g] recLoopTime[%ld] "
+	printf("=== %s [%d]> EXIT imgRecorded[%lu] coc[%g] recLoopTime[%ld] "
 			"tout[(%ld) 0(%ld)] rec[%ld] xfer[%ld] all[%ld](ms)\n", 
 			fnId, __LINE__, _dwValidImageCnt, msPerFrame, msNowRecordLoop, timeout, timeout0, msRecord, msXfer, msTotal);
 
@@ -1243,9 +1248,9 @@ void _pco_acq_thread_edge(void *argin) {
 	msElapsedTimeSet(tStart);
 	int error;
 	long msXfer;
-	int requestStop = stopNone;
+	//int requestStop = stopNone;
 
-	HANDLE m_handle = m_cam->getHandle();
+	//HANDLE m_handle = m_cam->getHandle();
 
 	m_sync->setAcqFrames(0);
 
@@ -1293,9 +1298,9 @@ void _pco_acq_thread_dimax_live(void *argin) {
 	msElapsedTimeSet(tStart);
 	int error;
 	long msXfer;
-	int requestStop = stopNone;
+	//int requestStop = stopNone;
 
-	HANDLE m_handle = m_cam->getHandle();
+	//HANDLE m_handle = m_cam->getHandle();
 
 	m_sync->setAcqFrames(0);
 
@@ -1986,7 +1991,7 @@ const char *Camera::_pco_GetCameraType(int &error){
 
 	// --- Get camera type
 	{
-		char *ptr;
+		const char *ptr;
 		int errTot = 0;
 
 		//m_pcoData->stcPcoCamType.wSize= sizeof(m_pcoData->stcPcoCamType);

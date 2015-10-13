@@ -1080,7 +1080,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		key = keys[ikey] = "acqEnable";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "(R) acq enable signal status (BNC acq enbl in)";     
 		if(_stricmp(cmd, key) == 0){
-			int error;
+			__attribute__((unused)) int error;
 			WORD wAcquEnableState;
 
 			error = PcoCheckError(__LINE__, __FILE__, PCO_GetAcqEnblSignalStatus(m_handle, &wAcquEnableState));
