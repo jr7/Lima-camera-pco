@@ -32,9 +32,19 @@
 
 
 #include <cstdlib>
+
+#ifndef __linux__
 #include <process.h>
+#endif 
+
 #include <sys/stat.h>
+
+#ifndef __linux__
 #include <sys/timeb.h>
+#else
+#include <sys/time.h>
+#endif 
+
 #include <time.h>
 
 #include "lima/Exceptions.h"
@@ -187,7 +197,7 @@ stcPcoData::stcPcoData(){
 	ptr = version; *ptr = 0;
 	ptrMax = ptr + sizeof(version) - 1;
 
-	ptr += sprintf_s(ptr, ptrMax - ptr, "\n");
+	ptr += sprintf_s(ptr, ptrMax - ptr,  "\n");
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcocamera()));
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcosyncctrlobj()));
 	ptr += sprintf_s(ptr, ptrMax - ptr, "%s\n", _split_date(_timestamp_pcointerface()));
@@ -377,8 +387,8 @@ void Camera::_init(){
 
 	char msg[MSG_SIZE + 1];
 	int error=0;
-	char *errMsg;
-	char *pcoFn;
+	const char *errMsg;
+	const char *pcoFn;
 
 	_armRequired(true);
 
@@ -676,7 +686,7 @@ void Camera::startAcq()
 
 	m_pcoData->traceAcqClean();
 
-	struct __timeb64 tStart;
+	TIME_USEC tStart;
 	msElapsedTimeSet(tStart);
 
 //=====================================================================
@@ -687,7 +697,7 @@ void Camera::startAcq()
 	DEB_ALWAYS() << fnId << " [ENTRY]" ;
 
 	int error;
-	char *msg;
+	const char *msg;
 
     int iRequestedFrames;
 
@@ -884,47 +894,87 @@ void Camera::startAcq()
 //==========================================================================================================
 //==========================================================================================================
 
-long msElapsedTime(struct __timeb64 &t0) {
-	struct __timeb64 tNow;
+long msElapsedTime(TIME_USEC &t0) {
+    long msDiff, seconds, useconds;
+	TIME_USEC tNow;
+
+
+#ifdef __linux__
+    gettimeofday(&tNow, NULL);
+
+    seconds  = tNow.tv_sec  - t0.tv_sec;
+    useconds = tNow.tv_usec - t0.tv_usec;
+
+    msDiff = long ( ((seconds) * 1000 + useconds/1000.0) + 0.5 );
+#else
 	_ftime64_s(&tNow);
 
-	return (long)((tNow.time - t0.time)*1000) + (tNow.millitm - t0.millitm);
+	msDiff = (long)((tNow.time - t0.time)*1000) + (tNow.millitm - t0.millitm);
+#endif
+
+	return msDiff;
 }
 
-void msElapsedTimeSet(struct __timeb64 &t0) {
+void msElapsedTimeSet(TIME_USEC &t0) {
+
+#ifdef __linux__
+    gettimeofday(&t0, NULL);
+#else
 	_ftime64_s(&t0);
+#endif
+
 }
 
 
-void usElapsedTimeSet(LARGE_INTEGER &tick0) {
+void usElapsedTimeSet(TIME_UTICKS &tick0) {
 
+#ifdef __linux__
+    clock_gettime(CLOCK_REALTIME, &tick0); 
+
+#else
 	QueryPerformanceCounter(&tick0);
-
+#endif
 }
 
-long long usElapsedTime(LARGE_INTEGER &tick0) {
-	LARGE_INTEGER ticksPerSecond;
-	LARGE_INTEGER tick;   // A point in time
-	long long uS, uS0;
+long long usElapsedTime(TIME_UTICKS &tick0) {
+	TIME_UTICKS ticksPerSecond;
+	TIME_UTICKS tick;   // A point in time
+	long long uS, uS0, usDiff;
 
+#ifdef __linux__
+    clock_gettime(CLOCK_REALTIME, &tick); 
+
+    usDiff = (long long int)   ((tick.tv_sec - tick0.tv_sec) * 1000000. +
+            (tick.tv_nsec - tick0.tv_nsec) / 1000. );
+
+#else
 	QueryPerformanceFrequency(&ticksPerSecond); 
 	QueryPerformanceCounter(&tick);
 
 	double ticsPerUSecond = ticksPerSecond.QuadPart/1.0e6;
 	uS = (long long) (tick.QuadPart/ticsPerUSecond);
 	uS0 = (long long) (tick0.QuadPart/ticsPerUSecond);
+    usDiff = uS - uS0;
+#endif
 
-	return uS - uS0;
+	return usDiff;
 
 }
 
+#if 0
 double usElapsedTimeTicsPerSec() {
-	LARGE_INTEGER ticksPerSecond;
+	TIME_UTICKS ticksPerSecond;
+#ifdef __linux__
+    clock_gettime(CLOCK_REALTIME, &tick); 
 
+#else
 	QueryPerformanceFrequency(&ticksPerSecond); 
 	return (double) ticksPerSecond.QuadPart;
+#endif
 
 }
+
+#endif
 
 //==========================================================================================================
 //==========================================================================================================
@@ -948,8 +998,8 @@ void _pco_acq_thread_dimax(void *argin) {
 	//m_pcoData->traceAcqClean();
 	m_pcoData->traceAcq.fnId = fnId;
 
-	char *msg;
-	struct __timeb64 tStart, tStart0;
+	const char *msg;
+	TIME_USEC tStart, tStart0;
 	msElapsedTimeSet(tStart);
 	tStart0 = tStart;
 
@@ -1190,7 +1240,7 @@ void _pco_acq_thread_edge(void *argin) {
 
 	struct stcPcoData *m_pcoData = m_cam->_getPcoData();
 
-	struct __timeb64 tStart;
+	TIME_USEC tStart;
 	msElapsedTimeSet(tStart);
 	int error;
 	long msXfer;
@@ -1206,7 +1256,7 @@ void _pco_acq_thread_edge(void *argin) {
 
 	m_sync->setExposing(status);
 	//m_sync->stopAcq();
-	char *msg = m_cam->_pcoSet_RecordingState(0, error);
+	const char *msg = m_cam->_pcoSet_RecordingState(0, error);
 	if(error) {
 		printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, msg);
 		//throw LIMA_HW_EXC(Error, "_pcoSet_RecordingState");
@@ -1240,7 +1290,7 @@ void _pco_acq_thread_dimax_live(void *argin) {
 
 	struct stcPcoData *m_pcoData = m_cam->_getPcoData();
 
-	struct __timeb64 tStart;
+	TIME_USEC tStart;
 	msElapsedTimeSet(tStart);
 	int error;
 	long msXfer;
@@ -1258,7 +1308,7 @@ void _pco_acq_thread_dimax_live(void *argin) {
 	pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImag();
 	m_sync->setExposing(status);
 	m_sync->stopAcq();
-	char *msg = m_cam->_pcoSet_RecordingState(0, error);
+	const char *msg = m_cam->_pcoSet_RecordingState(0, error);
 	if(error) {
 		printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, msg);
 		//throw LIMA_HW_EXC(Error, "_pcoSet_RecordingState");
@@ -1290,10 +1340,10 @@ void _pco_acq_thread_ringBuffer(void *argin) {
 
 	struct stcPcoData *m_pcoData = m_cam->_getPcoData();
 
-	struct __timeb64 tStart;
+	TIME_USEC tStart;
 	msElapsedTimeSet(tStart);
 
-	LARGE_INTEGER usStart;
+	TIME_UTICKS usStart;
 	usElapsedTimeSet(usStart);
 
 	int error;
@@ -1347,7 +1397,7 @@ void _pco_acq_thread_ringBuffer(void *argin) {
 	m_pcoData->traceAcq.usTicks[3].desc = "sync->stopAcq execTime";
 	usElapsedTimeSet(usStart);
 
-	char *msg = m_cam->_pcoSet_RecordingState(0, error);
+	const char *msg = m_cam->_pcoSet_RecordingState(0, error);
 	m_pcoData->traceAcq.usTicks[4].value = usElapsedTime(usStart);
 	m_pcoData->traceAcq.usTicks[4].desc = "_pcoSet_RecordingState execTime";
 	usElapsedTimeSet(usStart);
@@ -1469,7 +1519,8 @@ char* Camera::_PcoCheckError(int line, char *file, int err, int &error, char *fn
 
 	if (err != 0) {
 		PCO_GetErrorText(err, lastErrorMsg, ERR_SIZE-14);
-		strncpy_s(msg, ERR_SIZE, lastErrorMsg, _TRUNCATE); 
+		//strncpy_s(msg, ERR_SIZE, lastErrorMsg, _TRUNCATE); 
+		strcpy_s(msg, ERR_SIZE, lastErrorMsg); 
 
 		lg = strlen(msg);
 		sprintf_s(msg+lg,ERR_SIZE - lg, " [%s][%d]", file, line);
@@ -1497,12 +1548,12 @@ unsigned long Camera::pcoGetFramesMax(int segmentPco){
 
 		if(!_isCameraType(Dimax | Pco2k | Pco4k)) {
 			printf("=== %s> unknown camera type [%d]\n", fnId, _getCameraType());
-			return -1;
+			return 0;
 		}
 
 		if((segmentPco <1) ||(segmentPco > PCO_MAXSEGMENTS)) {
 			printf("=== %s> ERROR segmentPco[%d]\n", fnId, segmentPco);
-			return -1;
+			return 0;
 		}
 
 		xroisize = m_RoiLima.getSize().getWidth();
@@ -1515,12 +1566,12 @@ unsigned long Camera::pcoGetFramesMax(int segmentPco){
 
 		if(pixPerFrame <0) {
 			printf("=== %s> ERROR pixPerFrame[%lld]\n", fnId, pixPerFrame);
-			return -1;
+			return 0;
 		}
 
 		if(m_pcoData->wPixPerPage < 1) {
 			printf("=== %s> ERROR m_pcoData->wPixPerPage[%d]\n", fnId, m_pcoData->wPixPerPage);
-			return -1;
+			return 0;
 		}
 		pagesPerFrame = (pixPerFrame / m_pcoData->wPixPerPage) + 1;
 		if(pixPerFrame % m_pcoData->wPixPerPage) pagesPerFrame++;
@@ -1533,7 +1584,7 @@ unsigned long Camera::pcoGetFramesMax(int segmentPco){
 
 //=================================================================================================
 //=================================================================================================
-char * Camera::_pco_SetTriggerMode_SetAcquireMode(int &error){
+const char * Camera::_pco_SetTriggerMode_SetAcquireMode(int &error){
 	DEB_MEMBER_FUNCT();
 	char *msg;
 	
@@ -1587,7 +1638,7 @@ char * Camera::_pco_SetTriggerMode_SetAcquireMode(int &error){
 //      . if the allocated buffer overflows, the oldest images are overwritten
 //      . recording is stopped by software or disabling acquire signal (<acq enbl>)
 //=================================================================================================
-char * Camera::_pco_SetStorageMode_SetRecorderSubmode(enumPcoStorageMode mode, int &error){
+const char * Camera::_pco_SetStorageMode_SetRecorderSubmode(enumPcoStorageMode mode, int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 	char *msg;
@@ -1677,7 +1728,7 @@ void _pco_time2dwbase(double exp_time, DWORD &dwExp, WORD &wBase) {
 
 //=================================================================================================
 //=================================================================================================
-char* Camera::_pco_SetDelayExposureTime(int &error, int ph){
+const char* Camera::_pco_SetDelayExposureTime(int &error, int ph){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 	bool doIt;
@@ -1777,7 +1828,7 @@ int Camera::_pco_GetImageTiming(double &frameTime, double &expTime, double &sysD
 }
 //=================================================================================================
 //=================================================================================================
-char *Camera::_pco_SetCamLinkSetImageParameters(int &error){
+const char *Camera::_pco_SetCamLinkSetImageParameters(int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 	char *pcoFn;
@@ -1808,7 +1859,7 @@ char *Camera::_pco_SetCamLinkSetImageParameters(int &error){
 
 //=================================================================================================
 //=================================================================================================
-char *Camera::_pco_SetTransferParameter_SetActiveLookupTable(int &error){
+const char *Camera::_pco_SetTransferParameter_SetActiveLookupTable(int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 	struct stcPcoData _pcoData;
@@ -1928,7 +1979,7 @@ void Camera::getArmWidthHeight(WORD& width,WORD& height)
 
 //=================================================================================================
 //=================================================================================================
-char *Camera::_pco_GetCameraType(int &error){
+const char *Camera::_pco_GetCameraType(int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 	char *msg;
@@ -2045,7 +2096,7 @@ char *Camera::_pco_GetCameraType(int &error){
 
 //=================================================================================================
 //=================================================================================================
-char *Camera::_pco_GetTemperatureInfo(int &error){
+const char *Camera::_pco_GetTemperatureInfo(int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 	char msg[MSG_SIZE + 1];
@@ -2104,11 +2155,11 @@ char *Camera::_pco_GetTemperatureInfo(int &error){
 	Please call PCO_CancelImages to remove pending buffers from the driver.   --- 1.5 s
 **************************************************************************************************/
 
-char * Camera::_pcoSet_RecordingState(int state, int &error){
+const char * Camera::_pcoSet_RecordingState(int state, int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 	char *msg;
-	LARGE_INTEGER usStart;
+	TIME_UTICKS usStart;
 
 
 	WORD wRecState_new, wRecState_actual;
@@ -2196,7 +2247,7 @@ int Camera::dumpRecordedImages(int &nrImages, int &error){
 
 //=================================================================================================
 //=================================================================================================
-char *Camera::_pco_GetCOCRuntime(int &error){
+const char *Camera::_pco_GetCOCRuntime(int &error){
 		
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
@@ -2228,7 +2279,7 @@ char *Camera::_pco_GetCOCRuntime(int &error){
 
 //=================================================================================================
 //=================================================================================================
-char *Camera::_pco_SetMetaDataMode(WORD wMetaDataMode, int &error){
+const char *Camera::_pco_SetMetaDataMode(WORD wMetaDataMode, int &error){
 		
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
@@ -2971,7 +3022,7 @@ int Camera::_pco_SetADCOperation(int adc_new, int &adc_working)
 
 //=================================================================================================
 //=================================================================================================
-char *Camera::_pco_SetPixelRate(int &error){
+const char *Camera::_pco_SetPixelRate(int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
 	error = 0;

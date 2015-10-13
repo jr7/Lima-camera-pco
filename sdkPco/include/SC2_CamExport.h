@@ -116,6 +116,12 @@
 #define SC2_SDK_FUNC __declspec(dllimport)
 #endif
 
+
+#undef SC2_SDK_FUNC
+#define SC2_SDK_FUNC
+
+#define WINAPI
+
 #ifdef __cplusplus
 extern "C" {            //  Assume C declarations for C++
 #endif  //C++
@@ -161,6 +167,7 @@ again:-Access-To-Segment-1--
   err = PCO_GetImageEx(ph, 1, dw1stImage, dwLastImage, sBufNr,
                        wXRes, wYRes, wBitPerPixel);
  
+*/
 /*******************************************************************/
 
 /////////////////////////////////////////////////////////////////////

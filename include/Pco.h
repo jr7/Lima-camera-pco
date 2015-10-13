@@ -32,10 +32,63 @@
 	#define _x86
 #endif
 
+#ifdef __linux__
+#include <stdint.h>
+typedef unsigned long       DWORD;
+typedef unsigned char       BYTE;
+typedef unsigned short      WORD;
+typedef bool                BOOL;
+
+typedef void *HANDLE;
+
+typedef short SHORT;
+typedef long LONG;
+
+typedef uint64_t UINT64;
+
+#ifndef ULLONG_MAX
+#define ULONG_MAX     0xffffffffUL
+#define ULLONG_MAX    0xffffffffffffffffULL      /* maximum unsigned long long int value */
+#endif
+
+#define far
+
+#define DECLARE_HANDLE(n) typedef struct n##__{int i;}*n
+
+DECLARE_HANDLE(HWND);
+
+#ifndef __TIMESTAMP__
+#define __TIMESTAMP__
+#endif
+
+
+
+//#define sprintf_s(buffer, buffer_size, stringbuffer, ...) (snprintf(buffer, buffer_size, stringbuffer, __VA_ARGS__))
+
+#define sprintf_s snprintf
+
+#define _stricmp strcasecmp
+#define strcpy_s(d, l, s) strncpy( (d), (s), (l) )
+#define strncpy_s(d, s, l) strncpy( (d), (s), (l) )
+
+#define VS_PLATFORM osLinux
+#define VS_CONFIGURATION x64
+
+#define localtime_s(stc, tm )  (localtime_r( (tm) , (stc) ))
+
+#define  sscanf_s sscanf
+#define  strtok_s strtok_r
+typedef struct timeval TIME_USEC;
+#define  TIME_UTICKS struct timespec
+#else
+typedef struct __timeb64 TIME_USEC;
+#define  TIME_UTICKS LARGE_INTEGER 
+
+#endif
 
 #include "processlib/Compatibility.h"
 #include "PCO_Structures.h"
-#include "PCO_ConvStructures.h"
+#include "Pco_ConvStructures.h"
 #include "Pco_ConvDlgExport.h"
 #include "sc2_SDKStructures.h"
 #include "sc2_common.h"
@@ -43,6 +96,18 @@
 #include "sc2_defs.h"
 #include "SC2_SDKAddendum.h"
 #include "PCO_errt.h"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #include <math.h>
@@ -113,7 +178,7 @@ typedef int tPvErr;
 		} \
 }
 
-#define DEF_FNID 	static char *fnId =__FUNCTION__;
+#define DEF_FNID 	const char *fnId =__FUNCTION__;
 
 #define PRINTLINES { for(int i = 0; i<50;i++) printf("=====  %s [%d]/[%d]\n", __FILE__, __LINE__,i); }
 

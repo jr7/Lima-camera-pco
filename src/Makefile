@@ -1,14 +1,28 @@
-prosilica-objs = ProsilicaBufferCtrlObj.o ProsilicaCamera.o ProsilicaInterface.o \
-		 ProsilicaSyncCtrlObj.o  ProsilicaVideoCtrlObj.o ProsilicaDetInfoCtrlObj.o
+pco-objs =  \
+            PcoHwEventCtrlObj.o  \
+            PcoDetInfoCtrlObj.o  \
+            PcoInterface.o  \
+            PcoRoiCtrlObj.o  \
+            PcoSyncCtrlObj.o  \
+            PcoCameraUtils.o  \
+            PcoBufferCtrlObj.o  \
+            PcoCamera.o  \
 
-SRCS = $(prosilica-objs:.o=.cpp) 
 
-CXXFLAGS += -I../include -I../../../hardware/include -I../../../common/include -I../sdk/include \
-	-pthread -fPIC -g
 
-all:	Prosilica.o
+SRCS = $(pco-objs:.o=.cpp) 
 
-Prosilica.o:	$(prosilica-objs)
+CXXFLAGS += -I../include \
+            -I../../../hardware/include \
+            -I../../../common/include \
+            -I../sdkPco/include \
+            -I../../../third-party/Processlib/core/include \
+            -pthread -fPIC -g \
+            -Wall\
+
+all:	Pco.o
+
+Pco.o:	$(pco-objs)
 	$(LD) -o $@ -r $+
 
 clean:

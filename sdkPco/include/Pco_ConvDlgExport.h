@@ -48,6 +48,13 @@
 #else
 #define PCO_CONVERT_DIALOG_EXPORTS __declspec(dllimport) WINAPI
 #endif
+
+typedef void *HANDLE;
+
+#undef PCO_CONVERT_DIALOG_EXPORTS
+#define PCO_CONVERT_DIALOG_EXPORTS
+
+
  
 #ifdef __cplusplus
 extern "C" {

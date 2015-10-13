@@ -445,7 +445,7 @@ void PCO_GetErrorText(DWORD dwerr, char* pbuf, DWORD dwlen)
 
   if ((dwerr == PCO_NOERROR) || (index == 0))
   {
-    sprintf_s(pbuf, dwlen, "No error.");
+    sprintf_s(pbuf, dwlen, "%s", "No error.");
     return;
   }
 

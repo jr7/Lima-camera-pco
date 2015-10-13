@@ -28,11 +28,12 @@
 #include "PcoSyncCtrlObj.h"
 #include "PcoBufferCtrlObj.h"
 
+/*
 #define THROW_LIMA_HW_EXC(Error, x)  { \
 	printf("========*** LIMA_HW_EXC %s\n", x ); \
 			throw LIMA_HW_EXC(Error, x); \
 } 
-
+*/
 
 using namespace lima;
 using namespace lima::Pco;

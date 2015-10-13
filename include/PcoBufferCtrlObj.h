@@ -71,24 +71,6 @@ namespace lima
       DEB_CLASS_NAMESPC(DebModCamera,"BufferCtrlObj","Pco");
 	
     
-	public:
-      BufferCtrlObj(Camera *cam);
-      void prepareAcq();
-      void startAcq();
-      //void getStatus(int &err,bool& exposing) {err = m_status,exposing = m_exposing;}
-      void getStatus(int &err) {err = m_cam->pcoGetError();}
-      //void setStatus(int status) {m_status = status;}
-
-        //-------------------------------------------------------------  moved from taco
-        
-	  
-        int _xferImag();
-        int _xferImagMult();
-		void * BufferCtrlObj::_getLimaBuffer(int lima_buffer_nb, Sync::Status &status);
-		void _pcoAllocBuffersFree();
-		void _pcoAllocBuffersInfo(int &nr, DWORD &size);
-
-	
 	private:
 		SoftBufferCtrlObj::Sync *m_bufferSync;
 		Cond cond;
@@ -106,6 +88,26 @@ namespace lima
 		int m_requestStop, m_requestStopRetry;
 		int m_ImageBufferSize;
 		struct stcPcoData *m_pcoData;
+
+	public:
+      BufferCtrlObj(Camera *cam);
+      void prepareAcq();
+      void startAcq();
+      //void getStatus(int &err,bool& exposing) {err = m_status,exposing = m_exposing;}
+      void getStatus(int &err) {err = m_cam->pcoGetError();}
+      //void setStatus(int status) {m_status = status;}
+
+        //-------------------------------------------------------------  moved from taco
+        
+	  
+        int _xferImag();
+        int _xferImagMult();
+		//void * BufferCtrlObj::_getLimaBuffer(int lima_buffer_nb, Sync::Status &status);
+		void * _getLimaBuffer(int lima_buffer_nb, Sync::Status &status);
+		void _pcoAllocBuffersFree();
+		void _pcoAllocBuffersInfo(int &nr, DWORD &size);
+
+	
 
 	};
   }
