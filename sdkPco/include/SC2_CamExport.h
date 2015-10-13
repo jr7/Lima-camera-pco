@@ -120,7 +120,9 @@
 #undef SC2_SDK_FUNC
 #define SC2_SDK_FUNC
 
+#ifdef __linux__
 #define WINAPI
+#endif
 
 #ifdef __cplusplus
 extern "C" {            //  Assume C declarations for C++

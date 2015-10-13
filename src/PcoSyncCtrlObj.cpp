@@ -39,7 +39,7 @@ using namespace lima;
 using namespace lima::Pco;
 
 //=========================================================================================================
-char* _timestamp_pcosyncctrlobj() {return ID_TIMESTAMP ;}
+const char* _timestamp_pcosyncctrlobj() {return ID_TIMESTAMP ;}
 //=========================================================================================================
 
 //=========================================================================================================
@@ -391,7 +391,7 @@ void SyncCtrlObj::getNbHwFrames(int& nb_frames)
 //=========================================================================================================
 void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 {
-	DEF_FNID;
+	//DEF_FNID;
 	// DONE
 
 	
@@ -478,7 +478,7 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 
 	_stopRequestIn = _getRequestStop(_nrStop);
 
-	while(_started = getStarted()) {
+	while( (_started = getStarted()) ) {
 		_setRequestStop(stopRequest);
         resWait = m_cond.wait(5.);
 	}
@@ -495,7 +495,7 @@ void SyncCtrlObj::getStatus(HwInterface::StatusType& status)
 	bool _started = getStarted();
   DEB_MEMBER_FUNCT();
 DEB_TRACE() << DEB_VAR3(_started, m_buffer, m_exposing);
- DEF_FNID;
+ //DEF_FNID;
   if(_started){
       if(m_buffer){
 
@@ -553,9 +553,9 @@ int SyncCtrlObj::_getRequestStop(int &nrStop)
 void SyncCtrlObj::_setRequestStop(int requestStop) 
 { 
 	DEB_MEMBER_FUNCT();
-	DEF_FNID;
+	//DEF_FNID;
 
-	int m_requestStop0 = m_requestStop;
+	//int m_requestStop0 = m_requestStop;
 
 	switch(requestStop) {
 			case stopNone:

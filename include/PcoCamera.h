@@ -90,7 +90,7 @@
 #define PCO_BUFFER_NREVENTS 4
 struct stcXlatCode2Str {
 		int code;
-		char *str;
+		const char *str;
 };
 
 #define LEN_TRACEACQ_MSG 512
@@ -385,42 +385,48 @@ namespace lima
 		bool _isCameraType(int tp);
 		bool _isConfig(){return m_config; };
 		void _pco_set_shutter_rolling_edge(int &error);
-		void msgLog(char *s);
+		void msgLog(const char *s);
 		bool _getIsArmed() {return m_isArmed; };
 		void _armRequired(bool armRequiered){m_isArmed = !armRequiered;};
 		void _traceMsg(char *s);
 		
 		void paramsInit(const char *str);
-		bool paramsGet(const char *key, char *&value);
+		bool paramsGet(const char *key,  char *&value);
 
 	private:
-		PcoHwEventCtrlObj *m_HwEventCtrlObj;
+        bool m_cam_connected;
+		int	m_acq_frame_nb;
 		SyncCtrlObj*	m_sync;
 		BufferCtrlObj*  m_buffer;
+        HANDLE	m_handle;				/* handle of opened camera */
+
+
+		PcoHwEventCtrlObj *m_HwEventCtrlObj;
 
 		std::string m_log;
         //char pcoErrorMsg[ERR_SIZE+1];
 
 		struct stcPcoData *m_pcoData;
 
-        HANDLE	m_handle;				/* handle of opened camera */
-        bool m_cam_connected;
+
+
 
 		Cond m_cond;
 	
 		int m_pcoError;
+
 
         struct stcBinning m_bin;
 		Roi m_RoiLima, m_RoiLimaRequested ;
 		
 		//struct stcSize m_size;
 
-		int		m_acq_frame_nb;
 		bool m_config;
 
 		bool m_isArmed;
 
-        int PcoCheckError(int line, const char *file, int err, char *fn = "***");
+
+        int PcoCheckError(int line, const char *file, int err, const char *fn = "***");
 
 		void _allocBuffer();
 

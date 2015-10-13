@@ -163,7 +163,7 @@ char *_xlat_date(char *s1, char *s2, char *s3) {
 	return buff;
 	
 }
-char *_split_date(char *_s) {
+char *_split_date(const char *_s) {
 	static char s1[LEN_BUFF_DATE+1];
 	static char s2[LEN_BUFF_DATE+1];
 	static char s3[LEN_BUFF_DATE+1];
@@ -686,7 +686,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			//--- test of close
 			if( (_stricmp(tok[1], "cb")==0)){
 				int error;
-				char *msg;
+				const char *msg;
 
 				m_cam_connected = false;
 
@@ -1456,10 +1456,9 @@ int ringLog::dump(char *s, int lgMax, bool direction) {
         const char *fmt = "%Y/%m/%d %H:%M:%S";
 		int linMax = 25 + RING_LOG_BUFFER_SIZE;
         int i;
-		char *ptrOut;
+		//char *ptrOut = s;
         //errno_t err;
         int lg = 0;
-		ptrOut = s;
 
         for(i=0; (i< m_size) && ((lgMax - lg) > linMax); i++) {
         

@@ -36,7 +36,7 @@ using namespace lima::Pco;
 
 
 //=========================================================================================================
-char* _timestamp_pcointerface() {return ID_TIMESTAMP ;}
+const char* _timestamp_pcointerface() {return ID_TIMESTAMP ;}
 //=========================================================================================================
 
 
@@ -120,7 +120,7 @@ void Interface::prepareAcq()
 void Interface::startAcq()
 {
   DEB_MEMBER_FUNCT();
-  DEF_FNID;
+  //DEF_FNID;
 
   DEB_ALWAYS() << ": Interface::startAcq()";
 
@@ -135,7 +135,7 @@ void Interface::stopAcq()
 {
 	// DONE
   DEB_MEMBER_FUNCT();
-  DEF_FNID;
+  //DEF_FNID;
 
   DEB_ALWAYS() << ": Interface::stopAcq()";
   m_sync->stopAcq();

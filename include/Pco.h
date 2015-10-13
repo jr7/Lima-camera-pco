@@ -47,6 +47,7 @@ typedef long LONG;
 typedef uint64_t UINT64;
 
 #ifndef ULLONG_MAX
+#define LONG_MAX      2147483647L
 #define ULONG_MAX     0xffffffffUL
 #define ULLONG_MAX    0xffffffffffffffffULL      /* maximum unsigned long long int value */
 #endif

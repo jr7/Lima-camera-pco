@@ -5,8 +5,8 @@ pco-objs =  \
             PcoRoiCtrlObj.o  \
             PcoSyncCtrlObj.o  \
             PcoCameraUtils.o  \
-            PcoBufferCtrlObj.o  \
             PcoCamera.o  \
+            PcoBufferCtrlObj.o  \
 
 
 

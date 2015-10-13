@@ -72,9 +72,12 @@ namespace lima
 	
     
 	private:
+		HANDLE&      	m_handle;
+		Camera* m_cam;
+		struct stcPcoData *m_pcoData;
+
 		SoftBufferCtrlObj::Sync *m_bufferSync;
 		Cond cond;
-		Camera* m_cam;
 		int _assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast, DWORD dwRequestedFrames, int bufIdx, bool live_mode);
 		
 		void _pcoAllocBuffers(bool max = false);
@@ -82,12 +85,10 @@ namespace lima
 		unsigned long	m_frames_per_buffer;
 		//-------------------------------------------------------------
 
-		HANDLE&      	m_handle;
 		int        	m_frame[2];
 		SyncCtrlObj* 	m_sync;
 		int m_requestStop, m_requestStopRetry;
 		int m_ImageBufferSize;
-		struct stcPcoData *m_pcoData;
 
 	public:
       BufferCtrlObj(Camera *cam);

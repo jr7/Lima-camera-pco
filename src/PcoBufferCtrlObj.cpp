@@ -508,7 +508,7 @@ _RETRY:
 				"dwStatusDll[%08lx] dwStatusDrv[%08lx] errPco[%08lx] err[%s]\n", fnId, 
 				dwFrameIdx, dwRequestedFrames, bufIdx,
 				size, ((DWORD) ptrDest), ((DWORD) ptrSrc),
-				dwStatusDll, dwStatusDrv, errPco,
+				dwStatusDll, dwStatusDrv, (long unsigned int) errPco,
 				m_cam->_PcoCheckError(__LINE__, __FILE__, dwStatusDrv, error));
 		}
 		

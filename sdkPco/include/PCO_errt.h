@@ -91,7 +91,7 @@
 // Commmon error messages                                                                                 //
 //========================================================================================================//
 
-static char* PCO_ERROR_COMMON_TXT[] = 
+const char* PCO_ERROR_COMMON_TXT[] = 
 {
   "No error.",                                     // 0x00000000  PCO_NOERROR
   "Function call with wrong parameter.",           // 0xA0000001  PCO_ERROR_WRONGVALUE 
@@ -113,7 +113,7 @@ const int COMMON_MSGNUM = sizeof(PCO_ERROR_COMMON_TXT) / sizeof(PCO_ERROR_COMMON
 // Driver error messages                                                                                  //
 //========================================================================================================//
   
-static char* PCO_ERROR_DRIVER_TXT[] = 
+const char* PCO_ERROR_DRIVER_TXT[] = 
 {
   "No error.",                                     // 0x00002000  PCO_NOERROR
   "Initialization failed; no camera connected.",   // 0x80002001  PCO_ERROR_DRIVER_NOTINIT
@@ -179,7 +179,7 @@ const int DRIVER_MSGNUM = sizeof(PCO_ERROR_DRIVER_TXT) / sizeof(PCO_ERROR_DRIVER
 // Error messages for errors in SDK DLL                                                                   //
 //========================================================================================================//
 
-static char* PCO_ERROR_SDKDLL_TXT[] = 
+const char* PCO_ERROR_SDKDLL_TXT[] = 
 {
   "No error.",                                     // 0x00000000  PCO_NOERROR
   "wSize of an embedded buffer is to small.",      // 0x80003001  PCO_ERROR_SDKDLL_NESTEDBUFFERSIZE   
@@ -210,7 +210,7 @@ const int SDKDLL_MSGNUM = sizeof(PCO_ERROR_SDKDLL_TXT) / sizeof(PCO_ERROR_SDKDLL
 // Application error messages                                                                             //
 //========================================================================================================//
 
-static char* PCO_ERROR_APPLICATION_TXT[] = 
+const char* PCO_ERROR_APPLICATION_TXT[] = 
 {
   "No error.",                                     // 0x00000000  PCO_NOERROR
   "Error while waiting for a picture.",            // 0x80004001  PCO_ERROR_APPLICATION_PICTURETIMEOUT   
@@ -233,7 +233,7 @@ const int APPLICATION_MSGNUM = sizeof(PCO_ERROR_APPLICATION_TXT) / sizeof(PCO_ER
 // Firmware error messages                                                                                //
 //========================================================================================================//
 
-static char* PCO_ERROR_FIRMWARE_TXT[] = 
+const char* PCO_ERROR_FIRMWARE_TXT[] = 
 {
   "No error.",                                     // 0x00000000  PCO_NOERROR
   "Timeout in telegram.",                          // 0x80001001  PCO_ERROR_FIRMWARE_TELETIMEOUT   
@@ -362,7 +362,7 @@ static char* PCO_ERROR_FIRMWARE_TXT[] =
 const int FIRMWARE_MSGNUM = sizeof(PCO_ERROR_FIRMWARE_TXT) / sizeof(PCO_ERROR_FIRMWARE_TXT[0]);
 
 
-static char ERROR_CODE_OUTOFRANGE_TXT[] = "Error code out of range.";
+const char ERROR_CODE_OUTOFRANGE_TXT[] = "Error code out of range.";
 
 /////////////////////////////////////////////////////////////////////
 // end: error messages
@@ -373,7 +373,7 @@ static char ERROR_CODE_OUTOFRANGE_TXT[] = "Error code out of range.";
 // warnings:
 /////////////////////////////////////////////////////////////////////
 
-static char* PCO_ERROR_FWWARNING_TXT[] = 
+const char* PCO_ERROR_FWWARNING_TXT[] = 
 {
   "No error.",
   "Function is already on.",                       // 0xC0001001 PCO_WARNING_FIRMWARE_FUNCALON     
@@ -384,7 +384,7 @@ static char* PCO_ERROR_FWWARNING_TXT[] =
 
 const int FWWARNING_MSGNUM = sizeof(PCO_ERROR_FWWARNING_TXT) / sizeof(PCO_ERROR_FWWARNING_TXT[0]);
 
-static char* PCO_ERROR_DRIVERWARNING_TXT[] = 
+const char* PCO_ERROR_DRIVERWARNING_TXT[] = 
 {
   "No error.",                                     // 0x00000000  PCO_NOERROR
 };
@@ -392,7 +392,7 @@ static char* PCO_ERROR_DRIVERWARNING_TXT[] =
 const int DRIVERWARNING_MSGNUM = sizeof(PCO_ERROR_DRIVERWARNING_TXT) / sizeof(PCO_ERROR_DRIVERWARNING_TXT[0]);
 
 
-static char* PCO_ERROR_SDKDLLWARNING_TXT[] = 
+const char* PCO_ERROR_SDKDLLWARNING_TXT[] = 
 {
   "No error.",                                     // 0x00000000  PCO_NOERROR
   "Buffers are still allocated",                   // 0xC0003001 PCO_WARNING_SDKDLL_BUFFER_STILL_ALLOKATED
@@ -403,7 +403,7 @@ static char* PCO_ERROR_SDKDLLWARNING_TXT[] =
 
 const int SDKDLLWARNING_MSGNUM = sizeof(PCO_ERROR_SDKDLLWARNING_TXT) / sizeof(PCO_ERROR_SDKDLLWARNING_TXT[0]);
 
-static char* PCO_ERROR_APPLICATIONWARNING_TXT[] = 
+const char* PCO_ERROR_APPLICATIONWARNING_TXT[] = 
 {
   "No error.",                                     // 0x00000000  PCO_NOERROR
   "Memory recorder buffer is full.",               // 0xC0004001  PCO_WARNING_APPLICATION_RECORDERFULL
@@ -430,13 +430,13 @@ int sprintf_s(char* buf, int dwlen, const char* cp, ...)
 
 void PCO_GetErrorText(DWORD dwerr, char* pbuf, DWORD dwlen)
 {
-  char* layertxt;
-  char* errortxt;
-  char* devicetxt;
+  const char* layertxt;
+  const char* errortxt;
+  const char* devicetxt;
   char  msg[200];
   int   index;
   DWORD device;
-  DWORD layer;
+  //DWORD layer;
 
   if (dwlen < 40)
     return;
@@ -454,7 +454,7 @@ void PCO_GetErrorText(DWORD dwerr, char* pbuf, DWORD dwlen)
   // ------------------------------------------------------------ //
 
   device = dwerr & PCO_ERROR_DEVICE_MASK;
-  layer = dwerr & PCO_ERROR_LAYER_MASK;
+  //layer = dwerr & PCO_ERROR_LAYER_MASK;
     
   // -- evaluate layer information within complete error code --- //
   // ------------------------------------------------------------ //
@@ -634,15 +634,15 @@ void PCO_GetErrorText(DWORD dwerr, char* pbuf, DWORD dwlen)
   }
 
   if(dwerr & PCO_ERROR_IS_WARNING)
-    sprintf_s(msg, 200, "%s warning %x at device '%s': %s",
+    sprintf_s(msg, 200, "%s warning %lx at device '%s': %s",
             layertxt, dwerr, devicetxt, errortxt);
   else
-    sprintf_s(msg, 200, "%s error %x at device '%s': %s",
+    sprintf_s(msg, 200, "%s error %lx at device '%s': %s",
             layertxt, dwerr, devicetxt, errortxt);
 
   if (dwlen <= strlen(msg))    // 1 byte more for zero at end of string
   {
-    sprintf_s(pbuf, dwlen, "Error buffer too short. err: %x", dwerr);
+    sprintf_s(pbuf, dwlen, "Error buffer too short. err: %lx", dwerr);
     return;
   }
   sprintf_s(pbuf, dwlen, "%s", msg);

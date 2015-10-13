@@ -99,21 +99,21 @@ namespace lima
 
 	
 	private:
-		double	m_exp_time;			/* exposure time in s */
-		double	m_lat_time;			/* lattency - delay? */
-
 		Camera*		m_cam;
 		HANDLE&	m_handle;
+		struct stcPcoData *m_pcoData;
 		TrigMode		m_trig_mode;
 		BufferCtrlObj*	m_buffer;
+		double	m_lat_time;			/* lattency - delay? */
+		double	m_exp_time;			/* exposure time in s */
 		int		m_nb_frames;
 		int m_nb_acq_frames;
-		bool		m_started;
 		pcoAcqStatus m_exposing;
-		struct stcPcoData *m_pcoData;
+		bool		m_started;
+
+
 		Cond  m_cond;
 		int m_requestStop, m_requestStopRetry;
-
 	};
 
   } // namespace Pco
