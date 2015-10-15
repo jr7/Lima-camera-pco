@@ -356,7 +356,7 @@ Camera::Camera(const char *params) :
 
 	char *value;
 	const char  *key;
-	__attribute__((unused)) bool ret;
+	UNUSED bool ret;
 
 	/***
 	key = "test";
@@ -389,7 +389,7 @@ void Camera::_init(){
 	char msg[MSG_SIZE + 1];
 	int error=0;
 	const char *errMsg;
-	__attribute__((unused)) const char *pcoFn;
+	UNUSED const char *pcoFn;
 
 	_armRequired(true);
 
@@ -400,7 +400,7 @@ void Camera::_init(){
 
 		// --- Open Camera - close before if it is open
 	if(m_handle) {
-		__attribute__((unused)) const char *pcoFn;
+		UNUSED const char *pcoFn;
 		DEB_ALWAYS() << (char *) fnId << " [closing opened camera]";
 		PCO_FN1(error, pcoFn,PCO_CloseCamera, m_handle);
 		PCO_THROW_OR_TRACE(error, "_init(): PCO_CloseCamera - closing opened cam") ;
@@ -603,7 +603,7 @@ void  Camera::_init_dimax() {
 	DEB_TRACE() <<  "end block 1 / get initial seg Size - images";
 
 	{
-		__attribute__((unused)) int segmentPco, segmentArr;
+		UNUSED int segmentPco, segmentArr;
 		
 		unsigned int maxWidth, maxHeight; 
 		getMaxWidthHeight(maxWidth, maxHeight);

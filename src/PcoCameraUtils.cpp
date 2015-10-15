@@ -57,7 +57,6 @@
 using namespace lima;
 using namespace lima::Pco;
 
-const char *timebaseUnits[] = {"ns", "us", "ms"};
 
 #define BUFF_INFO_SIZE 5000
 
@@ -1080,7 +1079,7 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		key = keys[ikey] = "acqEnable";     //----------------------------------------------------------------
 		keys_desc[ikey++] = "(R) acq enable signal status (BNC acq enbl in)";     
 		if(_stricmp(cmd, key) == 0){
-			__attribute__((unused)) int error;
+			UNUSED int error;
 			WORD wAcquEnableState;
 
 			error = PcoCheckError(__LINE__, __FILE__, PCO_GetAcqEnblSignalStatus(m_handle, &wAcquEnableState));
