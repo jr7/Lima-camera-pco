@@ -1,4 +1,16 @@
 
+
+2015/10/20 16:04:11 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-09-10 18:18:10 +0200] head[4d5d8a8][4d5d8a8e401ac445911fd86d22adb7442b68d8fd] ref[ (HEAD, develop_01)] at [2015/10/20 16:04:11] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-09-25 13:19:22 +0200] head[753502f][753502fa269791d412013ded76ebb81bfdee4bd0] ref[ (HEAD, github/core-1.4, core-1.4)] at [2015/10/20 16:04:11] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-09-17 17:13:03 +0200] head[02549e9][02549e93c0b43f000ebf7ef57bb6b8d7b0e9bd93] ref[ (HEAD, github/processlib-1.2)] at [2015/10/20 16:04:11] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, github/master, github/HEAD, master)] at [2015/10/20 16:04:11] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2014-10-27 10:45:24 +0100] head[75fd770][75fd770dfb846293b9084a1b6af7a916a090429e] ref[ (HEAD, github/core-1.3)] at [2015/10/20 16:04:11] $"
+
+# update ver win32
+
+
+
 2015/09/10 17:33:42 ==========================================
 # tests with 64 bits
 # fixed proyect lima pco to RELEASE

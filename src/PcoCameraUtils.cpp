@@ -1454,6 +1454,12 @@ char * _getUserName(char *infoBuff, DWORD  bufCharCount  )
 }
 
 
+//=========================================================================
+// include in the preprocessor definitions:
+//     VS_PLATFORM=$(PlatformName)
+//     VS_CONFIGURATION=$(ConfigurationName)
+//=========================================================================
+#define Win32				"Win32"
 #define x64					"x64"
 #define Release_Win7_Sync	"Release_Win7_Sync"
 #define Release	"Release"

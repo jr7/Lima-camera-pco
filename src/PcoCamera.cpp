@@ -25,7 +25,7 @@
 #define PCO_ERRT_H_CREATE_OBJECT
 #define BYPASS
 
-#define TOUT_MIN_DIMAX 500
+#define TOUT_MIN_DIMAX 500 
 #define ERROR_MSG_LINE 128
 
 //#define BUFF_INFO_SIZE 5000
