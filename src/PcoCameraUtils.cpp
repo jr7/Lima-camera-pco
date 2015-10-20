@@ -1458,16 +1458,28 @@ char * _getUserName(char *infoBuff, DWORD  bufCharCount  )
 // include in the preprocessor definitions:
 //     VS_PLATFORM=$(PlatformName)
 //     VS_CONFIGURATION=$(ConfigurationName)
+//
+//     VS_PLATFORM_CONFIGURATION=$(PlatformName)_$(ConfigurationName)
 //=========================================================================
-#define Win32				"Win32"
-#define x64					"x64"
-#define Release_Win7_Sync	"Release_Win7_Sync"
-#define Release	"Release"
+#if 0
+#define Win32				"$Id: VS platform[Win32] $"
+#define x64					"$Id: VS platform[x64] $"
+#define Release_Win7_Sync	"$Id: VS configuration[Release_Win7_Sync] $"
+#define Release	"$Id: VS configuration[Release] $"
 
-char * _getVSconfiguration(char *infoBuff, DWORD  bufCharCount  )
+char * _getVSconfigurationXXX(char *infoBuff, DWORD  bufCharCount  )
 {
 	sprintf_s(infoBuff, bufCharCount, "platform[%s] configuration[%s]",  
 		VS_PLATFORM,
 		VS_CONFIGURATION); 
   return infoBuff ;
+}
+#endif
+
+#define STRINGIZE(x) STRINGIZE2(x)
+#define STRINGIZE2(x) "$Id: VS platform_configuration[" #x "]  $"
+
+char * _getVSconfiguration(char *infoBuff, DWORD  bufCharCount  )
+{
+	return STRINGIZE(VS_PLATFORM_CONFIGURATION);
 }
