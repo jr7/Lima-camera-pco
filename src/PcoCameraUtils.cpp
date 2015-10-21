@@ -1477,9 +1477,13 @@ char * _getVSconfigurationXXX(char *infoBuff, DWORD  bufCharCount  )
 #endif
 
 #define STRINGIZE(x) STRINGIZE2(x)
-#define STRINGIZE2(x) "$Id: VS platform_configuration[" #x "]  $"
+#define STRINGIZE2(x) #x
 
 char * _getVSconfiguration(char *infoBuff, DWORD  bufCharCount  )
 {
-	return STRINGIZE(VS_PLATFORM_CONFIGURATION);
+	return 
+		"$Id: [" __DATE__ " " __TIME__ "] VS "
+		"platform[" STRINGIZE(VS_PLATFORM)  "]  "
+		"configuration[" STRINGIZE(VS_CONFIGURATION)  "]  "
+		" $" ;
 }

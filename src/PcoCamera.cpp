@@ -892,7 +892,9 @@ void _pco_acq_thread_dimax(void *argin) {
 
 		if((timeout < msNowRecordLoop) && !m_pcoData->bExtTrigEnabled) { 
 			//m_sync->setExposing(pcoAcqRecordTimeout);
-			m_sync->stopAcq();
+			
+			//m_sync->stopAcq();     //--- to check
+
 			m_sync->setExposing(pcoAcqStop);
 			printf("=== %s [%d]> TIMEOUT!!! tout[(%ld) 0(%ld)] recLoopTime[%ld ms] lastImgRecorded[%ld] nrImgRequested[%d]\n", 
 				fnId, __LINE__, timeout, timeout0, msNowRecordLoop, _dwValidImageCnt, nb_frames);
@@ -1080,7 +1082,7 @@ void _pco_acq_thread_edge(void *argin) {
 	//pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImagMult();
 
 	m_sync->setExposing(status);
-	m_sync->stopAcq();
+	//m_sync->stopAcq();
 	char *msg = m_cam->_pcoSet_RecordingState(0, error);
 	if(error) {
 		printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, msg);
@@ -1132,7 +1134,9 @@ void _pco_acq_thread_dimax_live(void *argin) {
 
 	pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImag();
 	m_sync->setExposing(status);
-	m_sync->stopAcq();
+
+	//m_sync->stopAcq(); //--- to check
+
 	char *msg = m_cam->_pcoSet_RecordingState(0, error);
 	if(error) {
 		printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, msg);

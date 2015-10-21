@@ -24,10 +24,11 @@ cp -r ${LOCDIR}/ ${TMPDIR}/${INSTALLBETA}
 echo
 date "+%Y/%m/%d %H:%M:%S =========================================="
 echo "scp: copied local directory to segfs and /tmp_14_days:"
-echo "from: [${LOCDIR}/]" 
-echo "  to: [${REMHOST}:${REMDIR}/${INSTALL}]"
-echo "  to: [${TMPDIR}/${INSTALL}]"
-echo "  to: [${TMPDIR}/${INSTALLBETA}]"
+echo "   from: [${LOCDIR}/]" 
+echo "     to: [${REMHOST}:${REMDIR}/${INSTALL}]"
+echo "     to: [${TMPDIR}/${INSTALL}]"
+echo "     to: [${TMPDIR}/${INSTALLBETA}]"
+echo "package: [${INSTALL}]"
 echo
 } > ${LOG}.bck.bck
 
