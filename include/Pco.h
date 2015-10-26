@@ -236,6 +236,7 @@ typedef int tPvErr;
 #define __PCO_GetActiveRamSegment(y1, y2) ( PCO_GetActiveRamSegment( (y1) , (y2) ) )
 #define __PCO_SetCameraRamSegmentSize(y1, y2) ( PCO_SetCameraRamSegmentSize( (y1) , (y2) ) )
 #define __PCO_GetCameraRamSegmentSize(y1, y2) ( PCO_GetCameraRamSegmentSize( (y1) , (y2) ) )
+#define __PCO_OpenCamera(y1, y2) ( PCO_OpenCamera( (y1) , (y2) ) )
 
 #define __PCO_SetHWIOSignal(y1, y2, y3) ( PCO_SetHWIOSignal( (y1) , (y2) , (y3) ) )
 #define __PCO_GetHWIOSignal(y1, y2, y3) ( PCO_GetHWIOSignal( (y1) , (y2) , (y3) ) )
