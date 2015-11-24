@@ -646,6 +646,14 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="tango"
+			>
+			<File
+				RelativePath="..\..\..\..\..\..\applications\tango\python\camera\Pco.py"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

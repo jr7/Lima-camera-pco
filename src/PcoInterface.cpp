@@ -96,15 +96,38 @@ void Interface::getCapList(CapList &cap_list) const
 
 //=========================================================================================================
 //=========================================================================================================
+#define RESET_CLOSE_INTERFACE  100
 void Interface::reset(ResetLevel reset_level)
 {
   DEB_MEMBER_FUNCT();
   DEF_FNID;
+  int rl = reset_level;
+  DEB_ALWAYS() << fnId << ": " DEB_VAR2(rl, reset_level);
 
-  DEB_ALWAYS() << fnId << ": " DEB_VAR1(reset_level);
+  int error;
 
   m_sync->stopAcq();
-  m_cam->reset();
+  HANDLE m_handle = m_cam->getHandle();
+	switch(reset_level) 
+	{
+	case RESET_CLOSE_INTERFACE: 
+		DEB_ALWAYS() << "\n... RESET - freeBuff, closeCam, resetLib  " << DEB_VAR1(reset_level) ;
+
+		m_buffer->_pcoAllocBuffersFree();
+
+		error = m_cam->PcoCheckError(__LINE__, __FILE__, PCO_CloseCamera(m_handle));
+		m_handle = 0;
+
+		error = m_cam->PcoCheckError(__LINE__, __FILE__, PCO_ResetLib());
+		break;
+
+	default:
+		DEB_ALWAYS() << "\n... RESET -  " << DEB_VAR1(reset_level);
+		//_init();
+		break;
+	}
+
+  //m_cam->reset();
 }
 
 //=========================================================================================================

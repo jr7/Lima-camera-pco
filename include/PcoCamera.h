@@ -258,9 +258,13 @@ struct stcPcoData {
 		double min_lat_time, min_lat_time_err, step_lat_time;
 		double max_lat_time, max_lat_time_err;
 		
+		int testForceFrameFirst0;
+		bool pcoLogActive;
+
 		stcPcoData();
 		void traceAcqClean();
 		void traceMsg(char *s);
+
 };
 
 enum enumChange {
@@ -457,6 +461,7 @@ namespace lima
 		int _pco_getADC(int &adc_working, int &adc_max);
 		int _pco_setADC(int adc_new, int &adc_working);
 		int _pco_GetImageTiming(double &frameTime, double &expTime, double &sysDelay, double &sysJitter, double &trigDelay );
+		char *_checkLogFiles(bool firstCall = false);
 
     };
   }
