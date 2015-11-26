@@ -197,6 +197,8 @@ typedef int tPvErr;
 #define PCO_FN3(er,mg, fn, x1, x2, x3) {mg = #fn; er = PcoCheckError(__LINE__, __FILE__, __##fn ( (x1),(x2),(x3) ), #fn ) ; }
 #define PCO_FN4(er,mg, fn, x1, x2, x3, x4) {mg = #fn; er = PcoCheckError(__LINE__, __FILE__, __##fn ( (x1),(x2),(x3),(x4) ), #fn ) ; }
 #define PCO_FN5(er,mg, fn, x1, x2, x3, x4, x5) {mg = #fn; er = PcoCheckError(__LINE__, __FILE__, __##fn ( (x1),(x2),(x3),(x4),(x5) ), #fn ) ; }
+#define PCO_FN6(er,mg, fn, x1, x2, x3, x4, x5, x6) {mg = #fn; er = PcoCheckError(__LINE__, __FILE__, __##fn ( (x1),(x2),(x3),(x4),(x5),(x6) ), #fn ) ; }
+#define PCO_FN7(er,mg, fn, x1, x2, x3, x4, x5, x6, x7) {mg = #fn; er = PcoCheckError(__LINE__, __FILE__, __##fn ( (x1),(x2),(x3),(x4),(x5),(x6),(x7) ), #fn ) ; }
 
 
 // ----- PCO sdk 
@@ -262,5 +264,8 @@ typedef int tPvErr;
 #define __PCO_GetSizes(y1, y2, y3, y4, y5) ( PCO_GetSizes( (y1) , (y2) , (y3) , (y4) , (y5) ) )
 #define __PCO_GetROI(y1, y2, y3, y4, y5) ( PCO_GetROI( (y1) , (y2) , (y3) , (y4) , (y5) ) )
 #define __PCO_SetROI(y1, y2, y3, y4, y5) ( PCO_SetROI( (y1) , (y2) , (y3) , (y4) , (y5) ) )
+
+#define __PCO_SetDateTime(y1, y2, y3, y4, y5, y6, y7) ( PCO_SetDateTime( (y1) , (y2) , (y3) , (y4) , (y5) , (y6) , (y7) ) )
+
 
 #endif

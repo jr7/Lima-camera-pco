@@ -61,7 +61,6 @@ using namespace lima::Pco;
 
 const char *timebaseUnits[] = {"ns", "us", "ms"};
 
-//char *_checkLogFiles();
 void _pco_acq_thread_dimax(void *argin);
 void _pco_acq_thread_dimax_live(void *argin);
 void _pco_acq_thread_ringBuffer(void *argin);
@@ -369,7 +368,7 @@ Camera::Camera(const char *params) :
 
 	DEB_ALWAYS()
 		<< ALWAYS_NL << DEB_VAR1(m_pcoData->version) 
-		<< ALWAYS_NL << _checkLogFiles();
+		<< ALWAYS_NL << _checkLogFiles(true);
 
 	m_bin.changed = Invalid;
 	
@@ -499,6 +498,30 @@ void Camera::_init(){
 		throw LIMA_HW_EXC(Error, "Camera not found!");
 
 	_pco_initHWIOSignal(0, error);
+
+
+	{
+		// set date/time to PCO	
+		struct tm tmNow;
+		time_t now = time(NULL);
+		int error;
+		int day, mon, year, hour, min, sec;
+
+		localtime_s(&tmNow, &now);
+
+		BYTE ucDay   = day  = tmNow.tm_mday;
+		BYTE ucMonth = mon  = tmNow.tm_mon + 1;
+		WORD wYear   = year = tmNow.tm_year + 1900;
+		WORD wHour   = hour = tmNow.tm_hour;
+		BYTE ucMin   = min  = tmNow.tm_min;
+		BYTE ucSec   = sec  = tmNow.tm_sec;
+
+		PCO_FN7(error, pcoFn, PCO_SetDateTime, m_handle, ucDay, ucMonth, wYear, wHour, ucMin, ucSec);
+		PCO_THROW_OR_TRACE(error, pcoFn) ;
+
+		DEB_ALWAYS() << DEB_VAR6(day, mon, year, hour, min, sec);
+	}
+
 
   DEB_TRACE() << m_log;
   DEB_TRACE() << "END OF CAMERA";
@@ -681,6 +704,7 @@ void Camera::startAcq()
 {
     DEB_MEMBER_FUNCT();
 
+
 	m_acq_frame_nb = -1;
 	m_pcoData->pcoError = 0;
 	m_pcoData->pcoErrorMsg[0] = 0;
@@ -695,7 +719,7 @@ void Camera::startAcq()
     WORD state;
     //HANDLE hEvent= NULL;
 
-	DEB_ALWAYS() << fnId << " [ENTRY]" ;
+	DEB_ALWAYS() << "\n--- startAcq    [ENTRY]\n" << _checkLogFiles() ;
 
 	int error;
 	const char *msg;

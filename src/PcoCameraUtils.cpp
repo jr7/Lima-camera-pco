@@ -807,7 +807,34 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			return output;
 		}
 
-		key = keys[ikey] = "pixelRateInfo";     //----------------------------------------------------------------
+		//-------------------------------------------------------------------------------------------------------------
+		key = keys[ikey] = "testFrameFirst0";    
+		keys_desc[ikey++] = "(RW) TEST - force FrameFirst to 0 [<0 | 1>]";
+		if(_stricmp(cmd, key) == 0){
+			
+			if(tokNr == 0) {
+				ptr += sprintf_s(ptr, ptrMax - ptr, "%d", m_pcoData->testForceFrameFirst0);
+				return output;
+			}
+
+			m_pcoData->testForceFrameFirst0 = !!atoi(tok[1]);
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "%d", m_pcoData->testForceFrameFirst0);
+			return output;
+		}
+
+		//-------------------------------------------------------------------------------------------------------------
+		key = keys[ikey] = "pcoLogsEnabled";     
+		keys_desc[ikey++] = "(R) PCO log files enalbled (returns 0|1) ";     
+		if(_stricmp(cmd, key) == 0){
+			
+			ptr += sprintf_s(ptr, ptrMax - ptr, "%d", m_pcoData->pcoLogActive);
+			return output;
+
+		}
+
+		//-------------------------------------------------------------------------------------------------------------
+		key = keys[ikey] = "pixelRateInfo";     
 		keys_desc[ikey++] = "(R) pixelrate (Hz) for reading images from the image sensor (actual & valid values)";
 		if(_stricmp(cmd, key) == 0){
 			DWORD dwPixRate, dwPixRateNext ; int error, i;
@@ -872,6 +899,32 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			return output;
 
 		}
+
+		key = keys[ikey] = "timestampMode";     //----------------------------------------------------------------
+		keys_desc[ikey++] = "(RW) PCO timestampMode [<new value (0 (none), 1 (BCD), 2 (BCD+ASCII), 3 (ASCII))>]";     
+		
+		if(_stricmp(cmd, key) == 0){
+			int error, val;
+			WORD wTimeStampMode;
+
+			error = PcoCheckError(__LINE__, __FILE__, PCO_GetTimestampMode(m_handle, &wTimeStampMode));
+			ptr += sprintf_s(ptr, ptrMax - ptr, "%d   ", wTimeStampMode);
+
+			if((tokNr == 1)){
+					val = atoi(tok[1]);
+					if((val < 0) ||(val>3)) {
+						ptr += sprintf_s(ptr, ptrMax - ptr, "invalid value [%d] must be (0, 1, 2, 3)",  val);
+					}else {
+						wTimeStampMode = val;
+						error = PcoCheckError(__LINE__, __FILE__, PCO_SetTimestampMode(m_handle, wTimeStampMode));
+						error = PcoCheckError(__LINE__, __FILE__, PCO_GetTimestampMode(m_handle, &wTimeStampMode));
+						ptr += sprintf_s(ptr, ptrMax - ptr, "%d   ", wTimeStampMode);
+					}
+			}
+			ptr += sprintf_s(ptr, ptrMax - ptr, "\n");
+			return output;
+		}
+
 
 
 
@@ -1487,11 +1540,15 @@ unsigned long long Camera::_getDebug(unsigned long long mask = ULLONG_MAX){
 //=========================================================================================================
 //=========================================================================================================
 
-const char *_checkLogFiles() {
+//=========================================================================================================
+//=========================================================================================================
+
+const char *Camera::_checkLogFiles(bool firstCall) {
 	const char *logFiles[] = {
 		"C:\\ProgramData\\pco\\SC2_Cam.log", 
 		"C:\\ProgramData\\pco\\PCO_CDlg.log", 
 		"C:\\ProgramData\\pco\\PCO_Conv.log",
+		"C:\\ProgramData\\pco\\me4_memlog_end.log",
 		NULL};
 	const char **ptr = logFiles;
 	const char *logOn = "\n\n"		
@@ -1523,13 +1580,18 @@ const char *_checkLogFiles() {
 	int error;
 	bool found = false;
 
-	while(*ptr != NULL) {
-		error = stat(*ptr, &fileStat);
-		//printf("----------- [%d][%s]\n", error, *ptr);
- 		found |= !error;
-		ptr++;
+	if(firstCall) {
+		while(*ptr != NULL) {
+			error = stat(*ptr, &fileStat);
+			//printf("----------- [%d][%s]\n", error, *ptr);
+ 			found |= !error;
+			ptr++;
+		}
+		m_pcoData->pcoLogActive = found;
 	}
-	return found ? logOn : logOff;	
+
+
+	return m_pcoData->pcoLogActive ? logOn : logOff;	
 };
 
 //====================================================================

@@ -307,10 +307,17 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast,
 	// to the LIMA allocated one
 
 	  int iPcoBufIdx = m_allocBuff.pcoAllocBufferNr[bufIdx];	
-	  DWORD dwFrame = 
-		  (m_cam->_isCameraType(Edge)
-		  || m_cam->_isCameraType(Pco2k) 
-		  || live_mode) ? 0 :  dwFrameFirst;
+
+	  DWORD dwFrame = live_mode ? 0 :  dwFrameFirst;
+	  
+      // talk -> testForceFrameFirst0 (test option)
+      //    = 1 - force the first/last frame to 0 (last frame acquired)
+      //    = 0 - not modify received dwFrame (first/last frame = 1, 2, 3, ....)
+      if(m_pcoData->testForceFrameFirst0 &&
+              ( m_cam->_isCameraType(Edge) || m_cam->_isCameraType(Pco2k)) )
+      {
+            dwFrame = 0;
+      }
 
 	if(m_cam->_getDebug(DBG_ASSIGN_BUFF)) 
 	{
@@ -318,7 +325,7 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast,
 	}
 
 
-	  sErr =  m_cam->_PcoCheckError(__LINE__, __FILE__, PCO_AddBufferEx(m_handle, \
+    sErr =  m_cam->_PcoCheckError(__LINE__, __FILE__, PCO_AddBufferEx(m_handle, \
 				dwFrame, dwFrame, iPcoBufIdx, \
 				wArmWidth, wArmHeight, wBitPerPixel), error) ;
 	if(m_cam->_getDebug(DBG_ASSIGN_BUFF)) 
@@ -373,6 +380,7 @@ int BufferCtrlObj::_xferImag()
 	bool live_mode;
 	int _nrStop;
 	char msg[RING_LOG_BUFFER_SIZE+1];
+	char *pmsg = msg;
 	m_cam->m_tmpLog->flush(-1);
 	int maxWaitTimeout = 3;
 
@@ -440,6 +448,11 @@ int BufferCtrlObj::_xferImag()
 
  	// Edge cam must be started just after assign buff to avoid lost of img
 	if(m_cam->_isCameraType(Edge)) {
+			//DWORD sleepMs = 1;
+			//::Sleep(sleepMs);
+			if(m_cam->_getDebug(DBG_WAITOBJ)){
+				pmsg = "... EDGE - recordingState 1" ; m_cam->m_tmpLog->add(pmsg); DEB_ALWAYS() << pmsg;
+			}
 			m_cam->_pcoSet_RecordingState(1, error);
 	}
 
@@ -573,6 +586,9 @@ _RETRY:
 
 _RETRY_WAIT:
 // --------------- check if there is some buffer ready
+		if(m_cam->_getDebug(DBG_WAITOBJ)){
+				pmsg = "... WaitForMultipleObjects - waiting" ; m_cam->m_tmpLog->add(pmsg); DEB_ALWAYS() << pmsg;
+		}
 		dwEvent = WaitForMultipleObjects( 
 			PCO_BUFFER_NREVENTS,           // number of objects in array
 			m_allocBuff.bufferAllocEvent,     // array of objects
@@ -589,19 +605,27 @@ _RETRY_WAIT:
     switch (dwEvent) { 
         case WAIT_OBJECT_0 + 0: 
 			m_allocBuff.bufferReady[0] = 1; 
-			if(m_cam->_getDebug(DBG_WAITOBJ)){m_cam->m_tmpLog->add("... WAITOBJ 0");}
+			if(m_cam->_getDebug(DBG_WAITOBJ)){
+				pmsg = "... WAITOBJ 0 found" ; m_cam->m_tmpLog->add(pmsg); DEB_ALWAYS() << pmsg;
+			}
 			goto _RETRY;
         case WAIT_OBJECT_0 + 1: 
 			m_allocBuff.bufferReady[1] = 1; 
-			if(m_cam->_getDebug(DBG_WAITOBJ)){m_cam->m_tmpLog->add("... WAITOBJ 1");}
+			if(m_cam->_getDebug(DBG_WAITOBJ)){
+				pmsg = "... WAITOBJ 1 found" ; m_cam->m_tmpLog->add(pmsg); DEB_ALWAYS() << pmsg;
+			}
 			goto _RETRY;
         case WAIT_OBJECT_0 + 2: 
 			m_allocBuff.bufferReady[2] = 1;
-			if(m_cam->_getDebug(DBG_WAITOBJ)){m_cam->m_tmpLog->add("... WAITOBJ 2");}
+			if(m_cam->_getDebug(DBG_WAITOBJ)){
+				pmsg = "... WAITOBJ 2 found" ; m_cam->m_tmpLog->add(pmsg); DEB_ALWAYS() << pmsg;
+			}
 			goto _RETRY;
         case WAIT_OBJECT_0 + 3: 
 			m_allocBuff.bufferReady[3] = 1; 
-			if(m_cam->_getDebug(DBG_WAITOBJ)){m_cam->m_tmpLog->add("... WAITOBJ 3");}
+			if(m_cam->_getDebug(DBG_WAITOBJ)){
+				pmsg = "... WAITOBJ 3 found" ; m_cam->m_tmpLog->add(pmsg); DEB_ALWAYS() << pmsg;
+			}
 			goto _RETRY;
 
         case WAIT_TIMEOUT: 

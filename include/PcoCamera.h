@@ -271,6 +271,9 @@ struct stcPcoData {
 	double max_exp_time, max_exp_time_err;
 	double min_lat_time, min_lat_time_err, step_lat_time;
 	double max_lat_time, max_lat_time_err;
+
+	int testForceFrameFirst0;
+	bool pcoLogActive;
 	
 	stcPcoData();
 	void traceAcqClean();
@@ -480,7 +483,7 @@ namespace lima
 		int _pco_GetADCOperation(int &adc_working, int &adc_max);
 		int _pco_SetADCOperation(int adc_new, int &adc_working);
 		int _pco_GetImageTiming(double &frameTime, double &expTime, double &sysDelay, double &sysJitter, double &trigDelay );
-
+		const char *_checkLogFiles(bool firstCall = false);
     };
   }
 }

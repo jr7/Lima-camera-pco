@@ -1,3 +1,22 @@
+
+
+2015/11/26 19:33:22 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-10-26 10:31:39 +0100] head[82bf813][82bf813e50d2999fee51c7275eef60af0286128e] ref[ (HEAD, origin/devel_1, devel_1)] at [2015/11/26 19:33:21] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-09-25 13:19:22 +0200] head[753502f][753502fa269791d412013ded76ebb81bfdee4bd0] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/11/26 19:33:21] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/11/26 19:33:21] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/11/26 19:33:21] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-07 12:55:37 +0200] head[3b74e68][3b74e68a265668d43f977ca8af0ba9608ef91274] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/11/26 19:33:21] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/11/26 19:33:21] $"
+
+pco - tmp save 
+   sync with develop_02 3058e17a30caf91a52c43d03d5d87ec4bdd262d7
+      testForceFrameFirst0 / test value to force to 0 the frame read (0 -> last frame acq)
+      _checkLogFiles / warning msg of PCO log files for each startAcq
+      debug / cosmetics / waitobj ....
+      enabled timestampMode for frames
+   pushed ... 
+
+
 2015/10/07 12:50:00 ==========================================
 pushed tango - 228b06a7b194c5a23a4fe4411ceceb5123340a92
     included close_interface()
