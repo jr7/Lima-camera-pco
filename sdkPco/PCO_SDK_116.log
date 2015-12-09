@@ -1,0 +1,15 @@
+c225965495150e5b0e683a00ab9de24f  bin/SC2_Cam.dll
+47d29ab5208ebb7db523964bfd2647d8  bin/sc2_cl_me4.dll
+001e53237fac0660aeb4091624f26ba0  include/Pco_ConvDlgExport.h
+c0a22e2d703f75b78366732061095e4f  include/Pco_ConvExport.h
+63a3bf161eb13ee7ed3fce3324c87876  include/Pco_ConvStructures.h
+7908f9f326f7e714a089e97ab21668d4  include/PCO_err.h
+d031485a906c3f9ca13b04d0873d1847  include/PCO_errt.h
+1f2a3c56167094883ebb96a510b47efa  include/PCO_Structures.h
+223d699ab29ca637c96862631bc59560  include/SC2_CamExport.h
+c106c97721623cce99853c3a5bed70d0  include/sc2_common.h
+84f03cc150f448bf811daa7f90e56418  include/sc2_defs.h
+172c16819bbeda0bc53ecd340c8a2500  include/SC2_DialogExport.h
+f74bc61ce3208e4a13f375f912cd129a  include/SC2_SDKAddendum.h
+e30e00f6035a986fbf63b206e4e32b74  include/sc2_SDKStructures.h
+d265fe59ddc1ad1c43a2c7ebe147f26f  lib/SC2_Cam.lib
