@@ -382,7 +382,8 @@ int BufferCtrlObj::_xferImag()
 	char msg[RING_LOG_BUFFER_SIZE+1];
 	char *pmsg = msg;
 	m_cam->m_tmpLog->flush(-1);
-	int maxWaitTimeout = 3;
+	int waitTimeoutRetry = 0;
+	int waitTimeoutRetryMax = 3;
 
 	
 // --------------- get the requested nr of images 
@@ -570,6 +571,12 @@ _RETRY:
 				m_cam->m_tmpLog->add(msg);
 			}
 #endif
+			// --- similar debug as before with DEB_ALWAYS - to be cleaned ....
+			if(m_cam->_getDebug(DBG_WAITOBJ)){
+				sprintf_s(msg, RING_LOG_BUFFER_SIZE, "... ASSIGN BUFFER[%d] frame[%d]", bufIdx, dwFrameFirst2assign);
+				m_cam->m_tmpLog->add(msg); DEB_ALWAYS() << msg;
+			}
+
 			if(error = _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx, live_mode)) {
 				return pcoAcqPcoError;
 			}
@@ -629,14 +636,14 @@ _RETRY_WAIT:
 			goto _RETRY;
 
         case WAIT_TIMEOUT: 
-			maxWaitTimeout--;
+			waitTimeoutRetry++;
 			if(m_cam->_getDebug(DBG_WAITOBJ)){m_cam->m_tmpLog->dumpPrint(true);}
-			printf("=== %s> WAITOBJ ERROR - TIMEOUT [%d]\n", fnId, maxWaitTimeout);
-			if(maxWaitTimeout > 0 ) goto _RETRY_WAIT;
+			DEB_ALWAYS() << "\n===WAITOBJ ERROR - TIMEOUT - " << DEB_VAR2(waitTimeoutRetry, waitTimeoutRetryMax);
+			if(waitTimeoutRetry > waitTimeoutRetryMax ) goto _RETRY_WAIT;
 			return pcoAcqWaitTimeout;
 
         default: 
-			printf("=== %s> WAITOBJ default ????\n", fnId);
+			DEB_ALWAYS() << "\n===WAITOBJ default ????";
 			return pcoAcqWaitError;
     }
 
@@ -775,7 +782,6 @@ int BufferCtrlObj::_xferImagMult()
 	int error;
 	bool live_mode;
 	DWORD dwFrameIdxFirst, dwFrameIdxLast;
-	int maxWaitTimeout = 10;
 	WORD _wBitPerPixel;
 	char *sErr;
 	void *ptrLimaBuffer;

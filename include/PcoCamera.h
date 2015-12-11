@@ -427,6 +427,9 @@ namespace lima
 		bool _get_shutter_rolling_edge(int &error);
 		void _set_shutter_rolling_edge(bool roling, int &error);
 
+
+
+
 		void _init();
 		void _init_edge();
 		void _init_dimax();

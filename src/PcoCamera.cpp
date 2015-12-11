@@ -1130,7 +1130,7 @@ void _pco_acq_thread_edge(void *argin) {
 
 	m_sync->setAcqFrames(0);
 
-
+    // - ok xferImage() / testing the other ...
 	pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImag();
 	//pcoAcqStatus status = (pcoAcqStatus) m_buffer->_xferImagMult();
 
@@ -2612,6 +2612,9 @@ bool Camera::_isCameraType(int tp){
 		case CAMERATYPE_PCO_EDGE_GL:
 			return !!(tp & (EdgeGL | Edge));
 
+		case CAMERATYPE_PCO_EDGE_HS:
+		case CAMERATYPE_PCO_EDGE_USB3:
+		case CAMERATYPE_PCO_EDGE_42:
 		case CAMERATYPE_PCO_EDGE:
 			return !!(tp & (EdgeRolling | Edge));
 

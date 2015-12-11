@@ -527,42 +527,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath="..\..\..\..\include\Pco.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\include\PcoBufferCtrlObj.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\include\PcoCamera.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\include\PcoCameraUtils.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\include\PcoDetInfoCtrlObj.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\include\PcoHwEventCtrlObj.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\include\PcoInterface.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\include\PcoRoiCtrlObj.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\include\PcoSyncCtrlObj.h"
-				>
-			</File>
 			<Filter
 				Name="PCOsdk"
 				>
@@ -612,6 +576,50 @@
 				</File>
 				<File
 					RelativePath="..\..\..\..\sdkPco\include\sc2_SDKStructures.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Pco"
+				>
+				<File
+					RelativePath="..\..\..\..\include\Pco.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\PcoBufferCtrlObj.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\PcoCamera.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\PcoCameraUtils.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\PcoDetInfoCtrlObj.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\PcoGitVersion.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\PcoHwEventCtrlObj.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\PcoInterface.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\PcoRoiCtrlObj.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\include\PcoSyncCtrlObj.h"
 					>
 				</File>
 			</Filter>
