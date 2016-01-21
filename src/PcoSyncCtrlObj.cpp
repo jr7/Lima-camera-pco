@@ -92,8 +92,11 @@ bool SyncCtrlObj::checkTrigMode(TrigMode trig_mode)
 		case ExtGate:
 			return true;
 
-		case IntTrigMult:
 		case ExtTrigSingle:
+			if (m_cam->_isCameraType(Dimax)) return true ;
+			break;
+
+		case IntTrigMult:
 		case ExtStartStop:
 		case ExtTrigReadout:
 		default: 
@@ -111,8 +114,6 @@ void SyncCtrlObj::setTrigMode(TrigMode trig_mode)
 	DEB_MEMBER_FUNCT();
 	DEB_PARAM() << DEB_VAR1(trig_mode);
 
-	// DONE
-
 	if(!checkTrigMode(trig_mode)){
 		throw LIMA_HW_EXC(NotSupported,"Trigger type not supported");
 	}
@@ -124,7 +125,6 @@ void SyncCtrlObj::setTrigMode(TrigMode trig_mode)
 //=========================================================================================================
 void SyncCtrlObj::getTrigMode(TrigMode &trig_mode)
 {
-	// DONE
   trig_mode = m_trig_mode;
 }
 
@@ -145,7 +145,6 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoAcqMode()
     DEF_FNID;
 
 	WORD pcoAcqMode;
-
 
 	if(!checkTrigMode(m_trig_mode)){
 		throw LIMA_HW_EXC(NotSupported,"Trigger type not supported");
@@ -171,7 +170,17 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoAcqMode()
     	  pcoAcqMode= 0x0000;
 			break;
 
-		case ExtTrigMult:
+	  case ExtTrigSingle:
+		  // trig (at ACQ ENABLE) starts a sequence of int trigger (dimax only)
+		  //   StorageMode 0 - record mode
+		  //   RecorderSubmode 1 - ring buffer
+		  //   Triggermode 0 - auto
+		  //   Acquiremode 0 - auto / ignored
+    	  pcoAcqMode= 0x0000;
+			break;
+
+
+	  case ExtTrigMult:
 		//case IntTrigMult: // 1 START (spec)
       case ExtGate:  // 2 GATE (spec)
 #ifdef DISABLE_ACQ_ENBL_SIGNAL
@@ -239,6 +248,16 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(bool &ext_trig){
 			pcoTrigMode= 0x0003;  // 2 = GATE (spec)
 			break;
 
+
+	  case ExtTrigSingle:
+		  // trig starts a sequence of int trigger (dimax only)
+		  //   StorageMode 0 - record mode
+		  //   RecorderSubmode 1 - ring buffer
+		  //   Triggermode 0 - auto
+		  //   Acquiremode 0 - auto / ignored
+			ext_trig = true;
+			pcoTrigMode= 0x0000;  
+			break;
 	
 	}
 
