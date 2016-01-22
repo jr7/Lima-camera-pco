@@ -828,14 +828,6 @@ int BufferCtrlObj::_xferImag_getImage()
 	dwRequestedFrames = (requested_nb_frames > 0) ? (DWORD) requested_nb_frames : dwRequestedFramesMax;
 
 
-	DEB_ALWAYS() << "\n_xferImagMult_getImage() [entry]:\n" 
-		<< DEB_VAR2(_iPcoAllocatedBuffNr, _dwPcoAllocatedBuffSize) << "\n"  
-		<< DEB_VAR4(_wArmWidth, _wArmHeight, _uiBytesPerPixel, _wBitPerPixel) << "\n"  
-		<< DEB_VAR2( dwFramesPerBuffer, dwFrameSize) << "\n"
-		<< DEB_VAR3( requested_nb_frames, dwRequestedFrames, live_mode)
-		;
-
-
     // lima frame nr is from 0 .... N-1        
     // pco frame nr is from 1 .... N        
 
@@ -852,17 +844,17 @@ int BufferCtrlObj::_xferImag_getImage()
 		throw LIMA_HW_EXC(Error, "PCO_GetNumberOfImagesInSegment");
 	}
 
+	dwFrameIdx = (_dwValidImageCnt >= dwRequestedFrames) ? _dwValidImageCnt - dwRequestedFrames + 1 : 1;
 
-	DEB_ALWAYS() << "\n_xferImagMult_getImage() [entry]:\n" 
-		<< DEB_VAR2(_iPcoAllocatedBuffNr, _dwPcoAllocatedBuffSize) << "\n"  
-		<< DEB_VAR4(_wArmWidth, _wArmHeight, _uiBytesPerPixel, _wBitPerPixel) << "\n"  
-		<< DEB_VAR2( dwFramesPerBuffer, dwFrameSize) << "\n"
-		<< DEB_VAR2(_dwValidImageCnt, _dwMaxImageCnt) << "\n"
-		<< DEB_VAR3( requested_nb_frames, dwRequestedFrames, live_mode)
+	DEB_ALWAYS() << "\n_xferImagMult_getImage() [entry]:" 
+		<< "\n...   " << DEB_VAR2(_iPcoAllocatedBuffNr, _dwPcoAllocatedBuffSize)   
+		<< "\n...   " << DEB_VAR4(_wArmWidth, _wArmHeight, _uiBytesPerPixel, _wBitPerPixel)  
+		<< "\n...   " << DEB_VAR2( dwFramesPerBuffer, dwFrameSize)
+		<< "\n...   " << DEB_VAR3( requested_nb_frames, dwRequestedFrames, live_mode)
+		<< "\n...   " << DEB_VAR3(dwFrameIdx,_dwValidImageCnt, _dwMaxImageCnt)
 		;
 
 
-	dwFrameIdx = (_dwValidImageCnt >= dwRequestedFrames) ? _dwValidImageCnt - dwRequestedFrames + 1 : 1;
 
 	m_pcoData->traceAcq.nrImgRequested = dwRequestedFrames;
 

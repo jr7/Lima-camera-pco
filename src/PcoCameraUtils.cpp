@@ -1437,7 +1437,7 @@ char *Camera::_checkLogFiles(bool firstCall) {
 		"C:\\ProgramData\\pco\\SC2_Cam.log", 
 		"C:\\ProgramData\\pco\\PCO_CDlg.log", 
 		"C:\\ProgramData\\pco\\PCO_Conv.log",
-		"C:\\ProgramData\\pco\\me4_memlog_end.log",
+//		"C:\\ProgramData\\pco\\me4_memlog_end.log",
 		NULL};
 	const char **ptr = logFiles;
 	char *logOn = "\n\n"		

@@ -650,6 +650,10 @@
 			Name="tango"
 			>
 			<File
+				RelativePath="..\..\..\..\..\..\applications\tango\python\LimaCCDs.py"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\..\..\applications\tango\python\camera\Pco.py"
 				>
 			</File>
