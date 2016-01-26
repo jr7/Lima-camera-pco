@@ -1,5 +1,18 @@
 
 
+2016/01/26 13:01:24 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-01-22 20:26:03 +0100] head[755840f][755840ff073f80b41e646895383a275e420a2a0f] ref[ (HEAD, develop_02_tsingle)] at [2016/01/26 13:01:24] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2016/01/26 13:01:24] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/01/26 13:01:24] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/01/26 13:01:24] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2016/01/26 13:01:24] $"
+
+
+pco - dimax
+          to be define a new trig mode (ExtTrigDemand ?) for this implementation (ExtTrigSingle doesn't corresponds)
+          tmp save / compile / commit
+
+
 2016/01/22 20:14:41 ==========================================
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2016-01-22 20:12:31 +0100] head[2747a0b][2747a0ba53bec236ebb4df4618fd3f0a68fae966] ref[ (HEAD, develop_02_tsingle)] at [2016/01/22 20:14:40] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2016/01/22 20:14:40] $"
