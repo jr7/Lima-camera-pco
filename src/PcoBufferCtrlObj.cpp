@@ -776,6 +776,9 @@ int BufferCtrlObj::_xferImagMult()
 	LARGE_INTEGER usStart;
 	usElapsedTimeSet(usStart);
 
+	double msPerFrame = (m_cam->pcoGetCocRunTime() * 1000.);
+	DWORD dwMsSleepOneFrame = (DWORD) (msPerFrame/10.0);	// 4/5 rounding
+	if(dwMsSleepOneFrame == 0) dwMsSleepOneFrame = 1;		// min sleep
 
 	//_pcoAllocBuffers(true); // allocate 2 pco buff at max size
 
@@ -869,6 +872,23 @@ int BufferCtrlObj::_xferImagMult()
 		}
 
 		usElapsedTimeSet(usStart);
+
+		//========================================================================================
+		//   PCO_GetImageEx has a fixex timeout of about 5s, so the call for long exp time fails
+		//   included a waiting loop to chech when the image is ready
+		//========================================================================================
+		
+		while(1){
+			sErr = m_cam->_PcoCheckError(__LINE__, __FILE__, 
+				PCO_GetNumberOfImagesInSegment(m_handle, wSegment, &_dwValidImageCnt, &_dwMaxImageCnt), error, "PCO_GetNumberOfImagesInSegment");
+			if(error) {
+				printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, sErr);
+				throw LIMA_HW_EXC(Error, "PCO_GetNumberOfImagesInSegment");
+			}
+			if((_dwValidImageCnt > 0 ) && ( (_dwValidImageCnt >= dwFrameIdxFirst) || (dwFrameIdxFirst == 0))) break;
+			
+			::Sleep(dwMsSleepOneFrame);	// sleep 1 frame
+		}
 
 		sErr =  m_cam->_PcoCheckError(__LINE__, __FILE__, PCO_GetImageEx(m_handle, \
 			wSegment, dwFrameIdxFirst, dwFrameIdxLast, \

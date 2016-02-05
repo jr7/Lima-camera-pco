@@ -1,4 +1,16 @@
 
+2016/02/05 18:50:31 ==========================================
+scp: copied local directory to segfs and /tmp_14_days:
+from: [../../install/]
+  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2016-02-05_185029]
+  to: [/t/rhoms1/install-2016-02-05_185029]
+  to: [/t/rhoms1/install-beta]
+  
+  _xferImagMulti: solve the fixed timeout (5s) of PCO_GetImageEx
+  testing with pco2k / w64 bm05
+
+
+
 2015/09/29 12:12:21 ==========================================
 pushed - 65637c477990d630f67fba385f2fe2f745089671
     - beta test
