@@ -1,11 +1,26 @@
+2016/02/08 19:36:47 ==========================================
+
+- pco / Camera::reset(int)
+    modified to close complete the cam when the ds receive ctrl-C
+    tango calls close_interface() but does not destroy the objs
+    close_interface() calls reset (from - f0132cc7cf045c)
+
+
+2016/02/05 20:05:56 ==========================================
+
+
+
+2016/02/05 20:04:18 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-02-05 20:02:41 +0100] head[f05fe64][f05fe647fa6d04db277b45ca464bae2caceb83b5] ref[ (HEAD, develop_solei)] at [2016/02/05 20:04:18] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/02/05 20:04:18] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/02/05 20:04:18] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/02/05 20:04:18] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/02/05 20:04:18] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/02/05 20:04:18] $"
+
+
 
 2016/02/05 18:50:31 ==========================================
-scp: copied local directory to segfs and /tmp_14_days:
-from: [../../install/]
-  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2016-02-05_185029]
-  to: [/t/rhoms1/install-2016-02-05_185029]
-  to: [/t/rhoms1/install-beta]
-  
   _xferImagMulti: solve the fixed timeout (5s) of PCO_GetImageEx
   testing with pco2k / w64 bm05
 

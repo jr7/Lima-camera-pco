@@ -98,11 +98,15 @@ void Interface::reset(ResetLevel reset_level)
   DEB_MEMBER_FUNCT();
   DEF_FNID;
 
-  DEB_ALWAYS() << fnId << ": " DEB_VAR1(reset_level);
+  int intLevel = reset_level;
+
+  DEB_ALWAYS() << fnId << ": " DEB_VAR2(reset_level, intLevel);
 
   m_sync->stopAcq();
-  m_cam->reset();
+  m_cam->reset(intLevel);
 }
+
+
 
 //=========================================================================================================
 //=========================================================================================================

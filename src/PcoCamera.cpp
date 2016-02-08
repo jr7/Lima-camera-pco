@@ -638,23 +638,12 @@ void Camera::_init_edge() {
 //=========================================================================================================
 Camera::~Camera()
 {
-  DEB_DESTRUCTOR();
-  DEB_TRACE() << "~Camera";
-	int error;
-	char *msg ;
+	DEB_DESTRUCTOR();
+	DEB_ALWAYS() << "DESTRUCTOR ...................." ;
 
-  if(m_cam_connected){
-		//m_sync->_getBufferCtrlObj()->_pcoAllocBuffersFree();
-		//m_buffer->_pcoAllocBuffersFree();
-
-	}
 	m_cam_connected = false;
 
-	//m_sync->_getBufferCtrlObj()->_pcoAllocBuffersFree();
-	m_buffer->_pcoAllocBuffersFree();
-	PCO_FN1(error, msg,PCO_CloseCamera, m_handle);
-	PCO_PRINT_ERR(error, msg); 
-
+	reset(RESET_CLOSE_INTERFACE);
 }
 
 
@@ -1390,15 +1379,39 @@ void _pco_acq_thread_ringBuffer(void *argin) {
 
 //=====================================================================
 //=====================================================================
-void Camera::reset()
+
+
+//=====================================================================
+//=====================================================================
+void Camera::reset(int reset_level)
 {
-  DEB_MEMBER_FUNCT();
+	DEB_MEMBER_FUNCT();
+	int error;
+	char *msg;
 
-  DEB_ALWAYS() << "\n   RESET -----------\n";
-  //_init();
+
+	switch(reset_level) 
+	{
+	case RESET_CLOSE_INTERFACE: 
+		DEB_ALWAYS() << "\n... RESET - freeBuff, closeCam, resetLib  " << DEB_VAR1(reset_level) ;
+
+		m_buffer->_pcoAllocBuffersFree();
+
+		PCO_FN1(error, msg,PCO_CloseCamera, m_handle);
+		PCO_PRINT_ERR(error, msg); 
+		m_handle = 0;
+
+		PCO_FN0(error, msg,PCO_ResetLib);
+		PCO_PRINT_ERR(error, msg); 
+		break;
+
+	default:
+		DEB_ALWAYS() << "\n... RESET -  " << DEB_VAR1(reset_level);
+		//_init();
+		break;
+	}
+
 }
-
-
 
 //=========================================================================================================
 //=========================================================================================================
