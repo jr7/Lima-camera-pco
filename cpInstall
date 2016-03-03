@@ -1,7 +1,7 @@
 #!/bin/sh
 
 
-REMDIR="/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco"
+REMDIR="/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco"
 REMHOST="blissadm@lid00a"
 #LOCDIR="/c/blissadm/git/pco/Lima/install"
 LOCDIR="../../install"

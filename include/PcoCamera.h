@@ -270,6 +270,8 @@ struct stcPcoData {
 	double min_lat_time, min_lat_time_err, step_lat_time;
 	double max_lat_time, max_lat_time_err;
 	
+	WORD wBitAlignment; // 0 = MSB (left) alignment
+	
 	stcPcoData();
 	void traceAcqClean();
 	void traceMsg(char *s);
@@ -471,6 +473,9 @@ namespace lima
 		int _pco_GetADCOperation(int &adc_working, int &adc_max);
 		int _pco_SetADCOperation(int adc_new, int &adc_working);
 		int _pco_GetImageTiming(double &frameTime, double &expTime, double &sysDelay, double &sysJitter, double &trigDelay );
+		int _pco_GetBitAlignment(int &alignment);
+		int _pco_SetBitAlignment(int alignment);
+
 
     };
   }

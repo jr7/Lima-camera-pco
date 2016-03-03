@@ -438,6 +438,10 @@ void Camera::_init(){
 	_pco_SetADCOperation(1, adc_working);
 	m_pcoData->wNowADC= (WORD) adc_working;
 
+	// set alignment to [LSB aligned]; all raw image data will be aligned to the LSB.
+
+	_pco_SetBitAlignment(1);
+
 		// -- Initialise size, bin, roi
 	unsigned int maxWidth, maxHeight,maxwidth_step, maxheight_step; 
 	getMaxWidthHeight(maxWidth, maxHeight);
@@ -2882,14 +2886,23 @@ void Camera::_get_XYsteps(Point &xy_steps){
 void Camera::_presetPixelRate(DWORD &pixRate, int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
-		if(!_isCameraType(Edge) || !_isValid_pixelRate(pixRate)) {
-			pixRate = 0;
-			error = -1;
-			return;
-		}
 
-		m_pcoData->dwPixelRateRequested = pixRate;
-		error = 0;
+	if(! (_isCameraType(Edge) || _isCameraType(Pco2k) || _isCameraType(Pco4k)) ) {
+		DEB_ALWAYS() << "WARNING - this camera doesn't allows setPixelRate"  ;
+		pixRate = 0;
+		error = -1;
+		return;
+	}
+
+	if(!_isValid_pixelRate(pixRate)) {
+		DEB_ALWAYS() << "INVALID requested pixel Rate" << DEB_VAR1(pixRate)  ;
+		pixRate = 0;
+		error = -1;
+		return;
+	}
+
+	m_pcoData->dwPixelRateRequested = pixRate;
+	error = 0;
 }
 
 
@@ -2970,9 +2983,9 @@ char *Camera::_pco_SetPixelRate(int &error){
 	DEF_FNID;
 	error = 0;
 	char *msg;
+	DWORD _dwPixelRate, _dwPixelRateOld, _dwPixelRateReq, _dwPixelRateMax;
 
 	if(_isCameraType(Edge)) {
-		DWORD _dwPixelRate, _dwPixelRateOld, _dwPixelRateReq;
 
 		PCO_FN2(error, msg,PCO_GetPixelRate, m_handle, &m_pcoData->dwPixelRate);
 		PCO_THROW_OR_TRACE(error, msg) ;
@@ -2999,18 +3012,20 @@ char *Camera::_pco_SetPixelRate(int &error){
 	}
 
 	if(_isCameraType(Pco2k | Pco4k)) {
-		DWORD _dwPixelRate, _dwPixelRateOld, _dwPixelRateMax;
 
 		PCO_FN2(error, msg,PCO_GetPixelRate, m_handle, &m_pcoData->dwPixelRate);
 		PCO_THROW_OR_TRACE(error, msg) ;
 
 		_dwPixelRateOld = m_pcoData->dwPixelRate;
 		_dwPixelRateMax = m_pcoData->dwPixelRateMax;
-		DEB_ALWAYS() << "PIXEL rate (actual/max): " << DEB_VAR2(_dwPixelRateOld, _dwPixelRateMax) ;
+		_dwPixelRateReq = m_pcoData->dwPixelRateRequested;
 
-		if(_dwPixelRateMax > _dwPixelRateOld) {
+		DEB_ALWAYS() << "PIXEL rate (requested/actual/max): " << DEB_VAR3(_dwPixelRateReq, _dwPixelRateOld, _dwPixelRateMax) ;
 
-			PCO_FN2(error, msg,PCO_SetPixelRate, m_handle, _dwPixelRateMax);
+		if(_isValid_pixelRate(_dwPixelRateReq) && (_dwPixelRateOld != _dwPixelRateReq)) {
+		//if(_dwPixelRateMax > _dwPixelRateOld) {
+
+			PCO_FN2(error, msg,PCO_SetPixelRate, m_handle, _dwPixelRateReq);
 			PCO_THROW_OR_TRACE(error, msg) ;
 
 			PCO_FN2(error, msg,PCO_GetPixelRate, m_handle, &m_pcoData->dwPixelRate);
@@ -3024,6 +3039,56 @@ char *Camera::_pco_SetPixelRate(int &error){
 		return fnId;
 	}
 return fnId;
+}
+//=================================================================================================
+//=================================================================================================
+int Camera::_pco_GetBitAlignment(int &alignment){
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+	int error = 0;
+	char *msg;
+	WORD wBitAlignment;
+
+	PCO_FN2(error, msg,PCO_GetBitAlignment, m_handle, &wBitAlignment);
+	PCO_THROW_OR_TRACE(error, msg) ;
+
+	
+	alignment = m_pcoData->wBitAlignment = wBitAlignment;
+
+	return error;
+}
+//=================================================================================================
+//=================================================================================================
+
+
+//=================================================================================================
+//=================================================================================================
+
+// wBitAlignment:
+// - 0x0000 = [MSB aligned]; all raw image data will be aligned to the MSB. This is thedefault setting.
+// - 0x0001 = [LSB aligned]; all raw image data will be aligned to the LSB.
+
+int Camera::_pco_SetBitAlignment(int alignment){
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+	int error = 0;
+	int alignment1;
+	char *msg;
+	WORD wBitAlignment;
+
+	if((alignment <0) ||(alignment >1)){
+		DEB_ALWAYS() << "ERROR - invalid value " << DEB_VAR1(alignment);
+		return -1;
+	}
+
+	wBitAlignment = int(alignment);
+
+	PCO_FN2(error, msg,PCO_SetBitAlignment, m_handle, wBitAlignment);
+	PCO_THROW_OR_TRACE(error, msg) ;
+
+	
+	return _pco_GetBitAlignment(alignment1);
+
 }
 //=================================================================================================
 //=================================================================================================
