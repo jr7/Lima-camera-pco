@@ -1,3 +1,8 @@
+2016/03/31 ==========================================
+- prepare blissinstaller package 
+  tag pco-win64-1.4.5
+- updated vc pco proj tango files (lima/appliations/tango/python/...)
+
 2016/03/30 ==========================================
 
 - merged develop_solei 227a2487a4e637d6113e0e82d28c2ed433632919 to master 
@@ -13,6 +18,7 @@ from: [../../install/]
 
 TODO 
 - update the new attrib / push
+  talk bitAlignment [<1 (LSB) || 0 (MSB)>
 - update them in spec / push
 - blissbuilder
 
