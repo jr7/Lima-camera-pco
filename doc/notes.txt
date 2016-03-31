@@ -143,6 +143,12 @@ On 22/06/2015 16:49
 # c:\Users\homsrego\git\pco\Lima>                            <---
 #------------------------------------------------------------------------
 
+************************************************
+*** after test OK -> git commit -a
+*** setId (header is modified with the new hash)
+*** compile again
+************************************************
+
   - first copy config.inc_default to config.inc
         limabase
         Lima>
@@ -177,6 +183,20 @@ On 22/06/2015 16:49
 
         limacpins
 
+********************************************************************************************
+*** delete /tmp_14_days/rhoms1/install-beta
+*** cpInstall - copy install to
+***     /tmp_14_days/rhoms1/install-beta
+***     /tmp_14_days/rhoms1/install-DT
+***     blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-DT
+********************************************************************************************
+
+********************************************************************************************
+blissdb: 
+  cd /segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco
+  mkdir pco-win64-1.4.5
+  cp -r install-2016-03-31_134518/ pco-win64-1.4.5/install
+********************************************************************************************
 
 #===============================================================================
 # For Linux platform, It's manage by the master Makefile

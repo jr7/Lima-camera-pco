@@ -1,4 +1,21 @@
-2016/03/31 ==========================================
+
+2016/03/31 13:45:25 ==========================================
+scp: copied local directory to segfs and /tmp_14_days:
+from: [../../install/]
+  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-03-31_134518]
+  to: [/t/rhoms1/install-2016-03-31_134518]
+  to: [/t/rhoms1/install-beta]
+
+
+
+2016/03/31 13:29:46 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-03-31 13:26:25 +0200] head[ad1e112][ad1e112490c8e9fa168d8cdaeda243d1594f81da] ref[ (HEAD, tag: pco-win64-1.4.5, master)] at [2016/03/31 13:29:45] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/03/31 13:29:45] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/03/31 13:29:45] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/03/31 13:29:45] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/03/31 13:29:45] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/03/31 13:29:45] $"
+
 - prepare blissinstaller package 
   tag pco-win64-1.4.5
 - updated vc pco proj tango files (lima/appliations/tango/python/...)
