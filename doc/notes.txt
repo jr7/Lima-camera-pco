@@ -5,6 +5,42 @@
 #===================================================
 
 #===================================================
+# 2016/04/01
+  - from Paul / id17
+  Yes, the server crashes, and then has to be restarted, and the frame corresponding to the crash is exactly at 
+  64Gb. the error message on the windows machine is linked to the memory saturation. 
+  If the size of the complete scan is lower, then it works fine, but 64 Gb is a rather small size for a scan 
+  with half-acquisition.
+
+  We are currently doing an experiment on ID17 with the PCO edge. (new 64 bits version)
+  We had series of crashes, they happen when the size of the scan is more than 64 Gb. 
+  During the scan, the memory is constantly increasing and is released only at the end
+  once it reaches the total RAM (64Gb) everything crashes.
+  
+  - the fix of the memory in the 32b release / core 1.3 2014/03/07
+  was changed
+  
+  - Manu included this during setup
+    def ftomoccdsetup '{
+    # buffer max memory
+    _limapar_set(ccd_name, "buffer_max_memory", ccd_maxmem)
+
+  - included the property mem_factor (0 -100) in the pco device
+
+  - test
+  
+  ---------------
+       timestamp: 2016/04/01 16:31:52
+   computer name: ISG-PCO2K2
+       user name: opid00
+VS configuration: platform[x64] configuration[Release]
+
+=================================================
+   mem_factor: org[70] req[50] now[50]
+=================================================
+--------------- 
+
+#===================================================
 # 2015/06/22
   - changed the repository for lima/win
     /segfs/bliss/projects/LIMA/build/depot_win
