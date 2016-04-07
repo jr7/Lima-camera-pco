@@ -275,6 +275,10 @@ struct stcPcoData {
 	stcPcoData();
 	void traceAcqClean();
 	void traceMsg(char *s);
+
+	int testForceFrameFirst0;
+	bool pcoLogActive;
+
 };
 
 enum enumChange {
@@ -475,7 +479,7 @@ namespace lima
 		int _pco_GetImageTiming(double &frameTime, double &expTime, double &sysDelay, double &sysJitter, double &trigDelay );
 		int _pco_GetBitAlignment(int &alignment);
 		int _pco_SetBitAlignment(int alignment);
-
+		char *_checkLogFiles(bool firstCall = false);
 
     };
   }
