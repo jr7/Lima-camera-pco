@@ -1205,6 +1205,34 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 		}
 
 
+
+		//----------------------------------------------------------------------------------------------------------
+		key = keys[ikey] = "winMem";     
+		keys_desc[ikey++] = "(R) read win memory";     
+		if(_stricmp(cmd, key) == 0){
+			const float gB = 1024. * 1024. * 1024.;
+			MEMORYSTATUSEX statex;
+			statex.dwLength = sizeof(statex);
+			
+			GlobalMemoryStatusEx(&statex);
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "               dwLength [%u]\n", statex.dwLength);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "           dwMemoryLoad [%u]\n", statex.dwMemoryLoad);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "           ullTotalPhys [%g GB][%llu]\n", statex.ullTotalPhys/gB, statex.ullTotalPhys);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "           ullAvailPhys [%g GB][%llu]\n", statex.ullAvailPhys/gB, statex.ullAvailPhys);
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "       ullTotalPageFile [%g GB][%llu]\n", statex.ullTotalPageFile/gB, statex.ullTotalPageFile);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "       ullAvailPageFile [%g GB][%llu]\n", statex.ullAvailPageFile/gB, statex.ullAvailPageFile);
+
+			ptr += sprintf_s(ptr, ptrMax - ptr, "        ullTotalVirtual [%g GB][%llu]\n", statex.ullTotalVirtual/gB, statex.ullTotalVirtual);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "        ullAvailVirtual [%g GB][%llu]\n", statex.ullAvailVirtual/gB, statex.ullAvailVirtual);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "ullAvailExtendedVirtual [%g GB][%llu]\n", statex.ullAvailExtendedVirtual/gB, statex.ullAvailExtendedVirtual);
+
+
+			return output;
+		}
+
+
 		//----------------------------------------------------------------------------------------------------------
 		key = keys[ikey] = "comment";     
 		keys_desc[ikey++] = "(W) print timestamp & comment in the screen";     
@@ -1605,3 +1633,4 @@ void Camera::_traceMsg(char *msg)
 	DEB_ALWAYS() << "\n>>>  " << msg ;		
 
 }
+

@@ -71,7 +71,6 @@ Interface::Interface(Camera *cam) :
   RoiCtrlObj *Interface::m_RoiCtrlObjXXX = NULL;
   Interface::~Interface()
 {
-	// DONE
 	DEB_DESTRUCTOR();
   delete m_HwEventCtrlObj;
   delete m_RoiCtrlObj;
@@ -113,6 +112,8 @@ void Interface::reset(ResetLevel reset_level)
 void Interface::prepareAcq()
 {
 	DEB_MEMBER_FUNCT();
+
+	DEB_ALWAYS() << "[entry]";
 	if(m_buffer)
 		m_buffer->prepareAcq();
 }
@@ -124,7 +125,7 @@ void Interface::startAcq()
   DEB_MEMBER_FUNCT();
   DEF_FNID;
 
-  DEB_ALWAYS() << ": Interface::startAcq()";
+	DEB_ALWAYS() << "[entry]";
 
   if(m_buffer)
     m_buffer->getBuffer().setStartTimestamp(Timestamp::now());
@@ -135,11 +136,10 @@ void Interface::startAcq()
 //=========================================================================================================
 void Interface::stopAcq()
 {
-	// DONE
   DEB_MEMBER_FUNCT();
   DEF_FNID;
 
-  DEB_ALWAYS() << ": Interface::stopAcq()";
+  DEB_ALWAYS() << "[entry]";
   m_sync->stopAcq();
 }
 
@@ -148,7 +148,6 @@ void Interface::stopAcq()
 void Interface::getStatus(StatusType& status)
 {
   DEB_MEMBER_FUNCT();
-	// DONE
 	if(m_cam->_isConfig()){
 		status.acq = AcqConfig;
 		status.det = DetIdle;

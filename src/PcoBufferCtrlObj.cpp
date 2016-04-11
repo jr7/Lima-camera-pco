@@ -81,6 +81,7 @@ void BufferCtrlObj::prepareAcq()
 {
 	DEB_MEMBER_FUNCT();
 
+	DEB_ALWAYS() << "[entry]";
 	//_pcoAllocBuffers();
 
 	FrameDim dim;
@@ -89,9 +90,7 @@ void BufferCtrlObj::prepareAcq()
 
 	m_ImageBufferSize = dim.getMemSize();
 
-	if(m_cam->_getDebug(DBG_BUFF)) {DEB_ALWAYS() << DEB_VAR2(dim, m_ImageBufferSize);}
-	DEB_TRACE() << DEB_VAR1(m_ImageBufferSize);
-
+	DEB_ALWAYS()  << "[exit] " << DEB_VAR2(dim, m_ImageBufferSize);
 }
 
 //=========================================================================================================
