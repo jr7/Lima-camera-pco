@@ -1,34 +1,40 @@
 
-2016/04/11 18:30:48 ==========================================
+2016/04/12 13:24:08 ==========================================
 scp: copied local directory to segfs and /tmp_14_days:
 from: [../../install/]
-  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-04-11_183041]
-  to: [/t/rhoms1/install-2016-04-11_183041]
+  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-04-12_132402]
+  to: [/t/rhoms1/install-2016-04-12_132402]
   to: [/t/rhoms1/install-beta]
 
 
-2016/04/11 18:13:38 ==========================================
+
+2016/04/12 13:22:49 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-12 13:20:03 +0200] head[6851bfd][6851bfd395ef88053d0acd15ec73733570020236] ref[ (HEAD, master-01)] at [2016/04/12 13:22:49] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/12 13:22:49] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/12 13:22:49] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/12 13:22:49] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/12 13:22:49] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/12 13:22:49] $"
+
+
+2016/04/12 10:56:41 ==========================================
 scp: copied local directory to segfs and /tmp_14_days:
 from: [../../install/]
-  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-04-11_181331]
-  to: [/t/rhoms1/install-2016-04-11_181331]
+  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-04-12_105634]
+  to: [/t/rhoms1/install-2016-04-12_105634]
   to: [/t/rhoms1/install-beta]
 
+- problem with the accumulation mode memory crash (id17)
+  patch made in core:
+  
+control/src/CtAccumulation.cpp:578:
 
-2016/04/11 17:43:10 ==========================================
-scp: copied local directory to segfs and /tmp_14_days:
-from: [../../install/]
-  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-04-11_174303]
-  to: [/t/rhoms1/install-2016-04-11_174303]
-  to: [/t/rhoms1/install-beta]
+void CtAccumulation::prepare()
 
+  CtBuffer *buffer = m_ct.buffer();
+  buffer->getNumber(m_buffers_size);
+  m_buffers_size /= 2 ;       <------------------------ patch
 
-2016/04/11 11:56:35 ==========================================
-scp: copied local directory to segfs and /tmp_14_days:
-from: [../../install/]
-  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-04-11_115628]
-  to: [/t/rhoms1/install-2016-04-11_115628]
-  to: [/t/rhoms1/install-beta]
 
 
 
