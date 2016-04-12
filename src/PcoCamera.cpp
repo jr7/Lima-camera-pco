@@ -765,7 +765,8 @@ void Camera::startAcq()
     PCO_THROW_OR_TRACE(error, msg) ;
 
     // ----------------------------------------- storage mode (recorder + sequence)
-    if(_isCameraType(Dimax)) {
+//    if(_isCameraType(Dimax)) {
+    if(_isCameraType(Dimax | Pco4k | Pco2k)) {
 		
 			// live video requested frames = 0
 		enumPcoStorageMode mode = (iRequestedFrames > 0) ? RecSeq : Fifo;
@@ -774,6 +775,7 @@ void Camera::startAcq()
 		PCO_THROW_OR_TRACE(error, msg) ;
 	}
 
+#if 0
 	if(_isCameraType(Pco4k | Pco2k)) {
 			// live video requested frames = 0
 		enumPcoStorageMode mode = Fifo;
@@ -782,6 +784,7 @@ void Camera::startAcq()
 		msg = _pco_SetStorageMode_SetRecorderSubmode(mode, error);
 		PCO_THROW_OR_TRACE(error, msg) ;
 	}
+#endif
 //----------------------------------- set exposure time & delay time
 	msg = _pco_SetDelayExposureTime(error,0);   // initial set of delay (phase = 0)
 	PCO_THROW_OR_TRACE(error, msg) ;
@@ -857,14 +860,17 @@ void Camera::startAcq()
 		return;
 	}
 
+#if 0
 	if(_isCameraType(Pco2k | Pco4k)){
 		_pcoSet_RecordingState(1, error);
 		_beginthread( _pco_acq_thread_ringBuffer, 0, (void*) this);
 		m_pcoData->traceAcq.msStartAcqEnd = msElapsedTime(tStart);
 		return;
 	}
+#endif
 
-	if(_isCameraType(Dimax)){
+//	if(_isCameraType(Dimax)){
+	if(_isCameraType(Dimax | Pco2k | Pco4k)){
 		_pcoSet_RecordingState(1, error);
 		if(iRequestedFrames > 0 ) {
 			_beginthread( _pco_acq_thread_dimax, 0, (void*) this);

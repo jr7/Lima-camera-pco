@@ -835,7 +835,8 @@ int BufferCtrlObj::_xferImagMult()
 	bufIdx = 0;
 
 	DWORD _dwValidImageCnt, _dwMaxImageCnt;
-
+	DWORD _dwValidImageCntLast = 0;
+	
 	sErr = m_cam->_PcoCheckError(__LINE__, __FILE__, 
 			PCO_GetNumberOfImagesInSegment(m_handle, wSegment, &_dwValidImageCnt, &_dwMaxImageCnt), error, "PCO_GetNumberOfImagesInSegment");
 	if(error) {
@@ -856,8 +857,7 @@ int BufferCtrlObj::_xferImagMult()
 		bufIdx++; if(bufIdx >= _iPcoAllocatedBuffNr) bufIdx = 0;
 		sBufNr = m_allocBuff.pcoAllocBufferNr[bufIdx];
 
-
-		if(continuous) {
+        if(continuous) {
 			dwFrameIdxLast = dwFrameIdxFirst = 0;
 		} else {
 			dwFrameIdxLast = dwFrameIdxFirst = dwFrameIdx;
@@ -878,16 +878,32 @@ int BufferCtrlObj::_xferImagMult()
 		//========================================================================================
 		
 		while(1){
+			if((_dwValidImageCnt > 0 ) && ( (_dwValidImageCnt >= dwFrameIdxFirst) || (dwFrameIdxFirst == 0))) break;
+
 			sErr = m_cam->_PcoCheckError(__LINE__, __FILE__, 
 				PCO_GetNumberOfImagesInSegment(m_handle, wSegment, &_dwValidImageCnt, &_dwMaxImageCnt), error, "PCO_GetNumberOfImagesInSegment");
 			if(error) {
 				printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, sErr);
 				throw LIMA_HW_EXC(Error, "PCO_GetNumberOfImagesInSegment");
 			}
+
+			
 			if((_dwValidImageCnt > 0 ) && ( (_dwValidImageCnt >= dwFrameIdxFirst) || (dwFrameIdxFirst == 0))) break;
 			
 			::Sleep(dwMsSleepOneFrame);	// sleep 1 frame
 		}
+
+		if(_dwValidImageCnt != _dwValidImageCntLast) {
+			printf("=== _dwValidImageCnt[%d] dwFrameIdxFirst[%d]\n", _dwValidImageCnt , dwFrameIdxFirst);
+			_dwValidImageCntLast = _dwValidImageCnt;
+		}
+
+#if 0
+		DEB_ALWAYS() 
+				<< "\n     PCO_GetImageEx() ===>"
+				<< "\n     " << DEB_VAR5( dwFrameIdx, dwFrameIdxFirst, dwFrameIdxLast, dwFramesPerBuffer,  dwRequestedFrames)
+				<< "\n     " << DEB_VAR5(wSegment, sBufNr, _wArmWidth, _wArmHeight, _wBitPerPixel);
+#endif
 
 		sErr =  m_cam->_PcoCheckError(__LINE__, __FILE__, PCO_GetImageEx(m_handle, \
 			wSegment, dwFrameIdxFirst, dwFrameIdxLast, \
