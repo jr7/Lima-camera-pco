@@ -1,11 +1,80 @@
 
+
+2016/04/13 19:02:49 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-13 19:00:44 +0200] head[dbca15b][dbca15b03449968504f3e8480ff3697722d9062c] ref[ (HEAD, gitlab/master-01, master-01)] at [2016/04/13 19:02:49] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/13 19:02:49] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/13 19:02:49] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/13 19:02:49] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/13 19:02:49] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/13 19:02:49] $"
+
+
+- minor changes
+  use the dimax proc for Pco2k and Pco4k (was in ringBuff - to check)
+  improve traceAcq in _xferImagMult
+  
+2016/04/13 14:43:35 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-13 14:42:47 +0200] head[2c92f54][2c92f5481a27f5d9817fb227acfe1b7d3e386e8a] ref[ (HEAD, master-01)] at [2016/04/13 14:43:35] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/13 14:43:35] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/13 14:43:35] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/13 14:43:35] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/13 14:43:35] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/13 14:43:35] $"
+
+- problem with the accumulation mode memory crash (id17)
+  patch made in core:
+  
+control/src/CtAccumulation.cpp:532:
+
+void CtAccumulation::prepare()
+
+  CtBuffer *buffer = m_ct.buffer();
+  buffer->getNumber(m_buffers_size);
+
+  //----- patch for acc mode 32 bit - 16
+  if(m_buffers_size > 10) m_buffers_size /= 2;
+
+2016/04/13 13:53:48 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-12 22:33:31 +0200] head[88f05c1][88f05c1a29ec9766e84666f71b82ae062faae238] ref[ (HEAD, gitlab/master-01, master-01)] at [2016/04/13 13:53:48] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/13 13:53:48] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/13 13:53:48] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/13 13:53:48] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/13 13:53:48] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/13 13:53:48] $"
+
+
+2016/04/12 20:09:20 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-12 16:50:19 +0200] head[b2e7664][b2e76642cbb1a02345743191c514c2d9b0093536] ref[ (HEAD, gitlab/master-01, master-01)] at [2016/04/12 20:09:20] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/12 20:09:20] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/12 20:09:20] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/12 20:09:20] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/12 20:09:20] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/12 20:09:20] $"
+
+
+2016/04/12 16:52:00 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-12 16:50:19 +0200] head[b2e7664][b2e76642cbb1a02345743191c514c2d9b0093536] ref[ (HEAD, gitlab/master-01, master-01)] at [2016/04/12 16:52:00] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/12 16:52:00] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/12 16:52:00] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/12 16:52:00] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/12 16:52:00] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/12 16:52:00] $"
+
+
+2016/04/12 16:20:32 ==========================================
+scp: copied local directory to segfs and /tmp_14_days:
+from: [../../install/]
+  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-04-12_162026]
+  to: [/t/rhoms1/install-2016-04-12_162026]
+  to: [/t/rhoms1/install-beta]
+
+
 2016/04/12 13:24:08 ==========================================
 scp: copied local directory to segfs and /tmp_14_days:
 from: [../../install/]
   to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-04-12_132402]
   to: [/t/rhoms1/install-2016-04-12_132402]
   to: [/t/rhoms1/install-beta]
-
 
 
 2016/04/12 13:22:49 ==========================================
@@ -34,8 +103,6 @@ void CtAccumulation::prepare()
   CtBuffer *buffer = m_ct.buffer();
   buffer->getNumber(m_buffers_size);
   m_buffers_size /= 2 ;       <------------------------ patch
-
-
 
 
 2016/04/11 11:55:03 ==========================================

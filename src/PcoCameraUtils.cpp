@@ -1613,9 +1613,31 @@ char * _getUserName(char *infoBuff, DWORD  bufCharCount  )
 }
 
 
+//===============================================================
+//===============================================================
+// include these definitions in the PreprocessorDefinitions
+//    liblimapco -> properties -> c/c++ -> preprocessor -> preprocessor definitions
+//
+//    VS_PLATFORM=$(PlatformName)
+//    VS_CONFIGURATION=$(ConfigurationName)
+//===============================================================
+//===============================================================
+
+#define Win32				"Win32"
 #define x64					"x64"
 #define Release_Win7_Sync	"Release_Win7_Sync"
 #define Release	"Release"
+
+
+#ifndef VS_PLATFORM
+#pragma message ( "--- VS_PLATFORM - UNDEFINED" )
+#define VS_PLATFORM "undef"
+#endif
+
+#ifndef VS_CONFIGURATION
+#pragma message ( "--- VS_CONFIGURATION - UNDEFINED" )
+#define VS_CONFIGURATION "undef"
+#endif
 
 char * _getVSconfiguration(char *infoBuff, DWORD  bufCharCount  )
 {

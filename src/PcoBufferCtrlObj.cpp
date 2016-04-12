@@ -305,11 +305,12 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast,
 	// the data transfer is made to the buffer allocated by PCO, after that we must to copy this buffer
 	// to the LIMA allocated one
 
-	  int iPcoBufIdx = m_allocBuff.pcoAllocBufferNr[bufIdx];	
-	  DWORD dwFrame = 
-		  (m_cam->_isCameraType(Edge)
-		  || m_cam->_isCameraType(Pco2k) 
-		  || live_mode) ? 0 :  dwFrameFirst;
+	int iPcoBufIdx = m_allocBuff.pcoAllocBufferNr[bufIdx];	
+	DWORD dwFrame =  (
+		(m_cam->_isCameraType(Edge))
+		||(live_mode) 
+	//	|| (m_cam->_isCameraType(Pco2k | Pco4k))
+	) ? 0 : dwFrameFirst;
 
 	if(m_cam->_getDebug(DBG_ASSIGN_BUFF)) 
 	{
@@ -395,7 +396,14 @@ int BufferCtrlObj::_xferImag()
 	dwRequestedFrames = (requested_nb_frames > 0) ? (DWORD) requested_nb_frames : dwRequestedFramesMax;
 	dwFramesPerBuffer = m_cam->pcoGetFramesPerBuffer(); // for dimax = 1
 
-	DEB_ALWAYS() << "\n_xferImag():\n" 
+	DEB_ALWAYS() << "\n" 
+		<< ">>> " << fnId << " (WaitForMultipleObjects) [ ENTRY]:\n" 
+//		<< "    " << DEB_VAR2(_iPcoAllocatedBuffNr, _dwPcoAllocatedBuffSize) << "\n"  
+//		<< "    " << DEB_VAR2(_wArmWidth, _wArmHeight) << "\n" 
+//		<< "    " << DEB_VAR1(roiNow) << "\n" 
+//		<< "    " << DEB_VAR4(_wRoiWidth, _wRoiHeight, _uiBytesPerPixel, _wBitPerPixel) << "\n" 
+//		<< "    " << DEB_VAR2( dwFramesPerBuffer, dwFrameSize) << "\n"
+		<< "    " << DEB_VAR3( requested_nb_frames, dwRequestedFrames, live_mode)
 		;
 
 //----------------- traceAcq init
@@ -740,8 +748,13 @@ int BufferCtrlObj::_xferImagMult()
 	int mode = m_cam->_pco_GetStorageMode_GetRecorderSubmode();
 	bool continuous = (mode != RecSeq) ;
 
-	m_pcoData->traceAcq.fnIdXfer = fnId;
 
+	enum {tracePco =5, tracePcoAll = 6, traceLima = 7};
+
+	m_pcoData->traceAcq.fnIdXfer = fnId;
+	m_pcoData->traceAcq.usTicks[tracePco].desc = "PCO_GetImageEx only";
+	m_pcoData->traceAcq.usTicks[tracePcoAll].desc = "PCO_GetImageEx / API total execTime";
+	m_pcoData->traceAcq.usTicks[traceLima].desc = "xfer to lima / total execTime";
 
 	DWORD dwFrameIdx;
 	long long nr =0;
@@ -772,8 +785,9 @@ int BufferCtrlObj::_xferImagMult()
 	struct __timeb64 tStart;
 	msElapsedTimeSet(tStart);
 
-	LARGE_INTEGER usStart;
+	LARGE_INTEGER usStart, usStartPco;
 	usElapsedTimeSet(usStart);
+	usElapsedTimeSet(usStartPco);
 
 	double msPerFrame = (m_cam->pcoGetCocRunTime() * 1000.);
 	DWORD dwMsSleepOneFrame = (DWORD) (msPerFrame/10.0);	// 4/5 rounding
@@ -817,7 +831,7 @@ int BufferCtrlObj::_xferImagMult()
 
 
 	DEB_ALWAYS() << "\n" 
-		<< "    " << fnId << " [ ENTRY]:\n" 
+		<< ">>> " << fnId << " (PCO_GetImageEx) [ ENTRY]:\n" 
 		<< "    " << DEB_VAR2(_iPcoAllocatedBuffNr, _dwPcoAllocatedBuffSize) << "\n"  
 		<< "    " << DEB_VAR2(_wArmWidth, _wArmHeight) << "\n" 
 		<< "    " << DEB_VAR1(roiNow) << "\n" 
@@ -835,7 +849,8 @@ int BufferCtrlObj::_xferImagMult()
 	bufIdx = 0;
 
 	DWORD _dwValidImageCnt, _dwMaxImageCnt;
-
+	DWORD _dwValidImageCntLast = 0;
+	
 	sErr = m_cam->_PcoCheckError(__LINE__, __FILE__, 
 			PCO_GetNumberOfImagesInSegment(m_handle, wSegment, &_dwValidImageCnt, &_dwMaxImageCnt), error, "PCO_GetNumberOfImagesInSegment");
 	if(error) {
@@ -849,15 +864,12 @@ int BufferCtrlObj::_xferImagMult()
 
 	m_pcoData->traceAcq.nrImgRequested = dwRequestedFrames;
 
-	m_pcoData->traceAcq.usTicks[6].desc = "PCO_GetImageEx total execTime";
-	m_pcoData->traceAcq.usTicks[7].desc = "xfer to lima / total execTime";
 
 	while(dwFrameIdx <= dwRequestedFrames) {
 		bufIdx++; if(bufIdx >= _iPcoAllocatedBuffNr) bufIdx = 0;
 		sBufNr = m_allocBuff.pcoAllocBufferNr[bufIdx];
 
-
-		if(continuous) {
+        if(continuous) {
 			dwFrameIdxLast = dwFrameIdxFirst = 0;
 		} else {
 			dwFrameIdxLast = dwFrameIdxFirst = dwFrameIdx;
@@ -878,22 +890,42 @@ int BufferCtrlObj::_xferImagMult()
 		//========================================================================================
 		
 		while(1){
+			if((_dwValidImageCnt > 0 ) && ( (_dwValidImageCnt >= dwFrameIdxFirst) || (dwFrameIdxFirst == 0))) break;
+
 			sErr = m_cam->_PcoCheckError(__LINE__, __FILE__, 
 				PCO_GetNumberOfImagesInSegment(m_handle, wSegment, &_dwValidImageCnt, &_dwMaxImageCnt), error, "PCO_GetNumberOfImagesInSegment");
 			if(error) {
 				printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, sErr);
 				throw LIMA_HW_EXC(Error, "PCO_GetNumberOfImagesInSegment");
 			}
+
+			
 			if((_dwValidImageCnt > 0 ) && ( (_dwValidImageCnt >= dwFrameIdxFirst) || (dwFrameIdxFirst == 0))) break;
 			
 			::Sleep(dwMsSleepOneFrame);	// sleep 1 frame
 		}
 
+		if(_dwValidImageCnt != _dwValidImageCntLast) {
+			printf("=== _dwValidImageCnt[%d] dwFrameIdxFirst[%d]\n", _dwValidImageCnt , dwFrameIdxFirst);
+			_dwValidImageCntLast = _dwValidImageCnt;
+		}
+
+#if 0
+		DEB_ALWAYS() 
+				<< "\n     PCO_GetImageEx() ===>"
+				<< "\n     " << DEB_VAR5( dwFrameIdx, dwFrameIdxFirst, dwFrameIdxLast, dwFramesPerBuffer,  dwRequestedFrames)
+				<< "\n     " << DEB_VAR5(wSegment, sBufNr, _wArmWidth, _wArmHeight, _wBitPerPixel);
+#endif
+
+		usElapsedTimeSet(usStartPco);
+
 		sErr =  m_cam->_PcoCheckError(__LINE__, __FILE__, PCO_GetImageEx(m_handle, \
 			wSegment, dwFrameIdxFirst, dwFrameIdxLast, \
 			sBufNr, _wArmWidth, _wArmHeight, _wBitPerPixel), error, "PCO_GetImageEx");
 		
-		m_pcoData->traceAcq.usTicks[6].value += usElapsedTime(usStart);
+		m_pcoData->traceAcq.usTicks[tracePco].value += usElapsedTime(usStartPco);
+
+		m_pcoData->traceAcq.usTicks[tracePcoAll].value += usElapsedTime(usStart);
 		usElapsedTimeSet(usStart);
 
 		if(error) {
@@ -942,7 +974,7 @@ int BufferCtrlObj::_xferImagMult()
 		m_sync->setAcqFrames(dwFrameIdx);
 		dwFrameIdx++;
 
-		m_pcoData->traceAcq.usTicks[7].value += usElapsedTime(usStart);
+		m_pcoData->traceAcq.usTicks[traceLima].value += usElapsedTime(usStart);
 
 	} // while(frameIdx ...
 
@@ -958,7 +990,7 @@ int BufferCtrlObj::_xferImagMult()
 	}
 			
 	DEB_ALWAYS() 
-		<< "\n    " << fnId << " [ EXIT]:\n" 
+		<< "\n>>> " << fnId << " [ EXIT]:\n" 
 		<< "\n     " << DEB_VAR3(_retStatus, _stopReq, _newFrameReady);  
 
 
