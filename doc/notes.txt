@@ -4,9 +4,69 @@
 #===================================================
 #===================================================
 
+
+
+
+#===================================================
+# 2016/04/13
+# pco 2000 camera - FRAME RATE
+#===================================================
+
+nrFrames[100]
+exp[0.001] delay[0] (s)
+roi PCO X(1,2048) Y(1,2048) size(2048,2048)
+ADC: working[2]
+pixel rate: 40000000 Hz
+cocRunTime: 0.0682261 s
+frameRate: 14.6571 f/s
+
+- sequence mode recording
+
+that is
+- record in the cam memory
+- when it finishes, transfer the images to lima
+
+- the record phase is ok
+
+rec[6980] ms <- recording time 101 * coc = 0.0682261 OK
+
+cocRunTime: 0.0682261 s
+frameRate: 14.6571 f/s
+
+- the framerate of the acquisition in the cam memory, is NOT the final framerate of the 
+readout!
+
+the transfer speed from the camera to lima is low, similar the one you 
+reported
+
+xfer[31561] <- 31.5 s -> about 3 frames/s (!!!)
+
+the GigE connection is ok. i get with GigECalib V1,4,0,50
+Test succeeded with a maxium datathoughput of 68 MB/sec
+
+the net speed is 68 instead of 100 MB/s, because it takes about 50ms to 
+transfer the img to the ddr, and 80ms the transmission at 100 MB/s,
+that is the eth link has a net duty of about 80/130 -> 0.61 -> 61 MB/s 
+-> 68 MB/s
+
+the image of 2048*2048 is about 8MB -> 8 images/s, associated to the 
+GigE communication ...
+
+i tested the time of the API call, that is, counting the time just 
+between before/after the call PCO_GetImageEx
+* ... usTicks[5][31112.084] (ms)   (PCO_GetImageEx only)
+
+and the rest of time, copy to lima and lima processing is
+* ... usTicks[7][315.822] (ms)   (xfer to lima / total execTime)
+
+that is the GigE reduces the speed from about 14.6 f/s to 8 but the api 
+reduces this to about 3.1
+
+
 #===================================================
 # 2016/04/01
-  - from Paul / id17
+# from Paul / id17
+#===================================================
   Yes, the server crashes, and then has to be restarted, and the frame corresponding to the crash is exactly at 
   64Gb. the error message on the windows machine is linked to the memory saturation. 
   If the size of the complete scan is lower, then it works fine, but 64 Gb is a rather small size for a scan 
