@@ -936,7 +936,6 @@ double usElapsedTimeTicsPerSec() {
 
 void _pco_acq_thread_dimax(void *argin) {
 	DEF_FNID;
-	printf("=== %s [%d]> %s ENTRY\n",  fnId, __LINE__,getTimestamp(Iso));
 
 	static char msgErr[LEN_ERROR_MSG+1];
 
@@ -948,6 +947,10 @@ void _pco_acq_thread_dimax(void *argin) {
 	SyncCtrlObj* m_sync = m_cam->_getSyncCtrlObj();
 	//BufferCtrlObj* m_buffer = m_sync->_getBufferCtrlObj();
 	BufferCtrlObj* m_buffer = m_cam->_getBufferCtrlObj();
+
+	char _msg[LEN_MSG + 1];
+    sprintf_s(_msg, LEN_MSG, "%s> [ENTRY]", fnId);
+	m_cam->_traceMsg(_msg);
 
 	struct stcPcoData *m_pcoData = m_cam->_getPcoData();
 	//m_pcoData->traceAcqClean();
@@ -1130,9 +1133,10 @@ void _pco_acq_thread_dimax(void *argin) {
 	m_pcoData->traceAcq.endXferTimestamp = m_pcoData->msAcqXferTimestamp = getTimestamp();
 
 
-	printf("=== %s [%d]> EXIT imgRecorded[%d] coc[%g] recLoopTime[%ld] "
+	sprintf_s(_msg, LEN_MSG, "%s [%d]> [EXIT] imgRecorded[%d] coc[%g] recLoopTime[%ld] "
 			"tout[(%ld) 0(%ld)] rec[%ld] xfer[%ld] all[%ld](ms)\n", 
 			fnId, __LINE__, _dwValidImageCnt, msPerFrame, msNowRecordLoop, timeout, timeout0, msRecord, msXfer, msTotal);
+	m_cam->_traceMsg(_msg);
 
 	// included in 34a8fb6723594919f08cf66759fe5dbd6dc4287e only for dimax (to check for others)
 	m_sync->setStarted(false);
@@ -1165,13 +1169,20 @@ void _pco_shutter_thread_edge(void *argin) {
 	DEF_FNID;
 	int error;
 
-	printf("=== %s %s> ENTRY\n", fnId, getTimestamp(Iso));
 
 	Camera* m_cam = (Camera *) argin;
 	SyncCtrlObj* m_sync = m_cam->_getSyncCtrlObj();
+
+	char _msg[LEN_MSG + 1];
+	sprintf_s(_msg, LEN_MSG, "%s> [ENTRY]", fnId);
+	m_cam->_traceMsg(_msg);
+
+
 	m_cam->_pco_set_shutter_rolling_edge(error);
 
-	printf("=== %s> EXIT\n", fnId);
+
+	sprintf_s(_msg, LEN_MSG, "%s> [EXIT]", fnId);
+	m_cam->_traceMsg(_msg);
 
 	m_sync->setStarted(false); // to test
 
@@ -1185,13 +1196,15 @@ void _pco_shutter_thread_edge(void *argin) {
 void _pco_acq_thread_edge(void *argin) {
 	DEF_FNID;
 
-
-	printf("=== %s> ENTRY\n", fnId);
-
 	Camera* m_cam = (Camera *) argin;
 	SyncCtrlObj* m_sync = m_cam->_getSyncCtrlObj();
 	//BufferCtrlObj* m_buffer = m_sync->_getBufferCtrlObj();
 	BufferCtrlObj* m_buffer = m_cam->_getBufferCtrlObj();
+
+	char _msg[LEN_MSG + 1];
+	sprintf_s(_msg, LEN_MSG, "%s> [ENTRY]", fnId);
+	m_cam->_traceMsg(_msg);
+
 
 	struct stcPcoData *m_pcoData = m_cam->_getPcoData();
 
@@ -1221,8 +1234,10 @@ void _pco_acq_thread_edge(void *argin) {
 	m_pcoData->traceAcq.fnId = fnId;
 
 	m_pcoData->msAcqXfer = msXfer = msElapsedTime(tStart);
-	printf("=== %s> EXIT xfer[%ld] (ms) status[%s]\n", 
+	sprintf_s(_msg, LEN_MSG, "%s> [EXIT] xfer[%ld] (ms) status[%s]\n", 
 			fnId, msXfer, sPcoAcqStatus[status]);
+	m_cam->_traceMsg(_msg);
+
 
 	
 	m_sync->setStarted(false); // updated
@@ -1236,12 +1251,14 @@ void _pco_acq_thread_edge(void *argin) {
 void _pco_acq_thread_dimax_live(void *argin) {
 	DEF_FNID;
 
-	printf("=== %s> ENTRY\n", fnId);
-
 	Camera* m_cam = (Camera *) argin;
 	SyncCtrlObj* m_sync = m_cam->_getSyncCtrlObj();
 	//BufferCtrlObj* m_buffer = m_sync->_getBufferCtrlObj();
 	BufferCtrlObj* m_buffer = m_cam->_getBufferCtrlObj();
+
+	char _msg[LEN_MSG + 1];
+    sprintf_s(_msg, LEN_MSG, "%s> [ENTRY]", fnId);
+	m_cam->_traceMsg(_msg);
 
 	struct stcPcoData *m_pcoData = m_cam->_getPcoData();
 
@@ -1272,8 +1289,9 @@ void _pco_acq_thread_dimax_live(void *argin) {
 	// dimax xfer time
 	m_pcoData->msAcqXfer = msXfer = msElapsedTime(tStart);
 	m_pcoData->msAcqXferTimestamp = getTimestamp();
-	printf("=== %s> EXIT xfer[%ld] (ms) status[%s]\n", 
+	sprintf_s(_msg, LEN_MSG, "%s> [EXIT] xfer[%ld] (ms) status[%s]\n", 
 			fnId, msXfer, sPcoAcqStatus[status]);
+	m_cam->_traceMsg(_msg);
 
 	m_sync->setStarted(false); // to test
 
@@ -1284,12 +1302,12 @@ void _pco_acq_thread_dimax_live(void *argin) {
 //=====================================================================
 void _pco_acq_thread_ringBuffer(void *argin) {
 	DEF_FNID;
-	char _msg[LEN_MSG + 1];
 
 	Camera* m_cam = (Camera *) argin;
 	SyncCtrlObj* m_sync = m_cam->_getSyncCtrlObj();
 	BufferCtrlObj* m_buffer = m_cam->_getBufferCtrlObj();
 
+	char _msg[LEN_MSG + 1];
 	sprintf_s(_msg, LEN_MSG, "%s> [ENTRY]", fnId);
 	m_cam->_traceMsg(_msg);
 
