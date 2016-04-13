@@ -306,11 +306,21 @@ int BufferCtrlObj::_assignImage2Buffer(DWORD &dwFrameFirst, DWORD &dwFrameLast,
 	// the data transfer is made to the buffer allocated by PCO, after that we must to copy this buffer
 	// to the LIMA allocated one
 
-	  int iPcoBufIdx = m_allocBuff.pcoAllocBufferNr[bufIdx];	
-	  DWORD dwFrame = 
+	int iPcoBufIdx = m_allocBuff.pcoAllocBufferNr[bufIdx];	
+	DWORD dwFrame = 
 		  (m_cam->_isCameraType(Edge)
 		  || m_cam->_isCameraType(Pco2k) 
 		  || live_mode) ? 0 :  dwFrameFirst;
+
+
+	// testForceFrameFirst0 = 1 - force the first/last frame to 0 (last frame acquired)
+	//                      = 0 - not modify received dwFrame -> 1, 2, 3, ....
+	if(m_pcoData->testForceFrameFirst0 &&
+			( m_cam->_isCameraType(Edge) || m_cam->_isCameraType(Pco2k)) )
+	{
+		dwFrame = 0;
+	}
+
 
 	if(m_cam->_getDebug(DBG_ASSIGN_BUFF)) 
 	{
@@ -373,6 +383,7 @@ int BufferCtrlObj::_xferImag()
 	bool live_mode;
 	int _nrStop;
 	char msg[RING_LOG_BUFFER_SIZE+1];
+    char *pmsg = msg;
 	m_cam->m_tmpLog->flush(-1);
 	int maxWaitTimeout = 3;
 
@@ -423,7 +434,7 @@ int BufferCtrlObj::_xferImag()
 			
 			if(m_cam->_getDebug(DBG_WAITOBJ)){
 				sprintf_s(msg, RING_LOG_BUFFER_SIZE, "... ASSIGN BUFFER[%d] frame[%d]", bufIdx, dwFrameFirst2assign);
-				m_cam->m_tmpLog->add(msg);
+				m_cam->m_tmpLog->add(msg);  DEB_ALWAYS() << msg;
 			}
 
 			if(error = _assignImage2Buffer(dwFrameFirst2assign, dwFrameLast2assign, dwRequestedFrames, bufIdx,live_mode)) {
@@ -440,6 +451,11 @@ int BufferCtrlObj::_xferImag()
 
  	// Edge cam must be started just after assign buff to avoid lost of img
 	if(m_cam->_isCameraType(Edge)) {
+		       DWORD sleepMs = 1;
+               ::Sleep(sleepMs);
+               if(m_cam->_getDebug(DBG_WAITOBJ)){
+                       pmsg = "... EDGE - recordingState 1" ; m_cam->m_tmpLog->add(pmsg); DEB_ALWAYS() << pmsg;
+               }
 			m_cam->_pcoSet_RecordingState(1, error);
 	}
 
@@ -573,6 +589,9 @@ _RETRY:
 
 _RETRY_WAIT:
 // --------------- check if there is some buffer ready
+		if(m_cam->_getDebug(DBG_WAITOBJ)){
+			pmsg = "... WaitForMultipleObjects - waiting" ; m_cam->m_tmpLog->add(pmsg); DEB_ALWAYS() << pmsg;
+		}
 		dwEvent = WaitForMultipleObjects( 
 			PCO_BUFFER_NREVENTS,           // number of objects in array
 			m_allocBuff.bufferAllocEvent,     // array of objects
@@ -589,19 +608,30 @@ _RETRY_WAIT:
     switch (dwEvent) { 
         case WAIT_OBJECT_0 + 0: 
 			m_allocBuff.bufferReady[0] = 1; 
-			if(m_cam->_getDebug(DBG_WAITOBJ)){m_cam->m_tmpLog->add("... WAITOBJ 0");}
+            if(m_cam->_getDebug(DBG_WAITOBJ)){
+                    pmsg = "... WAITOBJ 0 found" ; m_cam->m_tmpLog->add(pmsg); DEB_ALWAYS() << pmsg;
+            }
 			goto _RETRY;
-        case WAIT_OBJECT_0 + 1: 
+
+		case WAIT_OBJECT_0 + 1: 
 			m_allocBuff.bufferReady[1] = 1; 
-			if(m_cam->_getDebug(DBG_WAITOBJ)){m_cam->m_tmpLog->add("... WAITOBJ 1");}
+            if(m_cam->_getDebug(DBG_WAITOBJ)){
+                    pmsg = "... WAITOBJ 1 found" ; m_cam->m_tmpLog->add(pmsg); DEB_ALWAYS() << pmsg;
+            }
 			goto _RETRY;
+
         case WAIT_OBJECT_0 + 2: 
 			m_allocBuff.bufferReady[2] = 1;
-			if(m_cam->_getDebug(DBG_WAITOBJ)){m_cam->m_tmpLog->add("... WAITOBJ 2");}
+            if(m_cam->_getDebug(DBG_WAITOBJ)){
+                    pmsg = "... WAITOBJ 2 found" ; m_cam->m_tmpLog->add(pmsg); DEB_ALWAYS() << pmsg;
+            }
 			goto _RETRY;
+
         case WAIT_OBJECT_0 + 3: 
 			m_allocBuff.bufferReady[3] = 1; 
-			if(m_cam->_getDebug(DBG_WAITOBJ)){m_cam->m_tmpLog->add("... WAITOBJ 3");}
+            if(m_cam->_getDebug(DBG_WAITOBJ)){
+                    pmsg = "... WAITOBJ 3 found" ; m_cam->m_tmpLog->add(pmsg); DEB_ALWAYS() << pmsg;
+            }
 			goto _RETRY;
 
         case WAIT_TIMEOUT: 
@@ -708,6 +738,222 @@ void * BufferCtrlObj::_getLimaBuffer(int lima_buffer_nb, Sync::Status &status)
 }
 
 
+//===================================================================================================================
+//===================================================================================================================
+
+
+/********************************************************************************
+
+-------------- in dimax is NOT possible read MULTIPLES images (PCO_GetImageEx)
+
+On 2013/09/17 11:44, PCO Support Team wrote:
+
+> So there are a few camera, which support reading multiple images (i.e.
+> the 1200hs), but the pco.dimax does not. Also not all interfaces
+> support the mode, Martin from the software and driver team has
+> realized it for a few CameraLink boards. Our experience is, that it is
+> pretty difficult and time consuming to provide the feature for all
+> cameras and all interfaces in a reliable way.
+>
+> Concisely, it's not possible for the pco.dimax, even if the command
+> "PCO_GetImageEx" mentions the multiple reading mode.
+********************************************************************************/
+
+
+int BufferCtrlObj::_xferImag_getImage()
+{
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+	
+
+	int mode =  m_cam->_pco_GetStorageMode_GetRecorderSubmode() ; 
+	bool continuous = (mode != RecSeq) ;
+
+	m_pcoData->traceAcq.fnIdXfer = fnId;
+
+
+	DWORD dwFrameIdx, dwFrameIdxCount;
+	long long nr =0;
+	long long bytesWritten = 0;
+	int bufIdx;
+	int error;
+	bool live_mode;
+	DWORD dwFrameIdxFirst, dwFrameIdxLast;
+	int maxWaitTimeout = 10;
+	WORD _wBitPerPixel;
+	char *sErr;
+	void *ptrLimaBuffer;
+	Sync::Status status;
+	int requested_nb_frames;
+	DWORD dwFramesPerBuffer, dwRequestedFrames;
+	DWORD dwRequestedFramesMax =DWORD_MAX;
+	unsigned int _uiBytesPerPixel;
+	WORD _wArmWidth, _wArmHeight;
+	int _iPcoAllocatedBuffNr;
+	DWORD _dwPcoAllocatedBuffSize;
+	SHORT sBufNr;
+	WORD wSegment;
+	int iLimaFrame;
+	DWORD dwFrameSize ;
+	int _retStatus, _stopReq, _nrStop;
+    int _newFrameReady = -1;
+
+	struct __timeb64 tStart;
+	msElapsedTimeSet(tStart);
+
+	LARGE_INTEGER usStart;
+	usElapsedTimeSet(usStart);
+
+
+	_pcoAllocBuffers(true); // allocate 2 pco buff at max size
+
+	wSegment = m_cam->pcoGetActiveRamSegment();
+	
+//------------------- nr of frames per buffer
+	m_cam->getBitsPerPixel(_wBitPerPixel);
+	m_cam->getBytesPerPixel(_uiBytesPerPixel);
+	m_cam->getArmWidthHeight(_wArmWidth, _wArmHeight);  // actual
+	_pcoAllocBuffersInfo(_iPcoAllocatedBuffNr, _dwPcoAllocatedBuffSize);
+	dwFrameSize = (DWORD) _wArmWidth * (DWORD) _wArmHeight * (DWORD) _uiBytesPerPixel;
+	//dwFramesPerBuffer = _dwPcoAllocatedBuffSize / dwFrameSize ;
+	dwFramesPerBuffer = 1;
+	
+
+
+// --------------- live video -> nr frames = 0 / idx lima buffers 32b (0...ffff)
+	m_sync->getNbFrames(requested_nb_frames);
+	
+	if(requested_nb_frames > 0){
+		dwRequestedFrames = (DWORD) requested_nb_frames;
+		live_mode =false;
+	} else {
+		dwRequestedFrames = dwRequestedFramesMax;
+		live_mode = true;
+	}
+		
+	dwRequestedFrames = (requested_nb_frames > 0) ? (DWORD) requested_nb_frames : dwRequestedFramesMax;
+
+
+    // lima frame nr is from 0 .... N-1        
+    // pco frame nr is from 1 .... N        
+
+	// --------------- loop - process the N frames
+	dwFrameIdxCount = dwFrameIdx = 1;
+	bufIdx = 0;
+
+	DWORD _dwValidImageCnt, _dwMaxImageCnt;
+
+	sErr = m_cam->_PcoCheckError(__LINE__, __FILE__, 
+			PCO_GetNumberOfImagesInSegment(m_handle, wSegment, &_dwValidImageCnt, &_dwMaxImageCnt), error);
+	if(error) {
+		printf("=== %s [%d]> ERROR %s\n", fnId, __LINE__, sErr);
+		throw LIMA_HW_EXC(Error, "PCO_GetNumberOfImagesInSegment");
+	}
+
+	dwFrameIdx = (_dwValidImageCnt >= dwRequestedFrames) ? _dwValidImageCnt - dwRequestedFrames + 1 : 1;
+
+	DEB_ALWAYS() << "\n_xferImagMult_getImage() [entry]:" 
+		<< "\n...   " << DEB_VAR2(_iPcoAllocatedBuffNr, _dwPcoAllocatedBuffSize)   
+		<< "\n...   " << DEB_VAR4(_wArmWidth, _wArmHeight, _uiBytesPerPixel, _wBitPerPixel)  
+		<< "\n...   " << DEB_VAR2( dwFramesPerBuffer, dwFrameSize)
+		<< "\n...   " << DEB_VAR3( requested_nb_frames, dwRequestedFrames, live_mode)
+		<< "\n...   " << DEB_VAR3(dwFrameIdx,_dwValidImageCnt, _dwMaxImageCnt)
+		;
+
+
+
+	m_pcoData->traceAcq.nrImgRequested = dwRequestedFrames;
+
+	m_pcoData->traceAcq.usTicks[6].desc = "PCO_GetImageEx total execTime";
+	m_pcoData->traceAcq.usTicks[7].desc = "xfer to lima / total execTime";
+
+
+
+	for(iLimaFrame = 0; iLimaFrame < requested_nb_frames; iLimaFrame++) {
+		bufIdx++; if(bufIdx >= _iPcoAllocatedBuffNr) bufIdx = 0;
+		sBufNr = m_allocBuff.pcoAllocBufferNr[bufIdx];
+
+		if(dwFrameIdx > _dwValidImageCnt) {
+			DEB_ALWAYS() << "WARNING lost image: " << DEB_VAR2(dwFrameIdx, _dwValidImageCnt);
+			dwFrameIdx = _dwValidImageCnt;
+		}
+		dwFrameIdxLast = dwFrameIdxFirst = dwFrameIdx;
+
+		if(m_cam->_getDebug(DBG_XFERMULT1)){
+			DEB_ALWAYS() << DEB_VAR5( dwFrameIdx, dwFrameIdxFirst, dwFrameIdxLast, dwFramesPerBuffer,  dwRequestedFrames);
+		}
+
+		usElapsedTimeSet(usStart);
+
+		sErr =  m_cam->_PcoCheckError(__LINE__, __FILE__, PCO_GetImageEx(m_handle, \
+			wSegment, dwFrameIdxFirst, dwFrameIdxLast, \
+			sBufNr, _wArmWidth, _wArmHeight, _wBitPerPixel), error);
+		
+		m_pcoData->traceAcq.usTicks[6].value += usElapsedTime(usStart);
+		usElapsedTimeSet(usStart);
+
+		if(error) {
+			DEB_ALWAYS() <<  "PCO_GetImageEx() ===> " << DEB_VAR4( sErr, wSegment, dwFrameIdxFirst, dwFrameIdxLast) \
+			 << DEB_VAR4(sBufNr, _wArmWidth, _wArmHeight, _wBitPerPixel);
+		}
+
+		void *ptrSrc =  m_allocBuff.pcoAllocBufferPtr[bufIdx];
+		
+
+		ptrLimaBuffer = _getLimaBuffer(iLimaFrame, status);
+
+		if(ptrLimaBuffer == NULL) {
+			DEB_ALWAYS() << DEB_VAR3(ptrLimaBuffer, iLimaFrame, status);
+			THROW_HW_ERROR(NotSupported) << "Lima ptr = NULL";
+		}
+
+		if(m_cam->_getDebug(DBG_XFERMULT1)){
+			DEB_ALWAYS() << DEB_VAR3( ptrLimaBuffer, ptrSrc, dwFrameSize);
+		}
+
+		memcpy(ptrLimaBuffer, ptrSrc, dwFrameSize);
+		ptrSrc = ((char *)ptrSrc) + dwFrameSize;
+		
+		HwFrameInfoType frame_info;
+		frame_info.acq_frame_nb = _newFrameReady = iLimaFrame;
+		m_buffer_cb_mgr.newFrameReady(frame_info);
+
+		m_pcoData->traceAcq.nrImgAcquired = dwFrameIdxCount;
+
+		if((_stopReq = m_sync->_getRequestStop(_nrStop)) == stopRequest) {
+			if(_nrStop > MAX_NR_STOP) {
+				char msg[LEN_TRACEACQ_MSG+1];
+				snprintf(msg,"%s> STOP REQ (saving), framesReq[%d] frameReady[%d]\n", fnId, requested_nb_frames, _newFrameReady);
+				m_pcoData->traceMsg(msg);
+				break;
+			}
+		}
+
+		m_sync->setAcqFrames(dwFrameIdxCount);
+		dwFrameIdx++;
+		dwFrameIdxCount++;
+
+		m_pcoData->traceAcq.usTicks[7].value += usElapsedTime(usStart);
+
+	} // while(frameIdx ...
+
+  // if(m_cam->_isCameraType(Edge)) {m_sync->setAcqFrames(dwFrameIdx-1);}
+
+	switch(_stopReq) {
+		//case stopProcessing: 
+		case stopRequest: 
+			_retStatus = pcoAcqTransferStop;
+			break;
+		default:
+			_retStatus = pcoAcqTransferEnd;
+	}
+			
+	DEB_ALWAYS() << "[exit]" << DEB_VAR3(_retStatus, _stopReq, _newFrameReady);  
+
+
+	return _retStatus;
+
+}
 
 
 //===================================================================================================================
