@@ -1,3 +1,7 @@
+
+
+2016/04/13 14:40:50 ==========================================
+
 - problem with the accumulation mode memory crash (id17)
   patch made in core:
   
@@ -9,8 +13,7 @@ void CtAccumulation::prepare()
   buffer->getNumber(m_buffers_size);
 
   //----- patch for acc mode 32 bit - 16
-  if(m_buffers_size >= 2) m_buffers_size /= 2;
-
+  if(m_buffers_size > 10) m_buffers_size /= 2;
 
 2016/04/13 13:53:48 ==========================================
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-12 22:33:31 +0200] head[88f05c1][88f05c1a29ec9766e84666f71b82ae062faae238] ref[ (HEAD, gitlab/master-01, master-01)] at [2016/04/13 13:53:48] $"
