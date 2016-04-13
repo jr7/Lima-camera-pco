@@ -1,3 +1,11 @@
+2016/04/13  ==========================================
+- merge develop_02_single to master -> dev_tsingle
+    git diff  106c5bad8db -- src/PcoCamera.cpp
+    2016/01/26 develop_02_single - 106c5bad8db
+      pco - dimax
+      to be define a new trig mode (ExtTrigDemand ?) for this implementation (ExtTrigSingle doesn't corresponds)
+      tmp save / compile / commit
+
 
 
 2016/04/13 19:02:49 ==========================================

@@ -55,7 +55,6 @@ SyncCtrlObj::SyncCtrlObj(Camera *cam,BufferCtrlObj *buffer) :
   m_exposing(pcoAcqIdle),
   m_started(false)
 {
-	// DONE
   DEB_CONSTRUCTOR();
     _setRequestStop(stopNone);
 
@@ -65,7 +64,6 @@ SyncCtrlObj::SyncCtrlObj(Camera *cam,BufferCtrlObj *buffer) :
 //=========================================================================================================
 SyncCtrlObj::~SyncCtrlObj()
 {
-	// DONE
   DEB_DESTRUCTOR();
 }
 
@@ -92,8 +90,11 @@ bool SyncCtrlObj::checkTrigMode(TrigMode trig_mode)
 		case ExtGate:
 			return true;
 
-		case IntTrigMult:
 		case ExtTrigSingle:
+			if (m_cam->_isCameraType(Dimax)) return true ;
+				break;
+		
+		case IntTrigMult:
 		case ExtStartStop:
 		case ExtTrigReadout:
 		default: 
@@ -111,7 +112,6 @@ void SyncCtrlObj::setTrigMode(TrigMode trig_mode)
 	DEB_MEMBER_FUNCT();
 	DEB_PARAM() << DEB_VAR1(trig_mode);
 
-	// DONE
 
 	if(!checkTrigMode(trig_mode)){
 		throw LIMA_HW_EXC(NotSupported,"Trigger type not supported");
@@ -124,7 +124,6 @@ void SyncCtrlObj::setTrigMode(TrigMode trig_mode)
 //=========================================================================================================
 void SyncCtrlObj::getTrigMode(TrigMode &trig_mode)
 {
-	// DONE
   trig_mode = m_trig_mode;
 }
 
@@ -171,19 +170,27 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoAcqMode()
     	  pcoAcqMode= 0x0000;
 			break;
 
+      case ExtTrigSingle:
+			// trig (at ACQ ENABLE) starts a sequence of int trigger (dimax only)
+			//   StorageMode 0 - record mode
+			//   RecorderSubmode 1 - ring buffer
+			//   Triggermode 0 - auto
+			//   Acquiremode 0 - auto / ignored
+			pcoAcqMode= 0x0000;
+			break;
+
 		case ExtTrigMult:
-		//case IntTrigMult: // 1 START (spec)
-      case ExtGate:  // 2 GATE (spec)
+			//case IntTrigMult: // 1 START (spec)
+		case ExtGate:  // 2 GATE (spec)
 #ifdef DISABLE_ACQ_ENBL_SIGNAL
-    	  pcoAcqMode= 0x0000;
+			pcoAcqMode= 0x0000;
 #else
-		  pcoAcqMode= 0x0001;
+			pcoAcqMode= 0x0001;
 #endif
-		  break;
+			break;
 
-	  default:
-		 throw LIMA_HW_EXC(NotSupported,"Invalid value");
-
+		default:
+			throw LIMA_HW_EXC(NotSupported,"Invalid value");
 	}
 
 	DEB_ALWAYS() << fnId << ": " << DEB_VAR2(pcoAcqMode, m_trig_mode);
@@ -239,6 +246,17 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(bool &ext_trig){
 			pcoTrigMode= 0x0003;  // 2 = GATE (spec)
 			break;
 
+
+		case ExtTrigSingle:
+			// trig starts a sequence of int trigger (dimax only)
+			//   StorageMode 0 - record mode
+			//   RecorderSubmode 1 - ring buffer
+			//   Triggermode 0 - auto
+			//   Acquiremode 0 - auto / ignored
+			ext_trig = true;
+			pcoTrigMode= 0x0000;
+			break;
+
 	
 	}
 
@@ -253,7 +271,6 @@ WORD SyncCtrlObj::xlatLimaTrigMode2PcoTrigMode(bool &ext_trig){
 //=========================================================================================================
 void SyncCtrlObj::setExpTime(double exp_time)
 {
-	// DONE
 	DEB_MEMBER_FUNCT();
 
 	ValidRangesType valid_ranges;
@@ -316,7 +333,6 @@ void SyncCtrlObj::getExpTime(double &exp_time)
 
   ValidRangesType valid_ranges;
   getValidRanges(valid_ranges);
-	// DONE
   
   if (m_exp_time < m_pcoData->min_exp_time) m_exp_time = m_pcoData->min_exp_time;
   else if (m_exp_time > m_pcoData->max_exp_time) m_exp_time = m_pcoData->max_exp_time;
@@ -330,9 +346,8 @@ void SyncCtrlObj::getExpTime(double &exp_time)
 //=========================================================================================================
 void SyncCtrlObj::setLatTime(double  lat_time)
 {
-	// DONE
   DEB_MEMBER_FUNCT();
-  //delay ???
+  // latency time -> delay
 
   m_lat_time = lat_time;
   DEB_PARAM() << DEB_VAR2(m_lat_time, lat_time);
@@ -342,11 +357,9 @@ void SyncCtrlObj::setLatTime(double  lat_time)
 //=========================================================================================================
 void SyncCtrlObj::getLatTime(double& lat_time)
 {
-	// DONE
   DEB_MEMBER_FUNCT();
 
-  //m_lat_time = 0.;
-  lat_time = m_lat_time;		// Don't know - delay????
+  lat_time = m_lat_time;		// latency time -> delay
   DEB_PARAM() << DEB_VAR2(m_lat_time, lat_time);
 }
 
@@ -354,7 +367,6 @@ void SyncCtrlObj::getLatTime(double& lat_time)
 //=========================================================================================================
 void SyncCtrlObj::setNbFrames(int  nb_frames)
 {
-	// DONE
   DEB_MEMBER_FUNCT();
   DEB_PARAM() << DEB_VAR1(nb_frames);
 
@@ -365,7 +377,6 @@ void SyncCtrlObj::setNbFrames(int  nb_frames)
 //=========================================================================================================
 void SyncCtrlObj::getNbFrames(int& nb_frames)
 {
-	// DONE
   nb_frames = m_nb_frames;
 }
 
@@ -374,7 +385,6 @@ void SyncCtrlObj::getNbFrames(int& nb_frames)
 // these two functions calls the upper ones get/setNbFrames
 void SyncCtrlObj::setNbHwFrames(int  nb_frames)
 {
-	// DONE
   setNbFrames(nb_frames);
 }
 
@@ -382,7 +392,6 @@ void SyncCtrlObj::setNbHwFrames(int  nb_frames)
 //=========================================================================================================
 void SyncCtrlObj::getNbHwFrames(int& nb_frames)
 {
-	// DONE
   getNbFrames(nb_frames);
 }
 
@@ -391,9 +400,7 @@ void SyncCtrlObj::getNbHwFrames(int& nb_frames)
 void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 {
 	DEF_FNID;
-	// DONE
 
-	
 
 	m_pcoData->step_exp_time = (m_pcoData->stcPcoDescription.dwMinExposureStepDESC) * NANO ;	//step exposure time in ns
 	
@@ -490,12 +497,12 @@ void SyncCtrlObj::stopAcq(bool clearQueue)
 //=========================================================================================================
 void SyncCtrlObj::getStatus(HwInterface::StatusType& status)
 {
-	// DONE
 	bool _started = getStarted();
-  DEB_MEMBER_FUNCT();
-DEB_TRACE() << DEB_VAR3(_started, m_buffer, m_exposing);
- DEF_FNID;
-  if(_started){
+	DEB_MEMBER_FUNCT();
+	DEB_TRACE() << DEB_VAR3(_started, m_buffer, m_exposing);
+	DEF_FNID;
+	
+	if(_started){
       if(m_buffer){
 
 		  switch(m_exposing) {

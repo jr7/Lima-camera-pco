@@ -27,7 +27,6 @@
 #include <time.h>
 #include "processlib/Compatibility.h"
 
-char *_checkLogFiles() ;
 
 
 #endif

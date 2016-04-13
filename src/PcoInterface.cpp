@@ -72,11 +72,11 @@ Interface::Interface(Camera *cam) :
   Interface::~Interface()
 {
 	DEB_DESTRUCTOR();
-  delete m_HwEventCtrlObj;
-  delete m_RoiCtrlObj;
-  delete m_buffer;
-  delete m_det_info;
-  delete m_sync;
+	delete m_HwEventCtrlObj;
+	delete m_RoiCtrlObj;
+	delete m_buffer;
+	delete m_det_info;
+	delete m_sync;
 }
 
 //=========================================================================================================

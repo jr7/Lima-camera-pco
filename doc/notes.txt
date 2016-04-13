@@ -100,6 +100,40 @@ VS configuration: platform[x64] configuration[Release]
 =================================================
 --------------- 
 
+
+#===================================================
+# 2015-09-10 18:18:10
+# 4d5d8a8e401ac445911fd86d22adb7442b68d8fd 
+# Tags: pco-win64-1.4.1
+#===================================================
+# including the platform and the configuration
+#===================================================
+
+PreprocessorDefinitions= VS_PLATFORM=$(PlatformName);VS_CONFIGURATION=$(ConfigurationName);
+liblimapco -> properties -> c/c++ -> preprocessor -> preprocessor definitions:
+
+   VS_PLATFORM=$(PlatformName)
+   VS_CONFIGURATION=$(ConfigurationName)
+
+the macro $(PlatformName) is Win32 or x64
+the macro $(ConfigurationName) is Release_Win7_Sync or Release
+
+PreprocessorDefinitions= VS_PLATFORM=$(PlatformName);VS_CONFIGURATION=$(ConfigurationName);
+
+the preprocessor change these values to strings:
+
+   #define Win32				"Win32"
+   #define x64					"x64"
+   #define Release_Win7_Sync	"Release_Win7_Sync"
+   #define Release				"Release"
+
+then we can use in:
+
+	sprintf_s(infoBuff, bufCharCount, "platform[%s] configuration[%s]",  
+		VS_PLATFORM,
+		VS_CONFIGURATION); 
+
+
 #===================================================
 # 2015/06/22
   - changed the repository for lima/win
