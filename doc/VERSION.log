@@ -1,3 +1,32 @@
+
+2016/04/20 20:53:17 ==========================================
+- camInfo - fix buff size, and sprintf
+  _nr = _snprintf_s(ptr, ptrMax - ptr, _TRUNCATE, "%s\n", m_log.c_str());
+
+2016/04/20 18:52:26 ==========================================
+scp: copied local directory to segfs and /tmp_14_days:
+from: [../../install/]
+  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-04-20_185219]
+  to: [/t/rhoms1/install-2016-04-20_185219]
+  to: [/t/rhoms1/install-beta]
+
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-20 17:15:29 +0200] head[ead80e1][ead80e18b0bc63257c96430ca7ec18544edc6294] ref[ (HEAD, gitlab/master, master)] at [2016/04/20 18:49:40] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/20 18:49:40] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/20 18:49:40] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/20 18:49:40] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/20 18:49:40] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/20 18:49:40] $"
+
+- PcoCameraUtils -> minor in camInfo
+
+
+2016/04/14 20:55:16 ==========================================
+
+- PcoCameraUtils -> added / modified some talk cmds
+  Pco.py -> new attributes / cosmetics / change pixelRate
+  limapco.mac -> fixed new attributes and config menu
+
+
 2016/04/13  ==========================================
 - merge develop_02_single to master -> dev_tsingle
     git diff  106c5bad8db -- src/PcoCamera.cpp

@@ -27,6 +27,26 @@
 #include <time.h>
 #include "processlib/Compatibility.h"
 
+#define CAMINFO_ALL				0xffffffffffffffffLL
+
+#define CAMINFO_BLOCK			(0x1LL << 0)
+#define CAMINFO_UNSORTED		(0x1LL << 1)
+#define CAMINFO_LOG				(0x1LL << 2)
+
+#define CAMINFO_PIXELRATE		(0x1LL << 8)
+#define CAMINFO_ADC				(0x1LL << 9)
+#define CAMINFO_FIRMWARE		(0x1LL << 10)
+#define CAMINFO_GENERAL			(0x1LL << 11)
+#define CAMINFO_VERSION			(0x1LL << 12)
+#define CAMINFO_DIMAX			(0x1LL << 13)
+#define CAMINFO_EXP				(0x1LL << 14)
+#define CAMINFO_ROI				(0x1LL << 15)
+
+#define CAMINFO_CAMERALINK		(0x1LL << 16)
+#define CAMINFO_CAMERATYPE		(0x1LL << 17)
+
+
+
 
 
 #endif
