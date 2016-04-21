@@ -1,4 +1,75 @@
 
+2016/05/19 14:23:26 ==========================================
+scp: copied local directory to segfs and /tmp_14_days:
+from: [../../install/]
+  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-05-19_142320]
+  to: [/t/rhoms1/install-2016-05-19_142320]
+  to: [/t/rhoms1/install-beta]
+
+- prepare blissinstaller pco-win64-1.406
+
+2016/05/19 14:21:19 ==========================================
+#define        PCO_SDK_VERSION "$Id:    PCOSDK [1.18] $"
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-05-18 18:08:39 +0200] head[b90ec80][b90ec8031a6e5ee2e8ac23e573dd1e8a187ab955] ref[ (HEAD, gitlab/master, master)] at [2016/05/19 14:21:19] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2016-01-26 13:27:46 +0100] head[668dfdb][668dfdb24c15bb21b94091a3d68e8bc3d6035a6b] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2016/05/19 14:21:19] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2016-01-15 15:44:08 +0100] head[3a08863][3a0886386e57a24ced072832d321d2dc43449e0b] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/05/19 14:21:19] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/05/19 14:21:19] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2016-01-26 13:27:46 +0100] head[668dfdb][668dfdb24c15bb21b94091a3d68e8bc3d6035a6b] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2016/05/19 14:21:19] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2016-05-19 13:58:33 +0200] head[a5b9be5][a5b9be5efd7916a28cf0ab06fcc6f17e19194605] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/05/19 14:21:19] $"
+
+
+
+
+2016/05/18 18:03:06 ==========================================
+#define        PCO_SDK_VERSION "$Id:    PCOSDK [1.18] $"
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-25 20:48:24 +0200] head[bbe482f][bbe482f8b64d53c791724c24da773f6fba53fe8e] ref[ (HEAD, gitlab/master, master)] at [2016/05/18 18:03:05] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/05/18 18:03:05] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/05/18 18:03:05] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/05/18 18:03:05] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/05/18 18:03:05] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2016-05-18 17:53:53 +0200] head[5b119dc][5b119dc910943b0475aae8c174c79418080425f5] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/05/18 18:03:05] $"
+
+- added some attr in spec
+- tested with pco 4000 / usb2 
+
+
+
+2016/04/25 18:52:34 ==========================================
+
+- included PCO sdk version directly from sc2_cam.dll
+
+
+
+2016/04/21 14:25:23 ==========================================
+#define        PCO_SDK_VERSION "$Id:    PCOSDK [1.18] $"
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-21 14:23:19 +0200] head[eba4f3f][eba4f3fe9d32e3f3d726b7612e1b8c3d06382113] ref[ (HEAD, master)] at [2016/04/21 14:25:22] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/21 14:25:22] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/21 14:25:22] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/21 14:25:22] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/21 14:25:22] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/21 14:25:22] $"
+
+- included PCO sdk version 
+- setId, useSdk116, useSdk118
+- test with sdk118
+
+2016/04/21 10:18:18 ==========================================
+- working x64 , tests with 2k, prepare for next package
+
+scp: copied local directory to segfs and /tmp_14_days:
+from: [../../install/]
+  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-04-21_101812]
+  to: [/t/rhoms1/install-2016-04-21_101812]
+  to: [/t/rhoms1/install-beta]
+
+2016/04/21 10:15:49 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-15 12:28:04 +0200] head[eab2d68][eab2d68cb5f560de941afde9d6f71e23c827055b] ref[ (HEAD, gitlab/master, master)] at [2016/04/21 10:15:48] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/21 10:15:48] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/21 10:15:48] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/21 10:15:48] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/21 10:15:48] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/21 10:15:48] $"
+
 2016/04/20 20:53:17 ==========================================
 - camInfo - fix buff size, and sprintf
   _nr = _snprintf_s(ptr, ptrMax - ptr, _TRUNCATE, "%s\n", m_log.c_str());
@@ -34,7 +105,6 @@ from: [../../install/]
       pco - dimax
       to be define a new trig mode (ExtTrigDemand ?) for this implementation (ExtTrigSingle doesn't corresponds)
       tmp save / compile / commit
-
 
 
 2016/04/13 19:02:49 ==========================================

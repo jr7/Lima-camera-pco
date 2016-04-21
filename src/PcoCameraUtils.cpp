@@ -54,7 +54,7 @@ static char *timebaseUnits[] = {"ns", "us", "ms"};
 void print_hex_dump_buff(void *ptr_buff, size_t len);
 int __xlat_date(char *s1, char &ptrTo, int lenTo) ;
 char *_xlat_date(char *s1, char *s2, char *s3) ;
-	
+
 //=========================================================================================================
 char* _timestamp_pcocamerautils() {return ID_TIMESTAMP ;}
 //=========================================================================================================
@@ -468,9 +468,11 @@ char *Camera::_talk(char *_cmd, char *output, int lg){
 			long long imgSize = size.getWidth()* size.getHeight() * bytesPerPix;
 			long long totSize = imgSize * m_pcoData->traceAcq.nrImgRequested;
 			double mbTotSize =  totSize/(1024.*1024.);
-			double xferSpeed = mbTotSize / m_pcoData->traceAcq.msXfer * 1000.;
-			ptr += sprintf_s(ptr, ptrMax - ptr, "* imgSize[%lld B] totSize[%lld B][%g MB] xferSpeed[%g MB/s]\n",  
-					imgSize, totSize, mbTotSize, xferSpeed);
+			double totTime = m_pcoData->traceAcq.msXfer / 1000.;
+			double xferSpeed = mbTotSize / totTime;
+			double framesPerSec = m_pcoData->traceAcq.nrImgRequested / totTime;
+			ptr += sprintf_s(ptr, ptrMax - ptr, "* imgSize[%lld B] totSize[%lld B][%g MB] xferSpeed[%g MB/s][%g fps]\n",  
+					imgSize, totSize, mbTotSize, xferSpeed, framesPerSec);
 
 			ptr += sprintf_s(ptr, ptrMax - ptr, 
 				"* nrImgRequested0[%d] nrImgRequested[%d] nrImgAcquired[%d] nrImgRecorded[%d] maxImgCount[%d]\n",
@@ -1486,6 +1488,97 @@ char * _getUserName(char *infoBuff, DWORD  bufCharCount  )
 
 //====================================================================
 //====================================================================
+#define PCOSDK_FILENAME "sc2_cam.dll"
+
+#include <winver.h>
+#pragma comment(lib, "version.lib")
+
+struct TRANSLATION {
+  WORD langID;
+  WORD charset;
+} ;
+
+int _getFileVerStruct(const TCHAR* pzFileName, int* ima, int* imi, int* imb, TCHAR* pcver, int ipclen)
+{
+  TCHAR* pzStr;
+  DWORD dwVerInfoSize = 0;
+  DWORD dwVerHnd = 0;
+  TCHAR* lpstrVffInfo;
+  UINT VersionLen;
+  TRANSLATION Translation;
+
+  // extracting the version info structure size
+  if ((dwVerInfoSize = GetFileVersionInfoSize(pzFileName, &dwVerHnd)) > 0)
+  {
+    LPVOID lpvi;
+    UINT iLen;
+    lpstrVffInfo = (TCHAR*)malloc(dwVerInfoSize*sizeof(TCHAR));
+    
+    GetFileVersionInfo(pzFileName, dwVerHnd, dwVerInfoSize, lpstrVffInfo);
+    // extracting the language/character value from the file.
+    if ((VerQueryValue((LPVOID)lpstrVffInfo, TEXT("\\VarFileInfo\\Translation"),
+      &lpvi, &iLen)) > 0)
+    {
+      Translation = *(TRANSLATION*)lpvi;
+      
+      pzStr = _T("");
+      TCHAR strVerCar[_MAX_PATH] = _T("\0");
+      _stprintf_s(strVerCar, sizeof(strVerCar)/sizeof(TCHAR), _T("\\StringFileInfo\\%04x%04x\\%s"),
+        Translation.langID,
+        Translation.charset,
+        _T("ProductVersion"));
+      // querying the file with the correct language/character value.
+      VerQueryValue((LPVOID)lpstrVffInfo,
+        strVerCar,
+        (LPVOID *)&pzStr,
+        &VersionLen);
+      
+      unsigned int j = 0;
+
+      if(_tcsstr(pzStr, _T(",")))
+        _stscanf_s(pzStr, _T("%d,%d,%d,%d"), ima, imi, &j, imb);
+      else
+        _stscanf_s(pzStr, _T("%d.%d.%d.%d"), ima, imi, &j, imb);
+      if(pcver != NULL)
+      {
+        if(_tcslen(pzStr) < (unsigned int)ipclen)
+          _tcscpy_s(pcver, ipclen, pzStr);
+      }
+    }
+    else
+    {
+      // an error occurred trying to retrieve the version structure
+      return -1;
+    }
+    free(lpstrVffInfo);
+  }
+  else
+  {
+    // could not open or find file to get the version information
+    return -1;
+  }
+ 
+  return 0;
+}
+
+char * _getPcoSdkVersion(char *infoBuff, int strLen)
+{
+	int ima, imi, imb;
+	char *lib = PCOSDK_FILENAME;
+	int nr;
+	char *ptr = infoBuff;
+
+	nr = sprintf_s(ptr, strLen, "file[%s] ver[", lib);
+
+	_getFileVerStruct(lib, &ima, &imi, &imb, ptr+nr, strLen-nr-2);
+	strncat_s(ptr, strLen, "]", _TRUNCATE);
+
+	return infoBuff ;
+}
+
+
+//====================================================================
+//====================================================================
 char * Camera::_camInfo(char *ptr, char *ptrMax, long long int flag)
 {
 	DEB_MEMBER_FUNCT();
@@ -1515,8 +1608,8 @@ char * Camera::_camInfo(char *ptr, char *ptrMax, long long int flag)
 			m_pcoData->model); 
 		
 		ptr += sprintf_s(ptr, ptrMax - ptr, "* wInterfaceType[%x]  [%s]\n", 
-			m_pcoData->stcPcoCamType.wInterfaceType,
-			m_pcoData->iface);
+			_getInterfaceType(),
+			_getInterfaceTypePtr());
 	
 		ptr += sprintf_s(ptr, ptrMax - ptr, "* firmware dwHWVersion[%lx]  dwFWVersion[%lx] <- OLD / not used!\n", 
 			m_pcoData->stcPcoCamType.dwHWVersion, 
@@ -1729,8 +1822,11 @@ char * Camera::_camInfo(char *ptr, char *ptrMax, long long int flag)
 		ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->dwSegmentSize[%d]=[%d pages]\n", segmentArr, m_pcoData->dwSegmentSize[segmentArr]);
 		ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->dwValidImageCnt[%d]=[%ld]\n", segmentArr, m_pcoData->dwValidImageCnt[segmentArr]);
 		ptr += sprintf_s(ptr, ptrMax - ptr, "* m_pcoData->dwMaxImageCnt[%d]=[%ld]\n", segmentArr, m_pcoData->dwMaxImageCnt[segmentArr]);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "* storage_mode[%d] recorder_submode[%d]\n", 
-			m_pcoData->storage_mode, m_pcoData->recorder_submode);
+
+		_pco_GetStorageMode_GetRecorderSubmode();
+				
+		ptr += sprintf_s(ptr, ptrMax - ptr, "* mode[%s] storage_mode[%d] recorder_submode[%d]\n", 
+			m_pcoData->storage_str, m_pcoData->storage_mode, m_pcoData->recorder_submode);
 		ptr += sprintf_s(ptr, ptrMax - ptr, 
 			"* Acq: rec[%ld] xfer[%ld] recNow[%ld] recTout[%ld] (ms) [%s]\n",
 			m_pcoData->msAcqRec, m_pcoData->msAcqXfer,  
@@ -1744,12 +1840,16 @@ char * Camera::_camInfo(char *ptr, char *ptrMax, long long int flag)
 
 
 	if(flag & CAMINFO_CAMERALINK) {
-		ptr += sprintf_s(ptr, ptrMax - ptr, "*** CameraLink transfer parameters\n");
-		ptr += sprintf_s(ptr, ptrMax - ptr, "*      baudrate[%u] %g Kbps\n", m_pcoData->clTransferParam.baudrate, m_pcoData->clTransferParam.baudrate/1000.);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "*ClockFrequency[%u] %g MHz\n", m_pcoData->clTransferParam.ClockFrequency, m_pcoData->clTransferParam.ClockFrequency/1000000.);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "*        CCline[%u]\n", m_pcoData->clTransferParam.CCline);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "*    DataFormat[x%x]\n", m_pcoData->clTransferParam.DataFormat);
-		ptr += sprintf_s(ptr, ptrMax - ptr, "*      Transmit[%u]\n", m_pcoData->clTransferParam.Transmit);
+		if (_getInterfaceType()==INTERFACE_CAMERALINK){ 
+			ptr += sprintf_s(ptr, ptrMax - ptr, "*** CameraLink transfer parameters\n");
+			ptr += sprintf_s(ptr, ptrMax - ptr, "*      baudrate[%u] %g Kbps\n", m_pcoData->clTransferParam.baudrate, m_pcoData->clTransferParam.baudrate/1000.);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "*ClockFrequency[%u] %g MHz\n", m_pcoData->clTransferParam.ClockFrequency, m_pcoData->clTransferParam.ClockFrequency/1000000.);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "*        CCline[%u]\n", m_pcoData->clTransferParam.CCline);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "*    DataFormat[x%x]\n", m_pcoData->clTransferParam.DataFormat);
+			ptr += sprintf_s(ptr, ptrMax - ptr, "*      Transmit[%u]\n", m_pcoData->clTransferParam.Transmit);
+		} else {
+			ptr += sprintf_s(ptr, ptrMax - ptr, "*** CameraLink transfer parameters - NO CAMERALINK interface\n");
+		}
 	}
 
 	if(flag & CAMINFO_UNSORTED) {

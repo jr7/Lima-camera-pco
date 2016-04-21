@@ -642,6 +642,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\useSdk116"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\useSdk118"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\doc\VERSION.log"
 				>
 			</File>

@@ -86,8 +86,9 @@ char* _timestamp_pcocamera() {return ID_TIMESTAMP ;}
 #include "PcoGitVersion.h"
 char * _timestamp_gitversion(char *buffVersion, int len)
 {
-	sprintf_s(buffVersion, len, "%s\n%s\n%s\n%s\n%s\n%s\n", 
+	sprintf_s(buffVersion, len, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n", 
 				 PCO_GIT_VERSION,
+				 PCO_SDK_VERSION,
 				 PROCLIB_GIT_VERSION,
 				 LIBCONFIG_GIT_VERSION,
 				 LIMA_GIT_VERSION,
@@ -101,6 +102,7 @@ char * _timestamp_gitversion(char *buffVersion, int len)
 char * _getComputerName(char *infoBuff, DWORD  bufCharCount);
 char * _getUserName(char *infoBuff, DWORD  bufCharCount);
 char * _getVSconfiguration(char *infoBuff, DWORD  bufCharCount);
+char * _getPcoSdkVersion(char *infoBuff, int strLen);
 
 //=========================================================================================================
 
@@ -207,6 +209,8 @@ stcPcoData::stcPcoData(){
 	ptr += sprintf_s(ptr, ptrMax - ptr, "   computer name: %s\n", _getComputerName(buff, BUFFER_LEN));
 	ptr += sprintf_s(ptr, ptrMax - ptr, "       user name: %s\n", _getUserName(buff, BUFFER_LEN));
 	ptr += sprintf_s(ptr, ptrMax - ptr, "VS configuration: %s\n", _getVSconfiguration(buff, BUFFER_LEN));
+	ptr += sprintf_s(ptr, ptrMax - ptr, " PCO SDK version: %s\n", _getPcoSdkVersion(buff, BUFFER_LEN));
+
 
 	stcPcoGeneral.wSize = sizeof(stcPcoGeneral);
 	stcPcoGeneral.strCamType.wSize = sizeof(stcPcoGeneral.strCamType);
@@ -808,8 +812,7 @@ void Camera::startAcq()
                        mode = (iRequestedFrames > 0) ? RecSeq : Fifo;
                }
 
-               DEB_ALWAYS() << "..... _pcoSet_Storage_subRecord_Mode - DIMAX: " << DEB_VAR1(mode);
-
+               DEB_ALWAYS() << "\n>>> set storage/recorder mode - DIMAX 2K 4K: " << DEB_VAR1(mode);
 
 		msg = _pco_SetStorageMode_SetRecorderSubmode(mode, error);
 		PCO_THROW_OR_TRACE(error, msg) ;
@@ -1896,15 +1899,16 @@ char * Camera::_pco_SetTriggerMode_SetAcquireMode(int &error){
 char * Camera::_pco_SetStorageMode_SetRecorderSubmode(enumPcoStorageMode mode, int &error){
 	DEB_MEMBER_FUNCT();
 	DEF_FNID;
-	char *msg;
+	char *msg, *sMode;
 
 	switch(mode) {
-		case RecSeq:  m_pcoData->storage_mode = 0; m_pcoData->recorder_submode = 0; break;
-		case RecRing: m_pcoData->storage_mode = 0; m_pcoData->recorder_submode = 1; break;
-		case Fifo:    m_pcoData->storage_mode = 1; m_pcoData->recorder_submode = 0; break;
+		case RecSeq:  m_pcoData->storage_mode = 0; m_pcoData->recorder_submode = 0; sMode = "RecSeq" ; break;
+		case RecRing: m_pcoData->storage_mode = 0; m_pcoData->recorder_submode = 1; sMode = "RecRing" ;  break;
+		case Fifo:    m_pcoData->storage_mode = 1; m_pcoData->recorder_submode = 0;  sMode = "Fifo" ; break;
 		default: 
 			throw LIMA_HW_EXC(Error,"FATAL - invalid storage mode!" );
 	}
+    DEB_ALWAYS() << "\n>>> storage/recorder mode: " << DEB_VAR2(sMode, mode) ;
 
     PCO_FN2(error, msg,PCO_SetStorageMode, m_handle, m_pcoData->storage_mode);
 	if(error) return msg;
@@ -1936,10 +1940,14 @@ int Camera::_pco_GetStorageMode_GetRecorderSubmode(){
 		    PCO_THROW_OR_TRACE(error, msg) ;
 	}
 
-	if((wStorageMode == 0) && (wRecSubmode == 0)) return RecSeq;
-	if((wStorageMode == 0) && (wRecSubmode == 1)) return RecRing;
-	if((wStorageMode == 1) && (wRecSubmode == 0)) return Fifo;
+	m_pcoData->storage_mode = wStorageMode;
+	m_pcoData->recorder_submode = wRecSubmode;
 
+	if((wStorageMode == 0) && (wRecSubmode == 0)) { m_pcoData->storage_str= "RecSeq"; return RecSeq; }
+	if((wStorageMode == 0) && (wRecSubmode == 1)) { m_pcoData->storage_str= "RecRing"; return RecRing; }
+	if((wStorageMode == 1) && (wRecSubmode == 0)) { m_pcoData->storage_str= "Fifo"; return Fifo; }
+
+	m_pcoData->storage_str= "INVALID"; 
 	return RecInvalid;
 }
 
@@ -2090,7 +2098,7 @@ char *Camera::_pco_SetCamLinkSetImageParameters(int &error){
 
 	// camLink -> imgPar
 	// GigE    -> imgPar 
-	switch (m_pcoData->stcPcoCamType.wInterfaceType) {
+	switch (_getInterfaceType()) {
         case INTERFACE_CAMERALINK: 
 		case INTERFACE_ETHERNET:
 		    WORD wXres, wYres;
@@ -2130,7 +2138,7 @@ char *Camera::_pco_SetTransferParameter_SetActiveLookupTable(int &error){
 	// PCO_SetTransferParameter
 	//================================================================================================
 
-	if (m_pcoData->stcPcoCamType.wInterfaceType==INTERFACE_CAMERALINK) 
+	if (_getInterfaceType()==INTERFACE_CAMERALINK) 
 	{
 		PCO_FN3(error, pcoFn,PCO_GetTransferParameter, m_handle, &m_pcoData->clTransferParam, sizeof(PCO_SC2_CL_TRANSFER_PARAM));
 		PCO_THROW_OR_TRACE(error, pcoFn) ;
@@ -2257,13 +2265,13 @@ char *Camera::_pco_GetCameraType(int &error){
 		strcpy_s(m_pcoData->model, MODEL_TYPE_SIZE, ptr);
 		errTot |= error;
 
-		ptr = xlatPcoCode2Str(m_pcoData->stcPcoCamType.wInterfaceType, InterfaceType, error);
-		strcpy_s(m_pcoData->iface, INTERFACE_TYPE_SIZE, ptr);
+		ptr = xlatPcoCode2Str(_getInterfaceType(), InterfaceType, error);
+		strcpy_s(_getInterfaceTypePtr(), INTERFACE_TYPE_SIZE, ptr);
 		errTot |= error;
 
 		sprintf_s(m_pcoData->camera_name, CAMERA_NAME_SIZE, "%s %s (SN %d)", 
-			m_pcoData->model, m_pcoData->iface, m_pcoData->stcPcoCamType.dwSerialNumber);
-		DEB_ALWAYS() <<  DEB_VAR3(m_pcoData->model, m_pcoData->iface, m_pcoData->camera_name);
+			m_pcoData->model, _getInterfaceTypePtr(), m_pcoData->stcPcoCamType.dwSerialNumber);
+		DEB_ALWAYS() <<  DEB_VAR3(m_pcoData->model, _getInterfaceTypePtr(), m_pcoData->camera_name);
 
 		if(errTot) return m_pcoData->camera_name;
 
@@ -3362,6 +3370,22 @@ int Camera::_pco_GetBitAlignment(int &alignment){
 
 	return error;
 }
+
+//=================================================================================================
+//=================================================================================================
+WORD Camera::_getInterfaceType(){
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+	return m_pcoData->stcPcoCamType.wInterfaceType;
+}
+
+char *Camera::_getInterfaceTypePtr(){
+	DEB_MEMBER_FUNCT();
+	DEF_FNID;
+	return m_pcoData->iface;
+}
+
+
 //=================================================================================================
 //=================================================================================================
 

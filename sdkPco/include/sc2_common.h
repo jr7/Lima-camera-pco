@@ -3,20 +3,21 @@
 //-------------------------------------------|       (*) header    //
 // Project     | PCO                         |       ( ) others    //
 //-----------------------------------------------------------------//
-// Platform    | Embedded System, PC                               //
+// Platform    | - Embedded platforms like M16C, AVR32, PIC32 etc. //
+//             | - PC with several Windows versions, Linux etc.    //
 //-----------------------------------------------------------------//
-// Environment | All 'C'-compiler used at PCO                      //
+// Environment | - Platform dependent                              //
 //-----------------------------------------------------------------//
 // Purpose     | Defines, constants for use with SDK commands for  //
 //             | pco.camera (SC2)                                  //
 //-----------------------------------------------------------------//
-// Author      | FRE, LWA, MBL, PCO AG                             //
+// Author      | MBl/FRe/LWa and others, PCO AG                    //
 //-----------------------------------------------------------------//
-// Revision    | Rev. 0.25                                         //
+// Revision    | versioned using SVN                               //
 //-----------------------------------------------------------------//
 // Notes       |                                                   //
 //-----------------------------------------------------------------//
-// (c) 2004 PCO AG  *  Donaupark 11 *  D-93309 Kelheim / Germany   //
+// (c) 2010-2014 PCO AG * Donaupark 11 * D-93309 Kelheim / Germany //
 // *  Phone: +49 (0)9441 / 2005-0  *                               //
 // *  Fax:   +49 (0)9441 / 2005-20 *  Email: info@pco.de           //
 //-----------------------------------------------------------------//

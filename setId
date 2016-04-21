@@ -10,6 +10,7 @@
 #======================================================================
 
 FILE="./include/PcoGitVersion.h"
+SDK_H="./sdkPco/PcoSdkVersion.h"
 LOG="./doc/VERSION.log"
 
 DT=`date +"%Y/%m/%d %H:%M:%S"`
@@ -22,6 +23,7 @@ TANGOREV=`cd ../../applications/tango ; git log -n 1 --date=iso --format=format:
 SPECREV=`cd ../../applications/spec ; git log -n 1 --date=iso --format=format:"rev[%ad] head[%h][%H] ref[%d]" HEAD || echo "ERROR"`
 
 {
+head -1 ${SDK_H}
 echo "#define        PCO_GIT_VERSION \"\$Id:       PCO ${PCOREV} at [${DT}] \$\"" 
 echo "#define       LIMA_GIT_VERSION \"\$Id:      LIMA ${LIMAREV} at [${DT}] \$\"" 
 echo "#define    PROCLIB_GIT_VERSION \"\$Id:   PROCLIB ${PROCLIBREV} at [${DT}] \$\"" 
