@@ -52,10 +52,12 @@ Interface::Interface(Camera *cam) :
   
   m_RoiCtrlObj = new RoiCtrlObj(cam);
   m_det_info = new DetInfoCtrlObj(cam);
+
   cam->m_buffer = m_buffer = new BufferCtrlObj(cam);
+  
   cam->m_sync = m_sync = new SyncCtrlObj(cam, m_buffer);
    
-  DEB_TRACE() << DEB_VAR2(cam, m_buffer);
+  DEB_TRACE() << DEB_VAR5(cam, m_buffer, m_sync, m_det_info, m_RoiCtrlObj);
 
   if(m_buffer){
     m_buffer->m_sync = m_sync;
@@ -69,27 +71,23 @@ Interface::Interface(Camera *cam) :
   RoiCtrlObj *Interface::m_RoiCtrlObjXXX = NULL;
   Interface::~Interface()
 {
-	// DONE
 	DEB_DESTRUCTOR();
-  delete m_HwEventCtrlObj;
-  delete m_RoiCtrlObj;
-  delete m_buffer;
-  delete m_det_info;
-  delete m_sync;
+	delete m_HwEventCtrlObj;
+	delete m_RoiCtrlObj;
+	delete m_buffer;
+	delete m_det_info;
+	delete m_sync;
 }
 
 //=========================================================================================================
 //=========================================================================================================
 void Interface::getCapList(CapList &cap_list) const
 {
-	// DONE
-  cap_list.push_back(HwCap(m_HwEventCtrlObj));
-  cap_list.push_back(HwCap(m_RoiCtrlObj));
-  cap_list.push_back(HwCap(m_sync));
-  cap_list.push_back(HwCap(m_det_info));
-  cap_list.push_back(HwCap(m_buffer));
-  //cap_list.push_back(HwCap(m_buffer));
-  
+	cap_list.push_back(HwCap(m_HwEventCtrlObj));
+	cap_list.push_back(HwCap(m_RoiCtrlObj));
+	cap_list.push_back(HwCap(m_sync));
+	cap_list.push_back(HwCap(m_det_info));
+	cap_list.push_back(HwCap(m_buffer));
 }
 
 //=========================================================================================================
@@ -99,20 +97,25 @@ void Interface::reset(ResetLevel reset_level)
   DEB_MEMBER_FUNCT();
   DEF_FNID;
 
-  DEB_ALWAYS() << fnId << ": " DEB_VAR1(reset_level);
+  int intLevel = reset_level;
+
+  DEB_ALWAYS() << fnId << ": " DEB_VAR2(reset_level, intLevel);
 
   m_sync->stopAcq();
-  m_cam->reset();
+  m_cam->reset(intLevel);
 }
+
+
 
 //=========================================================================================================
 //=========================================================================================================
 void Interface::prepareAcq()
 {
-  DEB_MEMBER_FUNCT();
-	// DONE
-  if(m_buffer)
-    m_buffer->prepareAcq();
+	DEB_MEMBER_FUNCT();
+
+	DEB_ALWAYS() << "[entry]";
+	if(m_buffer)
+		m_buffer->prepareAcq();
 }
 
 //=========================================================================================================
@@ -122,7 +125,7 @@ void Interface::startAcq()
   DEB_MEMBER_FUNCT();
   DEF_FNID;
 
-  DEB_ALWAYS() << ": Interface::startAcq()";
+	DEB_ALWAYS() << "[entry]";
 
   if(m_buffer)
     m_buffer->getBuffer().setStartTimestamp(Timestamp::now());
@@ -133,11 +136,10 @@ void Interface::startAcq()
 //=========================================================================================================
 void Interface::stopAcq()
 {
-	// DONE
   DEB_MEMBER_FUNCT();
   DEF_FNID;
 
-  DEB_ALWAYS() << ": Interface::stopAcq()";
+  DEB_ALWAYS() << "[entry]";
   m_sync->stopAcq();
 }
 
@@ -146,7 +148,6 @@ void Interface::stopAcq()
 void Interface::getStatus(StatusType& status)
 {
   DEB_MEMBER_FUNCT();
-	// DONE
 	if(m_cam->_isConfig()){
 		status.acq = AcqConfig;
 		status.det = DetIdle;

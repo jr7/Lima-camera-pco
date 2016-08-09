@@ -83,11 +83,9 @@ namespace lima
         
 	  
         int _xferImag();
+        int _xferImag_getImage();
         int _xferImagMult();
 		void * BufferCtrlObj::_getLimaBuffer(int lima_buffer_nb, Sync::Status &status);
-		  
-		int _getRequestStop(int &nrStop);
-		void _setRequestStop(int requestStop);
 		void _pcoAllocBuffersFree();
 		void _pcoAllocBuffersInfo(int &nr, DWORD &size);
 

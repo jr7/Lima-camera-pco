@@ -84,8 +84,8 @@ typedef struct  {
 	int           iColor_vibrance;        // Color dynamic saturation  -100...100
 	int           iContrast;              // Contrast  -100...100
 	int           iGamma;                 // Gamma  -100...100
-	int           iSRGB;				  // sRGB mode
-  unsigned char *pucLut;                // Pointer auf Lookup-Table // 10 int
+	int           iSRGB;				          // sRGB mode
+  unsigned char *pucLut;                // internal Pointer; set to zero // 10 int
 	DWORD     dwzzDummy1[52];             // 64 int
 }PCO_Display;
 

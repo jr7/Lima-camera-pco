@@ -1,175 +1,395 @@
 
-2015/07/29 16:55:58 ==========================================
+2016/05/19 14:23:26 ==========================================
 scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-29_165548]
-  to: [/t/rhoms1/install-2015-07-29_165548]
+from: [../../install/]
+  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-05-19_142320]
+  to: [/t/rhoms1/install-2016-05-19_142320]
+  to: [/t/rhoms1/install-beta]
+
+- prepare blissinstaller pco-win64-1.406
+
+2016/05/19 14:21:19 ==========================================
+#define        PCO_SDK_VERSION "$Id:    PCOSDK [1.18] $"
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-05-18 18:08:39 +0200] head[b90ec80][b90ec8031a6e5ee2e8ac23e573dd1e8a187ab955] ref[ (HEAD, gitlab/master, master)] at [2016/05/19 14:21:19] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2016-01-26 13:27:46 +0100] head[668dfdb][668dfdb24c15bb21b94091a3d68e8bc3d6035a6b] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2016/05/19 14:21:19] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2016-01-15 15:44:08 +0100] head[3a08863][3a0886386e57a24ced072832d321d2dc43449e0b] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/05/19 14:21:19] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/05/19 14:21:19] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2016-01-26 13:27:46 +0100] head[668dfdb][668dfdb24c15bb21b94091a3d68e8bc3d6035a6b] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2016/05/19 14:21:19] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2016-05-19 13:58:33 +0200] head[a5b9be5][a5b9be5efd7916a28cf0ab06fcc6f17e19194605] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/05/19 14:21:19] $"
 
 
-2015/07/29 16:08:59 ==========================================
+
+
+2016/05/18 18:03:06 ==========================================
+#define        PCO_SDK_VERSION "$Id:    PCOSDK [1.18] $"
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-25 20:48:24 +0200] head[bbe482f][bbe482f8b64d53c791724c24da773f6fba53fe8e] ref[ (HEAD, gitlab/master, master)] at [2016/05/18 18:03:05] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/05/18 18:03:05] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/05/18 18:03:05] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/05/18 18:03:05] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/05/18 18:03:05] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2016-05-18 17:53:53 +0200] head[5b119dc][5b119dc910943b0475aae8c174c79418080425f5] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/05/18 18:03:05] $"
+
+- added some attr in spec
+- tested with pco 4000 / usb2 
+
+
+
+2016/04/25 18:52:34 ==========================================
+
+- included PCO sdk version directly from sc2_cam.dll
+
+
+
+2016/04/21 14:25:23 ==========================================
+#define        PCO_SDK_VERSION "$Id:    PCOSDK [1.18] $"
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-21 14:23:19 +0200] head[eba4f3f][eba4f3fe9d32e3f3d726b7612e1b8c3d06382113] ref[ (HEAD, master)] at [2016/04/21 14:25:22] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/21 14:25:22] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/21 14:25:22] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/21 14:25:22] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/21 14:25:22] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/21 14:25:22] $"
+
+- included PCO sdk version 
+- setId, useSdk116, useSdk118
+- test with sdk118
+
+2016/04/21 10:18:18 ==========================================
+- working x64 , tests with 2k, prepare for next package
+
 scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-29_160850]
-  to: [/t/rhoms1/install-2015-07-29_160850]
+from: [../../install/]
+  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-04-21_101812]
+  to: [/t/rhoms1/install-2016-04-21_101812]
+  to: [/t/rhoms1/install-beta]
 
+2016/04/21 10:15:49 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-15 12:28:04 +0200] head[eab2d68][eab2d68cb5f560de941afde9d6f71e23c827055b] ref[ (HEAD, gitlab/master, master)] at [2016/04/21 10:15:48] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/21 10:15:48] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/21 10:15:48] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/21 10:15:48] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/21 10:15:48] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/21 10:15:48] $"
 
-2015/07/29 16:02:29 ==========================================
+2016/04/20 20:53:17 ==========================================
+- camInfo - fix buff size, and sprintf
+  _nr = _snprintf_s(ptr, ptrMax - ptr, _TRUNCATE, "%s\n", m_log.c_str());
+
+2016/04/20 18:52:26 ==========================================
 scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-29_160220]
-  to: [/t/rhoms1/install-2015-07-29_160220]
+from: [../../install/]
+  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-04-20_185219]
+  to: [/t/rhoms1/install-2016-04-20_185219]
+  to: [/t/rhoms1/install-beta]
+
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-20 17:15:29 +0200] head[ead80e1][ead80e18b0bc63257c96430ca7ec18544edc6294] ref[ (HEAD, gitlab/master, master)] at [2016/04/20 18:49:40] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/20 18:49:40] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/20 18:49:40] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/20 18:49:40] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/20 18:49:40] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/20 18:49:40] $"
+
+- PcoCameraUtils -> minor in camInfo
 
 
-2015/07/29 15:16:14 ==========================================
+2016/04/14 20:55:16 ==========================================
+
+- PcoCameraUtils -> added / modified some talk cmds
+  Pco.py -> new attributes / cosmetics / change pixelRate
+  limapco.mac -> fixed new attributes and config menu
+
+
+2016/04/13  ==========================================
+- merge develop_02_single to master -> dev_tsingle
+    git diff  106c5bad8db -- src/PcoCamera.cpp
+    2016/01/26 develop_02_single - 106c5bad8db
+      pco - dimax
+      to be define a new trig mode (ExtTrigDemand ?) for this implementation (ExtTrigSingle doesn't corresponds)
+      tmp save / compile / commit
+
+
+2016/04/13 19:02:49 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-13 19:00:44 +0200] head[dbca15b][dbca15b03449968504f3e8480ff3697722d9062c] ref[ (HEAD, gitlab/master-01, master-01)] at [2016/04/13 19:02:49] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/13 19:02:49] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/13 19:02:49] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/13 19:02:49] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/13 19:02:49] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/13 19:02:49] $"
+
+
+- minor changes
+  use the dimax proc for Pco2k and Pco4k (was in ringBuff - to check)
+  improve traceAcq in _xferImagMult
+  
+2016/04/13 14:43:35 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-13 14:42:47 +0200] head[2c92f54][2c92f5481a27f5d9817fb227acfe1b7d3e386e8a] ref[ (HEAD, master-01)] at [2016/04/13 14:43:35] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/13 14:43:35] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/13 14:43:35] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/13 14:43:35] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/13 14:43:35] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/13 14:43:35] $"
+
+- problem with the accumulation mode memory crash (id17)
+  patch made in core:
+  
+control/src/CtAccumulation.cpp:532:
+
+void CtAccumulation::prepare()
+
+  CtBuffer *buffer = m_ct.buffer();
+  buffer->getNumber(m_buffers_size);
+
+  //----- patch for acc mode 32 bit - 16
+  if(m_buffers_size > 10) m_buffers_size /= 2;
+
+2016/04/13 13:53:48 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-12 22:33:31 +0200] head[88f05c1][88f05c1a29ec9766e84666f71b82ae062faae238] ref[ (HEAD, gitlab/master-01, master-01)] at [2016/04/13 13:53:48] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/13 13:53:48] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/13 13:53:48] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/13 13:53:48] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/13 13:53:48] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/13 13:53:48] $"
+
+
+2016/04/12 20:09:20 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-12 16:50:19 +0200] head[b2e7664][b2e76642cbb1a02345743191c514c2d9b0093536] ref[ (HEAD, gitlab/master-01, master-01)] at [2016/04/12 20:09:20] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/12 20:09:20] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/12 20:09:20] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/12 20:09:20] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/12 20:09:20] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/12 20:09:20] $"
+
+
+2016/04/12 16:52:00 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-12 16:50:19 +0200] head[b2e7664][b2e76642cbb1a02345743191c514c2d9b0093536] ref[ (HEAD, gitlab/master-01, master-01)] at [2016/04/12 16:52:00] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/12 16:52:00] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/12 16:52:00] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/12 16:52:00] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/12 16:52:00] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/12 16:52:00] $"
+
+
+2016/04/12 16:20:32 ==========================================
 scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-29_151604]
-  to: [/t/rhoms1/install-2015-07-29_151604]
+from: [../../install/]
+  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-04-12_162026]
+  to: [/t/rhoms1/install-2016-04-12_162026]
+  to: [/t/rhoms1/install-beta]
 
 
-2015/07/29 15:00:39 ==========================================
+2016/04/12 13:24:08 ==========================================
 scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-29_150030]
-  to: [/t/rhoms1/install-2015-07-29_150030]
+from: [../../install/]
+  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-04-12_132402]
+  to: [/t/rhoms1/install-2016-04-12_132402]
+  to: [/t/rhoms1/install-beta]
 
 
-2015/07/29 12:55:24 ==========================================
+2016/04/12 13:22:49 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-12 13:20:03 +0200] head[6851bfd][6851bfd395ef88053d0acd15ec73733570020236] ref[ (HEAD, master-01)] at [2016/04/12 13:22:49] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/12 13:22:49] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/12 13:22:49] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/12 13:22:49] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/12 13:22:49] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/12 13:22:49] $"
+
+
+2016/04/12 10:56:41 ==========================================
 scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-29_125513]
-  to: [/t/rhoms1/install-2015-07-29_125513]
+from: [../../install/]
+  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-04-12_105634]
+  to: [/t/rhoms1/install-2016-04-12_105634]
+  to: [/t/rhoms1/install-beta]
+
+- problem with the accumulation mode memory crash (id17)
+  patch made in core:
+  
+control/src/CtAccumulation.cpp:578:
+
+void CtAccumulation::prepare()
+
+  CtBuffer *buffer = m_ct.buffer();
+  buffer->getNumber(m_buffers_size);
+  m_buffers_size /= 2 ;       <------------------------ patch
 
 
-2015/07/29 11:41:17 ==========================================
+2016/04/11 11:55:03 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-04-04 11:16:09 +0200] head[d005573][d005573bc89274d9d8f9aa07e100ceaf36a70974] ref[ (HEAD, gitlab/master, master)] at [2016/04/11 11:55:02] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/11 11:55:02] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/04/11 11:55:02] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/04/11 11:55:02] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/04/11 11:55:02] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/04/11 11:55:02] $"
+
+
+
+2016/03/31 13:45:25 ==========================================
 scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-29_114102]
-  to: [/t/rhoms1/install-2015-07-29_114102]
+from: [../../install/]
+  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-03-31_134518]
+  to: [/t/rhoms1/install-2016-03-31_134518]
+  to: [/t/rhoms1/install-beta]
 
 
-2015/07/29 11:30:04 ==========================================
+
+2016/03/31 13:29:46 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-03-31 13:26:25 +0200] head[ad1e112][ad1e112490c8e9fa168d8cdaeda243d1594f81da] ref[ (HEAD, tag: pco-win64-1.4.5, master)] at [2016/03/31 13:29:45] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/03/31 13:29:45] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/03/31 13:29:45] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/03/31 13:29:45] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/03/31 13:29:45] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/03/31 13:29:45] $"
+
+- prepare blissinstaller package 
+  tag pco-win64-1.4.5
+- updated vc pco proj tango files (lima/appliations/tango/python/...)
+
+2016/03/30 ==========================================
+
+- merged develop_solei 227a2487a4e637d6113e0e82d28c2ed433632919 to master 
+-- master was b09431cb7b3d00efdac210bb9810fc9c8ae854bd 2015-07-29 17:33:39
+
+
+2016/03/03 15:46:28 ==========================================
 scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-29_112954]
-  to: [/t/rhoms1/install-2015-07-29_112954]
+from: [../../install/]
+  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-03-03_154622]
+  to: [/t/rhoms1/install-2016-03-03_154622]
+  to: [/t/rhoms1/install-beta]
+
+TODO 
+- update the new attrib / push
+  talk bitAlignment [<1 (LSB) || 0 (MSB)>
+- update them in spec / push
+- blissbuilder
 
 
-2015/07/29 11:12:10 ==========================================
+2016/03/03 14:30:59 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-03-03 14:29:27 +0100] head[3dc8b46][3dc8b46b50e2ae6c105d20acbcf6bbe05485d3d2] ref[ (HEAD, origin/develop_solei, develop_solei)] at [2016/03/03 14:30:58] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/03/03 14:30:58] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/03/03 14:30:58] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/03/03 14:30:58] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/03/03 14:30:58] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/03/03 14:30:58] $"
+
+
+
+2016/02/24 14:02:25 ==========================================
 scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-29_111202]
-  to: [/t/rhoms1/install-2015-07-29_111202]
+from: [../../install/]
+  to: [blissadm@lid00a:/segfs/bliss/projects/LIMA/build/depot_win/win_vc9/pco/install-2016-02-24_140219]
+  to: [/t/rhoms1/install-2016-02-24_140219]
+  to: [/t/rhoms1/install-beta]
 
+$Id: comp[2016/02/24 12:30:14] file[2016/02/24 12:03:31] [..\..\..\..\src\PcoCamera.cpp] $
 
-2015/07/29 10:59:20 ==========================================
-scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-29_105911]
-  to: [/t/rhoms1/install-2015-07-29_105911]
-
-
-2015/07/29 10:34:35 ==========================================
-scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-29_103424]
-  to: [/t/rhoms1/install-2015-07-29_103424]
-
-
-2015/07/29 10:23:49 ==========================================
-scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-29_102337]
-  to: [/t/rhoms1/install-2015-07-29_102337]
-
-
-2015/07/29 10:15:09 ==========================================
-scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-29_101459]
-  to: [/t/rhoms1/install-2015-07-29_101459]
-
-
-2015/07/28 19:20:32 ==========================================
-scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-28_192018]
-  to: [/t/rhoms1/install-2015-07-28_192018]
-
-
-2015/07/28 17:01:15 ==========================================
-scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-28_170102]
-  to: [/t/rhoms1/install-2015-07-28_170102]
-
-
-2015/07/28 16:45:11 ==========================================
-scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-28_164458]
-  to: [/t/rhoms1/install-2015-07-28_164458]
-
-
-2015/07/28 13:23:52 ==========================================
-scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-07-28_132331]
-  to: [/t/rhoms1/install-2015-07-28_132331]
-
-
-2015/06/22 12:43:35 ==========================================
-scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-06-22_124324]
-  to: [/t/rhoms1/install-2015-06-22_124324]
-
-
-2015/06/22 12:40:38 ==========================================
-scp: copied local directory to segfs and /tmp_14_days:
-from: [/c/blissadm/git/pco/Lima/install/]
-  to: [blissadm@bestia:/segfs/bliss/projects/LIMA/build/depot_win/win32_vc9/pco/install-2015-06-22_124028]
-  to: [/t/rhoms1/install-2015-06-22_124028]
+- pco / included the control of aligment of the 12b data to 16b
+- enabled the pixelRate control in pco 2K and 4K
+- minor changes in talk cmd
 
 
 
-2015/06/22 10:10:35 ==========================================
-#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-06-22 10:09:43 +0200] head[7b2ef1a][7b2ef1a3a161858a69bfd544a39a7c63cb18c99b] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:10:34] $"
-#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/06/22 10:10:34] $"
-#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-01 18:48:32 +0200] head[4d2617a][4d2617af3b25b5033fe0ce807d36ef34f28f8681] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:10:34] $"
-#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:10:34] $"
-#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-06-03 11:42:48 +0200] head[676128c][676128c2d558d441907949b54736e6f80485d280] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:10:34] $"
+2016/02/08 19:54:11 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-02-08 19:51:33 +0100] head[8a1caa7][8a1caa7202909769581e6df73426350e756a8747] ref[ (HEAD, develop_solei)] at [2016/02/08 19:54:10] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/02/08 19:54:10] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/02/08 19:54:10] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/02/08 19:54:10] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/02/08 19:54:10] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/02/08 19:54:10] $"
 
 
+2016/02/08 19:36:47 ==========================================
+
+- pco / Camera::reset(int)
+    modified to close complete the cam when the ds receive ctrl-C
+    tango calls close_interface() but does not destroy the objs
+    close_interface() calls reset (from - f0132cc7cf045c)
+
+
+2016/02/05 20:04:18 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2016-02-05 20:02:41 +0100] head[f05fe64][f05fe647fa6d04db277b45ca464bae2caceb83b5] ref[ (HEAD, develop_solei)] at [2016/02/05 20:04:18] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/02/05 20:04:18] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, master)] at [2016/02/05 20:04:18] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2016/02/05 20:04:18] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-10-21 14:34:29 +0200] head[7ca4c77][7ca4c778889cdd1450529ba7e3a6c71eda20c72a] ref[ (HEAD, core-1.4)] at [2016/02/05 20:04:18] $"
+#define       SPEC_GIT_VERSION "$Id:      SPEC rev[2015-09-25 11:55:20 +0200] head[519ea7a][519ea7a708695550499930fbc4fa53a1b93d493c] ref[ (HEAD, master)] at [2016/02/05 20:04:18] $"
+
+
+
+2016/02/05 18:50:31 ==========================================
+  _xferImagMulti: solve the fixed timeout (5s) of PCO_GetImageEx
+  testing with pco2k / w64 bm05
+
+
+
+2015/09/29 12:12:21 ==========================================
+pushed - 65637c477990d630f67fba385f2fe2f745089671
+    - beta test
+    - restore 2nd arm pass / to check options
+    - fix GigE for 2000/4000 - tested with usb/GigE
+    - added some att (spec / tango)
+    - included ip conf (GigE)
+    - included initial properties (PCO -> params)
+    - other debug/minor changes
+
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-09-29 11:56:41 +0200] head[65637c4][65637c477990d630f67fba385f2fe2f745089671] ref[ (HEAD, origin/develop, develop)] at [2015/09/29 12:12:20] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-09-25 13:19:22 +0200] head[753502f][753502fa269791d412013ded76ebb81bfdee4bd0] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/09/29 12:12:20] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/09/29 12:12:20] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/09/29 12:12:20] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-09-25 13:04:32 +0200] head[043fbb3][043fbb3c61f832c05327fe3e247041b28796445e] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/09/29 12:12:20] $"
+
+
+2015/09/29 14:41:15 ==========================================
+- restore 2nd arm pass / to check options
+- fix GigE for 2000/4000 - tested with usb/GigE
+- added some att (spec / tango)
+
+2015/09/24 14:41:15 ==========================================
+- included ip conf (GigE)
+
+2015/09/12 14:58:25 ==========================================
+- included initial properties (PCO -> params)
+
+2015/09/10 17:33:42 ==========================================
+- tests with 64 bits
+- fixed proyect lima pco to RELEASE
+- working in release x64
+- x64 - temp save
+- project release x64
+- minor changes
+    
+2015/09/02 19:17:42 ==========================================
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-08-09 19:03:16 +0200] head[bae0d67][bae0d67fa7c04daa9baa41c39b7be37434492427] ref[ (HEAD, origin/develop, develop)] at [2015/09/02 19:17:42] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-08-25 18:10:21 +0200] head[c800316][c800316452f0c138efe37b90d7ea1154a5a6e9b7] ref[ (HEAD, tag: tango-camera-frelon-1.4.2, tag: frelon-1.4.1, tag: core-1.4.4, origin/core-1.4, core-1.4)] at [2015/09/02 19:17:42] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-09 14:50:05 +0200] head[7d49ed4][7d49ed48b9fe864251f4e6a9477699011297e39f] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/09/02 19:17:42] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/09/02 19:17:42] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-08-19 13:00:10 +0200] head[22dfd71][22dfd714cc0343dd4407c4a879e36231c6c3d778] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/09/02 19:17:42] $"
+
+2015/09/01 12:55:33 ==========================================
+- tests with 64 bits
+
+2015/08/09 17:57:22 ==========================================
+- stop recording -> modified to be sync / alert from Seb 
+- since the beginning it was async (?)
+
+2015/08/04 17:28:01 ==========================================
+- stop recording: check PCO_GetPendingBuffer to know if PCO_CancelImages is required - dead time reduction (1.5 sec) 
+
+#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-07-31 13:12:30 +0200] head[a9fe182][a9fe1826cf21fc4d96fa6cb84c624203bc4c1563] ref[ (HEAD, github/develop, develop)] at [2015/08/04 17:27:59] $"
+#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, core-1.4)] at [2015/08/04 17:27:59] $"
+#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-01 18:48:32 +0200] head[4d2617a][4d2617af3b25b5033fe0ce807d36ef34f28f8681] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/08/04 17:27:59] $"
+#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/08/04 17:27:59] $"
+#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-06-03 11:42:48 +0200] head[676128c][676128c2d558d441907949b54736e6f80485d280] ref[ (HEAD, master)] at [2015/08/04 17:27:59] $"
 
 
 2015/06/22 10:04:15 ==========================================
+- included tango ID
+- version to test in ID21
+
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2015-06-22 10:02:31 +0200] head[e61c76d][e61c76d7a7624d96a2523f25a775f31d5fb298a3] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:04:14] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/06/22 10:04:14] $"
 #define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-01 18:48:32 +0200] head[4d2617a][4d2617af3b25b5033fe0ce807d36ef34f28f8681] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:04:14] $"
 #define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:04:14] $"
 #define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-06-03 11:42:48 +0200] head[676128c][676128c2d558d441907949b54736e6f80485d280] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 10:04:14] $"
-
-# included tango ID
-# version to test in ID21
-
-
-2015/06/22 09:30:18 ==========================================
-#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-06-19 18:12:12 +0200] head[da9943d][da9943d51b85cba60091407c9ef3d3647baed9a6] ref[ (HEAD, tag: pco-1.4.1, origin/master, origin/HEAD, master)] at [2015/06/22 09:30:17] $"
-#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/06/22 09:30:17] $"
-#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-01 18:48:32 +0200] head[4d2617a][4d2617af3b25b5033fe0ce807d36ef34f28f8681] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 09:30:17] $"
-#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 09:30:17] $"
-#define      TANGO_GIT_VERSION "$Id:     TANGO rev[2015-06-03 11:42:48 +0200] head[676128c][676128c2d558d441907949b54736e6f80485d280] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 09:30:17] $"
-
-
-
-2015/06/22 09:27:32 ==========================================
-#define        PCO_GIT_VERSION "$Id:       PCO rev[2015-06-19 18:12:12 +0200] head[da9943d][da9943d51b85cba60091407c9ef3d3647baed9a6] ref[ (HEAD, tag: pco-1.4.1, origin/master, origin/HEAD, master)] at [2015/06/22 09:27:31] $"
-#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-06-01 19:18:32 +0200] head[771766a][771766ada820561aa41c4b952ca515bd1604382a] ref[ (HEAD, origin/core-1.4, core-1.4)] at [2015/06/22 09:27:31] $"
-#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-06-01 18:48:32 +0200] head[4d2617a][4d2617af3b25b5033fe0ce807d36ef34f28f8681] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 09:27:31] $"
-#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] ref[ (HEAD, origin/master, origin/HEAD, master)] at [2015/06/22 09:27:31] $"
-
-
 
 
 2015/06/19 18:04:32 ==========================================
@@ -224,13 +444,12 @@ computer name: WID15DIMAX2
 
 
 2015/06/01 16:56:27 ==========================================
+- checkout lima core 1.4
+
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2015-01-06 16:15:29 +0100] head[e76f6d2][e76f6d27f15cd78ae52e9351d119011351637756] at [2015/06/01 16:56:27] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-05-28 10:48:45 +0200] head[b32e69d][b32e69d6be2c0b01a709eca9b61904e46315ad31] at [2015/06/01 16:56:27] $"
 #define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-01-15 15:08:16 +0100] head[70f9a88][70f9a88b7f90b49fb37a686c594538158b7d4ab7] at [2015/06/01 16:56:27] $"
 #define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2015/06/01 16:56:27] $"
-
-- checkout lima core 1.4
-
 
 wid15dimax2
 c:\blissadm\lima\pco\install>python LimaCCDs.py pcodimax1 -ORBendPoint giop:tcp:160.103.26.70:
@@ -247,53 +466,39 @@ $Id:      LIMA rev[2015-05-28 10:48:45 +0200] head[b32e69d][b32e69d6be2c0b01a709
 $Id:   PROCLIB rev[2015-01-15 15:08:16 +0100] head[70f9a88][70f9a88b7f90b49fb37a686c594538158b7d4ab7] at [2015/06/01 16:56:27] $
 $Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2015/06/01 16:56:27] $
 
-
 2015/06/01 15:38:00 ==========================================
+- compiling for lima 1.4
+
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2015-01-06 16:15:29 +0100] head[e76f6d2][e76f6d27f15cd78ae52e9351d119011351637756] at [2015/06/01 15:37:58] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2015-05-28 10:41:46 +0200] head[6fd4667][6fd466741df93a4d49ece558283614d6ab32e547] at [2015/06/01 15:37:58] $"
 #define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2015-01-15 15:08:16 +0100] head[70f9a88][70f9a88b7f90b49fb37a686c594538158b7d4ab7] at [2015/06/01 15:37:58] $"
 #define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2015/06/01 15:37:58] $"
 
-- compiling for lima 1.4
-
-
-
 2014/10/24 12:09:33 ==========================================
+- some minor and merge last edge tested. 
+- to be tested to make a package 1.303
+
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-10-24 12:08:24 +0200] head[19e67b8][19e67b8c49a4b4a70c2b1a1506b38afa381e4423] at [2014/10/24 12:09:32] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/10/24 12:09:32] $"
 #define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/10/24 12:09:32] $"
 #define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/10/24 12:09:32] $"
 
-- some minor and merge last edge tested. 
-to be tested to make a package 1.303
-
-
 2014/10/20 10:33:16 ==========================================
+- edge: fixed bug during rolling shutter change (crashed in invalid ptr)
+
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-10-20 10:31:13 +0200] head[9f16f26][9f16f2601896b382e554a0038e916c52f1d65a25] at [2014/10/20 10:33:15] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/10/20 10:33:15] $"
 #define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/10/20 10:33:15] $"
 #define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/10/20 10:33:15] $"
 
-- edge: fixed bug during rolling shutter change (crashed in invalid ptr)
-
-
-2014/10/19 18:42:40 ==========================================
-#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-10-19 18:16:56 +0200] head[6f62484][6f62484e455766a61b2a1c9e25f75b0289835fd3] at [2014/10/19 18:42:39] $"
-#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/10/19 18:42:39] $"
-#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/10/19 18:42:39] $"
-#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/10/19 18:42:39] $"
-
-
-
 
 2014/10/17 12:38:58 ==========================================
+- pixelRate -> talk -> return the requested value used in the next ARM
+
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-10-17 12:37:35 +0200] head[76632f4][76632f49763658bf085e2cdc45b10ed55d0b1a51] at [2014/10/17 12:38:57] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/10/17 12:38:57] $"
 #define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/10/17 12:38:57] $"
 #define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/10/17 12:38:57] $"
-
-pixelRate -> talk -> return the requested value used in the next ARM
-
 
 
 2014/09/30 17:39:24 ==========================================
@@ -375,93 +580,42 @@ _assignImage2Buffer: myBufferLen=11059200, m_ImageBufferSize=11059200, dwLen=110
 
 
 
-
-2014/09/25 18:01:45 ==========================================
-#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-09-25 17:33:01 +0200] head[ec6a31a][ec6a31a524171ed2335583ac65e6f4cdc2ae3c57] at [2014/09/25 18:01:43] $"
-#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/09/25 18:01:43] $"
-#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/09/25 18:01:43] $"
-#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/09/25 18:01:43] $"
-
-
-
-
-2014/09/25 17:33:35 ==========================================
-#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-09-25 17:33:01 +0200] head[ec6a31a][ec6a31a524171ed2335583ac65e6f4cdc2ae3c57] at [2014/09/25 17:33:34] $"
-#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/09/25 17:33:34] $"
-#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/09/25 17:33:34] $"
-#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/09/25 17:33:34] $"
-
-
-
-
 2014/09/25 14:23:39 ==========================================
+- fix edge speed /test
+
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-09-25 14:11:30 +0200] head[200997b][200997b06e735f6bf6dc54a86c7725fb405082fd] at [2014/09/25 14:23:38] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/09/25 14:23:38] $"
 #define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/09/25 14:23:38] $"
 #define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/09/25 14:23:38] $"
 
-# fix edge speed /test
-
-
-
-2014/09/19 18:17:13 ==========================================
-#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-09-19 18:16:11 +0200] head[897d618][897d618fed9f0cd32fffae6fd84b712a47df2097] at [2014/09/19 18:17:11] $"
-#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/09/19 18:17:11] $"
-#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/09/19 18:17:11] $"
-#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/09/19 18:17:11] $"
-
-
 
 
 2014/09/19 14:40:31 ==========================================
+-  _init() -> close already opened cam
+
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-09-19 14:38:45 +0200] head[3f676e9][3f676e96a87f894fc425e7f9a8b5452b9ad8b52a] at [2014/09/19 14:40:30] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/09/19 14:40:30] $"
 #define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/09/19 14:40:30] $"
 #define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/09/19 14:40:30] $"
 
 
-- 2014/09/19 
-   _init() -> close already opened cam
 
 2014/09/10 10:14:22 ==========================================
+- included the callback of valid range in _init() / required during the change rolling/global shutter in edge
+
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-09-10 10:12:41 +0200] head[3dbc862][3dbc86265e25926cb5c672a1e3f883f920b22619] at [2014/09/10 10:14:21] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/09/10 10:14:21] $"
 #define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/09/10 10:14:21] $"
 #define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/09/10 10:14:21] $"
 
-- included the callback of valid range in _init() / required during the change rolling/global shutter in edge
 
+2014/08/29 14:22:31 ========================================== 
+- complete for bm05
 
-
-2014/08/29 14:22:31 ========================================== complete for bm05
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-08-29 14:20:07 +0200] head[42bb21f][42bb21fdd44230398daa7108683c3cc897887556] at [2014/08/29 14:22:30] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/29 14:22:30] $"
 #define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/08/29 14:22:30] $"
 #define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/08/29 14:22:30] $"
-
-
-
-
-2014/08/20 18:22:30 ==========================================
-#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-08-20 18:01:33 +0200] head[e1b7c66][e1b7c667ff2b26b47bb27daa9e5ef6ce6343eb47] at [2014/08/20 18:22:29] $"
-#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/20 18:22:29] $"
-#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/08/20 18:22:29] $"
-#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/08/20 18:22:29] $"
-
-
-$Id:       PCO rev[2014-08-20 18:01:33 +0200] head[e1b7c66][e1b7c667ff2b26b47bb27daa9e5ef6ce6343eb47] at [2014/08/20 18:22:29] $
-$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/20 18:22:29] $
-$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/08/20 18:22:29] $
-$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/08/20 18:22:29] $
-
-
-2014/08/15 17:01:18 ==========================================
-#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-08-15 16:59:02 +0200] head[a447a01][a447a01f01d4b1bd57e1118e4ea0412484e4c466] at [2014/08/15 17:01:17] $"
-#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/15 17:01:17] $"
-#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/08/15 17:01:17] $"
-#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/08/15 17:01:17] $"
-
-
 
 
 2014/08/14 19:12:39 ==========================================
@@ -579,23 +733,11 @@ LIMA[pco] > Saving in d:/rhtest/test_5100.edf [AUTO_FRAME-EDF]
 * msImgCoc[0.782] fps[1.28e+003] msTout[5080] msTotal[167574]
 * msExposure[0.001] msDelay[0]
 
-
-
 2014/08/12 18:41:46 ==========================================
 #define        PCO_GIT_VERSION "$Id:       PCO rev[2014-08-12 17:53:13 +0200] head[759570f][759570f0683e3a529974bd21140b243d273c1e68] at [2014/08/12 18:41:46] $"
 #define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/12 18:41:46] $"
 #define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/08/12 18:41:46] $"
 #define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/08/12 18:41:46] $"
-
-
-
-
-2014/08/12 13:17:03 ==========================================
-#define        PCO_GIT_VERSION "$Id:       PCO rev[2014-08-12 11:50:43 +0200] head[6e01263][6e0126326adaaa0f00cdc6bf620ebf3705ade66a] at [2014/08/12 13:17:02] $"
-#define       LIMA_GIT_VERSION "$Id:      LIMA rev[2014-08-06 15:24:21 +0200] head[c6d6ce9][c6d6ce9c87b7a439cc76724e09cf8c479c4967fe] at [2014/08/12 13:17:02] $"
-#define    PROCLIB_GIT_VERSION "$Id:   PROCLIB rev[2014-03-07 16:52:19 +0100] head[52a3557][52a3557a28917bfc8a3f03f3e35f6a1cb6515280] at [2014/08/12 13:17:02] $"
-#define  LIBCONFIG_GIT_VERSION "$Id: LIBCONFIG rev[2013-02-07 18:08:29 +0100] head[89c411a][89c411a541d4ab4d66257ccb85749853fd685cbb] at [2014/08/12 13:17:02] $"
-
 
 
 # 2014/08/12  =============================================

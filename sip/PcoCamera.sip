@@ -13,7 +13,7 @@ namespace Pco
 
 
         void 	startAcq();
-        void	reset();
+        void	reset(int);
 
 
 

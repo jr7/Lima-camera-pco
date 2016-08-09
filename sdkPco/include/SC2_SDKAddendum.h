@@ -123,7 +123,7 @@ typedef struct _PCO_USB_TRANSFER_PARAM {
    unsigned int   ClockFrequency;      // Pixelclock in Hz: 40000000,66000000,80000000
    unsigned int   Transmit;            // single or continuous transmitting images, 0-single, 1-continuous
    unsigned int   UsbConfig;           // 0=bulk_image, 1=iso_image
-   unsigned int   Img12Bit;			   // 1: 12Bit Image 0: 14Bit Image
+   unsigned int   ImgTransMode;        // 1: 12Bit Image 0: 14Bit Image 4: VTI coding enabled
 }PCO_USB_TRANSFER_PARAM;
 
 #define PCO_GIGE_PAKET_RESEND    0x00000001
@@ -149,6 +149,9 @@ typedef struct _PCO_GIGE_TRANSFER_PARAM
 									   // Bit 2:   Set to enable Max Speed Modus
 									   // Bit 3:   Set to enable Camera Debug Mode
 									   // Bit 4-7:   Reserved
+									   // Bit 4:   camera Sync Mutex
+									   // Bit 5:   Enable Jumbo Frames
+  									   // Bit 6:   Enable Intermediate Driver
 								       // Bit 8-11:0: Bandwidth is devided by number of connected cameras. PCO_GIGE_BW_SAME2ALL
 									   //	       1: Max-Speed-Mode is allways active regardless how many cameras are connected. PCO_GIGE_BW_ALL2MAX
 									   //          2: Maximal possible Bandwidth is used for active camera. Just one active camera is allowed. PCO_GIGE_BW_2ACTIVE
@@ -191,7 +194,7 @@ typedef struct _IMAGE_TRANSFER_MODE_PARAM
 #define INFO_M      0x0020
 #define COMMAND_M   0x0040
 
-#define PCI_M       0x0020
+#define PCI_M       0x0080
 
 #define TIME_M      0x1000 
 #define TIME_MD     0x2000 

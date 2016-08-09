@@ -1,0 +1,73 @@
+#!/bin/bash
+#--------------------------------------------------------
+
+FROM="sdkPco_116"
+TO="sdkPco"
+LOG="${TO}/PcoSdkVersion.log"
+
+
+#--------------------------------------------------------
+cpfile() {
+  fileTo="${TO}/$1"
+  fileFrom="${FROM}/$1"
+
+  echo
+  echo "... copying  [${fileTo}]"
+  cp -fpr ${fileFrom}  ${fileTo}
+  md5sum   ${fileTo}
+  ls -l ${fileTo}
+}
+
+#--------------------------------------------------------
+rmfile() {
+  fileTo="${TO}/$1"
+  
+  echo
+  echo "... removing [${fileTo}]"
+  rm -f  ${fileTo}
+  ls -l ${TO}/$1
+}
+
+#--------------------------------------------------------
+cpdir() {
+  fileTo="${TO}"
+  fileFrom="${FROM}/$1"
+  
+  echo
+  echo "... copying dir [${fileTo}]"
+  cp -fpr ${fileFrom}/  ${fileTo}/
+
+  ls -l ${TO}/$1
+}
+
+#--------------------------------------------------------
+
+mkdir -p ${TO}/bin
+mkdir -p ${TO}/lib
+mkdir -p ${TO}/include
+mkdir -p ${TO}/bin64
+mkdir -p ${TO}/lib64
+
+{
+echo "--------------------------------- FROM [${FROM}]"
+echo "---------------------------------   TO [${TO}]"
+
+date
+
+
+cpfile PcoSdkVersion.h
+
+cpfile bin/SC2_Cam.dll
+cpfile bin/sc2_cl_me4.dll
+cpfile lib/SC2_Cam.lib
+
+cpfile bin64/SC2_Cam.dll
+cpfile bin64/sc2_cl_me4.dll
+cpfile lib64/SC2_Cam.lib
+
+cpdir include
+find ${TO} -type f -name "*" | xargs md5sum 
+
+} > ${LOG}
+
+cat ${LOG}
